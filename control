@@ -1,0 +1,9 @@
+Package: dev.preloading.tubereplacer
+Name: TubeReplacer
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: Preloading
+Author: Preloading
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)
