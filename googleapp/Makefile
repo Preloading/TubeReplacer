@@ -6,7 +6,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = TubeReplacerGoogle
 
-TubeReplacerGoogle_FILES = Tweak.x
+TubeReplacerGoogle_FILES = categories.x deviceauth.x feed.x Tweak.x 
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
