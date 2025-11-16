@@ -1,13 +1,6 @@
-#include <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
 
-/// Logged out standard fields
-
-// -[YTVideoParser parseElement:error:]
-
-// TO LOOK AT
-// -[YTVideoParser parseElement:error:]
-
-
+// i accidently mixed this up, so that's here for now.
 
 // %hook YTGDataService
 
