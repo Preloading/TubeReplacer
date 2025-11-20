@@ -32,19 +32,40 @@
 + (id)requestForChannelsWithStandardFeed:(int)fp8;
 + (void)setUploadDateFilter:(int)fp8 toURLBuilder:(id)fp12;
 + (void)setQueryParametersToURLBuilder:(id)fp8 withSafeSearch:(int)fp12;
++ (void)setFormatsToURLBuilder:(id)fp8;
 + (id)requestWithURLString:(id)fp8 authentication:(id)fp12 body:(id)fp16;
 + (id)requestWithURLString:(id)fp8 authentication:(id)fp12;
 + (id)requestWithURLString:(id)fp8;
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16 noCache:(BOOL)fp20;
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16;
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12;
++ (id)requestForVideoWithVideoID:(id)fp8;
 @end
 
-@interface YTGDataService : NSObject
-- (void)makeDELETERequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(void)fp16;
+@interface YTBaseService : NSObject
+- (void)didReceiveMemoryWarning;
+- (void)performMASFRequest:(id)fp8 serviceURI:(id)fp12 dataBlock:(id)fp errorBlock:(void)fp16;
+- (void)performHTTPRequest:(id)fp8 parser:(id)fp12 responseBlock:(id)fp errorBlock:(void)fp16;
+- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 parser:(id)fp16 responseBlock:(id)fp errorBlock:(void)fp20;
+- (void)performHTTPRequest:(id)fp8 dataBlock:(id)fp errorBlock:(void)fp12;
+- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 dataBlock:(id)fp errorBlock:(void)fp16;
+- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 completionBlock:(id)fp;
+- (void)performErrorBlock:(id)fp error:(void)fp8;
+- (void)performResponseBlock:(id)fp response:(id)fp8;
+- (void)performBackgroundBlock:(id)fp;
+- (void)dealloc;
+- (id)init;
+- (id)initWithOperationQueue:(id)fp8;
+- (id)initWithOperationQueue:(id)fp8 HTTPFetcherService:(id)fp12;
+
+@end
+
+@interface YTGDataService : YTBaseService
+- (void)makeDELETERequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
 - (void)makePOSTRequest:(YTGDataRequest*)request withParser:(id)parser responseBlock:(id)responseBlock errorBlock:(id)errorBlock;
-- (void)makeWriteRequest:(YTGDataRequest*)request method:(NSString*)method parser:(id)fp16 responseBlock:(id)fp errorBlock:(void)fp20;
-- (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(void)fp16;
+- (void)makeWriteRequest:(YTGDataRequest*)request method:(NSString*)method parser:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
+- (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
+- (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
 @end
 
 @interface GTMURLBuilder : NSObject
@@ -205,3 +226,44 @@ typedef struct _TBXMLElement {
 - (id)initWithCode:(int)fp8 reason:(id)fp12;
 
 @end
+
+
+
+// @interface YTWatchViewController_iPhone : YTBaseViewController_iPhone <YTPlayerControllerDelegate, YTStackViewControllerDelegate, YTTabsViewDelegate, UIGestureRecognizerDelegate, YTWatchViewDelegate_iPhone, YTAddCommentViewDelegate>
+// - (void)playVideo;
+// - (void)confirmVideo;
+// - (void)setBranding:(id)fp8;
+// - (void)loadVideo;
+// - (void)layoutViewForOrientation:(int)fp8;
+// - (void)receivedRotation:(id)fp8;
+// - (void)animateToInterfaceOrientation:(int)fp8;
+// - (void)releasePortraitOrientation:(id)fp8;
+// - (void)requestPortraitOrientation:(id)fp8;
+// - (void)handlePanWithRecognizer:(id)fp8;
+// - (BOOL)gestureRecognizer:(id)fp8 shouldReceiveTouch:(id)fp12;
+// - (BOOL)gestureRecognizer:(id)fp8 shouldRecognizeSimultaneouslyWithGestureRecognizer:(id)fp12;
+// - (void)didCommentInputLoseFocus;
+// - (void)didCommentInputGainFocus;
+// - (void)didTouchStageShield;
+// - (void)didChangeToTab:(id)fp8;
+// - (void)willPushSubviewWithIndex:(unsigned int)fp8;
+// - (void)willPopSubviewWithIndex:(unsigned int)fp8;
+// - (void)showVideoPlaybackSmallscreen;
+// - (void)showVideoPlaybackFullscreen;
+// - (void)pushViewController:(id)fp8 animated:(BOOL)fp12;
+// - (void)popViewControllerAnimated;
+// - (BOOL)shouldAutorotateToInterfaceOrientation:(int)fp8;
+// - (void)didRotateFromInterfaceOrientation:(int)fp8;
+// - (void)willAnimateRotationToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+// - (void)willRotateToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+// - (void)viewDidDisappear:(BOOL)fp8;
+// - (void)viewWillDisappear:(BOOL)fp8;
+// - (void)viewDidAppear:(BOOL)fp8;
+// - (void)viewWillAppear:(BOOL)fp8;
+// - (void)viewDidUnload;
+// - (void)loadView;
+// - (void)dealloc;
+// - (id)initWithVideoID:(id)fp8 source:(int)fp12 services:(id)fp16 navigation:(id)fp20;
+
+// @end
+
