@@ -33,33 +33,86 @@
 }
 %end
 
+/// START DEFINITIONS
+@interface YTWatchView_iPhone : NSObject 
+- (id)guardView;
+- (id)stageView;
+- (int)layout;
+- (void)didTouchStageShield;
+- (void)adjustFrames;
+- (void)endPanWithOffset:(float)fp8;
+- (void)adjustScollViewInsetsFromView:(id)fp8;
+- (BOOL)isOffsetNearestTopEdge:(float)fp8;
+- (void)panWithOffset:(float)fp8;
+- (void)panDown;
+- (void)panUp;
+- (void)setDelegate:(id)fp8;
+- (void)setLayout:(int)fp8;
+- (void)layoutSubviews;
+- (id)initWithResourceLoader:(id)fp8 stackView:(id)fp12;
+
+- (void)addGestureRecognizer:(id)fp8;
+@end
+
+@interface YTVideoView_iPhone : NSObject
+- (YTAddCommentView*)addCommentView;
+- (id)commentsFeedView;
+- (id)suggestionsFeedView;
+- (id)videoInfoView;
+- (YTTabsView*)tabsView;
+- (void)setCommentsAllowed:(BOOL)fp8;
+- (void)dealloc;
+- (id)initWithResourceLoader:(id)fp8;
+@end
+
+/// END DEFINITONS
+
+
 %hook YTWatchViewController_iPhone
 -(void)loadView {
   // [super loadView];
 
-  self->stackController_ = [[%c(YTStackViewController) alloc] initWithMaximumDepth:4];
-  [self addChildController:self->stackController_];
-  [self didAddChildController:self->stackController_];
-  [self->stackController_ setDelegate:self];
-  id stackViewController = [self->stackController_ view];
+  [self setValue:[[%c(YTStackViewController) alloc] initWithMaximumDepth:4] forKey:@"stackController_"];
+  YTStackViewController *stackController = [self valueForKey:@"stackController_"];
+  [self addChildController:stackController];
+  [self didAddChildController:stackController];
+  
+  [stackController setDelegate:self];
+  id stackViewController = [stackController view];
+
+  YTServices *services = [self services];
+  GIPResourceLoader *resourceLoader = [services resourceLoader];
+
+  [self setValue:[[%c(YTWatchView_iPhone) alloc] initWithResourceLoader:resourceLoader stackView:stackViewController] forKey:@"watchView_"];
+  YTWatchView_iPhone *watchView = [self valueForKey:@"watchView_"];
+  [watchView setDelegate:self];
+  [self setView:watchView];
 
 
-  self->watchView_ = [[%c(YTWatchView_iPhone) alloc] initWithResourceLoader:[[self services] resourceLoader] stackView:stackViewController];
-  [self->watchView_ setDelegate:self];
-  [self setView:self->watchView_];
 
-  self->videoViewController_ = [[%c(YTVideoViewController_iPhone) alloc] initWithServices:self->super.services_ navigation:self->super.navigation_];
-  self->videoView_ = [[self->videoViewController_ view] retain];
-  [[self->videoView_ tabsView] setDelegate:self];
-  [[self->videoView_ addCommentView] setDelegate:self];
+  YTVideoViewController_iPhone *videoViewController = [%c(YTVideoViewController_iPhone) alloc];
+  YTServices *superServices = [self valueForKey:@"services_"];
+  id superNavigation = [self valueForKey:@"navigation_"];
+  
+  videoViewController = [[%c(YTVideoViewController_iPhone) alloc] initWithServices:superServices navigation:superNavigation];
+  [self setValue:videoViewController forKey:@"videoViewController_"];
 
-  [self->stackController_ pushViewController:self->videoViewController_ animated:0];
+  YTVideoView_iPhone *videoView = [videoViewController view];
 
-  self->verticalPanRecognizer_ = [[%c(UIPanGestureRecognizer) alloc] initWithTarget:self action:selector(handlePanWithRecognizer:)];
-  [self->verticalPanRecognizer_ setDelegate:self];
+  [self setValue:[videoView retain] forKey:@"videoView_"];
+  [[videoView tabsView] setDelegate:self];
+  [[videoView addCommentView] setDelegate:self];
 
-  [self->watchView_ addGestureRecognizer:self->verticalPanRecognizer_];
-  // if ( self->video_ )
+  [stackController pushViewController:[self valueForKey:@"videoViewController_"] animated:0];
+
+  UIPanGestureRecognizer *panGesture = [%c(UIPanGestureRecognizer) alloc];
+  panGesture = [panGesture initWithTarget:self action:@selector(handlePanWithRecognizer:)];
+  [panGesture setDelegate:self];
+  [self setValue:panGesture forKey:@"verticalPanRecognizer_"];
+  
+  
+  [watchView addGestureRecognizer:[self valueForKey:@"verticalPanRecognizer_"]];
+  // if (self->video_ )
   // {
   //   [self loadVideo];
   // }

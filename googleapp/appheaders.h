@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#include <UIKit/UIKit.h>
 
 /// This is where we put headers that are used in more than one section/.x file
 
@@ -7,7 +8,22 @@
 @end
 
 @interface YTServices : NSObject
+- (void)didReceiveMemoryWarning;
+- (id)settings;
+- (id)reachability;
+- (id)resourceLoader;
 - (id)userAuthenticator;
+- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
+- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
+- (id)videoStatsServiceWithSource:(int)fp8;
+- (id)subtitlesService;
+- (id)suggestService;
+- (id)searchHistory;
+- (id)musicService;
+- (id)imageService;
+- (id)gDataService;
+- (id)adTrackingServiceForAd:(id)fp8;
+- (id)adsService;
 @end
 
 @interface YTFeedController : NSObject
@@ -227,43 +243,164 @@ typedef struct _TBXMLElement {
 
 @end
 
+@interface YTContainerViewController : NSObject
+- (BOOL)viewVisible;
+- (void)realignChildNavigationBars;
+- (void)didRotateFromInterfaceOrientation:(int)fp8;
+- (void)willAnimateRotationToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+- (void)willRotateToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+- (void)viewDidDisappear:(BOOL)fp8;
+- (void)viewWillDisappear:(BOOL)fp8;
+- (void)viewDidAppear:(BOOL)fp8;
+- (void)viewWillAppear:(BOOL)fp8;
+- (BOOL)childVisibleInView:(id)fp8;
+- (BOOL)automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
+- (void)willRemoveChildController:(id)fp8;
+- (void)didAddChildController:(id)fp8;
+- (void)removeChildController:(id)fp8;
+- (void)addChildController:(id)fp8;
+- (id)childControllers;
+- (void)viewDidUnload;
+- (void)dealloc;
+- (void)observeValueForKeyPath:(id)fp8 ofObject:(id)fp12 change:(id)fp16 context:(void *)fp20;
+- (id)initWithNibName:(id)fp8 bundle:(id)fp12;
+- (id)init;
+
+@end
+
+@interface YTBaseViewController_iPhone : YTContainerViewController
+- (id)view;
+- (id)services;
+- (id)navigation;
+- (void)didPressSearchButton:(id)fp8;
+- (void)setNavigationBarTitle:(id)fp8;
+- (void)viewWillAppear:(BOOL)fp8;
+- (void)dealloc;
+- (id)init;
+- (id)initWithServices:(id)fp8 navigation:(id)fp12;
+- (id)initWithServices:(id)fp8 navigation:(id)fp12 rightView:(id)fp16;
+- (id)initWithServices:(id)fp8 navigation:(id)fp12 leftView:(id)fp16 rightView:(id)fp20;
+
+@end
 
 
-// @interface YTWatchViewController_iPhone : YTBaseViewController_iPhone <YTPlayerControllerDelegate, YTStackViewControllerDelegate, YTTabsViewDelegate, UIGestureRecognizerDelegate, YTWatchViewDelegate_iPhone, YTAddCommentViewDelegate>
-// - (void)playVideo;
-// - (void)confirmVideo;
-// - (void)setBranding:(id)fp8;
-// - (void)loadVideo;
-// - (void)layoutViewForOrientation:(int)fp8;
-// - (void)receivedRotation:(id)fp8;
-// - (void)animateToInterfaceOrientation:(int)fp8;
-// - (void)releasePortraitOrientation:(id)fp8;
-// - (void)requestPortraitOrientation:(id)fp8;
-// - (void)handlePanWithRecognizer:(id)fp8;
-// - (BOOL)gestureRecognizer:(id)fp8 shouldReceiveTouch:(id)fp12;
-// - (BOOL)gestureRecognizer:(id)fp8 shouldRecognizeSimultaneouslyWithGestureRecognizer:(id)fp12;
-// - (void)didCommentInputLoseFocus;
-// - (void)didCommentInputGainFocus;
-// - (void)didTouchStageShield;
-// - (void)didChangeToTab:(id)fp8;
-// - (void)willPushSubviewWithIndex:(unsigned int)fp8;
-// - (void)willPopSubviewWithIndex:(unsigned int)fp8;
-// - (void)showVideoPlaybackSmallscreen;
-// - (void)showVideoPlaybackFullscreen;
-// - (void)pushViewController:(id)fp8 animated:(BOOL)fp12;
-// - (void)popViewControllerAnimated;
-// - (BOOL)shouldAutorotateToInterfaceOrientation:(int)fp8;
-// - (void)didRotateFromInterfaceOrientation:(int)fp8;
-// - (void)willAnimateRotationToInterfaceOrientation:(int)fp8 duration:(double)fp12;
-// - (void)willRotateToInterfaceOrientation:(int)fp8 duration:(double)fp12;
-// - (void)viewDidDisappear:(BOOL)fp8;
-// - (void)viewWillDisappear:(BOOL)fp8;
-// - (void)viewDidAppear:(BOOL)fp8;
-// - (void)viewWillAppear:(BOOL)fp8;
-// - (void)viewDidUnload;
-// - (void)loadView;
-// - (void)dealloc;
-// - (id)initWithVideoID:(id)fp8 source:(int)fp12 services:(id)fp16 navigation:(id)fp20;
 
-// @end
+@interface YTWatchViewController_iPhone : YTBaseViewController_iPhone <UIGestureRecognizerDelegate> // <YTPlayerControllerDelegate, YTStackViewControllerDelegate, YTTabsViewDelegate, UIGestureRecognizerDelegate, YTWatchViewDelegate_iPhone, YTAddCommentViewDelegate>
+- (void)playVideo;
+- (void)confirmVideo;
+- (void)setBranding:(id)fp8;
+- (void)loadVideo;
+- (void)layoutViewForOrientation:(int)fp8;
+- (void)receivedRotation:(id)fp8;
+- (void)animateToInterfaceOrientation:(int)fp8;
+- (void)releasePortraitOrientation:(id)fp8;
+- (void)requestPortraitOrientation:(id)fp8;
+- (void)handlePanWithRecognizer:(id)fp8;
+- (BOOL)gestureRecognizer:(id)fp8 shouldReceiveTouch:(id)fp12;
+- (BOOL)gestureRecognizer:(id)fp8 shouldRecognizeSimultaneouslyWithGestureRecognizer:(id)fp12;
+- (void)didCommentInputLoseFocus;
+- (void)didCommentInputGainFocus;
+- (void)didTouchStageShield;
+- (void)didChangeToTab:(id)fp8;
+- (void)willPushSubviewWithIndex:(unsigned int)fp8;
+- (void)willPopSubviewWithIndex:(unsigned int)fp8;
+- (void)showVideoPlaybackSmallscreen;
+- (void)showVideoPlaybackFullscreen;
+- (void)pushViewController:(id)fp8 animated:(BOOL)fp12;
+- (void)popViewControllerAnimated;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(int)fp8;
+- (void)didRotateFromInterfaceOrientation:(int)fp8;
+- (void)willAnimateRotationToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+- (void)willRotateToInterfaceOrientation:(int)fp8 duration:(double)fp12;
+- (void)viewDidDisappear:(BOOL)fp8;
+- (void)viewWillDisappear:(BOOL)fp8;
+- (void)viewDidAppear:(BOOL)fp8;
+- (void)viewWillAppear:(BOOL)fp8;
+- (void)viewDidUnload;
+- (void)loadView;
+- (void)dealloc;
+- (id)initWithVideoID:(id)fp8 source:(int)fp12 services:(id)fp16 navigation:(id)fp20;
+
+// missing in classdump
+-(void)setView:(id)fp8;
+@end
+
+@interface YTStackViewController : YTContainerViewController
+- (id)scrollViewContainingTouch:(id)fp8;
+- (void)popView:(id)fp8 animated:(BOOL)fp12 completion:(id)fp;
+- (void)pushView:(id)fp8 isRootView:(BOOL)fp12 animated:(BOOL)fp16 completion:(id)fp;
+- (id)topView;
+- (void)handlePanFrom:(id)fp8;
+- (BOOL)gestureRecognizer:(id)fp8 shouldReceiveTouch:(id)fp12;
+- (BOOL)gestureRecognizer:(id)fp8 shouldRecognizeSimultaneouslyWithGestureRecognizer:(id)fp12;
+- (void)setDelegate:(id)fp8;
+- (void)pushViewController:(id)fp8 animated:(BOOL)fp12;
+- (void)popViewControllerAnimated:(BOOL)fp8;
+- (void)viewDidUnload;
+- (void)loadView;
+- (void)dealloc;
+- (id)init;
+- (id)initWithMaximumDepth:(unsigned int)fp8;
+
+// doesnt appear in the classdump, this is kinda getting annoying
+- (id)view;
+
+@end
+
+@interface GIPResourceLoader : NSObject
++ (id)imageNamed:(id)fp8 inBundle:(id)fp12;
++ (id)imageNamed:(id)fp8 fromLoader:(id)fp12 shouldCache:(BOOL)fp16;
++ (id)imageNamed:(id)fp8 fromLoader:(id)fp12;
++ (id)sharedLoaderForBundleNamed:(id)fp8;
++ (void)setSharedLoader:(id)fp8 forBundleNamed:(id)fp12;
++ (void)initialize;
+- (void)setBundleName:(id)fp8;
+- (id)bundleName;
+- (void)flush;
+- (void)put:(id)fp8 forKey:(id)fp12;
+- (id)contentsOfFileNamed:(id)fp8 ofType:(id)fp12 inDirectory:(id)fp16 fromBundle:(id)fp20;
+- (id)imageNamed:(id)fp8 cache:(BOOL)fp12;
+- (id)imageNamed:(id)fp8;
+- (void)dealloc;
+- (id)initWithCacheSize:(int)fp8 bundleName:(id)fp12;
+- (id)initWithCacheSize:(int)fp8;
+- (id)initWithBundleName:(id)fp8;
+- (id)init;
+
+@end
+
+@interface YTTabsView : NSObject
+- (void)setDelegate:(id)fp8;
+- (id)delegate;
+- (void)updateScrollsToTop;
+- (unsigned int)currentVisibleTabIndex;
+- (void)updateTabIndex:(unsigned int)fp8;
+- (void)scrollViewDidScroll:(id)fp8;
+- (void)didTouchTitleAtIndex:(int)fp8;
+- (void)setScrollsToTop:(BOOL)fp8;
+- (id)currentTabView;
+- (id)tabTitlesView;
+- (void)addTabView:(id)fp8 withTitle:(id)fp12;
+- (void)insertTabView:(id)fp8 withTitle:(id)fp12 atIndex:(int)fp16;
+- (void)layoutSubviews;
+- (void)setFrame:(struct CGRect)fp8;
+- (void)dealloc;
+- (id)initWithResourceLoader:(id)fp8;
+
+@end
+
+@interface YTAddCommentView : NSObject
+- (void)setDelegate:(id)fp8;
+- (id)delegate;
+- (id)inputField;
+- (void)setUserThumbnail:(id)fp8;
+- (void)setShowLoading:(BOOL)fp8;
+- (BOOL)hasFocus;
+- (BOOL)resignFirstResponder;
+- (struct CGSize)sizeThatFits:(struct CGSize)fp8;
+- (void)layoutSubviews;
+- (id)initWithFrame:(struct CGRect)fp8;
+- (id)initWithResourceLoader:(id)fp8;
+
+@end
 
