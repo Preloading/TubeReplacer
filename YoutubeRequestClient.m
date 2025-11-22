@@ -21,7 +21,7 @@
 +(NSData*)getVideoWithID:(NSString*)videoId {
     NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
 
-    [body setObject:[[YoutubeClientType webClient] makeContext] forKey:@"context"];
+    [body setObject:[[YoutubeClientType androidClient] makeContext] forKey:@"context"];
     [body setObject:videoId forKey:@"videoId"];
     // [body setObject:@{
     //     @"video_id":videoId

@@ -15,6 +15,16 @@
     return client;
 }
 
++(YoutubeClientType*)androidClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"ANDROID";
+    client.version   = @"20.10.38";
+    client.osName    = @"Android";
+    client.osVersion = @"11";
+    client.platform  = @"MOBILE";
+    return client;
+}
+
 -(NSDictionary*)makeContext {
     NSMutableDictionary *clientContext = [[NSMutableDictionary alloc] init];
     [clientContext setObject:@"en" forKey:@"hl"]; // todo: make this a correct language

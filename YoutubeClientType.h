@@ -17,5 +17,8 @@
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;
 
+// android
++(YoutubeClientType*)androidClient;
+
 -(NSDictionary*)makeContext;
 @end

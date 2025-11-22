@@ -74,11 +74,11 @@
                   description:data[@"videoDetails"][@"shortDescription"]
                   uploaderDisplayName:data[@"videoDetails"][@"author"]
                   uploaderChannelID:data[@"videoDetails"][@"channelId"]
-                  uploadedDate:RFC3339toNSDate(data[@"microformat"][@"playerMicroformatRenderer"][@"uploadDate"])
-                  publishedDate:RFC3339toNSDate(data[@"microformat"][@"playerMicroformatRenderer"][@"publishDate"])
-                  duration:[data[@"microformat"][@"playerMicroformatRenderer"][@"lengthSeconds"] intValue]
+                  uploadedDate:RFC3339toNSDate(data[@"microformat"][@"playerMicroformatRenderer"][@"uploadDate"])  // does not work w/ android client
+                  publishedDate:RFC3339toNSDate(data[@"microformat"][@"playerMicroformatRenderer"][@"publishDate"]) // does not work w/ android client
+                  duration:[data[@"microformat"][@"playerMicroformatRenderer"][@"lengthSeconds"] intValue]  // does not work w/ android client
                   viewCount:[data[@"videoDetails"][@"viewCount"] intValue]
-                  likesCount:[data[@"microformat"][@"playerMicroformatRenderer"][@"likeCount"] intValue]
+                  likesCount:[data[@"microformat"][@"playerMicroformatRenderer"][@"likeCount"] intValue]  // does not work w/ android client
                   dislikesCount:0 // hate
                   state:[[%c(YTVideoState) alloc] initWithCode:0 reason:@""] 
                   streams:ytStreams
@@ -87,14 +87,14 @@
                   commentsAllowed:YES // rahhhhh
                   commentsURL:[NSURL URLWithString:@"https://example.com/commentsdummy/"]
                   commentsCountHint:0
-                  relatedURL:[NSURL URLWithString:data[@"microformat"][@"playerMicroformatRenderer"][@"canonicalUrl"]] //probably?
+                  relatedURL:[NSURL URLWithString:data[@"microformat"][@"playerMicroformatRenderer"][@"canonicalUrl"]] //probably?  // does not work w/ android client
                   claimed:NO
                   monetized:NO 
                   monetizedCountries:@[] 
                   allowedCountries:availableCountries
                   deniedCountries:@[] 
                   categoryLabel:@"Gaming" // todo: this really needs category localization stuff
-                  categoryTerm:data[@"microformat"][@"playerMicroformatRenderer"][@"category"]
+                  categoryTerm:data[@"microformat"][@"playerMicroformatRenderer"][@"category"] // does not work w/ android client
                   tags:@[] // gueeeessss what? we dont get this >:(
                   adultContent:NO 
                   videoPro:nil
