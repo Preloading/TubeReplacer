@@ -18,7 +18,40 @@
     
 }
 
++(NSData*)getVideoWithID:(NSString*)videoId {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[[YoutubeClientType webClient] makeContext] forKey:@"context"];
+    [body setObject:videoId forKey:@"videoId"];
+    // [body setObject:@{
+    //     @"video_id":videoId
+    //     @"video"
+    // } forKey:@"watch_endpoint"];
+
+
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
+    
+    
+}
+
 @end
+
+NSDate *RFC3339toNSDate(NSString *rfc3339DateTimeString) {
+    /*
+      Returns a user-visible date time string that corresponds to the specified
+      RFC 3339 date time strings, handling both UTC (Z) and timezone offsets.
+     */
+ 
+    NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+ 
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+ 
+    // Convert the RFC 3339 date time string to an NSDate.
+    return [rfc3339DateFormatter dateFromString:rfc3339DateTimeString];
+}
 
 // chatgpt :( dates sux
 NSDate *YTTimeAgoToDate(NSString *timeAgo) {

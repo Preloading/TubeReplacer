@@ -472,3 +472,23 @@ typedef struct _TBXMLElement {
 @interface NSError (YouTubeAdditions)
 - (NSString *)logDescription;
 @end
+
+@interface YTStream : NSObject
+{
+    NSURL *URL_;
+    int format_;
+    BOOL encrypted_;
+}
+
++ (int)selectAdSenseiTagOnWiFi:(BOOL)fp8;
++ (id)selectStreamForVideo:(id)fp8 onWiFi:(BOOL)fp12;
++ (id)streamWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
+- (BOOL)encrypted;
+- (int)format;
+- (id)URL;
+- (id)description;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
+
+@end
