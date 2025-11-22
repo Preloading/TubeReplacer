@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #include "appheaders.h"
+#include "general.h"
 
 %hook YTGDataRequest
 +(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
@@ -112,20 +113,25 @@
   
   
   [watchView addGestureRecognizer:[self valueForKey:@"verticalPanRecognizer_"]];
-  // if (self->video_ )
-  // {
-  //   [self loadVideo];
-  // }
-  // else
-  // {
-  //   gdataService = [self->super.services_ gDataService];
-  //   NSString *videoID = self->videoID_;
-  //   requestResponceBlock = _stack_block_init(1107296256, &stru_4A4370, sub_E7A8);
-  //   requestResponceBlock.superSelf = self;
-  //   requestErrorBlock = _stack_block_init(1107296256, &stru_4A4390, sub_E81C);
-  //   requestErrorBlock.superSelf = self;
-  //   [gdataService makeVideoRequestWithVideoID:videoID responseBlock:&requestResponceBlock errorBlock:&requestErrorBlock];
-  // }
+  if ([self valueForKey:@"video_"])
+  {
+    [self loadVideo];
+  }
+  else
+  {
+    YTGDataService *gdataService = [services gDataService];
+    NSString *videoID = [self valueForKey:@"videoID_"];
+    [gdataService makeVideoRequestWithVideoID:videoID responseBlock:^{
+      [self loadVideo];
+    } errorBlock:^(NSError *error){
+        GTMLogger *logger = [%c(GTMLogger) sharedLogger];
+        NSString *errorMsg = [error logDescription];
+        [logger logFuncError:@"__40-[YTWatchViewController_iPhone loadView]_block_invoke_072" msg:[NSString stringWithFormat:@"%@", errorMsg]];
+
+        YTNavigation *navigation = [self valueForKey:@"navigation_"];
+        [navigation toastWithError:error message:localizedStringForKey(@"error.video")];
+    }];
+  }
 }
 
 %end

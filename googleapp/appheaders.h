@@ -82,6 +82,7 @@
 - (void)makeWriteRequest:(YTGDataRequest*)request method:(NSString*)method parser:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
 - (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
 - (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
+- (void)makeVideoRequestWithVideoID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
 @end
 
 @interface GTMURLBuilder : NSObject
@@ -107,6 +108,8 @@
 - (id)init;
 
 @end
+
+
 
 typedef struct _TBXMLElement {
 	char * name;
@@ -404,3 +407,68 @@ typedef struct _TBXMLElement {
 
 @end
 
+@interface GTMLogger : NSObject
++ (id)logger;
++ (id)loggerWithWriter:(id)fp8 formatter:(id)fp12 filter:(id)fp16;
++ (id)standardLoggerWithPath:(id)fp8;
++ (id)standardLoggerWithStdoutAndStderr;
++ (id)standardLoggerWithStderr;
++ (id)standardLogger;
++ (void)setSharedLogger:(id)fp8;
++ (id)sharedLogger;
+- (void)logAssert:(id)fp8;
+- (void)logError:(id)fp8;
+- (void)logInfo:(id)fp8;
+- (void)logDebug:(id)fp8;
+- (void)setFilter:(id)fp8;
+- (id)filter;
+- (void)setFormatter:(id)fp8;
+- (id)formatter;
+- (void)setWriter:(id)fp8;
+- (id)writer;
+- (void)dealloc;
+- (id)initWithWriter:(id)fp8 formatter:(id)fp12 filter:(id)fp16;
+- (id)init;
+- (void)logFuncError:(NSString*)func msg:(NSString*)msg;
+
+@end
+
+@interface YTNavigation : NSObject // actually a protocol but who's counting
+- (BOOL)isLastSender:(id)fp8;
+- (void)setNavigationBarHidden:(BOOL)fp8;
+- (void)toastWithError:(id)fp8 message:(id)fp12;
+- (void)toastWithMessage:(id)fp8;
+- (void)hideGuide;
+- (void)showGuide;
+- (void)back;
+- (void)showSettingsFromView:(id)fp8;
+- (void)showSignInFromRect:(struct CGRect)fp8 inView:(id)fp24 auth:(id)fp28 authedBlock:(id)fp2 failedBlock:(void)fp32 canceledBlock:(id)fp64;
+- (void)showChannelStoreFromView:(id)fp8;
+- (void)showAccountFromView:(id)fp8;
+- (void)showArtistWithArtistID:(id)fp8 fromView:(id)fp12;
+- (void)showArtistWithArtistBundle:(id)fp8 fromView:(id)fp12;
+- (void)showRiverFromView:(id)fp8;
+- (void)showCategory:(id)fp8 fromView:(id)fp12;
+- (void)showChannel:(id)fp8 fromView:(id)fp12;
+- (void)showChannelWithID:(id)fp8 fromView:(id)fp12;
+- (void)showPlaylist:(id)fp8 source:(int)fp12 fromView:(id)fp16;
+- (void)showMyWatchLaterFromView:(id)fp8;
+- (void)showMyWatchHistoryFromView:(id)fp8;
+- (void)showMyUploadsFromView:(id)fp8;
+- (void)showMyPurchasesFromView:(id)fp8;
+- (void)showMyPlaylistsFromView:(id)fp8;
+- (void)showMyFavoritesFromView:(id)fp8;
+- (void)showWatchWithVideoID:(id)fp8 source:(int)fp12 fromView:(id)fp16;
+- (void)showWatchWithVideo:(id)fp8 source:(int)fp12 fromView:(id)fp16;
+- (void)showAddPlaylistFromView:(id)fp8 target:(id)fp12 action:(SEL)fp16;
+- (void)showSearchFilters:(id)fp8 target:(id)fp12 action:(SEL)fp16;
+- (void)showSearchResultsForQuery:(id)fp8 fromView:(id)fp12;
+- (void)showSearchForQuery:(id)fp8 fromView:(id)fp12;
+- (void)showHome;
+- (void)shutdown;
+- (void)loadWithWindow:(id)fp8;
+@end
+
+@interface NSError (YouTubeAdditions)
+- (NSString *)logDescription;
+@end
