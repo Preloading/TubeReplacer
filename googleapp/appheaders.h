@@ -55,6 +55,7 @@
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16 noCache:(BOOL)fp20;
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16;
 + (id)requestWithURL:(id)fp8 authentication:(id)fp12;
++ (id)requestForChannelWithID:(id)fp8;
 + (id)requestForVideoWithVideoID:(id)fp8;
 @end
 
@@ -490,5 +491,29 @@ typedef struct _TBXMLElement {
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
+
+@end
+
+@interface YTChannel : NSObject
+// {
+//     NSString *summary_;
+//     NSString *displayName_;
+//     NSString *channelID_;
+//     NSDate *updated_;
+//     unsigned long long videoCount_;
+//     NSURL *thumbnailURL_;
+//     unsigned long long subscribersCount_;
+// }
+
+- (unsigned long long)subscribersCount;
+- (id)thumbnailURL;
+- (unsigned long long)videoCount;
+- (id)updated;
+- (id)channelID;
+- (id)displayName;
+- (id)summary;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36;
 
 @end

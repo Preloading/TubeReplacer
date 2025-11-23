@@ -39,7 +39,6 @@
 %hook YTVideoParser
 -(YTVideo*)parseElement:(id)body error:(NSError*)error {
   if ([body isKindOfClass:[NSDictionary class]] ) {
-    NSLog(@"help me");
     NSDictionary *data = body;
 
     NSMutableDictionary *thumbnails = [NSMutableDictionary new];
