@@ -2,11 +2,12 @@
 #include "appheaders.h"
 #include "../YoutubeRequestClient.h"
 
+
 %hook YTGDataRequest
 +(id)requestForChannelWithID:(NSString*)channelId
 {
 // this request is WAYYYYY overkill fir what we use it for
-  return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" authentication:nil body:[YoutubeRequestClient browseBody:channelId params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D"]];
+  return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false" authentication:nil body:[YoutubeRequestClient browseBody:channelId params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" withClient:[YoutubeClientType webMobileClient]]];
 }
 %end
 
@@ -24,12 +25,14 @@
     if ([body isKindOfClass:[NSDictionary class]] ) {
         NSDictionary *data = body;
         long subs = -1;
-        if (data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][0][@"text"][@"content"]) {
-            subs = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][0][@"text"][@"content"]);
-        }
         long videoCount = -1;
-        if (data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][1][@"text"][@"content"]) {
-            videoCount = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][1][@"text"][@"content"]);
+        if ([data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"] count] >= 2) {
+            if ([data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"] count] >= 2) {
+                subs = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][0][@"text"][@"content"]);
+                videoCount = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][1][@"text"][@"content"]);
+            } else if ([data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"] count] == 1) {
+                subs = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][0][@"text"][@"content"]);
+            }
         }
         return [[[%c(YTChannel) alloc] initWithDisplayName:data[@"header"][@"pageHeaderRenderer"][@"pageTitle"]
             channelID:data[@"metadata"][@"channelMetadataRenderer"][@"externalId"]

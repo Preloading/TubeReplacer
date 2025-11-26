@@ -1,27 +1,15 @@
 #import "YoutubeRequestClient.h"
-#include "YoutubeClientType.h"
 
 @implementation YoutubeRequestClient
 
 +(NSData*)browseBody:(NSString*)browseId params:(NSString*)params {
-    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
-
-    [body setObject:[[YoutubeClientType webClient] makeContext] forKey:@"context"];
-    [body setObject:browseId forKey:@"browse_id"];
-    if (params) {
-        [body setObject:params forKey:@"params"];
-    }
-
-
-    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
-    
-    
+    return [YoutubeRequestClient browseBody:browseId params:params withClient:[YoutubeClientType webMobileClient]];
 }
 
-+(NSData*)browseAndroidBody:(NSString*)browseId params:(NSString*)params {
++(NSData*)browseBody:(NSString*)browseId params:(NSString*)params withClient:(YoutubeClientType*)client {
     NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
 
-    [body setObject:[[YoutubeClientType androidClient] makeContext] forKey:@"context"];
+    [body setObject:[client makeContext] forKey:@"context"];
     [body setObject:browseId forKey:@"browse_id"];
     if (params) {
         [body setObject:params forKey:@"params"];
@@ -48,6 +36,16 @@
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
     
     
+}
+
++(NSData*)searchBody:(NSString*)query sortBy:(NSString*)sortBy uploadDateFilter:(NSString*)uploadDateFilter duration:(NSString*)duration hasCC:(BOOL)hasCC withClient:(YoutubeClientType*)client {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+    [body setObject:query forKey:@"query"];
+    [body setObject:@"EgIQAQ%3D%3D" forKey:@"params"]; // filters for videos only
+
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 
 @end

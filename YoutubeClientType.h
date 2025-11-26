@@ -13,7 +13,7 @@
 // web
 +(YoutubeClientType*)webClient;
 // +(YoutubeRequestClient*)webEmbeddedPlayer;
-// +(YoutubeRequestClient*)webMobile;
++(YoutubeClientType*)webMobileClient;
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;
 
