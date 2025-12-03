@@ -27,6 +27,7 @@
 @end
 
 // this is a big boy
+// handles parsing of alllll the feeds we can get.
 %hook YTPageParser
 
 -(id)parseElement:(id)body error:(NSError *)onError {
@@ -88,13 +89,37 @@
                     videoLengthInSeconds += [videoLengthTextComponents[3] intValue] * 86400;
                 }
 
+                // for later me accessibility looks like
+                // Pasis - Tonton Malele by Tonton Malele 35,908 views 5 days ago 4 minutes, 20 seconds
+                // find a way to parse this!
+
+                NSString *title = @"";
+                if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                    title = unparsedVideo[@"headline"][@"runs"][0][@"text"];
+                } else {
+                    title = unparsedVideo[@"title"][@"runs"][0][@"text"];
+                }
+
+                NSString *uploaderDisplayName = unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"];
+
+                NSArray *accessibilityParts = nil; 
+                if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                    accessibilityParts = [unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                } else {
+                    accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                }
+                int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
+
+
                 long views = 0;
                 if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                    views = YTTextToNumber(unparsedVideo[@"shortViewCountText"][@"runs"][0][@"text"]); // TODO: This can be more precise if we use the accessibilty data.
+                    views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
+                    // views = YTTextToNumber(unparsedVideo[@"shortViewCountText"][@"runs"][0][@"text"]); 
                 } else if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
-                    views = YTTextToNumber(unparsedVideo[@"videoInfo"][@"runs"][0][@"text"]); // TODO: This can be more precise if we use the accessibilty data. 
+                    // views = YTTextToNumber(unparsedVideo[@"videoInfo"][@"runs"][0][@"text"]); 
+                    views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
                 } else {
-                    views = [[[unparsedVideo[@"viewCountText"][@"runs"][0][@"text"] stringByReplacingOccurrencesOfString:@" views" withString:@""] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
+                    views = [[[unparsedVideo[@"viewCountText"][@"runs"][0][@"text"] stringByReplacingOccurrencesOfString:@" views" withString:@""] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue]; // precise
                 }
 
                 NSDate *uploadedDate = nil;
@@ -104,18 +129,13 @@
                     uploadedDate = YTTimeAgoToDate(unparsedVideo[@"publishedTimeText"][@"runs"][0][@"text"]); // TODO: Some accessiblity data has more precise time, we should use that instead
                 }
 
-                NSString *title = @"";
-                if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                    title = unparsedVideo[@"headline"][@"runs"][0][@"text"];
-                } else {
-                    title = unparsedVideo[@"title"][@"runs"][0][@"text"];
-                }
+                
                 
 
                 [videos addObject:[[%c(YTVideo) alloc] initWithID:unparsedVideo[@"videoId"] 
                     title:title
                     description:@"" 
-                    uploaderDisplayName:unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"]
+                    uploaderDisplayName:uploaderDisplayName
                     uploaderChannelID:unparsedVideo[@"shortBylineText"][@"runs"][0][@"navigationEndpoint"][@"browseEndpoint"][@"browseId"]
                     uploadedDate:uploadedDate
                     publishedDate:uploadedDate
