@@ -27,8 +27,48 @@
 @end
 
 @interface YTFeedController : NSObject
+- (void)setRefreshExtraRequest:(id)fp8;
+- (id)refreshExtraRequest;
+- (void)setRefreshRequest:(id)fp8;
+- (id)refreshRequest;
+- (void)setExtraRequest:(id)fp8;
+- (id)extraRequest;
+- (void)setNextRequest:(id)fp8;
+- (id)nextRequest;
+- (void)onError:(id)fp8;
+- (void)onResponse:(id)fp8;
+- (void)maybeMakeNextRequest;
+- (void)feedViewDidAskForRefresh:(id)fp8;
+- (void)feedViewDidAskForMore:(id)fp8;
+- (void)feedView:(id)fp8 didSelectEntryAtIndex:(int)fp12;
+- (void)updateCell:(id)fp8 atIndex:(int)fp12;
+- (id)entryAtIndex:(int)fp8;
+- (int)entryCount;
+- (void)clear;
+- (void)refresh;
+- (void)updateCell:(id)fp8 forEntry:(id)fp12 animated:(BOOL)fp16;
+- (void)handleEntries:(id)fp8;
+- (void)makeThumbnailRequestWithURL:(id)fp8 forEntry:(id)fp12;
+- (void)removeEntriesMatchingBlock:(id)fp;
+- (void)insertEntry:(id)fp8 atIndex:(unsigned int)fp12;
+- (void)addEntry:(id)fp8;
+- (void)insertEntriesFromArray:(id)fp8 atIndex:(unsigned int)fp12;
+- (void)addEntriesFromArray:(id)fp8;
+- (void)updateCellForEntry:(id)fp8 animated:(BOOL)fp12;
+- (id)cellForEntry:(id)fp8;
+- (id)thumbnailForEntry:(id)fp8;
+- (void)setSelectedThumbnail:(id)fp8 forEntry:(id)fp12;
+- (void)setThumbnail:(id)fp8 forEntry:(id)fp12;
+- (void)setDidSelectEntryTarget:(id)fp8 action:(SEL)fp12;
 - (void)makeRequest:(id)fp8 serviceSelector:(SEL)fp12 extraRequest:(id)fp16 extraServiceSelector:(SEL)fp20;
 - (void)makeRequest:(id)fp8 serviceSelector:(SEL)fp12;
+- (void)setAllowDuplicates:(BOOL)fp8;
+- (BOOL)allowDuplicates;
+- (void)reset;
+- (void)dealloc;
+- (id)init;
+- (id)initWithFeedView:(id)fp8 services:(id)fp12;
+
 @end
 
 @interface YTGuideFeedController: YTFeedController
@@ -517,3 +557,22 @@ typedef struct _TBXMLElement {
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36;
 
 @end
+
+@interface GIPToast : NSObject
+{
+    UILabel *message_;
+    UIActivityIndicatorView *spinner_;
+}
+
++ (void)showTodo;
++ (void)hide;
++ (void)showToastWithSpinner:(id)fp8;
++ (void)showToast:(id)fp8 forDuration:(double)fp12;
++ (id)toast;
+- (void)showMessage:(id)fp8 forDuration:(double)fp12 showIndicator:(BOOL)fp20;
+- (void)createView;
+- (void)dealloc;
+- (id)initWithFrame:(struct CGRect)fp8;
+
+@end
+
