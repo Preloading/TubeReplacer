@@ -73,17 +73,40 @@
 //   }
 //   if ([category length])
 //     baseUrl = -[baseUrl stringByAppendingFormat:@"_%@", category];
-    NSString *browseId = @"VLPL-wWBMXXWHNIbxAJtIj0YU4H2zQkk-RAi";
+    // some older, less fancy 
+
+    // browseId = @"UCEgdi0XIXXZ-qJOFPf4JSKw"; // sports 
+    // params = @"EglzcG9ydHN0YWKSAQMIwwY%3D";
+    // browseId = @"UCEgdi0XIXXZ-qJOFPf4JSKw"; // music
+    // params = @"EglzcG9ydHN0YWKSAQMIwwY%3D";
+    NSString *browseId = @"VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL";
     NSString *params = nil;
     if ([category isEqualToString:@"Games"]) {
-        browseId = @"UCOpNcN46UbXVtpKMrmU4Abg";
-        params = @"Egh0cmVuZGluZw%3D%3D";
-    } else if ([category isEqualToString:@"Sports"]) {
-        browseId = @"UCEgdi0XIXXZ-qJOFPf4JSKw";
-        params = @"EglzcG9ydHN0YWKSAQMIwwY%3D";
+      browseId = @"VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv";
+    } else if ([category isEqualToString:@"Film"]) {
+        browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
+    } else if ([category isEqualToString:@"Autos"]) {
+        browseId = @"VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U";
     } else if ([category isEqualToString:@"Music"]) {
-        browseId = @"UCEgdi0XIXXZ-qJOFPf4JSKw";
-        params = @"EglzcG9ydHN0YWKSAQMIwwY%3D";
+        browseId = @"VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi";
+    } else if ([category isEqualToString:@"Animals"]) {
+        browseId = @"VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB";
+    } else if ([category isEqualToString:@"Sports"]) {
+        browseId = @"VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb";
+    } else if ([category isEqualToString:@"Games"]) {
+        browseId = @"VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv";
+    } else if ([category isEqualToString:@"Comedy"]) {
+        browseId = @"VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz";
+    } else if ([category isEqualToString:@"People"]) {
+        browseId = @"VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-";
+    } else if ([category isEqualToString:@"News"]) {
+        browseId = @"VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO";
+    } else if ([category isEqualToString:@"Entertainment"]) {
+        browseId = @"VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF";
+    } else if ([category isEqualToString:@"Howto"]) {
+        browseId = @"VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn";
+    } else if ([category isEqualToString:@"Tech"]) {
+        browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
     }
 
   GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:baseUrl];
