@@ -39,6 +39,9 @@
             unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"playlistVideoListRenderer"][@"contents"]; // mobile Playlist
         }
         if (!unparsedVideos) {
+            unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][1][@"tabRenderer"][@"content"][@"richGridRenderer"][@"contents"]; // mobile channel videos
+        }
+        if (!unparsedVideos) {
             unparsedVideos = body[@"contents"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"]; // mobile search
         }
         if (unparsedVideos) {
@@ -58,6 +61,11 @@
                 }
                 if (!unparsedVideo) {
                     unparsedVideo = unparsedVideoFull[@"videoWithContextRenderer"];
+                    dataType = @"videoWithContextRenderer";
+                    mediaType = @"VIDEO";
+                }
+                if (!unparsedVideo) {
+                    unparsedVideo = unparsedVideoFull[@"richItemRenderer"][@"content"][@"videoWithContextRenderer"];
                     dataType = @"videoWithContextRenderer";
                     mediaType = @"VIDEO";
                 }
@@ -109,18 +117,26 @@
                     }
 
                     NSString *uploaderDisplayName = unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"];
+                    if (!uploaderDisplayName) {
+                        uploaderDisplayName = body[@"header"][@"pageHeaderRenderer"][@"pageTitle"]; // channel videos
+                    }
 
                     NSArray *accessibilityParts = nil; 
                     if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                        NSLog(@"accessiblity -> %@", unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"]);
                         accessibilityParts = [unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                        for (NSString *part in accessibilityParts) {
+                            NSLog(@"accessibilityParts contains %@", part);
+                        }
                     } else {
                         accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
                     }
                     int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
-
+                    //                           title                                    by                 display name                                  index stuff
 
                     long views = 0;
                     if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                        NSLog(@"views -> %@", [accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""]);
                         views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
                         // views = YTTextToNumber(unparsedVideo[@"shortViewCountText"][@"runs"][0][@"text"]); 
                     } else if ([dataType isEqualToString:@"playlistVideoRenderer"])  {

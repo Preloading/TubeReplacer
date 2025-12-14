@@ -1,8 +1,24 @@
 #import <Foundation/Foundation.h>
+#include "appheaders.h"
+#include "../YoutubeRequestClient.h"
+
 
 // i accidently mixed this up, so that's here for now.
 
-// %hook YTGDataService
+%hook YTGDataRequest
+
++(id)requestForUploadedVideosWithChannelID:(NSString*)channelId
+{
+  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:nil body:[YoutubeRequestClient browseBody:channelId params:@"EgZ2aWRlb3PyBgQKAjoA"]];
+}
+
+%end
+
+%hook YTGDataService
+-(void)makeUploadedVideosRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    [self makePOSTRequest:url withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+}
+%end
 
 // //change from a GET to a POST, since youtubei browse only accepts POST
 // -(void)makeVideosStandardFeedRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
