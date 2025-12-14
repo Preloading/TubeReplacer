@@ -38,12 +38,17 @@
     
 }
 
-+(NSData*)searchBody:(NSString*)query sortBy:(NSString*)sortBy uploadDateFilter:(NSString*)uploadDateFilter duration:(NSString*)duration hasCC:(BOOL)hasCC withClient:(YoutubeClientType*)client {
++(NSData*)searchBody:(NSString*)query sortBy:(NSString*)sortBy uploadDateFilter:(NSString*)uploadDateFilter duration:(NSString*)duration hasCC:(BOOL)hasCC withClient:(YoutubeClientType*)client isChannelLookup:(BOOL)isChannelLookup {
     NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
 
     [body setObject:[client makeContext] forKey:@"context"];
     [body setObject:query forKey:@"query"];
-    [body setObject:@"EgIQAQ%3D%3D" forKey:@"params"]; // filters for videos only
+    if (isChannelLookup) {
+        [body setObject:@"EgIQAg%3D%3D" forKey:@"params"]; // filters for channels only
+    } else {
+        [body setObject:@"EgIQAQ%3D%3D" forKey:@"params"]; // filters for videos only
+    }
+    
 
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
@@ -119,6 +124,7 @@ long YTTextToNumber(NSString *string) {
                           stringByReplacingOccurrencesOfString:@" subscribers" withString:@""]
                           stringByReplacingOccurrencesOfString:@" videos" withString:@""];
     cleaned = [cleaned stringByReplacingOccurrencesOfString:@" views" withString:@""];
+    cleaned = [cleaned stringByReplacingOccurrencesOfString:@"," withString:@""];
     cleaned = [cleaned stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     
     // Extract the numeric part and multiplier

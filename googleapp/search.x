@@ -57,20 +57,32 @@
   //   safeSearchLevel);.
   if (filters) {
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
-      sortBy:[filters sortBy] uploadDateFilter:nil duration:[filters duration] hasCC:[filters hasCC] withClient:[YoutubeClientType webMobileClient]]];
+      sortBy:[filters sortBy] uploadDateFilter:nil duration:[filters duration] hasCC:[filters hasCC] withClient:[YoutubeClientType webMobileClient] isChannelLookup:NO]];
   } else {
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
-      sortBy:nil uploadDateFilter:nil duration:nil hasCC:false withClient:[YoutubeClientType webMobileClient]]];
+      sortBy:nil uploadDateFilter:nil duration:nil hasCC:false withClient:[YoutubeClientType webMobileClient] isChannelLookup:NO]];
   }
   
 
 }
+
++(id)requestForChannelsWithSearchQuery:(NSString*)query
+{
+  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
+      sortBy:nil uploadDateFilter:nil duration:nil hasCC:false withClient:[YoutubeClientType webMobileClient] isChannelLookup:YES]];
+}
 %end
+
+
 
 %hook YTGDataService
 -(void)makeSearchVideosRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
   [self makePOSTRequest:url withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
   // cache:[self valueForKey:@"videoPageCache_"] 
+}
+
+-(void)makeSearchChannelsRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    [self makePOSTRequest:url withParser:[self valueForKey:@"channelPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
 %end
 
