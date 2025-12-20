@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 
 
@@ -135,6 +136,7 @@
 - (NSString*)hsid;
 - (NSString*)ssid;
 - (NSString*)sapisid;
+- (NSString*)datasyncID;
 @end
 
 %hook GTMOAuth2Authentication
@@ -163,6 +165,13 @@
     NSDictionary *parameters = [self parameters];
     return [parameters objectForKey:@"SAPISID"];
 }
+
+%new
+-(NSString*)datasyncID {
+    NSDictionary *parameters = [self parameters];
+    return [parameters objectForKey:@"DATASYNC_ID"];
+}
+
 -(NSString*)userAgent {
     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
 }
@@ -212,7 +221,6 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
   else
   {
     httpFetcher = nil;
-    NSLog(@"an error occured, io still gotta work out that system");
     NSError *error = [NSError errorWithDomain:@"com.google.HTTPStatus" code:-1 userInfo:nil];
     [%c(GTMOAuth2Authentication) invokeDelegate:delegate selector:didFinishSelector object:self object:0 object:error];
   }
@@ -258,6 +266,7 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
           }
         }
         [htmlString release];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"kGTMOAuth2RefreshTokenChanged" object:self userInfo:0];
       }
     }
   }
@@ -283,6 +292,7 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
   NSString *hsid = [self hsid];
   NSString *ssid = [self ssid];
   NSString *sapisid = [self sapisid];
+  NSString *datasyncID = [self datasyncID];
 
   if (![self shouldAuthorizeAllRequests]) {
     errorCode = -1004;
@@ -291,13 +301,36 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
       goto requestOK;
   }
   errorCode = -1001;
-  if ([hsid length] && [ssid length] && [sapisid length] && [sid length])
+  if ([hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length])
   {
     if ( request )
     {
         NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
         [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
-      [request setValue:[NSString stringWithFormat:@"%s %@", "Bearer", @"69696969420"] forHTTPHeaderField:@"Authorization"];
+
+        // SAPISIDHASH
+        long unixTime = (long)[[NSDate date] timeIntervalSince1970];
+        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [url scheme], [url host]];
+        NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
+
+        NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
+        uint8_t digest[CC_SHA1_DIGEST_LENGTH];
+
+        CC_SHA1(unhashedData.bytes, (CC_LONG)unhashedData.length, digest);
+
+        NSMutableString *output = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 2];
+
+        for (int i = 0; i < CC_SHA1_DIGEST_LENGTH; i++)
+        {
+            [output appendFormat:@"%02x", digest[i]];
+        }
+        NSLog(@"Hashed SAPISID: %@", output);
+        [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
+
+
+          
+
+      
     }
     [authArgs setError:nil];
     goto done;
