@@ -52,8 +52,8 @@
 //   id cookies; // [sp+10h] [bp-7Ch]
 
 //   authCookie = 0;
-    NSURL *authorizationURL = [self authorizationURL];
-    // NSURL *authorizationURL = [NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID"];
+    // NSURL *authorizationURL = [self authorizationURL];
+    NSURL *authorizationURL = [NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID"];
     NSLog(@"authorization URL: %@", authorizationURL);
     NSArray *cookies = [cookieStorage cookiesForURL:authorizationURL];
 
@@ -180,8 +180,9 @@
   NSString *ssid = [self ssid];
   NSString *sapisid = [self sapisid];
 
-    NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=false; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@;", hsid,ssid,sapisid,sapisid,sid];
+    NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
     [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+    [request setValue:@"https://accounts.google.com/" forHTTPHeaderField:@"Referer"];
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"User-Agent"];
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"user-agent"];
     
@@ -218,8 +219,58 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
   return httpFetcher;
 }
 
-
 // check for V6c17240b|| and call it bad
+-(void)tokenFetcher:(GTMHTTPFetcher*)fetcher finishedWithData:(NSData*)data error:(NSError*)error
+{
+  [self notifyFetchIsRunning:NO fetcher:fetcher type:0];
+  NSDictionary *responseHeaders = [fetcher responseHeaders];
+  NSString *contentType = [responseHeaders valueForKey:@"Content-Type"];
+  BOOL isHTML = [contentType hasPrefix:@"text/html"];
+  int dataLen = [data length];
+  if (!error)
+  {
+    error = nil;
+    if ( dataLen )
+    {
+      if ( isHTML )
+      {
+        // Extract DATASYNC_ID from HTML
+        NSString *htmlString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSString *datasyncID = nil;
+        
+        NSRange searchRange = [htmlString rangeOfString:@"\"DATASYNC_ID\":\""];
+        if (searchRange.location != NSNotFound) {
+          NSInteger startPos = searchRange.location + searchRange.length;
+          NSRange endRange = [htmlString rangeOfString:@"||" options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
+          
+          if (endRange.location != NSNotFound) {
+            datasyncID = [htmlString substringWithRange:NSMakeRange(startPos, endRange.location - startPos)];
+            NSLog(@"Extracted DATASYNC_ID: %@", datasyncID);
+            
+            // Store it in the authentication object if needed
+            NSMutableDictionary *params = [[self parameters] mutableCopy];
+            if (!params) {
+              params = [NSMutableDictionary dictionary];
+            }
+            [params setObject:datasyncID forKey:@"DATASYNC_ID"];
+            [self setParameters:params];
+            [params release];
+          }
+        }
+        [htmlString release];
+      }
+    }
+  }
+  id delegate = [fetcher propertyForKey:@"delegate"];
+  NSString *selectorStr = [fetcher propertyForKey:@"sel"];
+  SEL selector = nil;
+  if ( selectorStr )
+    selector = NSSelectorFromString(selectorStr);
+  [%c(GTMOAuth2Authentication) invokeDelegate:delegate selector:selector object:self object:fetcher object:error];
+  [fetcher setProperty:nil forKey:@"delegate"];
+}
+
+
 
 -(BOOL)authorizeRequestImmediateArgs:(GTMOAuth2AuthorizationArgs*)authArgs
 {
@@ -244,7 +295,7 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
   {
     if ( request )
     {
-        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=false; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@;", hsid,ssid,sapisid,sapisid,sid];
+        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
         [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
       [request setValue:[NSString stringWithFormat:@"%s %@", "Bearer", @"69696969420"] forHTTPHeaderField:@"Authorization"];
     }
