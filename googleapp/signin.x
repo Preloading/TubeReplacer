@@ -187,6 +187,26 @@
     return [hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length];
 }
 
+-(id)persistenceResponseString
+{
+
+  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:9];
+  [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
+  [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
+
+  [data setValue:[self sid] forKey:@"SID"];
+  [data setValue:[self hsid] forKey:@"HSID"];
+  [data setValue:[self ssid] forKey:@"SSID"];
+  [data setValue:[self sapisid] forKey:@"SAPISID"];
+  [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
+
+  [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
+  [data setValue:@"me@preloading.dev" forKey:@"email"];
+  [data setValue:[self userEmailIsVerified] forKey:@"isVerified"];
+  [data setValue:[self scope] forKey:@"scope"];
+  return [%c(GTMOAuth2Authentication) encodedQueryParametersForDictionary:data];
+}
+
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
     NSLog(@"did finish selector: %@", NSStringFromSelector(didFinishSelector)); // -[GTMOAuth2SignIn auth:finishedWithFetcher:error:]
     NSLog(@"sid is: %@", [self sid]);
@@ -214,7 +234,7 @@
 //   }
 //   else
 //   {
-GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
+  GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
 //   }
   [httpFetcher setCommentWithFormat:@"fetch tokens for"];
   [httpFetcher setRetryEnabled:1];
