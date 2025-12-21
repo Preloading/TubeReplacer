@@ -176,6 +176,16 @@
     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
 }
 
+-(BOOL)canAuthorize
+{
+    NSString *sid = [self sid];
+    NSString *hsid = [self hsid];
+    NSString *ssid = [self ssid];
+    NSString *sapisid = [self sapisid];
+    NSString *datasyncID = [self datasyncID];
+
+    return [hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length];
+}
 
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
     NSLog(@"did finish selector: %@", NSStringFromSelector(didFinishSelector)); // -[GTMOAuth2SignIn auth:finishedWithFetcher:error:]
@@ -263,6 +273,8 @@ GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
             [self setParameters:params];
             [params release];
+
+            [self setExpiresIn:@100000000];
           }
         }
         [htmlString release];
@@ -354,6 +366,75 @@ done:
   return [authArgs error] == nil;
 }
 
+%end
+
+%hook GTMOAuth2SignIn
+
+// void __cdecl -[GTMOAuth2SignIn infoFetcher:finishedWithData:error:](
+//         GTMOAuth2SignIn *self,
+//         SEL a2,
+//         id fetcher,
+//         NSData *data,
+//         NSError *error)
+// {
+//   GTMOAuth2Authentication *authentication; // r5
+//   NSMutableDictionary *v9; // r0 MAPDST
+//   NSString *email; // r0
+//   id v12; // r0
+//   id v13; // r0
+
+//   authentication = -[GTMOAuth2SignIn authentication](self);
+//   -[GTMOAuth2Authentication notifyFetchIsRunning:fetcher:type:](
+//     authentication,
+//     0,
+//     fetcher,
+//     0);
+//   -[GTMOAuth2SignIn setPendingFetcher:](self, 0);
+//   if ( !error )
+//   {
+//     if ( data )
+//     {
+//       v9 = -[GTMOAuth2Authentication dictionaryWithJSONData:](authentication, data);
+//       if ( v9 )
+//       {
+//         -[GTMOAuth2SignIn setUserProfile:](self, v9);
+//         email = (NSString *)-[NSMutableDictionary objectForKey:](v9, CFSTR("email"));
+//         -[GTMOAuth2Authentication setUserEmail:](authentication, email);
+//         v12 = -[NSMutableDictionary objectForKey:](v9, CFSTR("verified_email"));
+//         v13 = objc_msgSend(v12, "stringValue");
+//         -[GTMOAuth2Authentication setUserEmailIsVerified:](authentication, v13);
+//       }
+//     }
+//   }
+//   -[GTMOAuth2SignIn finishSignInWithError:](self, error);
+// }
+
+-(void)fetchGoogleUserInfo
+{
+  // based on -[GTMOAuth2SignIn infoFetcher:finishedWithData:error:]
+  GTMOAuth2Authentication *authentication = [self authentication];
+  // [self setUserProfile:v9];
+  [authentication setUserEmail:@"me@preloading.dev"];
+  // v12 = -[NSMutableDictionary objectForKey:](v9, CFSTR("verified_email"));
+  // v13 = objc_msgSend(v12, "`");
+  [authentication setUserEmailIsVerified:@"true"];
+
+  [self finishSignInWithError:nil];
+  // GTMOAuth2Authentication *v3; // r4
+  // id v4; // r0
+  // id v5; // r6
+
+  // v3 = -[GTMOAuth2SignIn authentication](self);
+  // v4 = -[GTMOAuth2SignIn class](self);
+  // v5 = objc_msgSend(v4, "userInfoFetcherWithAuth:", v3);
+  // objc_msgSend(v5, "beginFetchWithDelegate:didFinishSelector:", self, "infoFetcher:finishedWithData:error:");
+  // -[GTMOAuth2SignIn setPendingFetcher:](self, v5);
+  // -[GTMOAuth2Authentication notifyFetchIsRunning:fetcher:type:](
+  //   v3,
+  //   1,
+  //   v5,
+  //   off_4A4978[0]);
+}
 %end
 
 %hook GTMHTTPFetcher
