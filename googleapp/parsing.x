@@ -43,7 +43,20 @@
 -(id)parse:(NSData*)xmlData error:(NSError **)error
 {
     const unsigned char* bytes = [xmlData bytes];
+    NSUInteger length = [xmlData length];
     
+    // Check for and skip )]}'\n prefix (5 bytes)
+    if (length >= 5 && 
+        bytes[0] == ')' && 
+        bytes[1] == ']' && 
+        bytes[2] == '}' && 
+        bytes[3] == '\'' && 
+        bytes[4] == '\n') {
+        bytes += 5;
+        length -= 5;
+        xmlData = [NSData dataWithBytes:bytes length:length];
+    }
+
     if (bytes[0] == '<') {
         NSLog(@"XML Detected!");
         TBXML *xml = [%c(TBXML) tbxmlWithXMLData:xmlData error:error];

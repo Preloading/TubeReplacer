@@ -1020,3 +1020,22 @@ typedef struct _TBXMLElement {
 
 @end
 
+@interface YTUserProfile : NSObject
+- (unsigned long long)subscribersCount;
+- (unsigned long long)channelViewsCount;
+- (unsigned long long)uploadViewsCount;
+- (unsigned long long)subscriptionsCount;
+- (unsigned long long)favoritesCount;
+- (unsigned long long)uploadedCount;
+- (id)thumbnailURL;
+- (unsigned int)age;
+- (id)playlistsURL;
+- (id)uploadsURL;
+- (id)displayName;
+- (id)username;
+- (BOOL)hasLegalAge;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithUsername:(id)fp8 displayName:(id)fp12 age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
+
+@end
