@@ -179,9 +179,9 @@
     return [parameters objectForKey:@"DATASYNC_ID"];
 }
 
--(NSString*)userAgent {
-    return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
-}
+// -(NSString*)userAgent {
+//     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
+// }
 
 -(BOOL)canAuthorize
 {
@@ -479,30 +479,44 @@ done:
 }
 %end
 
-%hook GTMHTTPFetcher
+// %hook GTMHTTPFetcher
 
-- (id)connection:(id)conn
- willSendRequest:(NSURLRequest *)request
-redirectResponse:(id)response
-{
-    NSURLRequest *origReq = %orig;
+// - (id)connection:(id)conn
+//  willSendRequest:(NSURLRequest *)request
+// redirectResponse:(id)response
+// {
+//     NSURLRequest *origReq = %orig;
 
-    NSMutableURLRequest *mutableReq;
-    if ([origReq isKindOfClass:[NSMutableURLRequest class]]) {
-        mutableReq = (NSMutableURLRequest *)origReq;
-    } else {
-        mutableReq = [origReq mutableCopy];
-    }
+//     NSMutableURLRequest *mutableReq;
+//     if ([origReq isKindOfClass:[NSMutableURLRequest class]]) {
+//         mutableReq = (NSMutableURLRequest *)origReq;
+//     } else {
+//         mutableReq = [origReq mutableCopy];
+//     }
 
-    [mutableReq setValue:
-     @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) "
-      "AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329"
-      forHTTPHeaderField:@"User-Agent"];
+//     [mutableReq setValue:
+//      @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) "
+//       "AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329"
+//       forHTTPHeaderField:@"User-Agent"];
 
-    return mutableReq;
+//     return mutableReq;
+// }
+
+// %end
+
+%ctor {
+  NSString *userAgent = [NSString stringWithFormat:@"%@/%@ (%@; U; CPU %@ %@ like Mac OS X; %@)",
+    [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"],
+    [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"],
+    [[UIDevice currentDevice] model],
+    [[UIDevice currentDevice] systemName],
+    [[[UIDevice currentDevice] systemVersion] stringByReplacingOccurrencesOfString:@"." withString:@"_"],
+    [[NSLocale currentLocale] localeIdentifier]];
+  NSDictionary *dictionary = @{@"UserAgent": userAgent};
+  [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+
 }
-
-%end
 
 // todo: look at -[GTMHTTPFetcher beginFetchMayDelay:mayAuthorize:]
 
