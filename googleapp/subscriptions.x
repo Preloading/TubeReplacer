@@ -18,27 +18,27 @@
 
 %end
 
-%hook YTUserProfileParser
+%hook YTSubscriptionParser
     
 -(id)parseElement:(id)body error:(NSError *)onError {
     if ([body isKindOfClass:[NSDictionary class]] ) {
-        // NSDictionary *data = body;
+        NSDictionary *data = body;
 
-        // NSDictionary *accountInfo = data[@"data"][@"actions"][0][@"getMultiPageMenuAction"][@"menu"][@"multiPageMenuRenderer"][@"sections"][0][@"accountSectionListRenderer"][@"contents"][0][@"accountItemSectionRenderer"][@"contents"][0][@"accountItem"];
-        // NSString *displayName = accountInfo[@"accountName"][@"simpleText"];
-        // NSString *channelHandle = [accountInfo[@"channelHandle"][@"simpleText"] substringFromIndex:1];
-        // int subscribersCount = YTTextToNumber(accountInfo[@"accountByline"][@"simpleText"]);
-        // NSURL *thumbnail = [NSURL URLWithString:accountInfo[@"accountPhoto"][@"thumbnails"][0][@"url"]];
-        YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:@"michaelpenisgaming"
-            displayName:@"michaelpenisgaming"
-            channelID:@"michaelpenisgaming"
+        NSDictionary *subscription = data[@"i"][@"channelListItemRenderer"];
+        NSString *channelID = subscription[@"channelId"];
+        NSString *displayName = subscription[@"title"][@"runs"][0][@"text"];
+        NSString *thumbnail = [NSString stringWithFormat:@"https:%@", subscription[@"thumbnail"][@"thumbnails"][0][@"url"]];
+        YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:displayName // ugh
+            displayName:displayName
+            channelID:channelID
             type:1
             publishedDate:[NSDate date]
             updatedDate:[NSDate date]
             countHint:6969420
             editURL:[NSURL URLWithString:@"https://example.com/subediturl"]
-            thumbnailURL:[NSURL URLWithString:@"https://example.com/subediturl"]
+            thumbnailURL:[NSURL URLWithString:thumbnail]
         ] autorelease];
+        NSLog(@"YTSubscriptionParser");
         return sub;
     } else {
         NSLog(@"PANIK WE DIDNT GET JSON!|!!!!!");

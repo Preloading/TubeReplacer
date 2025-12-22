@@ -30,207 +30,231 @@
 // handles parsing of alllll the feeds we can get.
 %hook YTPageParser
 
--(id)parseElement:(id)body error:(NSError *)onError {
+-(id)parseElement:(id)body error:(NSError **)error {
     NSMutableArray *output = [NSMutableArray array];
     if ([body isKindOfClass:[NSDictionary class]] ) {
+        // proper page implementation, since i did this badly
 
-        NSArray *unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"shelfRenderer"][@"content"][@"horizontalListRenderer"][@"items"]; // mobile Gaming
-        if (!unparsedVideos) {
-            unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"playlistVideoListRenderer"][@"contents"]; // mobile Playlist
-        }
-        if (!unparsedVideos) {
-            unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][1][@"tabRenderer"][@"content"][@"richGridRenderer"][@"contents"]; // mobile channel videos
-        }
-        if (!unparsedVideos) {
-            unparsedVideos = body[@"contents"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"]; // mobile search
-        }
-        if (unparsedVideos) {
-            for (NSDictionary *unparsedVideoFull in unparsedVideos) {
-                NSDictionary *unparsedVideo = unparsedVideoFull[@"gridVideoRenderer"];
-                NSString *dataType = @"videoRenderer";
-                NSString *mediaType = @""; // VIDEO or CHANNEL
-                if (!unparsedVideo) {
-                    unparsedVideo = unparsedVideoFull[@"richItemRenderer"][@"content"][@"videoRenderer"];
-                    dataType = @"videoRenderer";
-                    mediaType = @"VIDEO";
-                }
-                if (!unparsedVideo) {
-                    unparsedVideo = unparsedVideoFull[@"playlistVideoRenderer"];
-                    dataType = @"playlistVideoRenderer";
-                    mediaType = @"VIDEO";
-                }
-                if (!unparsedVideo) {
-                    unparsedVideo = unparsedVideoFull[@"videoWithContextRenderer"];
-                    dataType = @"videoWithContextRenderer";
-                    mediaType = @"VIDEO";
-                }
-                if (!unparsedVideo) {
-                    unparsedVideo = unparsedVideoFull[@"richItemRenderer"][@"content"][@"videoWithContextRenderer"];
-                    dataType = @"videoWithContextRenderer";
-                    mediaType = @"VIDEO";
-                }
-                if (!unparsedVideo) {
-                    unparsedVideo = unparsedVideoFull[@"compactChannelRenderer"];
-                    dataType = @"compactChannelRenderer";
-                    mediaType = @"CHANNEL";
-                }
-                if (!unparsedVideo) {
-                    continue;
-                }
-                NSLog(@"videocheck1");
-
-                // NSLog(@"%@", unparsedVideo[@"videoId"] );
-
-                if ([mediaType isEqualToString:@"VIDEO"]) {
-                    // is the video even available?
-                    if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
-                        if (!([unparsedVideo[@"videoInfo"][@"runs"] count] >= 2)) {
-                            NSLog(@"bad video");
-                            continue;
-                        }
-                    } else {
-                        if (!(unparsedVideo[@"publishedTimeText"][@"runs"][0])) {
-                            continue;
-                        }
-                    }
-
-                    // thumbnails
-                    NSMutableDictionary *thumbnails = [NSMutableDictionary new];
-                    NSDictionary *unparsedThumbnails = unparsedVideo[@"thumbnail"][@"thumbnails"];
-                    for (NSDictionary *unparsedThumbnail in unparsedThumbnails) {
-                        [thumbnails setObject:[NSURL URLWithString:unparsedThumbnail[@"url"]] forKey:[NSValue valueWithBytes:&(CGSize){[unparsedThumbnail[@"height"] intValue],[unparsedThumbnail[@"width"] intValue]} objCType:@encode(CGSize)]];
-                    }
-                    NSLog(@"videocheck2");
-
-                    // video length
-                    NSString *videoLengthText = unparsedVideo[@"lengthText"][@"runs"][0][@"text"];
-                    NSArray *videoLengthTextComponents = [[[videoLengthText componentsSeparatedByString:@":"] reverseObjectEnumerator] allObjects];
-                    long videoLengthInSeconds = 0;
-                    if (videoLengthTextComponents.count >= 1) { // seconds
-                        videoLengthInSeconds += [videoLengthTextComponents[0] intValue];
-                    }
-                    if (videoLengthTextComponents.count >= 2) { // minutes
-                        videoLengthInSeconds += [videoLengthTextComponents[1] intValue] * 60;
-                    }
-                    if (videoLengthTextComponents.count >= 3) { // hours
-                        videoLengthInSeconds += [videoLengthTextComponents[2] intValue] * 3600;
-                    }
-                    if (videoLengthTextComponents.count >= 4) { // days
-                        videoLengthInSeconds += [videoLengthTextComponents[3] intValue] * 86400;
-                    }
-                    NSLog(@"videocheck3");
-
-                    // for later me accessibility looks like
-                    // Pasis - Tonton Malele by Tonton Malele 35,908 views 5 days ago 4 minutes, 20 seconds
-                    // find a way to parse this!
-
-                    NSString *title = @"";
-                    if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                        title = unparsedVideo[@"headline"][@"runs"][0][@"text"];
-                    } else {
-                        title = unparsedVideo[@"title"][@"runs"][0][@"text"];
-                    }
-
-                    NSLog(@"videocheck4");
-
-                    NSString *uploaderDisplayName = unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"];
-                    if (!uploaderDisplayName) {
-                        uploaderDisplayName = body[@"header"][@"pageHeaderRenderer"][@"pageTitle"]; // channel videos
-                    }
-
-                    NSLog(@"videocheck5");
-
-                    NSArray *accessibilityParts = nil; 
-                    if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                        NSLog(@"accessiblity -> %@", unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"]);
-                        accessibilityParts = [unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
-                        for (NSString *part in accessibilityParts) {
-                            NSLog(@"accessibilityParts contains %@", part);
-                        }
-                    } else {
-                        NSLog(@"accessiblity -> %@", unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"]);
-                        accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
-                    }
-                    int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
-                    //                           title                                    by                 display name                                  index stuff
-                    NSLog(@"videocheck6");
-
-                    long views = 0;
-                    if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                        NSLog(@"views -> %@", [accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""]);
-                        views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
-                        // views = YTTextToNumber(unparsedVideo[@"shortViewCountText"][@"runs"][0][@"text"]); 
-                    } else if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
-                        // views = YTTextToNumber(unparsedVideo[@"videoInfo"][@"runs"][0][@"text"]); 
-                        views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
-                    } else {
-                        views = [[[unparsedVideo[@"viewCountText"][@"runs"][0][@"text"] stringByReplacingOccurrencesOfString:@" views" withString:@""] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue]; // precise
-                    }
-
-                    NSLog(@"videocheck7");
-
-                    NSDate *uploadedDate = nil;
-                    NSString *uploadDateString = @"";
-                    for (int i = 0; i < [accessibilityParts count] - (removedParts + 3); i++) {
-                        uploadDateString = [NSString stringWithFormat:@"%@%@ ", uploadDateString, [accessibilityParts[removedParts + 3 + i] stringByReplacingOccurrencesOfString:@"," withString:@""]];
-                    }
-
-
-                    NSLog(@"maybe upload date = %@", uploadDateString);
-                    uploadedDate = YTTimeAgoToDate(uploadDateString);
-                    // if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
-                    //     // uploadedDate = YTTimeAgoToDate(unparsedVideo[@"videoInfo"][@"runs"][2][@"text"]);
-                    // } else {
-                    //     // uploadedDate = YTTimeAgoToDate(unparsedVideo[@"publishedTimeText"][@"runs"][0][@"text"]);
-                    // }
-
-                    NSLog(@"video");
+        if (!([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTVideoParser) class]] || [[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTChannelParser) class]])) { // this is here to avoid me having to rewrite a lot of code right now.
+            NSArray *unparsedData = nil;
+            NSDictionary *bodyDict = body;
+            if ([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTSubscriptionParser) class]]) {
+                unparsedData = bodyDict[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"shelfRenderer"][@"content"][@"verticalListRenderer"][@"items"];
+            }
+            NSLog(@"unparsed data count -> %lu",(unsigned long) [unparsedData count]);
+            for (id i in unparsedData) {
+                YTTBParser *parser = [self valueForKey:@"entryParser_"];
+                NSError *parseError = nil;
+                id entry = [parser parseElement:@{@"i":i,@"all":unparsedData} error:&parseError];
+                if ( parseError ) {
+                    NSLog(@"fuck");
+                    break;
                     
-
-                    [output addObject:[[%c(YTVideo) alloc] initWithID:unparsedVideo[@"videoId"] 
-                        title:title
-                        description:@"" 
-                        uploaderDisplayName:uploaderDisplayName
-                        uploaderChannelID:unparsedVideo[@"shortBylineText"][@"runs"][0][@"navigationEndpoint"][@"browseEndpoint"][@"browseId"]
-                        uploadedDate:uploadedDate
-                        publishedDate:uploadedDate
-                        duration:videoLengthInSeconds 
-                        viewCount:views
-                        likesCount:0 
-                        dislikesCount:0 
-                        state:[[%c(YTVideoState) alloc] initWithCode:0 reason:@""] 
-                        streams:@[[NSURL URLWithString:@"https://example.com/badstream"]] 
-                        thumbnailURLs:thumbnails
-                        subtitlesTracksURL:[NSURL URLWithString:@"https://example.com/badsubtitles"]
-                        commentsAllowed:YES 
-                        commentsURL:[NSURL URLWithString:@"https://example.com/badcomments"]
-                        commentsCountHint:0
-                        relatedURL:[NSURL URLWithString:@"https://example.com/badrelatedurl"]
-                        claimed:NO
-                        monetized:NO 
-                        monetizedCountries:@[] 
-                        allowedCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"] 
-                        deniedCountries:@[] 
-                        categoryLabel:@"Gaming" // who knows!
-                        categoryTerm:@"Games"  // who knows!
-                        tags:@[]
-                        adultContent:NO 
-                        videoPro:nil
-                    ]];
-                } else if ([mediaType isEqualToString:@"CHANNEL"]) {
-                    NSString *displayName = unparsedVideo[@"displayName"][@"runs"][0][@"text"];
+                }
                     
-                    NSArray *accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
-                    int removedParts = [[displayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
+                if ( entry )
+                    [output addObject:entry];
+            }
+        } else {
 
-                    [output addObject:[[[%c(YTChannel) alloc] initWithDisplayName:displayName
-                        channelID:unparsedVideo[@"channelId"]
-                        summary:@"summary"
-                        updated:[NSDate date] // todo: we aren't provided this, but since this is way overkill, we can get the latest video as the date
-                        videoCount:YTTextToNumber(accessibilityParts[removedParts + 1])
-                        thumbnailURL:[NSURL URLWithString:[NSString stringWithFormat:@"https:%@", unparsedVideo[@"thumbnail"][@"thumbnails"][0][@"url"]]]
-                        subscribersCount:YTTextToNumber(unparsedVideo[@"videoCountText"][@"runs"][0][@"text"])
-                    ] autorelease]];
+            NSArray *unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"shelfRenderer"][@"content"][@"horizontalListRenderer"][@"items"]; // mobile Gaming
+            if (!unparsedVideos) {
+                unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"playlistVideoListRenderer"][@"contents"]; // mobile Playlist
+            }
+            if (!unparsedVideos) {
+                unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][1][@"tabRenderer"][@"content"][@"richGridRenderer"][@"contents"]; // mobile channel videos
+            }
+            if (!unparsedVideos) {
+                unparsedVideos = body[@"contents"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"]; // mobile search
+            }
+            if (unparsedVideos) {
+                for (NSDictionary *unparsedVideoFull in unparsedVideos) {
+                    NSDictionary *unparsedVideo = unparsedVideoFull[@"gridVideoRenderer"];
+                    NSString *dataType = @"videoRenderer";
+                    NSString *mediaType = @""; // VIDEO or CHANNEL
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"richItemRenderer"][@"content"][@"videoRenderer"];
+                        dataType = @"videoRenderer";
+                        mediaType = @"VIDEO";
+                    }
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"playlistVideoRenderer"];
+                        dataType = @"playlistVideoRenderer";
+                        mediaType = @"VIDEO";
+                    }
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"videoWithContextRenderer"];
+                        dataType = @"videoWithContextRenderer";
+                        mediaType = @"VIDEO";
+                    }
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"richItemRenderer"][@"content"][@"videoWithContextRenderer"];
+                        dataType = @"videoWithContextRenderer";
+                        mediaType = @"VIDEO";
+                    }
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"compactChannelRenderer"];
+                        dataType = @"compactChannelRenderer";
+                        mediaType = @"CHANNEL";
+                    }
+                    if (!unparsedVideo) {
+                        continue;
+                    }
+                    NSLog(@"videocheck1");
+
+                    // NSLog(@"%@", unparsedVideo[@"videoId"] );
+
+                    if ([mediaType isEqualToString:@"VIDEO"]) {
+                        // is the video even available?
+                        if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
+                            if (!([unparsedVideo[@"videoInfo"][@"runs"] count] >= 2)) {
+                                NSLog(@"bad video");
+                                continue;
+                            }
+                        } else {
+                            if (!(unparsedVideo[@"publishedTimeText"][@"runs"][0])) {
+                                continue;
+                            }
+                        }
+
+                        // thumbnails
+                        NSMutableDictionary *thumbnails = [NSMutableDictionary new];
+                        NSDictionary *unparsedThumbnails = unparsedVideo[@"thumbnail"][@"thumbnails"];
+                        for (NSDictionary *unparsedThumbnail in unparsedThumbnails) {
+                            [thumbnails setObject:[NSURL URLWithString:unparsedThumbnail[@"url"]] forKey:[NSValue valueWithBytes:&(CGSize){[unparsedThumbnail[@"height"] intValue],[unparsedThumbnail[@"width"] intValue]} objCType:@encode(CGSize)]];
+                        }
+                        NSLog(@"videocheck2");
+
+                        // video length
+                        NSString *videoLengthText = unparsedVideo[@"lengthText"][@"runs"][0][@"text"];
+                        NSArray *videoLengthTextComponents = [[[videoLengthText componentsSeparatedByString:@":"] reverseObjectEnumerator] allObjects];
+                        long videoLengthInSeconds = 0;
+                        if (videoLengthTextComponents.count >= 1) { // seconds
+                            videoLengthInSeconds += [videoLengthTextComponents[0] intValue];
+                        }
+                        if (videoLengthTextComponents.count >= 2) { // minutes
+                            videoLengthInSeconds += [videoLengthTextComponents[1] intValue] * 60;
+                        }
+                        if (videoLengthTextComponents.count >= 3) { // hours
+                            videoLengthInSeconds += [videoLengthTextComponents[2] intValue] * 3600;
+                        }
+                        if (videoLengthTextComponents.count >= 4) { // days
+                            videoLengthInSeconds += [videoLengthTextComponents[3] intValue] * 86400;
+                        }
+                        NSLog(@"videocheck3");
+
+                        // for later me accessibility looks like
+                        // Pasis - Tonton Malele by Tonton Malele 35,908 views 5 days ago 4 minutes, 20 seconds
+                        // find a way to parse this!
+
+                        NSString *title = @"";
+                        if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                            title = unparsedVideo[@"headline"][@"runs"][0][@"text"];
+                        } else {
+                            title = unparsedVideo[@"title"][@"runs"][0][@"text"];
+                        }
+
+                        NSLog(@"videocheck4");
+
+                        NSString *uploaderDisplayName = unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"];
+                        if (!uploaderDisplayName) {
+                            uploaderDisplayName = body[@"header"][@"pageHeaderRenderer"][@"pageTitle"]; // channel videos
+                        }
+
+                        NSLog(@"videocheck5");
+
+                        NSArray *accessibilityParts = nil; 
+                        if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                            NSLog(@"accessiblity -> %@", unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"]);
+                            accessibilityParts = [unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                            for (NSString *part in accessibilityParts) {
+                                NSLog(@"accessibilityParts contains %@", part);
+                            }
+                        } else {
+                            NSLog(@"accessiblity -> %@", unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"]);
+                            accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                        }
+                        int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
+                        //                           title                                    by                 display name                                  index stuff
+                        NSLog(@"videocheck6");
+
+                        long views = 0;
+                        if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                            NSLog(@"views -> %@", [accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""]);
+                            views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
+                            // views = YTTextToNumber(unparsedVideo[@"shortViewCountText"][@"runs"][0][@"text"]); 
+                        } else if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
+                            // views = YTTextToNumber(unparsedVideo[@"videoInfo"][@"runs"][0][@"text"]); 
+                            views = [[accessibilityParts[removedParts + 1] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue];
+                        } else {
+                            views = [[[unparsedVideo[@"viewCountText"][@"runs"][0][@"text"] stringByReplacingOccurrencesOfString:@" views" withString:@""] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue]; // precise
+                        }
+
+                        NSLog(@"videocheck7");
+
+                        NSDate *uploadedDate = nil;
+                        NSString *uploadDateString = @"";
+                        for (int i = 0; i < [accessibilityParts count] - (removedParts + 3); i++) {
+                            uploadDateString = [NSString stringWithFormat:@"%@%@ ", uploadDateString, [accessibilityParts[removedParts + 3 + i] stringByReplacingOccurrencesOfString:@"," withString:@""]];
+                        }
+
+
+                        NSLog(@"maybe upload date = %@", uploadDateString);
+                        uploadedDate = YTTimeAgoToDate(uploadDateString);
+                        // if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
+                        //     // uploadedDate = YTTimeAgoToDate(unparsedVideo[@"videoInfo"][@"runs"][2][@"text"]);
+                        // } else {
+                        //     // uploadedDate = YTTimeAgoToDate(unparsedVideo[@"publishedTimeText"][@"runs"][0][@"text"]);
+                        // }
+
+                        NSLog(@"video");
+                        
+
+                        [output addObject:[[%c(YTVideo) alloc] initWithID:unparsedVideo[@"videoId"] 
+                            title:title
+                            description:@"" 
+                            uploaderDisplayName:uploaderDisplayName
+                            uploaderChannelID:unparsedVideo[@"shortBylineText"][@"runs"][0][@"navigationEndpoint"][@"browseEndpoint"][@"browseId"]
+                            uploadedDate:uploadedDate
+                            publishedDate:uploadedDate
+                            duration:videoLengthInSeconds 
+                            viewCount:views
+                            likesCount:0 
+                            dislikesCount:0 
+                            state:[[%c(YTVideoState) alloc] initWithCode:0 reason:@""] 
+                            streams:@[[NSURL URLWithString:@"https://example.com/badstream"]] 
+                            thumbnailURLs:thumbnails
+                            subtitlesTracksURL:[NSURL URLWithString:@"https://example.com/badsubtitles"]
+                            commentsAllowed:YES 
+                            commentsURL:[NSURL URLWithString:@"https://example.com/badcomments"]
+                            commentsCountHint:0
+                            relatedURL:[NSURL URLWithString:@"https://example.com/badrelatedurl"]
+                            claimed:NO
+                            monetized:NO 
+                            monetizedCountries:@[] 
+                            allowedCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"] 
+                            deniedCountries:@[] 
+                            categoryLabel:@"Gaming" // who knows!
+                            categoryTerm:@"Games"  // who knows!
+                            tags:@[]
+                            adultContent:NO 
+                            videoPro:nil
+                        ]];
+                    } else if ([mediaType isEqualToString:@"CHANNEL"]) {
+                        NSString *displayName = unparsedVideo[@"displayName"][@"runs"][0][@"text"];
+                        
+                        NSArray *accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
+                        int removedParts = [[displayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
+
+                        [output addObject:[[[%c(YTChannel) alloc] initWithDisplayName:displayName
+                            channelID:unparsedVideo[@"channelId"]
+                            summary:@"summary"
+                            updated:[NSDate date] // todo: we aren't provided this, but since this is way overkill, we can get the latest video as the date
+                            videoCount:YTTextToNumber(accessibilityParts[removedParts + 1])
+                            thumbnailURL:[NSURL URLWithString:[NSString stringWithFormat:@"https:%@", unparsedVideo[@"thumbnail"][@"thumbnails"][0][@"url"]]]
+                            subscribersCount:YTTextToNumber(unparsedVideo[@"videoCountText"][@"runs"][0][@"text"])
+                        ] autorelease]];
+                    }
                 }
             }
         }

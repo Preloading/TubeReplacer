@@ -22,38 +22,14 @@
 
 @end
 
+@interface YTGuideFeedController (TubeReplacer)
+-(void)addCategories;
+@end
+
 %hook YTGuideFeedController
 
-// handles subscriptions & categories
-- (void)updateViews:(id)a3 {
-	
-
-	YTServices *services = [self valueForKey:@"services_"];
-    YTUserAuthenticator *userAuthenticator = [services userAuthenticator];
-
-	// might be GTMOAuth2Authentication, but ID is probably more reliable
-	id authentication = [userAuthenticator authentication];
-	// NSString *userLang = [%c(YTUtils) userLanguageCode];
-	// YTGDataRequest *requestCategories = [%c(YTGDataRequest) requestForCategoriesWithLanguageCode:userLang];
-
-	
-	// todo: fuck with -[YTFeedController refresh] and get it to actually finish refreshing.
-	[self reset];
-	if ( authentication )
-	{
-		[self loadAccountThumbnail];
-		YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
-		// [self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:) extraRequest:requestCategories extraServiceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];
-		[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
-	}
-	// else
-	// {
-	// 	[self makeRequest:requestCategories serviceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];
-	// }
-
-	// give hardcoded categories :3
-	// NSLog(@"my country is %@", [%c(YTUtils) userCountryCode]);
-
+%new
+-(void)addCategories {
 	NSMutableArray *categories = [NSMutableArray array];
 	
 	// TODO: The category fetching relies on the language being set correctly to have them all be translated correctly, we should move this 
@@ -78,5 +54,48 @@
 	NSLog(@"categoriesCount_ = %@", [self valueForKey:@"categoriesCount_"]);
 	
 	NSLog(@"entryCount = %d", [self entryCount]);
+}
+
+// handles subscriptions & categories
+- (void)updateViews:(id)a3 {
+	
+
+	YTServices *services = [self valueForKey:@"services_"];
+    YTUserAuthenticator *userAuthenticator = [services userAuthenticator];
+
+	// might be GTMOAuth2Authentication, but ID is probably more reliable
+	id authentication = [userAuthenticator authentication];
+	// NSString *userLang = [%c(YTUtils) userLanguageCode];
+	// YTGDataRequest *requestCategories = [%c(YTGDataRequest) requestForCategoriesWithLanguageCode:userLang];
+
+	
+	// todo: fuck with -[YTFeedController refresh] and get it to actually finish refreshing.
+	[self reset];
+	if ( authentication )
+	{
+		[self loadAccountThumbnail];
+		YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
+		// [self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:) extraRequest:requestCategories extraServiceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];
+		[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
+	} else {
+		[self addCategories];
+	}
+	// else
+	// {
+	// 	[self makeRequest:requestCategories serviceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];
+	// }
+
+	// give hardcoded categories :3
+	// NSLog(@"my country is %@", [%c(YTUtils) userCountryCode]);
+
+	
+}
+
+-(void) handleEntries:(NSArray*)entries
+{
+	%orig;
+	if ([entries[0] isKindOfClass:[%c(YTSubscription) class]]) {
+		[self addCategories];
+	}
 }
 %end
