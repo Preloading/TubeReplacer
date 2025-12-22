@@ -1,5 +1,4 @@
 #include <Foundation/Foundation.h>
-#import <CoreGraphics/CoreGraphics.h>
 #include "appheaders.h"
 #include "../YoutubeRequestClient.h"
 

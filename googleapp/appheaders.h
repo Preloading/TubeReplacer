@@ -1039,3 +1039,21 @@ typedef struct _TBXMLElement {
 - (id)initWithUsername:(id)fp8 displayName:(id)fp12 age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
 
 @end
+
+
+@interface YTSubscription : NSObject
+- (id)updatedDate;
+- (id)publishedDate;
+- (unsigned long long)countHint;
+- (id)thumbnailURL;
+- (id)editURL;
+- (int)type;
+- (id)channelID;
+- (id)displayName;
+- (id)username;
+- (BOOL)isSupported;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithUsername:(id)fp8 displayName:(id)fp12 channelID:(id)fp16 type:(int)fp20 publishedDate:(id)fp24 updatedDate:(id)fp28 countHint:(unsigned long long)fp32 editURL:(id)fp40 thumbnailURL:(id)fp44;
+
+@end
