@@ -53,6 +53,14 @@
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 
++(NSData*)clientOnlyWithClient:(YoutubeClientType*)client {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
+}
+
 @end
 
 NSDate *RFC3339toNSDate(NSString *rfc3339DateTimeString) {

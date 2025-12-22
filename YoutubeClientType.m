@@ -20,11 +20,22 @@
     client.name      = @"mweb";
     client.nameProto = @"2";
     client.version   = @"2.20250224.01.00";
-    client.osName    = @"Android";
-    client.osVersion = @"11";
+    client.osName    = @"iOS";
+    client.osVersion = @"18";
     client.platform  = @"MOBILE";
     return client;
 }
+
+// +(YoutubeClientType*)webMobileClient {
+//     YoutubeClientType *client = [[YoutubeClientType alloc] init];
+//     client.name      = @"mweb";
+//     client.nameProto = @"2";
+//     client.version   = @"2.20250224.01.00";
+//     client.osName    = @"Android";
+//     client.osVersion = @"11";
+//     client.platform  = @"MOBILE";
+//     return client;
+// }
 
 +(YoutubeClientType*)androidClient {
     YoutubeClientType *client = [[YoutubeClientType alloc] init];

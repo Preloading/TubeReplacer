@@ -135,6 +135,7 @@
 - (NSString*)sid;
 - (NSString*)hsid;
 - (NSString*)ssid;
+- (NSString*)sidcc;
 - (NSString*)sapisid;
 - (NSString*)datasyncID;
 @end
@@ -167,6 +168,12 @@
 }
 
 %new
+-(NSString*)sidcc {
+    NSDictionary *parameters = [self parameters];
+    return [parameters objectForKey:@"SIDCC"];
+}
+
+%new
 -(NSString*)datasyncID {
     NSDictionary *parameters = [self parameters];
     return [parameters objectForKey:@"DATASYNC_ID"];
@@ -182,9 +189,10 @@
     NSString *hsid = [self hsid];
     NSString *ssid = [self ssid];
     NSString *sapisid = [self sapisid];
+    NSString *sidcc = [self sidcc];
     NSString *datasyncID = [self datasyncID];
 
-    return [hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length];
+    return [hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length] && [sidcc length];
 }
 
 -(id)persistenceResponseString
@@ -198,6 +206,7 @@
   [data setValue:[self hsid] forKey:@"HSID"];
   [data setValue:[self ssid] forKey:@"SSID"];
   [data setValue:[self sapisid] forKey:@"SAPISID"];
+  [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
@@ -234,6 +243,10 @@
 //   }
 //   else
 //   {
+  if ([[self datasyncID] length]) { // todo: this is here so it doesn't request after we got everything, since this is the same function used to renew access tokens.
+    return nil;
+  }
+
   GTMHTTPFetcher *httpFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
 //   }
   [httpFetcher setCommentWithFormat:@"fetch tokens for"];
@@ -294,6 +307,14 @@
             [self setParameters:params];
             [params release];
 
+            NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+
+            for (NSHTTPCookie *cookie in [storage cookiesForURL:[NSURL URLWithString:@"https://m.youtube.com"]]) {
+                if ([cookie.name isEqualToString:@"SIDCC"]) {
+                    [params setObject:cookie.value forKey:@"SIDCC"];
+                }
+            }
+
             [self setExpiresIn:@100000000];
           }
         }
@@ -323,6 +344,7 @@
   NSString *sid = [self sid];
   NSString *hsid = [self hsid];
   NSString *ssid = [self ssid];
+  NSString *sidcc = [self sidcc];
   NSString *sapisid = [self sapisid];
   NSString *datasyncID = [self datasyncID];
 
@@ -333,16 +355,16 @@
       goto requestOK;
   }
   errorCode = -1001;
-  if ([hsid length] && [ssid length] && [sapisid length] && [sid length] && [datasyncID length])
+  if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
   {
     if ( request )
     {
-        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
         [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
 
         // SAPISIDHASH
         long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [url scheme], [url host]];
+        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ https://www.youtube.com", datasyncID, unixTime, sapisid];
         NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
 
         NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
@@ -358,7 +380,7 @@
         }
         NSLog(@"Hashed SAPISID: %@", output);
         [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
-
+        [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
 
           
 
