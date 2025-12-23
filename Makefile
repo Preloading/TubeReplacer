@@ -1,4 +1,4 @@
-TARGET := iphone:clang:latest:6.0
+TARGET := iphone:clang:latest:5.0
 INSTALL_TARGET_PROCESSES = YouTube
 ARCHS := armv7
 

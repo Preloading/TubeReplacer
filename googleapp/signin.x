@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#import "signinpolyfil.h"
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 
@@ -577,3 +578,23 @@ done:
 // }
 
 // %end
+
+// TODO: check if polyfil isn't loaded already (._.)
+// JS Polyfils (i blame iOS 5!) Sadly, this makes iOS 5 kinda slow...
+%hook GTMOAuth2ViewControllerTouch
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    %orig;
+    
+    NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
+    if ([systemVersion floatValue] < 6.0) {
+      NSString *js = [[NSString alloc] initWithBytes:signinpolyfil_js 
+                                          length:signinpolyfil_js_len 
+                                        encoding:NSUTF8StringEncoding];
+      [webView stringByEvaluatingJavaScriptFromString:js];
+      [js release];
+    }
+}
+
+%end
