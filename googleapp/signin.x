@@ -360,6 +360,12 @@
   {
     if ( request )
     {
+        // NSHTTPCookieStorage *sharedHTTPCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        // NSArray *cookies = [sharedHTTPCookieStorage cookies];
+        // for (id cookie in cookies) {
+        //     [sharedHTTPCookieStorage deleteCookie:cookie];
+        // }
+        [request setHTTPShouldHandleCookies:NO];
         NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
         [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
 
@@ -480,7 +486,10 @@ done:
 }
 %end
 
-// %hook GTMHTTPFetcher
+%hook GTMHTTPFetcher
+-(void)addCookiesToRequest:(id)unk1 {
+  return;
+}
 
 // - (id)connection:(id)conn
 //  willSendRequest:(NSURLRequest *)request
@@ -503,7 +512,7 @@ done:
 //     return mutableReq;
 // }
 
-// %end
+%end
 
 %ctor {
   NSString *userAgent = [NSString stringWithFormat:@"%@/%@ (%@; U; CPU %@ %@ like Mac OS X; %@)",

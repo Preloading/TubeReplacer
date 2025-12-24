@@ -62,6 +62,9 @@
                 unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"playlistVideoListRenderer"][@"contents"]; // mobile Playlist
             }
             if (!unparsedVideos) {
+                unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"];
+            }
+            if (!unparsedVideos) {
                 unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][1][@"tabRenderer"][@"content"][@"richGridRenderer"][@"contents"]; // mobile channel videos
             }
             if (!unparsedVideos) {
@@ -96,6 +99,11 @@
                         unparsedVideo = unparsedVideoFull[@"compactChannelRenderer"];
                         dataType = @"compactChannelRenderer";
                         mediaType = @"CHANNEL";
+                    }
+                    if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"itemSectionRenderer"][@"contents"][0][@"compactVideoRenderer"];
+                        dataType = @"videoRenderer";
+                        mediaType = @"VIDEO";
                     }
                     if (!unparsedVideo) {
                         continue;
