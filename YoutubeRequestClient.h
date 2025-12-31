@@ -7,6 +7,7 @@
 +(NSData*)searchBody:(NSString*)query sortBy:(NSString*)sortBy uploadDateFilter:(NSString*)uploadDateFilter duration:(NSString*)duration hasCC:(BOOL)hasCC withClient:(YoutubeClientType*)client isChannelLookup:(BOOL)isChannelLookup;
 +(NSData*)clientOnlyWithClient:(YoutubeClientType*)client;
 +(NSData*)getVideoWithID:(NSString*)videoId;
++(NSData*)getVideoWithID:(NSString*)videoId withClient:(YoutubeClientType*)client;
 @end
 
 NSDate *YTTimeAgoToDate(NSString *timeAgo);

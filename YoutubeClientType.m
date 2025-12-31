@@ -15,6 +15,17 @@
     return client;
 }
 
+// apparently doesn't need POToken with HLS
++(YoutubeClientType*)webSafariClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"web";
+    client.nameProto = @"1";
+    client.version   = @"2.20250222.10.00";
+    client.useragent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Safari/605.1.15,gzip(gfe)";
+    client.screen    = @"WATCH_FULL_SCREEN";
+    return client;
+} 
+
 +(YoutubeClientType*)webMobileClient {
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"mweb";
@@ -46,6 +57,15 @@
     client.platform  = @"MOBILE";
     return client;
 }
++(YoutubeClientType*)tvEmbeddedClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"TVHTML5_SIMPLY_EMBEDDED_PLAYER";
+    client.version   = @"2.0";
+    client.osName    = @"Android";
+    client.osVersion = @"11";
+    client.platform  = @"TV";
+    return client;
+}
 
 -(NSDictionary*)makeContext {
     NSMutableDictionary *clientContext = [[NSMutableDictionary alloc] init];
@@ -61,6 +81,9 @@
     }
     if ([self platform]) {
         [clientContext setObject:[self platform] forKey:@"platform"];
+    }
+    if ([self useragent]) {
+        [clientContext setObject:[self useragent] forKey:@"userAgent"];
     }
     
     // there is more, but hopefully this will be fine for now?

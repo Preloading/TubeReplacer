@@ -8,7 +8,7 @@
 +(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
     // NSString *baseUrl = [@"https://gdata.youtube.com/feeds/api/" stringByAppendingFormat:@"videos/%@", videoId];
     // GTMURLBuilder *urlBuilder = [GTMURLBuilder builderWithString:baseUrl];
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
     NSURL *fullURL = [urlBuilder URL];
     return [self requestWithURL:fullURL authentication:nil body:[YoutubeRequestClient getVideoWithID:videoId]];//[YoutubeRequestClient browseBody:browseId params:params]];
 }
@@ -86,7 +86,7 @@
                   commentsAllowed:YES // rahhhhh
                   commentsURL:[NSURL URLWithString:@"https://example.com/commentsdummy/"]
                   commentsCountHint:0
-                  relatedURL:[NSURL URLWithString:data[@"microformat"][@"playerMicroformatRenderer"][@"canonicalUrl"]] //probably?  // does not work w/ android client
+                  relatedURL:data[@"videoDetails"][@"videoId"]
                   claimed:NO
                   monetized:NO 
                   monetizedCountries:@[] 

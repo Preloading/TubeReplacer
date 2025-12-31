@@ -9,10 +9,13 @@
 @property (nonatomic, strong) NSString *osName;
 @property (nonatomic, strong) NSString *osVersion;
 @property (nonatomic, strong) NSString *platform;
+@property (nonatomic, strong) NSString *useragent;
 
 // web
 +(YoutubeClientType*)webClient;
 // +(YoutubeRequestClient*)webEmbeddedPlayer;
++(YoutubeClientType*)webSafariClient;
++(YoutubeClientType*)tvEmbeddedClient;
 +(YoutubeClientType*)webMobileClient;
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;

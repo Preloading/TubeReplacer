@@ -34,8 +34,20 @@
 
 
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
-    
-    
+}
+
++(NSData*)getVideoWithID:(NSString*)videoId withClient:(YoutubeClientType*)client  {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+    [body setObject:videoId forKey:@"videoId"];
+    // [body setObject:@{
+    //     @"video_id":videoId
+    //     @"video"
+    // } forKey:@"watch_endpoint"];
+
+
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 
 +(NSData*)searchBody:(NSString*)query sortBy:(NSString*)sortBy uploadDateFilter:(NSString*)uploadDateFilter duration:(NSString*)duration hasCC:(BOOL)hasCC withClient:(YoutubeClientType*)client isChannelLookup:(BOOL)isChannelLookup {

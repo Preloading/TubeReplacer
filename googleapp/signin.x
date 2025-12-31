@@ -355,6 +355,21 @@
     if (isSecure)
       goto requestOK;
   }
+
+  NSString *query = [url query];
+  BOOL hasNoauth = NO;
+  for (NSString *pair in [query componentsSeparatedByString:@"&"]) {
+      NSArray *kv = [pair componentsSeparatedByString:@"="];
+      if (kv.count == 2 && [kv[0] isEqualToString:@"noauth"] && [kv[1] isEqualToString:@"1"]) {
+          hasNoauth = YES;
+          break;
+      }
+  }
+
+  if (hasNoauth) {
+    goto done;
+  }
+
   errorCode = -1001;
   if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
   {
@@ -372,7 +387,7 @@
         // SAPISIDHASH
         long unixTime = (long)[[NSDate date] timeIntervalSince1970];
         NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ https://www.youtube.com", datasyncID, unixTime, sapisid];
-        NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
+        // NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
 
         NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
         uint8_t digest[CC_SHA1_DIGEST_LENGTH];
@@ -385,7 +400,7 @@
         {
             [output appendFormat:@"%02x", digest[i]];
         }
-        NSLog(@"Hashed SAPISID: %@", output);
+        // NSLog(@"Hashed SAPISID: %@", output);
         [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
         [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
 
