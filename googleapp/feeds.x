@@ -123,6 +123,7 @@
             if (!unparsedVideos) {
                 unparsedVideos = body[@"contents"][@"twoColumnWatchNextResults"][@"secondaryResults"][@"secondaryResults"][@"results"][1][@"itemSectionRenderer"][@"contents"]; // desktop suggestions
             }
+            NSLog(@"youtube parsdign  of videos@!!!!");
             if (unparsedVideos) {
                 for (NSDictionary *unparsedVideoFull in unparsedVideos) {
                     // NSLog(@"unparsedVideo: %@", unparsedVideoFull);
@@ -185,10 +186,11 @@
                                 NSLog(@"bad video");
                                 continue;
                             }
-                        } if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                        } else if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
                             // suggestions  
                         } else {
                             if (!(unparsedVideo[@"publishedTimeText"][@"runs"][0])) {
+                                NSLog(@"bad video (2)");
                                 continue;
                             }
                         }
