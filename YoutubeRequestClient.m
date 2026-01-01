@@ -1,4 +1,6 @@
 #import "YoutubeRequestClient.h"
+#import "Protobuf.h"
+#import "base64/NSData+Base64.h"
 
 @implementation YoutubeRequestClient
 
@@ -17,8 +19,6 @@
 
 
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
-    
-    
 }
 
 
@@ -62,6 +62,43 @@
     }
     
 
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
+}
+
++(NSData*)commentsBody:(NSString*)videoId sortBy:(NSString*)sortBy withClient:(YoutubeClientType*)client {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+
+    // top, newest
+    uint64_t sortByVal = 0;
+    if ([sortBy isEqualToString:@"newest"]) {
+        sortByVal = 1;
+    }
+
+    ProtobufEncoder *enc = [[ProtobufEncoder alloc] init];
+    [enc writeMessageField:2 usingBlock:^(ProtobufEncoder *a){
+        [a writeStringField:2 string:videoId];
+    }];
+    [enc writeUInt64Field:3 value:6];
+    [enc writeMessageField:6 usingBlock:^(ProtobufEncoder *a){
+        // [a writeStringField:1 string:@""]; // cursor
+        [a writeMessageField:4 usingBlock:^(ProtobufEncoder *b){
+            [b writeStringField:4 string:videoId];
+            [b writeUInt64Field:6 value:sortByVal];
+        }];
+        [a writeUInt64Field:6 value:1];
+        [a writeStringField:8 string:@"engagement-panel-comments-section"];
+        
+    }];
+
+    NSData *out = [enc dataRepresentation];
+    NSString *b64 = [out base64EncodedString];
+    CFStringRef escaped = CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)b64, NULL, CFSTR(":/?#[]@!$&'()*+,;="), kCFStringEncodingUTF8);
+    NSString *urlEncodedB64 = (NSString *)escaped;
+
+    [body setObject:urlEncodedB64 forKey:@"continuation"];
+    
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 

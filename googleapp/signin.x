@@ -220,7 +220,6 @@
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
     NSLog(@"did finish selector: %@", NSStringFromSelector(didFinishSelector)); // -[GTMOAuth2SignIn auth:finishedWithFetcher:error:]
     NSLog(@"sid is: %@", [self sid]);
-    %log;
 
   NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com"]];
 

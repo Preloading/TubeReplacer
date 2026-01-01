@@ -84,7 +84,7 @@
                   thumbnailURLs:thumbnails
                   subtitlesTracksURL:captionURL
                   commentsAllowed:YES // rahhhhh
-                  commentsURL:[NSURL URLWithString:@"https://example.com/commentsdummy/"]
+                  commentsURL:data[@"videoDetails"][@"videoId"]
                   commentsCountHint:0
                   relatedURL:data[@"videoDetails"][@"videoId"]
                   claimed:NO
