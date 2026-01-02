@@ -85,7 +85,7 @@
             if ([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTCommentParser) class]]) {
                 unparsedData = bodyDict[@"onResponseReceivedEndpoints"][1][@"reloadContinuationItemsCommand"][@"continuationItems"];
             }
-            NSLog(@"unparsed data count -> %lu",(unsigned long) [unparsedData count]);
+            // NSLog(@"unparsed data count -> %lu",(unsigned long) [unparsedData count]);
             for (id i in unparsedData) {
                 if (i[@"continuationItemRenderer"]) {
                     continue;
@@ -192,12 +192,17 @@
                         continue;
                     }
 
-                    NSLog(@"videocheck1");
+                    #if VIDEOPRINTDBG 
+                        NSLog(@"videocheck1");
+                    #endif
 
                     // NSLog(@"%@", unparsedVideo[@"videoId"] );
 
                     if ([mediaType isEqualToString:@"VIDEO"]) {
-                        NSLog(@"videocheck2");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck2");
+                        #endif
+
                         // is the video even available?
                         if ([dataType isEqualToString:@"playlistVideoRenderer"])  {
                             if (!([unparsedVideo[@"videoInfo"][@"runs"] count] >= 2)) {
@@ -219,7 +224,9 @@
                         for (NSDictionary *unparsedThumbnail in unparsedThumbnails) {
                             [thumbnails setObject:[NSURL URLWithString:unparsedThumbnail[@"url"]] forKey:[NSValue valueWithBytes:&(CGSize){[unparsedThumbnail[@"height"] intValue],[unparsedThumbnail[@"width"] intValue]} objCType:@encode(CGSize)]];
                         }
-                        NSLog(@"videocheck3");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck3");
+                        #endif
 
                         // video length
                         NSString *videoLengthText = unparsedVideo[@"lengthText"][@"runs"][0][@"text"];
@@ -237,7 +244,9 @@
                         if (videoLengthTextComponents.count >= 4) { // days
                             videoLengthInSeconds += [videoLengthTextComponents[3] intValue] * 86400;
                         }
-                        NSLog(@"videocheck4");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck4");
+                        #endif
 
                         // for later me accessibility looks like
                         // Pasis - Tonton Malele by Tonton Malele 35,908 views 5 days ago 4 minutes, 20 seconds
@@ -250,14 +259,18 @@
                             title = unparsedVideo[@"title"][@"runs"][0][@"text"];
                         }
 
-                        NSLog(@"videocheck5");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck5");
+                        #endif
 
                         NSString *uploaderDisplayName = unparsedVideo[@"shortBylineText"][@"runs"][0][@"text"];
                         if (!uploaderDisplayName) {
                             uploaderDisplayName = body[@"header"][@"pageHeaderRenderer"][@"pageTitle"]; // channel videos
                         }
 
-                        NSLog(@"videocheck6");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck6");
+                        #endif
 
                         NSArray *accessibilityParts = nil; 
                         if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
@@ -272,7 +285,9 @@
                         }
                         int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.
                         //                           title                                    by                 display name                                  index stuff
-                        NSLog(@"videocheck7");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck7");
+                        #endif
 
                         long views = 0;
                         if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
@@ -286,7 +301,9 @@
                             views = [[[unparsedVideo[@"viewCountText"][@"runs"][0][@"text"] stringByReplacingOccurrencesOfString:@" views" withString:@""] stringByReplacingOccurrencesOfString:@"," withString:@""] intValue]; // precise
                         }
 
-                        NSLog(@"videocheck8");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck8");
+                        #endif
 
                         // this is *technically* wrong for suggestions, but it's not shown either way, so who cares!
                         NSDate *uploadedDate = nil;
@@ -304,7 +321,9 @@
                         //     // uploadedDate = YTTimeAgoToDate(unparsedVideo[@"publishedTimeText"][@"runs"][0][@"text"]);
                         // }
 
-                        NSLog(@"video");
+                        #if VIDEOPRINTDBG 
+                            NSLog(@"videocheck9");
+                        #endif
                         
 
                         [output addObject:[[%c(YTVideo) alloc] initWithID:unparsedVideo[@"videoId"] 
