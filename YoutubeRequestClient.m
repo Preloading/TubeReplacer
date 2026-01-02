@@ -12,7 +12,7 @@
     NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
 
     [body setObject:[client makeContext] forKey:@"context"];
-    [body setObject:browseId forKey:@"browse_id"];
+    [body setObject:browseId forKey:@"browseId"];
     if (params) {
         [body setObject:params forKey:@"params"];
     }

@@ -30,7 +30,7 @@
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"mweb";
     client.nameProto = @"2";
-    client.version   = @"2.20250224.01.00";
+    client.version   = @"2.20251222.01.00";
     client.osName    = @"iOS";
     client.osVersion = @"18";
     client.platform  = @"MOBILE";
@@ -84,6 +84,9 @@
     }
     if ([self useragent]) {
         [clientContext setObject:[self useragent] forKey:@"userAgent"];
+    }
+    if ([self configData]) {
+        [clientContext setObject:[self configData] forKey:@"configData"];
     }
     
     // there is more, but hopefully this will be fine for now?

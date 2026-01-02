@@ -15,6 +15,11 @@
    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"FEhistory" params:nil]];
 }
 
++(id)requestForMyWatchLaterVideosWithAuth:(id)authentication
+{
+   return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"VLWL" params:nil]];
+}
+
 %end
 
 %hook YTGDataService
@@ -27,4 +32,16 @@
     //cache:[self valueForKey:@"videoPageCache_"] 
     [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
+
+-(void)makeMyWatchLaterVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    //cache:[self valueForKey:@"videoPageCache_"] 
+    [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+}
+
+-(void)makeMyUploadedVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    //cache:[self valueForKey:@"videoPageCache_"] 
+    [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+}
 %end
+
+// https://studio.youtube.com/youtubei/v1/creator/list_creator_videos?alt=json

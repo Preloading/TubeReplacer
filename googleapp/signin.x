@@ -103,8 +103,6 @@
         NSLog(@"SSID: %@", [hsid value]);
         NSLog(@"SAPISID: %@", [sapisid value]);
 
-        
-
         // if ([sid isSecure])
         // {
         //     result = 0;
@@ -132,14 +130,7 @@
 
 %end
 
-@interface GTMOAuth2Authentication (TubeReplacer)
-- (NSString*)sid;
-- (NSString*)hsid;
-- (NSString*)ssid;
-- (NSString*)sidcc;
-- (NSString*)sapisid;
-- (NSString*)datasyncID;
-@end
+
 
 %hook GTMOAuth2Authentication
 
@@ -180,6 +171,13 @@
     return [parameters objectForKey:@"DATASYNC_ID"];
 }
 
+%new
+-(NSString*)channelID {
+    NSDictionary *parameters = [self parameters];
+    return [parameters objectForKey:@"CHANNEL_ID"];
+}
+
+
 // -(NSString*)userAgent {
 //     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
 // }
@@ -199,7 +197,7 @@
 -(id)persistenceResponseString
 {
 
-  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:9];
+  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:10];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
 
@@ -209,6 +207,7 @@
   [data setValue:[self sapisid] forKey:@"SAPISID"];
   [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
+  [data setValue:[self channelID] forKey:@"CHANNEL_ID"];
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
   [data setValue:@"me@preloading.dev" forKey:@"email"];
@@ -218,10 +217,7 @@
 }
 
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
-    NSLog(@"did finish selector: %@", NSStringFromSelector(didFinishSelector)); // -[GTMOAuth2SignIn auth:finishedWithFetcher:error:]
-    NSLog(@"sid is: %@", [self sid]);
-
-  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com"]];
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/feed/you?app=desktop"]];
 
    NSString *sid = [self sid];
   NSString *hsid = [self hsid];
@@ -297,23 +293,35 @@
           if (endRange.location != NSNotFound) {
             datasyncID = [htmlString substringWithRange:NSMakeRange(startPos, endRange.location - startPos)];
             NSLog(@"Extracted DATASYNC_ID: %@", datasyncID);
-            
-            // Store it in the authentication object if needed
+
             NSMutableDictionary *params = [[self parameters] mutableCopy];
             if (!params) {
               params = [NSMutableDictionary dictionary];
             }
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
-            [self setParameters:params];
-            [params release];
+
+            NSString *channelID = nil;
+            NSRange chanSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
+            if (chanSearch.location != NSNotFound) {
+              NSInteger chanStart = chanSearch.location + chanSearch.length;
+              NSRange chanEnd = [htmlString rangeOfString:@"\"" options:0 range:NSMakeRange(chanStart, [htmlString length] - chanStart)];
+              if (chanEnd.location != NSNotFound) {
+                channelID = [htmlString substringWithRange:NSMakeRange(chanStart, chanEnd.location - chanStart)];
+                NSLog(@"Extracted CHANNEL_ID: %@", channelID);
+                [params setObject:channelID forKey:@"CHANNEL_ID"];
+              }
+            }
 
             NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-            for (NSHTTPCookie *cookie in [storage cookiesForURL:[NSURL URLWithString:@"https://m.youtube.com"]]) {
+            for (NSHTTPCookie *cookie in [storage cookiesForURL:[NSURL URLWithString:@"https://www.youtube.com"]]) {
                 if ([cookie.name isEqualToString:@"SIDCC"]) {
                     [params setObject:cookie.value forKey:@"SIDCC"];
                 }
             }
+
+            [self setParameters:params];
+            [params release];
 
             [self setExpiresIn:@100000000];
           }
@@ -404,7 +412,7 @@
         [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
 
           
-
+        
       
     }
     [authArgs setError:nil];
@@ -428,6 +436,10 @@ done:
   }
   return [authArgs error] == nil;
 }
+
+// -(BOOL) shouldRefreshAccessToken {
+//   return 0;
+// }
 
 %end
 

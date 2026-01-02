@@ -4,7 +4,18 @@
 /// This is where we put headers that are used in more than one section/.x file
 
 @interface YTUserAuthenticator: NSObject
++ (id)standardGoogleAuthentication;
+- (void)unAuthenticate;
+- (BOOL)isAuthenticated;
 - (id)authentication;
+- (void)authenticateWithBlock:(id)fp;
+- (void)authenticateWithBlock:(id)fp1 failedBlock:(void)fp8 canceledBlock:(id)fp2;
+- (void)authenticateWithBlock:(id)fp1 showSignInFromRect:(void)fp8 inView:(struct CGRect)fp12;
+- (void)authenticateWithBlock:(id)fp1 failedBlock:(void)fp8 canceledBlock:(id)fp2 showSignInFromRect:(void)fp12 inView:(id)fp3;
+- (void)dealloc;
+- (void)setNavigation:(id)fp8;
+- (id)init;
+
 @end
 
 @interface YTServices : NSObject
@@ -1056,4 +1067,15 @@ typedef struct _TBXMLElement {
 - (void)dealloc;
 - (id)initWithUsername:(id)fp8 displayName:(id)fp12 channelID:(id)fp16 type:(int)fp20 publishedDate:(id)fp24 updatedDate:(id)fp28 countHint:(unsigned long long)fp32 editURL:(id)fp40 thumbnailURL:(id)fp44;
 
+@end
+
+/// EXTRA/MODIFIED HEADERS
+@interface GTMOAuth2Authentication (TubeReplacer)
+- (NSString*)sid;
+- (NSString*)hsid;
+- (NSString*)ssid;
+- (NSString*)sidcc;
+- (NSString*)sapisid;
+- (NSString*)datasyncID;
+- (NSString*)channelID;
 @end

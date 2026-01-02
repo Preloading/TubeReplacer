@@ -10,6 +10,7 @@
 @property (nonatomic, strong) NSString *osVersion;
 @property (nonatomic, strong) NSString *platform;
 @property (nonatomic, strong) NSString *useragent;
+@property (nonatomic, strong) NSDictionary *configData;
 
 // web
 +(YoutubeClientType*)webClient;
