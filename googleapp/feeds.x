@@ -105,6 +105,19 @@
         } else {
 
             NSArray *unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"shelfRenderer"][@"content"][@"horizontalListRenderer"][@"items"]; // mobile Gaming
+            if (!unparsedVideos) { // history
+                if ([body[@"responseContext"][@"serviceTrackingParams"][0][@"params"][0][@"value"] isEqualToString:@"FEhistory"]) {
+                    // History is wierd, it's seperated by the date.
+                    unparsedVideos = @[];
+                    for (NSDictionary *section in body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"]) {
+                        if (section[@"continuationItemRenderer"]) {
+                            continue; // we don't wanna do this to the pagination data
+                        }
+
+                        unparsedVideos = [unparsedVideos arrayByAddingObjectsFromArray:section[@"itemSectionRenderer"][@"contents"]];
+                    }
+                }
+            }
             if (!unparsedVideos) {
                 unparsedVideos = body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"][0][@"playlistVideoListRenderer"][@"contents"]; // mobile Playlist
             }
@@ -166,6 +179,11 @@
                         mediaType = @"VIDEO";
                     }
                     if (!unparsedVideo) {
+                        unparsedVideo = unparsedVideoFull[@"compactVideoRenderer"];
+                        dataType = @"videoRenderer";
+                        mediaType = @"VIDEO";
+                    }
+                    if (!unparsedVideo) {
                         continue;
                     }
 
@@ -186,14 +204,14 @@
                                 NSLog(@"bad video");
                                 continue;
                             }
-                        } else if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
+                        } //else if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
                             // suggestions  
-                        } else {
-                            if (!(unparsedVideo[@"publishedTimeText"][@"runs"][0])) {
-                                NSLog(@"bad video (2)");
-                                continue;
-                            }
-                        }
+                        // } else {
+                        //     if (!(unparsedVideo[@"publishedTimeText"][@"runs"][0])) {
+                        //         NSLog(@"bad video (2)");
+                        //         continue;
+                        //     }
+                        // }
 
                         // thumbnails
                         NSMutableDictionary *thumbnails = [NSMutableDictionary new];
@@ -305,7 +323,7 @@
                             thumbnailURLs:thumbnails
                             subtitlesTracksURL:[NSURL URLWithString:@"https://example.com/badsubtitles"]
                             commentsAllowed:YES 
-                            commentsURL:[NSURL URLWithString:@"https://example.com/badcomments"]
+                            commentsURL:unparsedVideo[@"videoId"] 
                             commentsCountHint:0
                             relatedURL:[NSURL URLWithString:@"https://example.com/badrelatedurl"]
                             claimed:NO

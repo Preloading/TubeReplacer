@@ -6,7 +6,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = TubeReplacerGoogle
 
-TubeReplacerGoogle_FILES = polyfill.x signin.x categories.x deviceauth.x frontfeed.x parsing.x getvideo.x channels.x channelfeed.x search.x feeds.x myprofile.x subscriptions.x homefeed.x suggestedvideos.x comments.x ../Protobuf.m ../YoutubeRequestClient.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
+TubeReplacerGoogle_FILES = polyfill.x signin.x categories.x deviceauth.x frontfeed.x parsing.x getvideo.x channels.x channelfeed.x search.x feeds.x myprofile.x subscriptions.x homefeed.x suggestedvideos.x comments.x accountfeeds.x ../Protobuf.m ../YoutubeRequestClient.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 TubeReplacerGoogleb_CFLAGS = -fno-objc-arc
 
 before-all::
