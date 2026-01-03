@@ -93,7 +93,6 @@
                     }
                 }
                 if (!unparsedData) {
-                    NSLog(@"why do it no worky :(");
                     return [[%c(YTPage) alloc] initWithEntries:@[] totalResults:0 entriesPerPage:0 startIndex:0 nextURL:nil previousURL:nil]; 
                 }
             }
