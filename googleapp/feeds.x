@@ -1,7 +1,10 @@
 #include <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
-#include "appheaders.h"
-#include "../YoutubeRequestClient.h"
+#import "appheaders.h"
+#import "../YoutubeRequestClient.h"
+
+// Enable debug prints for video parsing
+#define VIDEOPRINTDBG 1
 
 
 @interface YTPage : NSObject
@@ -228,6 +231,10 @@
                         //         continue;
                         //     }
                         // }
+
+                        if (unparsedVideo[@"upcomingEventData"]) {
+                            continue; // the video is "upcoming", which means it doesn't actually exist, and does not have all parameters needed. Lets ignore it.
+                        }
 
                         // thumbnails
                         NSMutableDictionary *thumbnails = [NSMutableDictionary new];
