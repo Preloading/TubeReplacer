@@ -20,6 +20,12 @@
    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"VLWL" params:nil]];
 }
 
++(id)requestForMyPurchases:(id)authentication
+{
+    [%c(GIPToast) showToast:@"do you really think youtube would actually let you watch any of your purchases on a decade old phone?" forDuration:4];
+    return %orig;
+}
+
 %end
 
 %hook YTGDataService
