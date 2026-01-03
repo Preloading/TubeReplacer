@@ -26,6 +26,11 @@
     return %orig;
 }
 
++(id)requestForMyUploadedVideosWithAuth:(id)authentication
+{
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:[authentication channelID] params:@"EgZ2aWRlb3PyBgQKAjoA"]];
+}
+
 %end
 
 %hook YTGDataService
