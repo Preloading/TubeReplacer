@@ -85,6 +85,9 @@
             if ([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTCommentParser) class]]) {
                 unparsedData = bodyDict[@"onResponseReceivedEndpoints"][1][@"reloadContinuationItemsCommand"][@"continuationItems"];
             }
+            if ([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTPlaylistParser) class]]) {
+                unparsedData = bodyDict[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][2][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"];
+            }
             // NSLog(@"unparsed data count -> %lu",(unsigned long) [unparsedData count]);
             for (id i in unparsedData) {
                 if (i[@"continuationItemRenderer"]) {
@@ -92,7 +95,7 @@
                 }
                 YTTBParser *parser = [self valueForKey:@"entryParser_"];
                 NSError *parseError = nil;
-                id entry = [parser parseElement:@{@"i":i,@"all":unparsedData} error:&parseError];
+                id entry = [parser parseElement:@{@"i":i,@"all":bodyDict} error:&parseError];
                 if ( parseError ) {
                     NSLog(@"fuck");
                     break;

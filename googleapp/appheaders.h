@@ -1079,3 +1079,23 @@ typedef struct _TBXMLElement {
 - (NSString*)datasyncID;
 - (NSString*)channelID;
 @end
+
+@interface YTPlaylistParser : YTTBParser
+- (id)parseElement:(id)fp8 error:(id *)fp12;
+@end
+
+@interface YTPlaylist : NSObject
+- (BOOL)isPrivate;
+- (unsigned int)size;
+- (id)editURL;
+- (id)contentURL;
+- (id)thumbnailURLs;
+- (id)updated;
+- (id)authorDisplayName;
+- (id)summary;
+- (id)title;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithTitle:(id)fp8 summary:(id)fp12 authorDisplayName:(id)fp16 updated:(id)fp20 thumbnailURLs:(id)fp24 contentURL:(id)fp28 editURL:(id)fp32 size:(unsigned int)fp36 isPrivate:(BOOL)fp40;
+
+@end

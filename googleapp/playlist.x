@@ -7,7 +7,7 @@
 
 +(id)requestForMyPlaylistVideosWithURL:(id)url authentication:(id)authentication
 {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"FEplaylist_aggregation" params:nil]];
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"penis; if this shows anywhere, please let me know!!" params:nil]];
 }
 
 %end
@@ -16,9 +16,33 @@
 -(void)makeMyPlaylistsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     //cache:[self valueForKey:@"videoPageCache_"] 
 
-    NSLog(@"dear god just give it to me please playlists: %@", [[request authentication] channelID]);
-    [self makePOSTRequest:[%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:nil body:[YoutubeRequestClient browseBody:@"FEplaylist_aggregation" params:nil]] 
-        withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+    [self makePOSTRequest:[%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:nil body:[YoutubeRequestClient browseBody:[[request authentication] channelID] params:@"EglwbGF5bGlzdHPyBgQKAkIA"]] 
+        withParser:[self valueForKey:@"playlistPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
 
 %end
+
+%hook YTPlaylistParser 
+
+-(id)parseElement:(NSDictionary*)body error:(NSError *)onError {
+    NSDictionary *data = body[@"i"][@"compactPlaylistRenderer"];
+    NSMutableDictionary *thumbnails = [NSMutableDictionary new];
+    NSDictionary *unparsedThumbnails = data[@"thumbnail"][@"thumbnails"];
+    for (NSDictionary *unparsedThumbnail in unparsedThumbnails) {
+        [thumbnails setObject:[NSURL URLWithString:unparsedThumbnail[@"url"]] forKey:[NSValue valueWithBytes:&(CGSize){[unparsedThumbnail[@"height"] intValue],[unparsedThumbnail[@"width"] intValue]} objCType:@encode(CGSize)]];
+    }
+
+    return [[[%c(YTPlaylist) alloc] initWithTitle:data[@"title"][@"runs"][0][@"text"]
+        summary:@""
+        authorDisplayName:@""//body[@"all"][@"header"][@"pageHeaderRenderer"][@"pageTitle"]
+        updated:[NSDate date] // :(
+        thumbnailURLs:thumbnails
+        contentURL:[NSURL URLWithString:@"https://example.com/contenturl"]
+        editURL:[NSURL URLWithString:@"https://example.com/editurl"]
+        size:[data[@"videoCountShortText"][@"runs"][0][@"text"] intValue]
+        isPrivate:[data[@"shortBylineText"][@"runs"][0][@"text"] isEqualToString:@"Private"] // i think that technically if the channel of "Private" has a playlist, this *might* break, but realistically idc
+    ] autorelease];
+}
+
+%end
+
