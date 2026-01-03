@@ -86,7 +86,16 @@
                 unparsedData = bodyDict[@"onResponseReceivedEndpoints"][1][@"reloadContinuationItemsCommand"][@"continuationItems"];
             }
             if ([[self valueForKey:@"entryParser_"] isKindOfClass:[%c(YTPlaylistParser) class]]) {
-                unparsedData = bodyDict[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][2][@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"];
+                for (NSDictionary *tab in bodyDict[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"]) {
+                    if ([tab[@"tabRenderer"][@"title"] isEqualToString:@"Playlists"]) {
+                        unparsedData = tab[@"tabRenderer"][@"content"][@"sectionListRenderer"][@"contents"][0][@"itemSectionRenderer"][@"contents"];
+                        break;
+                    }
+                }
+                if (!unparsedData) {
+                    NSLog(@"why do it no worky :(");
+                    return [[%c(YTPage) alloc] initWithEntries:@[] totalResults:0 entriesPerPage:0 startIndex:0 nextURL:nil previousURL:nil]; 
+                }
             }
             // NSLog(@"unparsed data count -> %lu",(unsigned long) [unparsedData count]);
             for (id i in unparsedData) {

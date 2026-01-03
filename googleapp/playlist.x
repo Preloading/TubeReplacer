@@ -5,9 +5,15 @@
 
 %hook YTGDataRequest
 
+// my play
 +(id)requestForMyPlaylistVideosWithURL:(id)url authentication:(id)authentication
 {
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"penis; if this shows anywhere, please let me know!!" params:nil]];
+}
+
++(id)requestForPlaylistsWithChannelID:(id)channelId
+{
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:nil body:[YoutubeRequestClient browseBody:channelId params:@"EglwbGF5bGlzdHPyBgQKAkIA"]];
 }
 
 %end
@@ -18,6 +24,12 @@
 
     [self makePOSTRequest:[%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:nil body:[YoutubeRequestClient browseBody:[[request authentication] channelID] params:@"EglwbGF5bGlzdHPyBgQKAkIA"]] 
         withParser:[self valueForKey:@"playlistPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+}
+
+-(void)makePlaylistsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    //cache:[self valueForKey:@"videoPageCache_"] 
+
+    [self makePOSTRequest:request withParser:[self valueForKey:@"playlistPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
 
 %end
@@ -34,7 +46,7 @@
 
     return [[[%c(YTPlaylist) alloc] initWithTitle:data[@"title"][@"runs"][0][@"text"]
         summary:@""
-        authorDisplayName:@""//body[@"all"][@"header"][@"pageHeaderRenderer"][@"pageTitle"]
+        authorDisplayName:body[@"all"][@"header"][@"pageHeaderRenderer"][@"pageTitle"]
         updated:[NSDate date] // :(
         thumbnailURLs:thumbnails
         contentURL:[NSURL URLWithString:@"https://example.com/contenturl"]
