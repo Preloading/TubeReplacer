@@ -54,5 +54,3 @@
     [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
 %end
-
-// https://studio.youtube.com/youtubei/v1/creator/list_creator_videos?alt=json

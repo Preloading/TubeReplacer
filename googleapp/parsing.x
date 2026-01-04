@@ -88,3 +88,34 @@
     }
 }
 %end
+
+// cache to POST requests.
+
+%hook YTGDataService
+
+- (void)makePOSTRequest:(YTGDataRequest *)request
+             withParser:(id)parser
+          responseBlock:(id)responseBlock
+             errorBlock:(id)errorBlock
+{
+    void (^originalResponseBlock)(id) = [responseBlock copy];
+
+    void (^wrappedResponseBlock)(id) = ^(id response) {
+
+        if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
+            [[self valueForKey:@"subscriptionCache_"] setValue:@100000 forKey:@"countLimit_"]; // if they have this many subs, the app is going to die anyways. 
+            [self cacheSubscriptionsFromSubscriptionPage:response];
+        }
+
+        // Call the original block
+        if (originalResponseBlock) {
+            originalResponseBlock(response);
+        }
+    };
+
+    // Call the original method with the wrapped block
+    %orig(request, parser, wrappedResponseBlock, errorBlock);
+}
+
+
+%end

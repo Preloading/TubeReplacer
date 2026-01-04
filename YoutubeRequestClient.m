@@ -102,6 +102,24 @@
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 
++(NSData*)addComment:(NSString*)videoId commentText:(NSString*)commentText withClient:(YoutubeClientType*)client {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+    [body setObject:commentText forKey:@"commentText"];
+
+    ProtobufEncoder *enc = [[ProtobufEncoder alloc] init];
+    [enc writeStringField:2 string:videoId];
+    NSData *out = [enc dataRepresentation];
+    NSString *b64 = [out base64EncodedString];
+    CFStringRef escaped = CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)b64, NULL, CFSTR(":/?#[]@!$&'()*+,;="), kCFStringEncodingUTF8);
+    NSString *urlEncodedB64 = (NSString *)escaped;
+
+    [body setObject:urlEncodedB64 forKey:@"createCommentParams"];
+    
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
+}
+
 +(NSData*)clientOnlyWithClient:(YoutubeClientType*)client {
     NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
 

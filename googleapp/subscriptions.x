@@ -13,6 +13,7 @@
 
 -(void)makeMySubscriptionsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock
 {
+    NSLog(@"subscription cache is class of %@", NSStringFromClass([[self valueForKey:@"subscriptionPageParser_"] class]));
     [self makePOSTRequest:request withParser:[self valueForKey:@"subscriptionPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
 }
 
@@ -47,3 +48,5 @@
 }
 
 %end
+
+// we shouldn't need to implement /feeds/api/users/default/subscriptions?channel-id=, because our caching.

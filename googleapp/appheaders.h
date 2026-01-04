@@ -193,6 +193,14 @@
 - (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
 - (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
 - (void)makeVideoRequestWithVideoID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
+
+- (void)authenticationDidChange:(id)fp8;
+- (void)evictElementsFromCache:(id)fp8 forRequest:(id)fp12;
+- (void)clearSubscriptionDependentCaches;
+- (void)cacheSubscriptionsFromSubscriptionPage:(id)fp8;
+- (void)cacheVideosFromPurchasePage:(id)fp8;
+- (void)cacheVideosFromEventPage:(id)fp8;
+- (void)cacheVideosFromVideoPage:(id)fp8;
 @end
 
 @interface GTMURLBuilder : NSObject
@@ -1097,5 +1105,21 @@ typedef struct _TBXMLElement {
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithTitle:(id)fp8 summary:(id)fp12 authorDisplayName:(id)fp16 updated:(id)fp20 thumbnailURLs:(id)fp24 contentURL:(id)fp28 editURL:(id)fp32 size:(unsigned int)fp36 isPrivate:(BOOL)fp40;
+
+@end
+
+@interface YTCache : NSObject
+
+- (id)valueWrapperForKeyWrapper:(id)fp8;
+- (void)evict;
+- (void)removeAllObjects;
+- (void)removeObjectForKey:(id)fp8;
+- (id)objectForKey:(id)fp8;
+- (void)setObject:(id)fp8 forKey:(id)fp12;
+- (id)allKeys;
+- (void)dealloc;
+- (id)init;
+- (id)initWithCountLimit:(unsigned int)fp8;
+- (id)initWithExpirationInterval:(double)fp8 countLimit:(unsigned int)fp16;
 
 @end

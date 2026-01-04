@@ -4,7 +4,7 @@
 #import "../YoutubeRequestClient.h"
 
 // Enable debug prints for video parsing
-#define VIDEOPRINTDBG 1
+// #define VIDEOPRINTDBG 1
 
 
 @interface YTPage : NSObject
@@ -292,13 +292,15 @@
 
                         NSArray *accessibilityParts = nil; 
                         if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
-                            NSLog(@"accessiblity -> %@", unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"]);
+                            // NSLog(@"accessiblity -> %@", unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"]);
                             accessibilityParts = [unparsedVideo[@"headline"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
-                            for (NSString *part in accessibilityParts) {
-                                NSLog(@"accessibilityParts contains %@", part);
-                            }
+                            // for (NSString *part in accessibilityParts) {
+                            //     NSLog(@"accessibilityParts contains %@", part);
+                            // }
                         } else {
+                            #if VIDEOPRINTDBG 
                             NSLog(@"accessiblity -> %@", unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"]);
+                            #endif
                             accessibilityParts = [unparsedVideo[@"title"][@"accessibility"][@"accessibilityData"][@"label"] componentsSeparatedByString:@" "];
                         }
                         int removedParts = [[title componentsSeparatedByString:@" "] count] + 1 + [[uploaderDisplayName componentsSeparatedByString:@" "] count] -1; // This includes stuff like the title and diplay name which we already have, and since they can have spaces, we just filter them out here.

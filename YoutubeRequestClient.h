@@ -9,6 +9,7 @@
 +(NSData*)getVideoWithID:(NSString*)videoId;
 +(NSData*)getVideoWithID:(NSString*)videoId withClient:(YoutubeClientType*)client;
 +(NSData*)commentsBody:(NSString*)videoId sortBy:(NSString*)sortBy withClient:(YoutubeClientType*)client;
++(NSData*)addComment:(NSString*)videoId commentText:(NSString*)commentText withClient:(YoutubeClientType*)client;
 @end
 
 NSDate *YTTimeAgoToDate(NSString *timeAgo);
