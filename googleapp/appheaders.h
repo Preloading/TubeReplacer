@@ -18,25 +18,6 @@
 
 @end
 
-@interface YTServices : NSObject
-- (void)didReceiveMemoryWarning;
-- (id)settings;
-- (id)reachability;
-- (id)resourceLoader;
-- (id)userAuthenticator;
-- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
-- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
-- (id)videoStatsServiceWithSource:(int)fp8;
-- (id)subtitlesService;
-- (id)suggestService;
-- (id)searchHistory;
-- (id)musicService;
-- (id)imageService;
-- (id)gDataService;
-- (id)adTrackingServiceForAd:(id)fp8;
-- (id)adsService;
-@end
-
 @interface YTFeedController : NSObject
 - (void)setRefreshExtraRequest:(id)fp8;
 - (id)refreshExtraRequest;
@@ -193,7 +174,7 @@
 - (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
 - (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
 - (void)makeVideoRequestWithVideoID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
-
+- (void)makeChannelRequestWithID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
 - (void)authenticationDidChange:(id)fp8;
 - (void)evictElementsFromCache:(id)fp8 forRequest:(id)fp12;
 - (void)clearSubscriptionDependentCaches;
@@ -201,6 +182,25 @@
 - (void)cacheVideosFromPurchasePage:(id)fp8;
 - (void)cacheVideosFromEventPage:(id)fp8;
 - (void)cacheVideosFromVideoPage:(id)fp8;
+@end
+
+@interface YTServices : NSObject
+- (void)didReceiveMemoryWarning;
+- (id)settings;
+- (id)reachability;
+- (id)resourceLoader;
+- (id)userAuthenticator;
+- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
+- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
+- (id)videoStatsServiceWithSource:(int)fp8;
+- (id)subtitlesService;
+- (id)suggestService;
+- (id)searchHistory;
+- (id)musicService;
+- (id)imageService;
+- (YTGDataService*)gDataService;
+- (id)adTrackingServiceForAd:(id)fp8;
+- (id)adsService;
 @end
 
 @interface GTMURLBuilder : NSObject
@@ -1121,5 +1121,62 @@ typedef struct _TBXMLElement {
 - (id)init;
 - (id)initWithCountLimit:(unsigned int)fp8;
 - (id)initWithExpirationInterval:(double)fp8 countLimit:(unsigned int)fp16;
+
+@end
+
+@interface YTVideoInfoTableController_iPhone : NSObject
+- (void)loadWithChannelID:(id)fp8;
+- (void)loadMusicVideoDataForVideo:(id)fp8;
+- (int)tableRowFromIndexPath:(id)fp8;
+- (id)artistInfoCellWithTableView:(id)fp8;
+- (float)tableView:(id)fp8 heightForRowAtIndexPath:(id)fp12;
+- (void)tableView:(id)fp8 didSelectRowAtIndexPath:(id)fp12;
+- (id)tableView:(id)fp8 willSelectRowAtIndexPath:(id)fp12;
+- (id)tableView:(id)fp8 cellForRowAtIndexPath:(id)fp12;
+- (int)tableView:(id)fp8 numberOfRowsInSection:(int)fp12;
+- (void)setBranding:(id)fp8;
+- (void)setVideo:(id)fp8;
+- (void)dealloc;
+- (id)initWithTableView:(id)fp8 services:(id)fp12 navigation:(id)fp16;
+
+@end
+
+@interface YTSubscribeSwitchController : NSObject
+- (int)subscribeState;
+- (id)subscribeSwitch;
+- (void)restoreToSubscribedState;
+- (void)didPressSubscribeSwitch:(id)fp8;
+- (void)unsubscribe:(id)fp8;
+- (void)subscribe:(id)fp8;
+- (void)loadSubscriptionWithChannelID:(id)fp8;
+- (void)didReceiveSubscriptionChangeNotification:(id)fp8;
+- (void)setSubscribeState:(int)fp8;
+- (void)setSubscribeSwitch:(id)fp8;
+- (void)dealloc;
+- (id)init;
+- (id)initWithChannelID:(id)fp8 navigation:(id)fp12 services:(id)fp16;
+- (id)initWithChannelID:(id)fp8 subscription:(id)fp12 navigation:(id)fp16 services:(id)fp20;
+
+@end
+
+@interface YTPage : NSObject
+{
+    NSArray *entries_;
+    int totalResults_;
+    int entriesPerPage_;
+    int startIndex_;
+    NSURL *nextURL_;
+    NSURL *previousURL_;
+}
+
+- (id)previousURL;
+- (id)nextURL;
+- (int)startIndex;
+- (int)entriesPerPage;
+- (int)totalResults;
+- (id)entries;
+// - (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithEntries:(id)fp8 totalResults:(int)fp12 entriesPerPage:(int)fp16 startIndex:(int)fp20 nextURL:(id)fp24 previousURL:(id)fp28;
 
 @end

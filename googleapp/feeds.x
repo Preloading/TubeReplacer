@@ -7,28 +7,6 @@
 // #define VIDEOPRINTDBG 1
 
 
-@interface YTPage : NSObject
-{
-    NSArray *entries_;
-    int totalResults_;
-    int entriesPerPage_;
-    int startIndex_;
-    NSURL *nextURL_;
-    NSURL *previousURL_;
-}
-
-- (id)previousURL;
-- (id)nextURL;
-- (int)startIndex;
-- (int)entriesPerPage;
-- (int)totalResults;
-- (id)entries;
-// - (id)copyWithZone:(struct _NSZone *)fp8;
-- (void)dealloc;
-- (id)initWithEntries:(id)fp8 totalResults:(int)fp12 entriesPerPage:(int)fp16 startIndex:(int)fp20 nextURL:(id)fp24 previousURL:(id)fp28;
-
-@end
-
 // this is a big boy
 // handles parsing of alllll the feeds we can get.
 

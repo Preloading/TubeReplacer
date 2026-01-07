@@ -34,7 +34,7 @@
                 subs = YTTextToNumber(data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"metadata"][@"contentMetadataViewModel"][@"metadataRows"][1][@"metadataParts"][0][@"text"][@"content"]);
             }
         }
-        return [[[%c(YTChannel) alloc] initWithDisplayName:data[@"header"][@"pageHeaderRenderer"][@"pageTitle"]
+        YTChannel *channel = [[[%c(YTChannel) alloc] initWithDisplayName:data[@"header"][@"pageHeaderRenderer"][@"pageTitle"]
             channelID:data[@"metadata"][@"channelMetadataRenderer"][@"externalId"]
             summary:data[@"metadata"][@"channelMetadataRenderer"][@"description"]
             updated:[NSDate date] // todo: we aren't provided this, but since this is way overkill, we can get the latest video as the date
@@ -42,6 +42,8 @@
             thumbnailURL:[NSURL URLWithString:data[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"image"][@"decoratedAvatarViewModel"][@"avatar"][@"avatarViewModel"][@"image"][@"sources"][0][@"url"]] 
             subscribersCount:subs
         ] autorelease];
+
+        return channel;
     } else {
         // welp. this 100% needs error handling: todo: fix this
         NSLog(@"ytchannel != NSDictionary, crash and burning time!");
