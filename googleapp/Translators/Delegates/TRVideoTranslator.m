@@ -17,11 +17,9 @@
 }
 
 - (BOOL)canTranslateJSON:(NSDictionary *)json {
-    // Player response format
     if ([json objectForKey:@"videoDetails"]) {
         return YES;
     }
-    // Feed/search item formats (direct or nested)
     if ([json objectForKey:@"videoRenderer"] ||
         [json objectForKey:@"compactVideoRenderer"] ||
         [json objectForKey:@"gridVideoRenderer"] ||
@@ -30,12 +28,11 @@
         [json objectForKey:@"lockupViewModel"]) {
         return YES;
     }
-    // Nested in richItemRenderer
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"] ||
         [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"]) {
         return YES;
     }
-    // Nested in itemSectionRenderer
+    
     if ([TRJSONUtils dictFromJSON:json keyPath:@"itemSectionRenderer.contents[0].compactVideoRenderer"]) {
         return YES;
     }
@@ -51,7 +48,6 @@
         return nil;
     }
     
-    // Detect format and delegate
     if ([json objectForKey:@"videoDetails"]) {
         return [self translatePlayerResponse:json error:error];
     }
@@ -72,11 +68,9 @@
         return nil;
     }
     
-    // Thumbnails
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:json keyPath:@"videoDetails.thumbnail.thumbnails"];
     NSDictionary *thumbnails = [TRJSONUtils thumbnailsFromArray:thumbArray];
     
-    // Streams
     NSMutableArray *ytStreams = [NSMutableArray array];
     NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
     for (NSDictionary *format in formats) {
@@ -92,7 +86,6 @@
         }
     }
     
-    // Available countries
     NSMutableArray *availableCountries = [NSMutableArray array];
     NSArray *countries = [TRJSONUtils arrayFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.availableCountries"];
     for (NSString *country in countries) {
@@ -101,24 +94,19 @@
         }
     }
     
-    // Dates
     NSString *uploadDateStr = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.uploadDate"];
     NSString *publishDateStr = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.publishDate"];
     NSDate *uploadDate = [TRJSONUtils dateFromRFC3339:uploadDateStr];
     NSDate *publishDate = [TRJSONUtils dateFromRFC3339:publishDateStr];
     
-    // Duration and counts
     NSInteger duration = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.lengthSeconds"];
     NSInteger viewCount = [TRJSONUtils intFromJSON:json keyPath:@"videoDetails.viewCount"];
     NSInteger likesCount = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.likeCount"];
     
-    // Category
     NSString *category = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.category"];
     
-    // Create video state
     id videoState = [[NSClassFromString(@"YTVideoState") alloc] initWithCode:0 reason:@""];
     
-    // Create YTVideo
     id video = [[NSClassFromString(@"YTVideo") alloc] 
         initWithID:videoId
         title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
@@ -282,7 +270,6 @@
         uploadDate = [NSDate date];
     }
     
-    // Create video state
     id videoState = [[NSClassFromString(@"YTVideoState") alloc] initWithCode:0 reason:@""];
     
     // Default allowed countries
@@ -333,7 +320,6 @@
 #pragma mark - Helpers
 
 - (NSDictionary *)unwrapVideoData:(NSDictionary *)json {
-    // Try each known wrapper format
     NSDictionary *result = [json objectForKey:@"videoRenderer"];
     if (result) return result;
     

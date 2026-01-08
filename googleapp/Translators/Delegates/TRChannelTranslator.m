@@ -16,11 +16,9 @@
 }
 
 - (BOOL)canTranslateJSON:(NSDictionary *)json {
-    // Full channel page
     if ([TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer"]) {
         return YES;
     }
-    // Compact channel from search
     if ([json objectForKey:@"compactChannelRenderer"]) {
         return YES;
     }
@@ -39,7 +37,6 @@
         return nil;
     }
     
-    // Detect format
     if ([TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer"]) {
         return [self translateChannelPage:json error:error];
     }
@@ -50,7 +47,6 @@
 #pragma mark - Full Channel Page
 
 - (id)translateChannelPage:(NSDictionary *)json error:(NSError **)error {
-    // Extract channel ID
     NSString *channelId = [TRJSONUtils stringFromJSON:json keyPath:@"metadata.channelMetadataRenderer.externalId"];
     
     if (!channelId) {
@@ -61,13 +57,9 @@
         return nil;
     }
     
-    // Title
     NSString *title = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.pageTitle"];
-    
-    // Description
     NSString *description = [TRJSONUtils stringFromJSON:json keyPath:@"metadata.channelMetadataRenderer.description"];
     
-    // Subscriber and video counts from metadata rows
     long subs = -1;
     long videoCount = -1;
     
@@ -93,12 +85,10 @@
         }
     }
     
-    // Thumbnail
     NSString *thumbnailUrl = [TRJSONUtils stringFromJSON:json 
         keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.image.decoratedAvatarViewModel.avatar.avatarViewModel.image.sources[0].url"];
     NSURL *thumbnailURL = thumbnailUrl ? [NSURL URLWithString:thumbnailUrl] : nil;
     
-    // Create YTChannel
     id channel = [[[NSClassFromString(@"YTChannel") alloc] 
         initWithDisplayName:title ?: @""
         channelID:channelId
@@ -115,7 +105,6 @@
 #pragma mark - Compact Channel (Search/Feed)
 
 - (id)translateCompactChannel:(NSDictionary *)json error:(NSError **)error {
-    // Unwrap from container
     NSDictionary *channelData = [json objectForKey:@"compactChannelRenderer"];
     if (!channelData) {
         channelData = [json objectForKey:@"channelRenderer"];
@@ -133,24 +122,20 @@
         return nil;
     }
     
-    // Display name
     NSString *displayName = [TRJSONUtils stringFromJSON:channelData keyPath:@"displayName.runs[0].text"];
     if (!displayName) {
         displayName = [TRJSONUtils stringFromJSON:channelData keyPath:@"title.simpleText"];
     }
     
-    // Thumbnail
     NSString *thumbUrl = [TRJSONUtils stringFromJSON:channelData keyPath:@"thumbnail.thumbnails[0].url"];
     if (thumbUrl && ![thumbUrl hasPrefix:@"http"]) {
         thumbUrl = [@"https:" stringByAppendingString:thumbUrl];
     }
     NSURL *thumbnailURL = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
-    
-    // Subscriber count from videoCountText (YouTube uses this field for subs in compact view)
+
     NSString *subsText = [TRJSONUtils stringFromJSON:channelData keyPath:@"videoCountText.runs[0].text"];
     long subs = [TRJSONUtils numberFromText:subsText];
     
-    // Video count from accessibility
     long videoCount = 0;
     NSString *accessibilityLabel = [TRJSONUtils stringFromJSON:channelData 
                                                        keyPath:@"title.accessibility.accessibilityData.label"];

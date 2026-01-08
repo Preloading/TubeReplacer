@@ -8,8 +8,6 @@
 #import "../appheaders.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-// YTPlaylist is declared in appheaders.h
-
 @implementation TRPlaylistTranslator
 
 #pragma mark - TRJSONTranslatorProtocol
@@ -38,7 +36,6 @@
         return nil;
     }
     
-    // Get context if available
     NSDictionary *context = [json objectForKey:@"all"];
     return [self translateCompactPlaylist:json withContext:context error:error];
 }
@@ -58,17 +55,14 @@
         }
         return nil;
     }
-    
-    // Title
+
     NSString *title = [TRJSONUtils stringFromJSON:data keyPath:@"title.runs[0].text"];
-    
-    // Author from context (channel page header)
+
     NSString *author = @"";
     if (context) {
         author = [TRJSONUtils stringFromJSON:context keyPath:@"header.pageHeaderRenderer.pageTitle"];
     }
     
-    // Thumbnails
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:data keyPath:@"thumbnail.thumbnails"];
     NSMutableDictionary *thumbnails = [NSMutableDictionary dictionary];
     for (NSDictionary *thumb in thumbArray) {
@@ -88,14 +82,11 @@
         }
     }
     
-    // Playlist ID
     NSString *playlistId = [data objectForKey:@"playlistId"];
     
-    // Video count
     NSString *countText = [TRJSONUtils stringFromJSON:data keyPath:@"videoCountShortText.runs[0].text"];
     int videoCount = countText ? [countText intValue] : 0;
     
-    // Privacy check
     NSString *bylineText = [TRJSONUtils stringFromJSON:data keyPath:@"shortBylineText.runs[0].text"];
     BOOL isPrivate = [bylineText isEqualToString:@"Private"];
     

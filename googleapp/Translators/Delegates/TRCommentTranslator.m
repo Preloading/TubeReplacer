@@ -7,7 +7,6 @@
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
 
-// Forward declare YTComment to avoid -Wobjc-method-access
 @interface YTComment : NSObject
 - (id)initWithTitle:(id)title content:(id)content authorDisplayName:(id)displayName publishedDate:(id)date;
 @end
@@ -44,7 +43,6 @@
         return nil;
     }
     
-    // Detect format
     if ([json objectForKey:@"i"]) {
         return [self translateFeedComment:json error:error];
     }
@@ -66,7 +64,6 @@
         return nil;
     }
     
-    // Build comment text from runs
     NSMutableString *commentText = [NSMutableString string];
     NSArray *runs = [TRJSONUtils arrayFromJSON:commentData keyPath:@"contentText.runs"];
     for (NSDictionary *run in runs) {
@@ -76,14 +73,10 @@
         }
     }
     
-    // Author
     NSString *username = [TRJSONUtils stringFromJSON:commentData keyPath:@"authorText.runs[0].text"];
-    
-    // Published date
     NSString *timeAgo = [TRJSONUtils stringFromJSON:commentData keyPath:@"publishedTimeText.runs[0].text"];
     NSDate *publishedDate = [TRJSONUtils dateFromTimeAgo:timeAgo];
     
-    // Create YTComment
     id comment = [[[NSClassFromString(@"YTComment") alloc] 
         initWithTitle:username
         content:commentText

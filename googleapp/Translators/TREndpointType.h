@@ -18,4 +18,4 @@ typedef NS_ENUM(NSInteger, TREndpointType) {
     TREndpointTypeSearch
 };
 
-#endif /* TREndpointType_h */
+#endif

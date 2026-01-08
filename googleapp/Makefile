@@ -24,14 +24,15 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	comments.x \
 	accountfeeds.x \
 	playlist.x \
+	likes.x \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
-	Translators/TRVideoTranslator.m \
-	Translators/TRChannelTranslator.m \
-	Translators/TRFeedTranslator.m \
-	Translators/TRCommentTranslator.m \
-	Translators/TRSubscriptionTranslator.m \
-	Translators/TRPlaylistTranslator.m \
+	Translators/Delegates/TRVideoTranslator.m \
+	Translators/Delegates/TRChannelTranslator.m \
+	Translators/Delegates/TRFeedTranslator.m \
+	Translators/Delegates/TRCommentTranslator.m \
+	Translators/Delegates/TRSubscriptionTranslator.m \
+	Translators/Delegates/TRPlaylistTranslator.m \
 	Translators/TRRequestBuilder.m \
 	../Protobuf.m ../YoutubeRequestClient.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	

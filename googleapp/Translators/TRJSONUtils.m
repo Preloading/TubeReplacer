@@ -1,7 +1,7 @@
 // TRJSONUtils.m
 // TubeReplacer
 //
-// Safe JSON access utilities implementation
+// Utilities duh
 
 #import "TRJSONUtils.h"
 #import <CoreGraphics/CoreGraphics.h>

@@ -82,6 +82,22 @@
     return [self serializeBody:body];
 }
 
++ (NSData *)nextBodyWithVideoId:(NSString *)videoId 
+                         client:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+    
+    if (videoId) {
+        [body setObject:videoId forKey:@"videoId"];
+    }
+    
+    // racyCheckOk and contentCheckOk allow mature content
+    [body setObject:@YES forKey:@"racyCheckOk"];
+    [body setObject:@YES forKey:@"contentCheckOk"];
+    
+    return [self serializeBody:body];
+}
+
 #pragma mark - Search Requests
 
 + (NSData *)searchBodyWithQuery:(NSString *)query
@@ -215,6 +231,31 @@
     
     // Transfer ownership to ARC-compatible autorelease
     return [(NSString *)escaped autorelease];
+}
+
+#pragma mark - Like/Unlike Requests
+
++ (NSData *)likeBodyWithVideoId:(NSString *)videoId 
+                         client:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+    
+    if (videoId) {
+        // The target structure for like endpoint
+        NSDictionary *target = @{
+            @"videoId": videoId
+        };
+        [body setObject:target forKey:@"target"];
+    }
+    
+    return [self serializeBody:body];
+}
+
++ (NSData *)unlikeBodyWithVideoId:(NSString *)videoId 
+                           client:(YoutubeClientType *)client {
+    
+    // Same body structure as like
+    return [self likeBodyWithVideoId:videoId client:client];
 }
 
 @end

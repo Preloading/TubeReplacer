@@ -45,6 +45,12 @@
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 
                            client:(YoutubeClientType *)client;
 
+/**
+ * Build body for next endpoint (video UI info including likes)
+ */
++ (NSData *)nextBodyWithVideoId:(NSString *)videoId 
+                         client:(YoutubeClientType *)client;
+
 #pragma mark - Search Requests
 
 /**
@@ -77,5 +83,19 @@
 + (NSData *)commentsBodyWithVideoId:(NSString *)videoId 
                              sortBy:(NSString *)sortBy 
                              client:(YoutubeClientType *)client;
+
+#pragma mark - Like/Unlike Requests
+
+/**
+ * Build body for liking a video
+ */
++ (NSData *)likeBodyWithVideoId:(NSString *)videoId 
+                         client:(YoutubeClientType *)client;
+
+/**
+ * Build body for removing a like from a video
+ */
++ (NSData *)unlikeBodyWithVideoId:(NSString *)videoId 
+                           client:(YoutubeClientType *)client;
 
 @end
