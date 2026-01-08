@@ -12,6 +12,11 @@
   return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false" authentication:authentication body:[YoutubeRequestClient browseBody:channelId params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" withClient:[YoutubeClientType webMobileClient]]];
 //   return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" authentication:authentication body:[YoutubeRequestClient browseBody:@"FEchannels" params:nil]];
 }
+
++(id)requestToSubscribeWithChannelID:(NSString*)channelId authentication:(id)authentication {
+  return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/subscription/subscribe?prettyPrint=false" authentication:authentication body:[YoutubeRequestClient subscribeToChannelId:channelId withClient:[YoutubeClientType webMobileClient]]];
+}
+
 %end
 
 %hook YTGDataService
@@ -60,9 +65,11 @@
             ] autorelease];
             NSLog(@"YTSubscriptionParser");
             return sub;
-        } else {
+        } else if (body[@"header"]) {
+            // is the user subbed?
             // header.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.acheader.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.actionsRows[0].actions[0].subscribeButtonViewModel.subscribeButtonContent.subscribeStatetionsRows[0].actions[0].subscribeButtonViewModel.subscribeButtonContent.subscribeState
-            if (body[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"actions"][@"flexibleActionsViewModel"][@"acheader"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"actions"][@"flexibleActionsViewModel"][@"actionsRows"][0][@"actions"][0][@"subscribeButtonViewModel"][@"subscribeButtonContent"][@"subscribeStatetionsRows"][0][@"actions"][0][@"subscribeButtonViewModel"][@"subscribeButtonContent"][@"subscribeState"][@"subscribed"]) {
+            NSLog(@"is subscribed to channel? -> %@", body[@"frameworkUpdates"][@"entityBatchUpdate"][@"mutations"][0][@"payload"][@"subscriptionStateEntity"][@"subscribed"]);
+            if ([body[@"frameworkUpdates"][@"entityBatchUpdate"][@"mutations"][0][@"payload"][@"subscriptionStateEntity"][@"subscribed"] isEqual:@1]) {
                 NSLog(@"subscribed!");
                 NSString *thumbnail = [NSString stringWithFormat:@"%@", body[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"image"][@"decoratedAvatarViewModel"][@"avatar"][@"avatarViewModel"][@"image"][@"sources"][0][@"url"]];
                 YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:body[@"header"][@"pageHeaderRenderer"][@"pageTitle"] // ugh
@@ -82,6 +89,19 @@
             // NSLog(@"channel name -> %@", body[@"header"][@"pageHeaderRenderer"][@"pageTitle"]);
             // onError = [NSError errorWithDomain:@"something i odnt know" code:1 userInfo:nil]; // help i dont know how to do that.
             return nil;
+        } else {
+            // if you just subscribed:
+            YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:nil
+                displayName:@"is this visible?"
+                channelID:body[@"actions"][2][@"updateSubscribeButtonAction"][@"channelId"]
+                type:1
+                publishedDate:[NSDate date]
+                updatedDate:[NSDate date]
+                countHint:6969420
+                editURL:[NSURL URLWithString:@"https://example.com/subediturl"]
+                thumbnailURL:[NSURL URLWithString:@"https://example.com/thumbnailurl"]
+            ] autorelease];
+            return sub;
         }
         //    
     } else {

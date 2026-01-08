@@ -128,6 +128,16 @@
     return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
 }
 
++(NSData*)subscribeToChannelId:(NSString*)channelId withClient:(YoutubeClientType*)client {
+    NSMutableDictionary *body = [[NSMutableDictionary alloc] init];
+
+    [body setObject:[client makeContext] forKey:@"context"];
+    [body setObject:@"EgIIAxgAIgtxQ0dUX0NLR2dGRQ%3D%3D" forKey:@"params"];
+    [body setObject:@[channelId] forKey:@"channelIds"];
+
+    return [NSJSONSerialization dataWithJSONObject:body options:0 error:nil]; // TODO: NSJSON will never run on iOS 4 and below, we should switch this to SBJson
+}
+
 @end
 
 NSDate *RFC3339toNSDate(NSString *rfc3339DateTimeString) {
