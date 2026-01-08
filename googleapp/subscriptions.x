@@ -68,7 +68,6 @@
         } else if (body[@"header"]) {
             // is the user subbed?
             // header.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.acheader.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.actionsRows[0].actions[0].subscribeButtonViewModel.subscribeButtonContent.subscribeStatetionsRows[0].actions[0].subscribeButtonViewModel.subscribeButtonContent.subscribeState
-            NSLog(@"is subscribed to channel? -> %@", body[@"frameworkUpdates"][@"entityBatchUpdate"][@"mutations"][0][@"payload"][@"subscriptionStateEntity"][@"subscribed"]);
             if ([body[@"frameworkUpdates"][@"entityBatchUpdate"][@"mutations"][0][@"payload"][@"subscriptionStateEntity"][@"subscribed"] isEqual:@1]) {
                 NSLog(@"subscribed!");
                 NSString *thumbnail = [NSString stringWithFormat:@"%@", body[@"header"][@"pageHeaderRenderer"][@"content"][@"pageHeaderViewModel"][@"image"][@"decoratedAvatarViewModel"][@"avatar"][@"avatarViewModel"][@"image"][@"sources"][0][@"url"]];
@@ -91,8 +90,8 @@
             return nil;
         } else {
             // if you just subscribed:
-            YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:nil
-                displayName:@"is this visible?"
+            YTSubscription *sub = [[[%c(YTSubscription) alloc] initWithUsername:nil // TODO: this gets used in the UI, there HAS to be a better way to do this.
+                displayName:@"todo: fix it"
                 channelID:body[@"actions"][2][@"updateSubscribeButtonAction"][@"channelId"]
                 type:1
                 publishedDate:[NSDate date]
