@@ -1,22 +1,34 @@
+// suggestedvideos.x
+// TubeReplacer
+//
+// Related/suggested videos hooks
+
 #import <Foundation/Foundation.h>
 #include "appheaders.h"
-#include "general.h"
-#include "../YoutubeRequestClient.h"
+#include "Translators/TRTranslators.h"
+
+#pragma mark - Request Building
 
 %hook YTGDataRequest 
 
 +(id)requestForRelatedVideosWithURL:(id)videoId safeSearch:(id)safeSearch {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] authentication:nil body:[YoutubeRequestClient getVideoWithID:videoId withClient:[YoutubeClientType webMobileClient]]];//[YoutubeRequestClient browseBody:browseId params:params]];
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                                                 client:[YoutubeClientType webMobileClient]]];
 }
 
 %end
 
+#pragma mark - Request Dispatch
+
 %hook YTGDataService
 
-// convert from GET to POST
 -(void)makeRelatedVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    //cache:[self valueForKey:@"videoPageCache_"] 
-  [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+    [self makePOSTRequest:request 
+               withParser:[self valueForKey:@"videoPageParser_"] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
 }
 
 %end
