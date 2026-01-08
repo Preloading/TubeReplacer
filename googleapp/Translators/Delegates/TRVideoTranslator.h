@@ -32,4 +32,10 @@
             withContext:(NSDictionary *)context 
                   error:(NSError **)error;
 
+/**
+ * Enhance an existing video with like data from /next response.
+ * Extracts like count and like status, sets them on the video object.
+ */
+- (void)enhanceVideo:(id)video withNextResponse:(NSDictionary *)nextData;
+
 @end

@@ -6,6 +6,7 @@
 
 #import "TRVideoTranslator.h"
 #import "TRJSONUtils.h"
+#import <objc/runtime.h>
 #import "../appheaders.h"
 
 @implementation TRVideoTranslator
@@ -362,6 +363,73 @@
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"]) return @"videoRenderer";
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"]) return @"videoWithContextRenderer";
     return @"unknown";
+}
+
+#pragma mark - Video Enhancement (/next response)
+
+- (void)enhanceVideo:(id)video withNextResponse:(NSDictionary *)nextData {
+    if (!video || !nextData) return;
+    
+    @try {
+        // Navigate to the like button data in /next response
+        NSDictionary *contents = [nextData objectForKey:@"contents"];
+        NSDictionary *scwnr = [[contents objectForKey:@"singleColumnWatchNextResults"] objectForKey:@"results"];
+        NSDictionary *results = [scwnr objectForKey:@"results"];
+        NSArray *resultContents = [results objectForKey:@"contents"];
+        
+        if (![resultContents isKindOfClass:[NSArray class]]) return;
+
+        for (NSDictionary *item in resultContents) {
+            NSDictionary *metadataSection = [item objectForKey:@"slimVideoMetadataSectionRenderer"];
+            if (!metadataSection) continue;
+            
+            NSArray *metaContents = [metadataSection objectForKey:@"contents"];
+            if (![metaContents isKindOfClass:[NSArray class]]) continue;
+            
+            for (NSDictionary *metaItem in metaContents) {
+                NSDictionary *actionBar = [metaItem objectForKey:@"slimVideoActionBarRenderer"];
+                if (!actionBar) continue;
+                
+                NSArray *buttons = [actionBar objectForKey:@"buttons"];
+                if (![buttons isKindOfClass:[NSArray class]]) continue;
+                
+                for (NSDictionary *buttonItem in buttons) {
+                    NSDictionary *smbr = [buttonItem objectForKey:@"slimMetadataButtonRenderer"];
+                    if (!smbr) continue;
+                    
+                    NSDictionary *sldbvm = [[smbr objectForKey:@"button"] objectForKey:@"segmentedLikeDislikeButtonViewModel"];
+                    if (!sldbvm) continue;
+                    
+                    // Extract like status
+                    NSDictionary *likeButtonVM = [sldbvm objectForKey:@"likeButtonViewModel"];
+                    NSDictionary *likeStatusEntity = [likeButtonVM objectForKey:@"likeStatusEntity"];
+                    NSString *status = [likeStatusEntity objectForKey:@"likeStatus"];
+                    
+                    if (status) {
+                        objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                    }
+
+                    // Extract like count
+                    NSDictionary *toggleButtonVM = [[[likeButtonVM objectForKey:@"likeButtonViewModel"]
+                                                    objectForKey:@"toggleButtonViewModel"]
+                                                    objectForKey:@"toggleButtonViewModel"];
+                    NSDictionary *defaultButton = [[toggleButtonVM objectForKey:@"defaultButtonViewModel"] objectForKey:@"buttonViewModel"];
+                    
+                    NSString *title = [defaultButton objectForKey:@"title"];
+                    if (title) {
+                        long likes = [TRJSONUtils numberFromText:title];
+                        if (likes > 0) {
+                            [video setValue:[NSNumber numberWithLong:likes] forKey:@"likesCount_"];
+                        }
+                    }
+                    
+                    return; // Found it
+                }
+            }
+        }
+    } @catch (NSException *e) {
+        NSLog(@"TRVideoTranslator: Failed to enhance video: %@", e);
+    }
 }
 
 @end

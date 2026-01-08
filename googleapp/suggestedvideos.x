@@ -14,8 +14,8 @@
 +(id)requestForRelatedVideosWithURL:(id)videoId safeSearch:(id)safeSearch {
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
                  authentication:nil 
-                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:[YoutubeClientType webMobileClient]]];
+                           body:[TRRequestBuilder nextBodyWithVideoId:videoId 
+                                                               client:[YoutubeClientType webMobileClient]]];
 }
 
 %end

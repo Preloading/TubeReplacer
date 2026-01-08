@@ -18,35 +18,12 @@
         ? @"https://www.youtube.com/youtubei/v1/like/like" 
         : @"https://www.youtube.com/youtubei/v1/like/removelike";
     
-    // Build request body
     NSData *body = [TRRequestBuilder likeBodyWithVideoId:videoId 
                                                   client:[YoutubeClientType webMobileClient]];
     
     return [self requestWithURLString:endpoint 
                        authentication:authentication 
                                  body:body];
-}
-
-%end
-
-#pragma mark - Like UI State
-
-%hook YTVideoActionBarController
-
--(id)initWithActionBarView:(YTVideoActionBarView *)actionBarView video:(id)video navigation:(id)navigation services:(id)services {
-    self = %orig;
-    
-    if (self && video) {
-        // Check for associated like status stored by getvideo.x
-        NSString *status = objc_getAssociatedObject(video, "TRLikeStatus");
-        
-        if (status && [status isEqualToString:@"LIKE"]) {
-            // Set the Like button (index 0) to selected (blue)
-            [actionBarView setBarButton:0 selected:YES];
-        }
-    }
-    
-    return self;
 }
 
 %end

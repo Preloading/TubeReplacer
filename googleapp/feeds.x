@@ -2,13 +2,11 @@
 // TubeReplacer
 //
 // Main page/feed parser - delegates to translators for parsing
-// This file only contains hook code, all parsing logic is in translators
 
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
 
-// YTPageParser interface for new method
 @interface YTPageParser : NSObject
 +(id)parseLockupViewModelVideo:(NSDictionary*)unparsedVideo;
 -(id)parseSpecializedFeed:(NSDictionary *)bodyDict 
