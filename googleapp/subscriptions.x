@@ -37,6 +37,20 @@
   }
 }
 
+-(void)makeUnsubscribeRequestWithSubscription:(NSString*)channelId authentication:(id)authentication responseBlock:(id)responseBlock errorBlock:(id)errorBlock
+{
+  id request; // r0
+
+  request = [%c(YTGDataRequest) requestToUnsubscribeWithSubscription:channelId authentication:authentication];
+  [self makePOSTRequest:request withParser:nil responseBlock:^(id response) {
+    [self clearSubscriptionDependentCaches];
+    // v3 = *(void **)(block->superSelf + 28);
+    [[self valueForKey:@"subscriptionPageCache_"] setObject:[NSNull null] forKey:channelId];
+    // [%c(YTNotificationCenter) notifySubscriptionChange: subscribed:0];
+    // (*(void (**)(void))(block->responseBlock + 12))();
+  } errorBlock:errorBlock];
+}
+
 -(void)makeMySubscriptionsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock
 {
     [self makePOSTRequest:request withParser:[self valueForKey:@"subscriptionPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
@@ -60,7 +74,7 @@
                 publishedDate:[NSDate date]
                 updatedDate:[NSDate date]
                 countHint:6969420
-                editURL:[NSURL URLWithString:@"https://example.com/subediturl"]
+                editURL:channelID
                 thumbnailURL:[NSURL URLWithString:thumbnail]
             ] autorelease];
             NSLog(@"YTSubscriptionParser");
@@ -78,7 +92,7 @@
                     publishedDate:[NSDate date]
                     updatedDate:[NSDate date]
                     countHint:6969420
-                    editURL:[NSURL URLWithString:@"https://example.com/subediturl"]
+                    editURL:body[@"contents"][@"singleColumnBrowseResultsRenderer"][@"tabs"][0][@"tabRenderer"][@"browseEndpoint"][@"browseId"]
                     thumbnailURL:[NSURL URLWithString:thumbnail]
                 ] autorelease];
                 return sub;
@@ -97,7 +111,7 @@
                 publishedDate:[NSDate date]
                 updatedDate:[NSDate date]
                 countHint:6969420
-                editURL:[NSURL URLWithString:@"https://example.com/subediturl"]
+                editURL:body[@"actions"][2][@"updateSubscribeButtonAction"][@"channelId"]
                 thumbnailURL:[NSURL URLWithString:@"https://example.com/thumbnailurl"]
             ] autorelease];
             return sub;
