@@ -34,7 +34,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	Translators/Delegates/TRSubscriptionTranslator.m \
 	Translators/Delegates/TRPlaylistTranslator.m \
 	Translators/TRRequestBuilder.m \
-	../Protobuf.m ../YoutubeRequestClient.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
+	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
 
