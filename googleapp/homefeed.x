@@ -1,47 +1,43 @@
-// FEsubscriptions
+// homefeed.x
+// TubeReplacer
+//
+// Home feed and subscription uploads hooks
 
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
-#include "../YoutubeRequestClient.h"
+#include "Translators/TRTranslators.h"
 
-/// Logged out standard fields
-
-// -[YTVideoParser parseElement:error:]
-
-// TO LOOK AT
-// -[YTVideoParser parseElement:error:]
-
-
-// called at -[YTCategoryViewController_iPhone loadView]
-
+#pragma mark - Request Dispatch
 
 %hook YTGDataService
 
-// uploads only
 -(void)makeMySubscriptionUploadsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-  %log;
-  [self makePOSTRequest:request withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+    [self makePOSTRequest:request 
+               withParser:[self valueForKey:@"videoPageParser_"] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
 }
 
 %end
+
+#pragma mark - Request Building
 
 %hook YTGDataRequest
 
-// uploads only
-+(id)requestForMySubscriptionUploadsWithAuth:(id)authentication safeSearch:(BOOL)isSafeSearch
-{
-  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"FEsubscriptions" params:nil]];
++(id)requestForMySubscriptionUploadsWithAuth:(id)authentication safeSearch:(BOOL)isSafeSearch {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder browseBodyWithId:@"FEsubscriptions" 
+                                                            params:nil 
+                                                            client:[YoutubeClientType webMobileClient]]];
 }
 
-// highlights
-+(id)requestForMySubscriptionUpdatesWithAuth:(id)authentication
-{
-  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] authentication:authentication body:[YoutubeRequestClient browseBody:@"FEwhat_to_watch" params:nil]];
++(id)requestForMySubscriptionUpdatesWithAuth:(id)authentication {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder browseBodyWithId:@"FEwhat_to_watch" 
+                                                            params:nil 
+                                                            client:[YoutubeClientType webMobileClient]]];
 }
 
 %end
-
-
-/// -[YTPageParser parseElement:error:]
-/// 
-

@@ -1,6 +1,11 @@
+// search.x
+// TubeReplacer
+//
+// Search video and channel hooks
+
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
-#include "../YoutubeRequestClient.h"
+#include "Translators/TRTranslators.h"
 
 @interface YTSearchFilters : NSObject {
     int sortBy_;
@@ -9,80 +14,60 @@
     BOOL CC_;
 }
 
-- (void)setCC:(BOOL)fp8;
+- (void)setCC:(BOOL)cc;
 - (BOOL)hasCC;
-- (void)setDuration:(int)fp8;
+- (void)setDuration:(int)duration;
 - (id)duration;
-- (void)setUploadDate:(int)fp8;
+- (void)setUploadDate:(int)uploadDate;
 - (id)uploadDate;
-- (void)setSortBy:(int)fp8;
+- (void)setSortBy:(int)sortBy;
 - (id)sortBy;
-- (id)copyWithZone:(struct _NSZone *)fp8;
+- (id)copyWithZone:(struct _NSZone *)zone;
 
 @end
 
+#pragma mark - Request Building
 
 %hook YTGDataRequest
-+(id)requestForVideosWithSearchQuery:(NSString*) query languageCode:(NSString*)language filters:(YTSearchFilters*)filters safeSearch:(NSString*)safeSearchLevel
-{
-  // NSString *baseUrl; // r0
-  // GTMURLBuilder *urlBuilder; // r5
-  // id sortFilter; // r0
-  // NSString *uploadDateFilter; // r0
-  // NSString duration; // r0
-  // id hasCC; // r0
-  // NSURL *fullURL; // r0
 
-  // baseUrl = [@"https://gdata.youtube.com/feeds/api/" stringByAppendingFormat:@"videos"];
-  // urlBuilder = +[GTMURLBuilder builderWithString:](baseUrl);
-  // -[GTMURLBuilder setValue:forParameter:](urlBuilder, query, CFSTR("q"));
-  // -[GTMURLBuilder setValue:forParameter:](urlBuilder, language, CFSTR("hl"));
-  // if ( filters )
-  // {
-  //   sortFilter = -[YTSearchFilters sortBy](filters);
-  //   -[YTGDataRequest setSortByFilter:toURLBuilder:](self, sortFilter, urlBuilder);
-  //   uploadDateFilter = -[YTSearchFilters uploadDate](filters);
-  //   -[YTGDataRequest setUploadDateFilter:toURLBuilder:](
-  //     self,
-  //     uploadDateFilter,
-  //     urlBuilder);
-  //   duration = -[YTSearchFilters duration](filters);
-  //   -[YTGDataRequest setDurationFilter:toURLBuilder:](self, duration, urlBuilder);
-  //   hasCC = (id)-[YTSearchFilters hasCC](filters);
-  //   -[YTGDataRequest setCCFilter:toURLBuilder:](self, hasCC, urlBuilder);
-  // }
-  // -[YTGDataRequest setQueryParametersToURLBuilder:withSafeSearch:](
-  //   self,
-  //   urlBuilder,
-  //   safeSearchLevel);.
-  if (filters) {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
-      sortBy:[filters sortBy] uploadDateFilter:nil duration:[filters duration] hasCC:[filters hasCC] withClient:[YoutubeClientType webMobileClient] isChannelLookup:NO]];
-  } else {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
-      sortBy:nil uploadDateFilter:nil duration:nil hasCC:false withClient:[YoutubeClientType webMobileClient] isChannelLookup:NO]];
-  }
-  
-
++(id)requestForVideosWithSearchQuery:(NSString*)query 
+                        languageCode:(NSString*)language 
+                             filters:(YTSearchFilters*)filters 
+                          safeSearch:(NSString*)safeSearchLevel {
+    // TODO: Implement full filter support in TRRequestBuilder
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder searchBodyWithQuery:query 
+                                                          channelOnly:NO 
+                                                               client:[YoutubeClientType webMobileClient]]];
 }
 
-+(id)requestForChannelsWithSearchQuery:(NSString*)query
-{
-  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] authentication:nil body:[YoutubeRequestClient searchBody:query 
-      sortBy:nil uploadDateFilter:nil duration:nil hasCC:false withClient:[YoutubeClientType webMobileClient] isChannelLookup:YES]];
++(id)requestForChannelsWithSearchQuery:(NSString*)query {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder searchBodyWithQuery:query 
+                                                          channelOnly:YES 
+                                                               client:[YoutubeClientType webMobileClient]]];
 }
+
 %end
 
-
+#pragma mark - Request Dispatch
 
 %hook YTGDataService
+
 -(void)makeSearchVideosRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-  [self makePOSTRequest:url withParser:[self valueForKey:@"videoPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
-  // cache:[self valueForKey:@"videoPageCache_"] 
+    [self makePOSTRequest:url 
+               withParser:[self valueForKey:@"videoPageParser_"] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
 }
 
 -(void)makeSearchChannelsRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    [self makePOSTRequest:url withParser:[self valueForKey:@"channelPageParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+    [self makePOSTRequest:url 
+               withParser:[self valueForKey:@"channelPageParser_"] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
 }
-%end
 
+%end

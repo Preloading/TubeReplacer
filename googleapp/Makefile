@@ -24,9 +24,19 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	comments.x \
 	accountfeeds.x \
 	playlist.x \
-	../Protobuf.m ../YoutubeRequestClient.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
+	likes.x \
+	Translators/TRJSONUtils.m \
+	Translators/TRJSONTranslator.m \
+	Translators/Delegates/TRVideoTranslator.m \
+	Translators/Delegates/TRChannelTranslator.m \
+	Translators/Delegates/TRFeedTranslator.m \
+	Translators/Delegates/TRCommentTranslator.m \
+	Translators/Delegates/TRSubscriptionTranslator.m \
+	Translators/Delegates/TRPlaylistTranslator.m \
+	Translators/TRRequestBuilder.m \
+	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
-TubeReplacerGoogleb_CFLAGS = -fno-objc-arc
+TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
 
 before-all::
 	rm signinpolyfil.h

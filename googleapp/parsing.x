@@ -1,51 +1,35 @@
+// parsing.x
+// TubeReplacer
+//
+// Data format detection and routing (XML vs JSON)
+// Also handles subscription caching for POST requests
+
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
+#include "Translators/TRTranslators.h"
 
+// TBXML interface for legacy XML parsing
 @interface TBXML : NSObject
-// {
-//     struct _TBXMLElement *rootXMLElement;
-//     struct _TBXMLElementBuffer *currentElementBuffer;
-//     struct _TBXMLAttributeBuffer *currentAttributeBuffer;
-//     long currentElement;
-//     long currentAttribute;
-//     char *bytes;
-//     long bytesLength;
-// }
-
-+ (id)tbxmlWithXMLFile:(id)fp8 fileExtension:(id)fp12 error:(id *)fp16;
-+ (id)tbxmlWithXMLFile:(id)fp8 fileExtension:(id)fp12;
-+ (id)tbxmlWithXMLFile:(id)fp8 error:(id *)fp12;
-+ (id)tbxmlWithXMLFile:(id)fp8;
-+ (id)tbxmlWithXMLData:(id)fp8 error:(id *)fp12;
-+ (id)tbxmlWithXMLData:(id)fp8;
-+ (id)tbxmlWithXMLString:(id)fp8 error:(id *)fp12;
-+ (id)tbxmlWithXMLString:(id)fp8;
++ (id)tbxmlWithXMLData:(id)data error:(id *)error;
 - (struct _TBXMLElement *)rootXMLElement;
-- (void)decodeData:(id)fp8 withError:(id *)fp12;
-- (void)decodeData:(id)fp8;
-- (id)initWithXMLFile:(id)fp8 fileExtension:(id)fp12 error:(id *)fp16;
-- (id)initWithXMLFile:(id)fp8 fileExtension:(id)fp12;
-- (id)initWithXMLFile:(id)fp8 error:(id *)fp12;
-- (id)initWithXMLFile:(id)fp8;
-- (id)initWithXMLData:(id)fp8 error:(id *)fp12;
-- (id)initWithXMLData:(id)fp8;
-- (id)initWithXMLString:(id)fp8 error:(id *)fp12;
-- (id)initWithXMLString:(id)fp8;
-- (id)init;
-
 @end
 
-
+#pragma mark - Format Detection & Parsing
 
 %hook YTTBParser
 
-// i apologize for the cursed shit in this function. There is 100% a better way to do this, but uhhh i can't find where the parser is set, so here we are, in hell
--(id)parse:(NSData*)xmlData error:(NSError **)error
-{
-    const unsigned char* bytes = [xmlData bytes];
-    NSUInteger length = [xmlData length];
+-(id)parse:(NSData*)rawData error:(NSError **)error {
+    if (!rawData || [rawData length] == 0) {
+        NSLog(@"TubeReplacer: Empty data received");
+        return nil;
+    }
     
-    // Check for and skip )]}'\n prefix (5 bytes)
+    const unsigned char* bytes = [rawData bytes];
+    NSUInteger length = [rawData length];
+    NSData *cleanData = rawData;
+    
+    // Strip Google's anti-XSS prefix: )]}'\\n
+    // This is prepended to JSON responses to prevent JSONP hijacking
     if (length >= 5 && 
         bytes[0] == ')' && 
         bytes[1] == ']' && 
@@ -54,68 +38,75 @@
         bytes[4] == '\n') {
         bytes += 5;
         length -= 5;
-        xmlData = [NSData dataWithBytes:bytes length:length];
+        cleanData = [NSData dataWithBytes:bytes length:length];
     }
-
-    if (bytes[0] == '<') {
-        NSLog(@"XML Detected!");
-        TBXML *xml = [%c(TBXML) tbxmlWithXMLData:xmlData error:error];
-        if ([xml rootXMLElement])
-        {
-            YTTBXMLElement *ytRootElement = [[[%c(YTTBXMLElement) alloc] initWithElement:[xml rootXMLElement]] autorelease];
-            return [self parseElement:ytRootElement error:error];
+    
+    // Detect format by first character
+    if (length > 0 && bytes[0] == '<') {
+        // XML format - use legacy TBXML parser
+        NSLog(@"TubeReplacer: XML detected, using TBXML");
+        TBXML *xml = [%c(TBXML) tbxmlWithXMLData:cleanData error:error];
+        if ([xml rootXMLElement]) {
+            YTTBXMLElement *rootElement = [[[%c(YTTBXMLElement) alloc] 
+                initWithElement:[xml rootXMLElement]] autorelease];
+            return [self parseElement:rootElement error:error];
         }
-        else
-        {
-            // too hard innit?
-            // if ( error )
-            // {
-            //     *error = [NSError errorWithCode:1 cause:*error];
-            // }
+        return nil;
+    } 
+    else if (length > 0 && bytes[0] == '{') {
+        // JSON format - parse and route to translators
+        NSLog(@"TubeReplacer: JSON detected");
+        id json = [NSJSONSerialization 
+            JSONObjectWithData:cleanData 
+            options:NSJSONReadingMutableContainers 
+            error:error];
+        
+        if (!json) {
+            NSLog(@"TubeReplacer: JSON parsing failed");
             return nil;
         }
-    } else if (bytes[0] == '{') {
-        NSLog(@"JSON Detected!");
-        id json = [NSJSONSerialization 
-            JSONObjectWithData: xmlData 
-            options: NSJSONReadingMutableContainers 
-            error: error];
         
-        return [self parseElement:json error:error]; // if we haven't touched this function, we are **VERY** likely to crash
-    } else {
-        NSLog(@"Not a valid file format! %c", bytes[0]);
+        // Route to parseElement which will use the appropriate translator
+        return [self parseElement:json error:error];
+    } 
+    else {
+        NSLog(@"TubeReplacer: Unknown format, first byte: 0x%02X", bytes[0]);
         return nil;
     }
 }
+
 %end
 
-// cache to POST requests.
+#pragma mark - POST Request Caching
 
 %hook YTGDataService
 
 - (void)makePOSTRequest:(YTGDataRequest *)request
              withParser:(id)parser
           responseBlock:(id)responseBlock
-             errorBlock:(id)errorBlock
-{
+             errorBlock:(id)errorBlock {
+    
+    // Wrap the response block to intercept certain responses for caching
     void (^originalResponseBlock)(id) = [responseBlock copy];
 
     void (^wrappedResponseBlock)(id) = ^(id response) {
-
-        if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
-            [[self valueForKey:@"subscriptionCache_"] setValue:@100000 forKey:@"countLimit_"]; // if they have this many subs, the app is going to die anyways. 
+        // Cache subscriptions when fetching subscription page
+        id subscriptionParser = [self valueForKey:@"subscriptionPageParser_"];
+        if (parser == subscriptionParser) {
+            // Increase cache limit for heavy users
+            id cache = [self valueForKey:@"subscriptionCache_"];
+            [cache setValue:@100000 forKey:@"countLimit_"];
             [self cacheSubscriptionsFromSubscriptionPage:response];
         }
 
-        // Call the original block
         if (originalResponseBlock) {
             originalResponseBlock(response);
         }
     };
 
-    // Call the original method with the wrapped block
     %orig(request, parser, wrappedResponseBlock, errorBlock);
+    
+    [originalResponseBlock release];
 }
-
 
 %end
