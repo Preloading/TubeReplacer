@@ -94,7 +94,11 @@
 -(NSDictionary *)fetchNextDataForVideoId:(NSString *)videoId {
     // Synchronous request to /next endpoint
     // Consider making this async for better UX BUT im lazy
+
+    NSMutableDictionary *allData = [NSMutableDictionary dictionary];
+
     NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"];
+    
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
@@ -105,12 +109,29 @@
     NSError *reqError = nil;
     NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&reqError];
     
-    if (reqError || !data) {
-        return nil;
+    if (!reqError && data) {
+        NSError *jsonError = nil;
+
+        allData[@"next"] = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
     }
     
-    NSError *jsonError = nil;
-    return [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+    
+    // TODO: this should be running at the same time as the next request
+    NSURL *rytdl = [NSURL URLWithString:[NSString stringWithFormat:@"https://returnyoutubedislikeapi.com/votes?videoId=%@", videoId]];
+    
+    NSMutableURLRequest *requestDL = [NSMutableURLRequest requestWithURL:rytdl];
+    [requestDL setHTTPMethod:@"GET"];
+    
+    NSURLResponse *responseDL = nil;
+    NSError *reqErrorDL = nil;
+    NSData *dataDL = [NSURLConnection sendSynchronousRequest:requestDL returningResponse:&responseDL error:&reqErrorDL];
+    
+    if (!reqErrorDL && dataDL) {
+        NSError *jsonErrorDL = nil;
+        allData[@"dislikes"] = [NSJSONSerialization JSONObjectWithData:dataDL options:0 error:&jsonErrorDL];
+    }
+    
+    return allData;
 }
 
 %end

@@ -21,12 +21,12 @@
     if ([json objectForKey:@"videoDetails"]) {
         return YES;
     }
-    if ([json objectForKey:@"videoRenderer"] ||
-        [json objectForKey:@"compactVideoRenderer"] ||
-        [json objectForKey:@"gridVideoRenderer"] ||
-        [json objectForKey:@"playlistVideoRenderer"] ||
-        [json objectForKey:@"videoWithContextRenderer"] ||
-        [json objectForKey:@"lockupViewModel"]) {
+    if (json[@"videoRenderer"] ||
+        json[@"compactVideoRenderer"] ||
+        json[@"gridVideoRenderer"] ||
+        json[@"playlistVideoRenderer"] ||
+        json[@"videoWithContextRenderer"] ||
+        json[@"lockupViewModel"]) {
         return YES;
     }
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"] ||
@@ -49,7 +49,7 @@
         return nil;
     }
     
-    if ([json objectForKey:@"videoDetails"]) {
+    if (json[@"videoDetails"]) {
         return [self translatePlayerResponse:json error:error];
     }
     
@@ -75,7 +75,7 @@
     NSMutableArray *ytStreams = [NSMutableArray array];
     NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
     for (NSDictionary *format in formats) {
-        NSString *urlString = [format objectForKey:@"url"];
+        NSString *urlString = format[@"url"];
         if (urlString) {
             NSURL *url = [NSURL URLWithString:urlString];
             if (url) {
@@ -163,11 +163,11 @@
     }
     
     // Skip upcoming/scheduled videos
-    if ([videoData objectForKey:@"upcomingEventData"]) {
+    if (videoData[@"upcomingEventData"]) {
         return nil;
     }
     
-    NSString *videoId = [videoData objectForKey:@"videoId"];
+    NSString *videoId = videoData[@"videoId"];
     if (!videoId) {
         return nil;
     }
@@ -368,29 +368,27 @@
 #pragma mark - Video Enhancement (/next response)
 
 - (void)enhanceVideo:(id)video withNextResponse:(NSDictionary *)nextData {
-    if (!video || !nextData) return;
+    if (!video || !nextData || !nextData[@"next"]) return;
     
     @try {
+        if (nextData[@"dislikes"]) {
+            NSLog(@"dislikes -> %@", nextData[@"dislikes"][@"dislikes"]);
+            [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
+        }
+
         // Navigate to the like button data in /next response
-        NSDictionary *contents = [nextData objectForKey:@"contents"];
-        NSDictionary *scwnr = [[contents objectForKey:@"singleColumnWatchNextResults"] objectForKey:@"results"];
-        NSDictionary *results = [scwnr objectForKey:@"results"];
-        NSArray *resultContents = [results objectForKey:@"contents"];
+        NSDictionary *resultContents = nextData[@"next"][@"contents"][@"singleColumnWatchNextResults"][@"results"][@"results"][@"contents"];
         
         if (![resultContents isKindOfClass:[NSArray class]]) return;
 
         for (NSDictionary *item in resultContents) {
-            NSDictionary *metadataSection = [item objectForKey:@"slimVideoMetadataSectionRenderer"];
-            if (!metadataSection) continue;
-            
-            NSArray *metaContents = [metadataSection objectForKey:@"contents"];
+            NSDictionary *metaContents = item[@"slimVideoMetadataSectionRenderer"][@"contents"];    
             if (![metaContents isKindOfClass:[NSArray class]]) continue;
-            
             for (NSDictionary *metaItem in metaContents) {
-                NSDictionary *actionBar = [metaItem objectForKey:@"slimVideoActionBarRenderer"];
+                NSDictionary *actionBar = metaItem[@"slimVideoActionBarRenderer"];
                 if (!actionBar) continue;
                 
-                NSArray *buttons = [actionBar objectForKey:@"buttons"];
+                NSArray *buttons = actionBar[@"buttons"];
                 if (![buttons isKindOfClass:[NSArray class]]) continue;
                 
                 for (NSDictionary *buttonItem in buttons) {
