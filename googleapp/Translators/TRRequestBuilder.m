@@ -68,6 +68,18 @@
     return [self serializeBody:body];
 }
 
+#pragma mark - Continuation
+
++ (NSData *)continueWithContext:(NSString *)context 
+                      client:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+    
+    [body setObject:context forKey:@"continuation"];
+    
+    return [self serializeBody:body];
+}
+
 #pragma mark - Player Requests
 
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 

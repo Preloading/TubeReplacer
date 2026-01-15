@@ -37,6 +37,9 @@
                       params:(NSString *)params 
                       client:(YoutubeClientType *)client;
 
++ (NSData *)continueWithContext:(NSString *)context 
+                      client:(YoutubeClientType *)client;b
+
 #pragma mark - Player Requests
 
 /**

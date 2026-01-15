@@ -135,3 +135,14 @@
 }
 
 %end
+
+// this is just for debugging setting strings as NSURL
+%hook __NSCFString
+
+%new
+-(id)host {
+    NSLog(@"String got a host call!");
+    [%c(GIPToast) showTodo];
+    return nil; // things go wrong here
+}
+%end

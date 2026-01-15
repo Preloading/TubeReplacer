@@ -31,6 +31,9 @@
     if ([TRJSONUtils dictFromJSON:json keyPath:@"contents.singleColumnWatchNextResults"]) {
         return YES;
     }
+    if ([TRJSONUtils dictFromJSON:json keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"]) {
+        return YES;
+    }
     return NO;
 }
 
@@ -45,7 +48,9 @@
     
     NSArray *items = [self extractItemsFromFeed:json];
     NSMutableArray *entries = [NSMutableArray array];
+    NSString *continuationToken = nil;
     
+    // TODO: move this somewhat to it's own space like comments, how that app actually expects it
     TRVideoTranslator *videoTranslator = [[[TRVideoTranslator alloc] init] autorelease];
     TRChannelTranslator *channelTranslator = [[[TRChannelTranslator alloc] init] autorelease];
     
@@ -56,6 +61,7 @@
         
         // Skip continuation items
         if ([item objectForKey:@"continuationItemRenderer"]) {
+            continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];
             continue;
         }
         
@@ -75,14 +81,16 @@
             [entries addObject:entry];
         }
     }
+
+    NSLog(@"continuation token -> %@", continuationToken);
     
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
-        totalResults:[entries count] 
+        totalResults:100000 // todo: make better
         entriesPerPage:[entries count] 
         startIndex:1 
-        nextURL:nil 
+        nextURL:continuationToken 
         previousURL:nil
     ] autorelease];
     
@@ -148,6 +156,11 @@
     // Desktop suggestions
     items = [TRJSONUtils arrayFromJSON:json 
         keyPath:@"contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results[1].itemSectionRenderer.contents"];
+    if (items) return items;
+
+    // Continuation
+    items = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
     if (items) return items;
     
     return @[];
