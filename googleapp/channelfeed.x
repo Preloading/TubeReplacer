@@ -25,8 +25,16 @@
 
 %hook YTGDataService
 
--(void)makeUploadedVideosRequest:(id)url responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    [self makePOSTRequest:url 
+-(void)makeUploadedVideosRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    id actualRequest = request;
+    if ([[request URL] isKindOfClass:[NSString class]]) {
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:nil // i hope this wont cause issues... 
+                           body:[TRRequestBuilder continueWithContext:[request URL] 
+                                                            client:[YoutubeClientType webMobileClient]]];
+    }
+
+    [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"videoPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
