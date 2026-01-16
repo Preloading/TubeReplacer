@@ -37,12 +37,13 @@
  * Convert RFC3339 date string to NSDate.
  */
 + (NSDate *)dateFromRFC3339:(NSString *)string;
++ (NSDate *)dateFromISO8601:(NSString *)string;
 
 /**
  * Convert "5 days ago" style strings to NSDate.
  */
 + (NSDate *)dateFromTimeAgo:(NSString *)string;
-
++ (NSDate *)dateFromShortDate:(NSString *)string;
 /**
  * Parse view/subscriber counts like "1.2M", "500K", "1,234,567".
  */

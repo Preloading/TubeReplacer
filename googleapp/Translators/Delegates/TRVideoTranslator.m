@@ -371,14 +371,23 @@
     if (!video || !nextData || !nextData[@"next"]) return;
     
     @try {
-        if (nextData[@"dislikes"]) {
-            NSLog(@"dislikes -> %@", nextData[@"dislikes"][@"dislikes"]);
-            [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
-        }
+        
 
         // Navigate to the like button data in /next response
         NSDictionary *resultContents = nextData[@"next"][@"contents"][@"singleColumnWatchNextResults"][@"results"][@"results"][@"contents"];
         
+
+        BOOL hasLikeDataAlready = false;
+        if (nextData[@"dislikes"]) {
+            [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
+            [video setValue:nextData[@"dislikes"][@"likes"] forKey:@"likesCount_"];
+            NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
+            [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
+            [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
+            hasLikeDataAlready = true;
+        }
+
+
         if (![resultContents isKindOfClass:[NSArray class]]) return;
 
         for (NSDictionary *item in resultContents) {
@@ -400,31 +409,38 @@
                     
                     // Extract like status
                     NSDictionary *likeButtonVM = [sldbvm objectForKey:@"likeButtonViewModel"];
-                    NSDictionary *likeStatusEntity = [likeButtonVM objectForKey:@"likeStatusEntity"];
-                    NSString *status = [likeStatusEntity objectForKey:@"likeStatus"];
+                    NSString *status = likeButtonVM[@"likeStatusEntity"][@"likeStatus"];
                     
+                    // todo dislikes
                     if (status) {
                         objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                     }
 
-                    // Extract like count
-                    NSDictionary *toggleButtonVM = [[[likeButtonVM objectForKey:@"likeButtonViewModel"]
-                                                    objectForKey:@"toggleButtonViewModel"]
-                                                    objectForKey:@"toggleButtonViewModel"];
-                    NSDictionary *defaultButton = [[toggleButtonVM objectForKey:@"defaultButtonViewModel"] objectForKey:@"buttonViewModel"];
-                    
-                    NSString *title = [defaultButton objectForKey:@"title"];
-                    if (title) {
-                        long likes = [TRJSONUtils numberFromText:title];
-                        if (likes > 0) {
-                            [video setValue:[NSNumber numberWithLong:likes] forKey:@"likesCount_"];
+
+                    if (!hasLikeDataAlready) {
+                        // Extract like count
+                        NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
+
+                        if (accessibilityText) { 
+                            NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                            long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
+                            if (likes > 0) {
+                                [video setValue:[NSNumber numberWithLong:likes] forKey:@"likesCount_"];
+                            }
                         }
+
+                         // fallback
+                        NSString *dateString = nextData[@"next"][@"engagementPanels"][2][@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
+                        NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
+                        [video setValue:date forKey:@"uploadedDate_"];
+                        [video setValue:date forKey:@"publishedDate_"];
                     }
-                    
-                    return; // Found it
+                    return;
                 }
             }
         }
+        
+        
     } @catch (NSException *e) {
         NSLog(@"TRVideoTranslator: Failed to enhance video: %@", e);
     }

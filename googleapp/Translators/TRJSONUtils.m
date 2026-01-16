@@ -151,6 +151,25 @@
     return result;
 }
 
++ (NSDate *)dateFromISO8601:(NSString *)string {
+    if (!string || ![string isKindOfClass:[NSString class]]) {
+        return nil;
+    }
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+
+    [formatter setLocale:enUSPOSIXLocale];
+    [formatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSZ"];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+
+    NSDate *result = [formatter dateFromString:string];
+    [formatter release];
+    [enUSPOSIXLocale release];
+    
+    return result;
+}
+
 + (NSDate *)dateFromTimeAgo:(NSString *)string {
     if (!string || ![string isKindOfClass:[NSString class]]) {
         return nil;
@@ -194,6 +213,25 @@
     
     NSDate *result = [cal dateByAddingComponents:offset toDate:now options:0];
     [offset release];
+    
+    return result;
+}
+
++ (NSDate *)dateFromShortDate:(NSString *)string {
+    if (!string || ![string isKindOfClass:[NSString class]]) {
+        return nil;
+    }
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [formatter setLocale:enUSPOSIXLocale];
+    [formatter setDateFormat:@"MMM dd, yyyy"];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    NSDate *result = [formatter dateFromString:string];
+    [formatter release];
+    [enUSPOSIXLocale release];
     
     return result;
 }
