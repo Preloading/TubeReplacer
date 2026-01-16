@@ -13,7 +13,6 @@
 
 -(void)makeMySubscriptionUploadsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
 // something for future, it may be worth it to figure out the entire pagination stuff so we dont have to do this everywhere
-    NSLog(@"makeMySubscriptionUploadsRequest class -> %@", NSStringFromClass([[request URL] class]));
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 

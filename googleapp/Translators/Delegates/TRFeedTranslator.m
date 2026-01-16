@@ -34,6 +34,9 @@
     if ([TRJSONUtils dictFromJSON:json keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"]) {
         return YES;
     }
+    if ([TRJSONUtils dictFromJSON:json keyPath:@"onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems"]) {
+        return YES;
+    }
     return NO;
 }
 
@@ -161,6 +164,11 @@
     // Continuation
     items = [TRJSONUtils arrayFromJSON:json 
         keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
+    if (items) return items;
+
+    // suggestions continue
+    items = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems"];
     if (items) return items;
     
     return @[];
