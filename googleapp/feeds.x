@@ -6,6 +6,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 
 @interface YTPageParser : NSObject
 +(id)parseLockupViewModelVideo:(NSDictionary*)unparsedVideo;
@@ -60,10 +61,14 @@
     }
     
     NSMutableArray *output = [NSMutableArray array];
+    TRContinuation *continuation = nil;
     
     for (id item in items) {
         if (![item isKindOfClass:[NSDictionary class]]) continue;
-        if ([item objectForKey:@"continuationItemRenderer"]) continue;
+        if ([item objectForKey:@"continuationItemRenderer"]) {
+            continuation = [TRContinuation initWithToken:item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"]];
+            continue;
+        }
         
         // Wrap item with context for the parser
         NSError *parseError = nil;
@@ -83,7 +88,7 @@
                                           totalResults:[output count] 
                                         entriesPerPage:[output count] 
                                             startIndex:1 
-                                               nextURL:nil 
+                                               nextURL:continuation 
                                            previousURL:nil];
     
     return [page autorelease];
@@ -99,8 +104,11 @@
     
     // Comment items
     if ([parser isKindOfClass:[%c(YTCommentParser) class]]) {
-        return [TRJSONUtils arrayFromJSON:bodyDict 
+        id feed = [TRJSONUtils arrayFromJSON:bodyDict 
             keyPath:@"onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems"];
+        if (feed) return feed;
+        return [TRJSONUtils arrayFromJSON:bodyDict 
+            keyPath:@"onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems"];
     }
     
     // Playlist items (find the "Playlists" tab)

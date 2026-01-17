@@ -6,6 +6,7 @@
 #import <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 
 #pragma mark - Request Building
 
@@ -26,14 +27,23 @@
 %hook YTGDataService
 
 -(void)makeCommentsRequest:(id)originalRequest responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    NSString* videoId = [originalRequest valueForKey:@"URL_"];
-    NSLog(@"TubeReplacer: Fetching comments for videoId: %@", videoId);
+    YTGDataRequest *request = nil;
     
-    YTGDataRequest *request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+    if ([[originalRequest valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
+        TRContinuation *continuation = [originalRequest valueForKey:@"URL_"];
+        request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            authentication:nil // i hope this wont cause issues... 
+            body:[TRRequestBuilder continueWithContext:[continuation token]
+                    client:[YoutubeClientType webMobileClient]]];
+        
+    } else {
+        NSString* videoId = [originalRequest valueForKey:@"URL_"];
+        request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
             authentication:nil 
             body:[TRRequestBuilder commentsBodyWithVideoId:videoId 
                                                     sortBy:@"top" 
                                                     client:[YoutubeClientType webMobileClient]]];
+    }    
     
     [self makePOSTRequest:request 
                withParser:[self valueForKey:@"commentPageParser_"] 

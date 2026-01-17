@@ -381,7 +381,7 @@
         if (nextData[@"dislikes"]) {
             [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
             [video setValue:nextData[@"dislikes"][@"likes"] forKey:@"likesCount_"];
-            NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
+            // NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
             hasLikeDataAlready = true;
