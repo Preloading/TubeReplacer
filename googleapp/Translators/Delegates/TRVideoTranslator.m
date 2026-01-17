@@ -100,9 +100,9 @@
     NSDate *uploadDate = [TRJSONUtils dateFromRFC3339:uploadDateStr];
     NSDate *publishDate = [TRJSONUtils dateFromRFC3339:publishDateStr];
     
-    NSInteger duration = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.lengthSeconds"];
-    NSInteger viewCount = [TRJSONUtils intFromJSON:json keyPath:@"videoDetails.viewCount"];
-    NSInteger likesCount = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.likeCount"];
+    uint64_t duration = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.lengthSeconds"];
+    uint64_t viewCount = [TRJSONUtils intFromJSON:json keyPath:@"videoDetails.viewCount"];
+    uint64_t likesCount = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.likeCount"];
     
     NSString *category = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.category"];
     
@@ -205,7 +205,7 @@
     // The accessibility label has format:
     // "Video Title by Channel Name 35,908 views 5 days ago 4 minutes, 20 seconds"
     
-    long views = 0;
+    uint64_t views = 0;
     NSDate *uploadDate = nil;
     
     // Get accessibility label based on renderer type
@@ -231,7 +231,7 @@
         if ([accessibilityParts count] > removedParts + 1) {
             NSString *viewsPart = accessibilityParts[removedParts + 1];
             viewsPart = [viewsPart stringByReplacingOccurrencesOfString:@"," withString:@""];
-            views = [viewsPart intValue];
+            views = [viewsPart longLongValue];
         }
         
         // Extract upload date (remaining words after views + "views")
@@ -382,8 +382,8 @@
             [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
             [video setValue:nextData[@"dislikes"][@"likes"] forKey:@"likesCount_"];
             NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
-            [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
-            [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
+            // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
+            // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
             hasLikeDataAlready = true;
         }
 
@@ -416,6 +416,10 @@
                         objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                     }
 
+                    NSString *dateString = nextData[@"next"][@"engagementPanels"][2][@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
+                    NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
+                    [video setValue:date forKey:@"uploadedDate_"];
+                    [video setValue:date forKey:@"publishedDate_"];
 
                     if (!hasLikeDataAlready) {
                         // Extract like count
@@ -428,12 +432,6 @@
                                 [video setValue:[NSNumber numberWithLong:likes] forKey:@"likesCount_"];
                             }
                         }
-
-                         // fallback
-                        NSString *dateString = nextData[@"next"][@"engagementPanels"][2][@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
-                        NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
-                        [video setValue:date forKey:@"uploadedDate_"];
-                        [video setValue:date forKey:@"publishedDate_"];
                     }
                     return;
                 }

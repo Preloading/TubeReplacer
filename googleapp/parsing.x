@@ -110,3 +110,11 @@
 }
 
 %end
+
+// fixes views & other values being capped at 32bit unsigned int limit
+%hook YTUtils
++(id)localizedCount:(uint64_t)number
+{
+  return [NSNumberFormatter localizedStringFromNumber:[NSNumber numberWithLongLong:number] numberStyle:1];
+}
+%end

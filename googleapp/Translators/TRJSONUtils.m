@@ -114,10 +114,10 @@
     return nil;
 }
 
-+ (NSInteger)intFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath {
++ (uint64_t)intFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath {
     id value = [self valueFromJSON:json keyPathWithArrays:keyPath];
     if ([value respondsToSelector:@selector(integerValue)]) {
-        return [value integerValue];
+        return [value longLongValue];
     }
     return 0;
 }

@@ -28,7 +28,7 @@
 + (NSString *)stringFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
 + (NSArray *)arrayFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
 + (NSDictionary *)dictFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
-+ (NSInteger)intFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
++ (uint64_t)intFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
 + (BOOL)boolFromJSON:(NSDictionary *)json keyPath:(NSString *)keyPath;
 
 #pragma mark - Parsing Helpers
