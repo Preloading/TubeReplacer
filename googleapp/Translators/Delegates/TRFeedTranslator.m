@@ -123,7 +123,24 @@
         NSArray *sections = [TRJSONUtils arrayFromJSON:json 
             keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents"];
         for (NSDictionary *section in sections) {
-            if ([section objectForKey:@"continuationItemRenderer"]) {
+            if (section[@"continuationItemRenderer"]) {
+                [allItems addObject:section];
+                continue;
+            }
+            NSArray *sectionItems = [TRJSONUtils arrayFromJSON:section keyPath:@"itemSectionRenderer.contents"];
+            if (sectionItems) {
+                [allItems addObjectsFromArray:sectionItems];
+            }
+        }
+        if ([allItems count] > 0) return allItems;
+
+        // Continuation
+        sections = [TRJSONUtils arrayFromJSON:json 
+            keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
+        for (NSDictionary *section in sections) {
+            if (section[@"continuationItemRenderer"]) { // seems to break for some reason that i can't figure out.
+                NSLog(@"history contiunue!");
+                [allItems addObject:section];
                 continue;
             }
             NSArray *sectionItems = [TRJSONUtils arrayFromJSON:section keyPath:@"itemSectionRenderer.contents"];

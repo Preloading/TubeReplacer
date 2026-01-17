@@ -14,6 +14,7 @@
 
 +(id)requestToRateWithVideoID:(NSString *)videoId authentication:(id)authentication like:(BOOL)like {
     // Choose endpoint based on like/unlike
+    // TODO: Add RYTDL support
     NSString *endpoint = like 
         ? @"https://www.youtube.com/youtubei/v1/like/like" 
         : @"https://www.youtube.com/youtubei/v1/like/removelike";

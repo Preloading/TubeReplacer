@@ -14,7 +14,7 @@
 +(id)requestForMySubscriptionsWithAuth:(id)authentication {
     return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" 
                        authentication:authentication 
-                                 body:[TRRequestBuilder browseBodyWithId:@"FEchannels" 
+                                 body:[TRRequestBuilder browseBodyWithId:@"FEsubscriptions" 
                                                                   params:nil 
                                                                   client:[YoutubeClientType webMobileClient]]];
 }
