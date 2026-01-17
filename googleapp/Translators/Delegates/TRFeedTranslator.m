@@ -57,6 +57,9 @@
     TRVideoTranslator *videoTranslator = [[[TRVideoTranslator alloc] init] autorelease];
     TRChannelTranslator *channelTranslator = [[[TRChannelTranslator alloc] init] autorelease];
     
+    continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"contents.sectionListRenderer.contents[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+    if (!continuationToken) continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+
     for (NSDictionary *item in items) {
         if (![item isKindOfClass:[NSDictionary class]]) {
             continue;
@@ -169,6 +172,11 @@
     // suggestions continue
     items = [TRJSONUtils arrayFromJSON:json 
         keyPath:@"onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems"];
+    if (items) return items;
+
+    // search continuation
+    items = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents"];
     if (items) return items;
     
     return @[];
