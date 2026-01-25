@@ -15,7 +15,7 @@
                     bitrate:(int)bitrate
                     url:(NSURL*)url
 {
-    TRYTStreamDetails *details = [TRYTStreamDetails alloc];
+    TRYTStreamDetails *details = [[TRYTStreamDetails alloc] init];
     details->_type = type;
     details->_itag = itag;
     details->_mimetype = mimeType;

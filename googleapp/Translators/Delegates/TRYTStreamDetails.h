@@ -3,17 +3,17 @@
 @interface TRYTStreamDetails : NSObject 
 @property (nonatomic, assign) int type; // 1 = muxed, 2 = video, 3 = audio
 @property (nonatomic, assign) int itag;
-@property (nonatomic, assign) NSString *mimetype;
-@property (nonatomic, assign) NSString *profile; // baseline, main, high.
+@property (nonatomic, strong) NSString *mimetype;
+@property (nonatomic, strong) NSString *profile; // baseline, main, high.
 @property (nonatomic, assign) int height;
 @property (nonatomic, assign) int width;
 @property (nonatomic, assign) int fps;
-@property (nonatomic, assign) NSString *quality;
-@property (nonatomic, assign) NSString *qualityLabel;
-@property (nonatomic, assign) NSString *audioQuality;
+@property (nonatomic, strong) NSString *quality;
+@property (nonatomic, strong) NSString *qualityLabel;
+@property (nonatomic, strong) NSString *audioQuality;
 @property (nonatomic, assign) int averageBitrate;
 @property (nonatomic, assign) int bitrate;
-@property (nonatomic, assign) NSURL *url;
+@property (nonatomic, strong) NSURL *url;
 
 +(TRYTStreamDetails*)initWithType:(int)type
                     itag:(int)itag

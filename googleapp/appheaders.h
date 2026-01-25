@@ -70,8 +70,25 @@
 @end 
 
 @interface YTUtils
-+ (id)userLanguageCode;
++ (id)isoFixForCountryCode:(id)fp8;
++ (void)printStackTrace;
++ (BOOL)isRetinaDisplay;
++ (void)runBlock:(id)fp withDelay:(void)fp8;
++ (id)generateCPN;
++ (id)systemVersion;
++ (id)appID;
++ (id)appVersion;
++ (void)setNeedsLayoutRecursivelyFromView:(id)fp8;
++ (id)styledNavigationController:(id)fp8;
++ (BOOL)viewContainsVisibleSubview:(id)fp8;
++ (id)systemCountryCode;
 + (id)userCountryCode;
++ (id)userLanguageCode;
++ (id)localizedCount:(unsigned long long)fp8;
++ (id)localizedDateSinceNow:(id)fp8;
++ (id)stringWithDurationSeconds:(int)fp8;
++ (BOOL)isDateRecent:(id)fp8;
++ (id)dateFormatter;
 @end
 
 @interface YTGDataRequest
@@ -1178,5 +1195,43 @@ typedef struct _TBXMLElement {
 // - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithEntries:(id)fp8 totalResults:(int)fp12 entriesPerPage:(int)fp16 startIndex:(int)fp20 nextURL:(id)fp24 previousURL:(id)fp28;
+
+@end
+
+@interface GIPDevice : NSObject
++ (void)ensureInitialized;
++ (id)allocWithZone:(struct _NSZone *)fp8;
++ (id)currentDevice;
+- (void)keyboardWillHide:(id)fp8;
+- (void)keyboardWasShown:(id)fp8;
+- (void)stopListeningToKeyboardEvents;
+- (void)startListeningToKeyboardEvents;
+- (BOOL)canPlayH264MainProfile;
+- (BOOL)canPlayH264HighProfile; // MODIFIED!!!
+- (BOOL)supportsAirPlayMirroring;
+- (BOOL)proximityState;
+- (BOOL)isProximitySensingEnabled;
+- (void)setProximitySensingEnabled:(BOOL)fp8;
+- (BOOL)hasInternalMic;
+- (BOOL)canRecordAudio;
+- (BOOL)canText;
+- (BOOL)canCall;
+- (id)model;
+- (float)screenScaleFactor;
+- (struct CGSize)screenDimensions;
+- (unsigned int)iPhoneOSVersion;
+- (BOOL)isRecognizedModel;
+- (id)generation;
+- (id)normalizedModel;
+- (void)setModelAndGeneration;
+- (struct CGSize)keyboardSize;
+- (id)deviceCategory;
+- (id)modelVersion;
+- (id)init;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (id)autorelease;
+- (oneway void)release;
+- (unsigned int)retainCount;
+- (id)retain;
 
 @end

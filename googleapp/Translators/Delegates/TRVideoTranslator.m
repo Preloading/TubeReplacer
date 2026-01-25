@@ -107,6 +107,7 @@
             NSURL *url = [NSURL URLWithString:urlString];
             if (url) {
                 id streamDetails =  nil;
+
                 if (format[@"audioQuality"]) {
                     // audio
                     streamDetails = [TRYTStreamDetails initWithType:3 // audio
@@ -125,6 +126,7 @@
                     ];
                 } else {
                     // video (probably)
+                    NSLog(@"quality -> %@", format[@"quality"]);
                     streamDetails = [TRYTStreamDetails initWithType:2 // video
                                         itag:[TRJSONUtils intFromJSON:format keyPath:@"itag"]
                                         mimeType:format[@"mimeType"]
@@ -141,7 +143,8 @@
                     ];
                 }
                 
-                id stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
+                YTStream* stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
+                NSLog(@"quality4 -> %@", [(TRYTStreamDetails*)[stream URL] quality]);
                 if (stream) {
                     [ytStreams addObject:stream];
                 }
