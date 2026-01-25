@@ -34,6 +34,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	Translators/Delegates/TRCommentTranslator.m \
 	Translators/Delegates/TRSubscriptionTranslator.m \
 	Translators/Delegates/TRPlaylistTranslator.m \
+	Translators/Delegates/TRYTStreamDetails.m \
 	Translators/TRRequestBuilder.m \
 	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	

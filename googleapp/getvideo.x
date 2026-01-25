@@ -146,3 +146,14 @@
     return nil; // things go wrong here
 }
 %end
+
+
+
+%hook YTStream
+
+// // changed to provide both an audio & video stream (since it's muxed)
+// +(id)selectStreamForVideo:(NSArray*)streams onWiFi:(BOOL)onWifi {
+
+// }
+
+%end

@@ -6,6 +6,7 @@
 
 #import "TRVideoTranslator.h"
 #import "TRJSONUtils.h"
+#import "TRYTStreamDetails.h"
 #import <objc/runtime.h>
 #import "../appheaders.h"
 
@@ -72,14 +73,75 @@
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:json keyPath:@"videoDetails.thumbnail.thumbnails"];
     NSDictionary *thumbnails = [TRJSONUtils thumbnailsFromArray:thumbArray];
     
+    // formats: 1 = muxed 2 = video 3 = audio
     NSMutableArray *ytStreams = [NSMutableArray array];
-    NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
-    for (NSDictionary *format in formats) {
+    for (NSDictionary *format in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"]) {
         NSString *urlString = format[@"url"];
         if (urlString) {
             NSURL *url = [NSURL URLWithString:urlString];
             if (url) {
-                id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:3 encrypted:NO];
+                id streamDetails = [TRYTStreamDetails initWithType:1 // muxed
+                                                      itag:[TRJSONUtils intFromJSON:format keyPath:@"itag"]
+                                                      mimeType:format[@"mimeType"]
+                                                      profile:[self profileFromMimeType:format[@"mimeType"]]
+                                                      height:[TRJSONUtils intFromJSON:format keyPath:@"height"]
+                                                      width:[TRJSONUtils intFromJSON:format keyPath:@"width"]
+                                                      fps:[TRJSONUtils intFromJSON:format keyPath:@"fps"]
+                                                      quality:format[@"quality"]
+                                                      qualityLabel:format[@"qualityLabel"]
+                                                      audioQuality:format[@"audioQuality"]
+                                                      averageBitrate:[TRJSONUtils intFromJSON:format keyPath:@"averageBitrate"]
+                                                      bitrate:[TRJSONUtils intFromJSON:format keyPath:@"bitrate"]
+                                                      url:url
+                                    ];
+                id stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
+                if (stream) {
+                    [ytStreams addObject:stream];
+                }
+            }
+        }
+    }
+    for (NSDictionary *format in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
+        NSString *urlString = format[@"url"];
+        if (urlString) {
+            NSURL *url = [NSURL URLWithString:urlString];
+            if (url) {
+                id streamDetails =  nil;
+                if (format[@"audioQuality"]) {
+                    // audio
+                    streamDetails = [TRYTStreamDetails initWithType:3 // audio
+                                        itag:[TRJSONUtils intFromJSON:format keyPath:@"itag"]
+                                        mimeType:format[@"mimeType"]
+                                        profile:nil
+                                        height:0
+                                        width:0
+                                        fps:0
+                                        quality:format[@"quality"]
+                                        qualityLabel:nil
+                                        audioQuality:format[@"audioQuality"]
+                                        averageBitrate:[TRJSONUtils intFromJSON:format keyPath:@"averageBitrate"]
+                                        bitrate:[TRJSONUtils intFromJSON:format keyPath:@"bitrate"]
+                                        url:url
+                    ];
+                } else {
+                    // video (probably)
+                    streamDetails = [TRYTStreamDetails initWithType:2 // video
+                                        itag:[TRJSONUtils intFromJSON:format keyPath:@"itag"]
+                                        mimeType:format[@"mimeType"]
+                                        profile:[self profileFromMimeType:format[@"mimeType"]]
+                                        height:[TRJSONUtils intFromJSON:format keyPath:@"height"]
+                                        width:[TRJSONUtils intFromJSON:format keyPath:@"width"]
+                                        fps:[TRJSONUtils intFromJSON:format keyPath:@"fps"]
+                                        quality:format[@"quality"]
+                                        qualityLabel:format[@"qualityLabel"]
+                                        audioQuality:nil
+                                        averageBitrate:[TRJSONUtils intFromJSON:format keyPath:@"averageBitrate"]
+                                        bitrate:[TRJSONUtils intFromJSON:format keyPath:@"bitrate"]
+                                        url:url
+                    ];
+                }
+                
+                id stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
                 if (stream) {
                     [ytStreams addObject:stream];
                 }
@@ -442,6 +504,49 @@
     } @catch (NSException *e) {
         NSLog(@"TRVideoTranslator: Failed to enhance video: %@", e);
     }
+}
+
+// AI'd, sorry.
+- (NSString *)profileFromMimeType:(NSString *)mimeType {
+    if (!mimeType) return @"unknown";
+    
+    // Look for avc1 codec (H.264)
+    NSRange avc1Range = [mimeType rangeOfString:@"avc1."];
+    if (avc1Range.location != NSNotFound) {
+        NSUInteger start = avc1Range.location + avc1Range.length;
+        if (start + 2 <= [mimeType length]) {
+            NSString *profileCode = [[mimeType substringWithRange:NSMakeRange(start, 2)] uppercaseString];
+            
+            if ([profileCode isEqualToString:@"42"]) return @"baseline";
+            if ([profileCode isEqualToString:@"4D"]) return @"main";
+            if ([profileCode isEqualToString:@"58"]) return @"extended";
+            if ([profileCode isEqualToString:@"64"]) return @"high";
+            if ([profileCode isEqualToString:@"6E"]) return @"high10";
+            if ([profileCode isEqualToString:@"7A"]) return @"high422";
+            if ([profileCode isEqualToString:@"F4"]) return @"high444";
+            
+            return [NSString stringWithFormat:@"avc1.%@", profileCode];
+        }
+    }
+    
+    // Look for vp9 codec
+    if ([mimeType rangeOfString:@"vp9"].location != NSNotFound ||
+        [mimeType rangeOfString:@"vp09"].location != NSNotFound) {
+        return @"vp9";
+    }
+    
+    // Look for vp8 codec
+    if ([mimeType rangeOfString:@"vp8"].location != NSNotFound ||
+        [mimeType rangeOfString:@"vp08"].location != NSNotFound) {
+        return @"vp8";
+    }
+    
+    // Look for av1 codec
+    if ([mimeType rangeOfString:@"av01"].location != NSNotFound) {
+        return @"av1";
+    }
+    
+    return @"unknown";
 }
 
 @end
