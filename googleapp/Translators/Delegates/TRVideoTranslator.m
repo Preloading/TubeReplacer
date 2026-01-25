@@ -94,9 +94,8 @@
                                                       bitrate:[TRJSONUtils intFromJSON:format keyPath:@"bitrate"]
                                                       url:url
                                     ];
-                id stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
-                if (stream) {
-                    [ytStreams addObject:stream];
+                if (streamDetails) {
+                    [ytStreams addObject:streamDetails];
                 }
             }
         }
@@ -143,10 +142,8 @@
                     ];
                 }
                 
-                YTStream* stream = [NSClassFromString(@"YTStream") streamWithURL:streamDetails format:1 encrypted:NO];
-                NSLog(@"quality4 -> %@", [(TRYTStreamDetails*)[stream URL] quality]);
-                if (stream) {
-                    [ytStreams addObject:stream];
+                if (streamDetails) {
+                    [ytStreams addObject:streamDetails];
                 }
             }
         }

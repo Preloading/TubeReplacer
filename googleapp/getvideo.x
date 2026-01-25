@@ -176,19 +176,16 @@
 
     return YES;
 }
+
 %end
 
-
 %hook YTStream
-
-// changed to provide both an audio & video stream (since it's muxed)
 +(id)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi {
-    NSLog(@"+(id)selectStreamForVideo");
     NSArray *streams = [video streams];
 
     BOOL isPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
 
-    BOOL isRetina = [%c(YTUtils) isRetinaDisplay];
+    BOOL isRetina = [NSClassFromString(@"YTUtils") isRetinaDisplay];
 
     // video rankings
     // 1 = tiny/144p
@@ -242,35 +239,13 @@
     NSLog(@"Finding video with rank %i", selectedVideo);
 
     int closenessToVideoRank = 2147483647;
-    YTStream *currentlySelectedVideo = nil;
+    TRYTStreamDetails *currentlySelectedVideo = nil;
 
     // int closenessToAudioRank = 2147483647;
     // YTStream *currentlySelectedAudio = nil;
 
-    NSLog(@"a1");
-    GIPDevice *device = [%c(GIPDevice) currentDevice];
-    for (YTStream *actualStream in streams) {
-        NSLog(@"a2");
-        TRYTStreamDetails* stream = [actualStream valueForKey:@"details"];
-        if (!stream) {
-    NSLog(@"Stream is nil, skipping");
-    continue;
-}
-if (!stream || ![stream isKindOfClass:[TRYTStreamDetails class]]) {
-    NSLog(@"Invalid stream object");
-    continue;
-}
-
-        NSLog(@"type -> %i", [stream type]);
-        NSLog(@"itag -> %i", [stream itag]);
-        NSLog(@"mimetype -> %@", [stream mimetype]);
-        NSLog(@"profile -> %@", [stream profile]);
-        NSLog(@"height -> %i", [stream height]);
-        NSLog(@"fps -> %i", [stream fps]);
-        NSLog(@"quality -> %@", [stream quality]);
-
-
-        NSLog(@"a3");
+    GIPDevice *device = [NSClassFromString(@"GIPDevice") currentDevice];
+    for (TRYTStreamDetails *stream in streams) {
         if ([stream type] == 3) { continue; } // ignoring audio for now in case we chose a muxed stream :P
         if ([[stream profile] isEqualToString:@"vp8"]) { continue; }
         if ([[stream profile] isEqualToString:@"vp9"]) { continue; }
@@ -281,7 +256,6 @@ if (!stream || ![stream isKindOfClass:[TRYTStreamDetails class]]) {
         if ([[stream profile] isEqualToString:@"main"]     && ![device canPlayH264MainProfile]) { continue; }
         if ([[stream profile] isEqualToString:@"extended"] && ![device canPlayH264HighProfile]) { continue; }
         if ([[stream profile] isEqualToString:@"high"]     && ![device canPlayH264HighProfile]) { continue; }
-        NSLog(@"profile -> %@", [stream profile]);
         int currentVideoType = 0;
 
         // video rankings
@@ -306,28 +280,22 @@ if (!stream || ![stream isKindOfClass:[TRYTStreamDetails class]]) {
         } else if ([[stream quality] isEqualToString:@"hd1080"]) {
             currentVideoType=6;
         }
-        NSLog(@"a5");
         
         int closenessOfStream = abs(selectedVideo - currentVideoType);
         if (closenessOfStream < closenessToVideoRank) {
             closenessToVideoRank = closenessOfStream;
-            currentlySelectedVideo = actualStream;
+            currentlySelectedVideo = stream;
         } else if (closenessOfStream == closenessToVideoRank) {
-            // the seperated streams are better than the muxed stream in general.
-            TRYTStreamDetails* bestRankedStream = [actualStream URL];
-            if ([bestRankedStream type] == 1) {
+            // the seperated streams are better than the muxed stream in general. 
+            if ([currentlySelectedVideo type] == 1) {
                 closenessToVideoRank = closenessOfStream;
-                currentlySelectedVideo = actualStream;
+                currentlySelectedVideo = stream;
             }
         }
-        NSLog(@"a6");
     }
 
-NSLog(@"a7");
-    TRYTStreamDetails *currentlySelectedVideoDetails = [currentlySelectedVideo URL];
-    NSLog(@"Selected a %@ stream", [currentlySelectedVideoDetails quality]);
+    NSLog(@"Selected a %@ stream", [currentlySelectedVideo quality]);
 
     return nil;
 }
-
 %end

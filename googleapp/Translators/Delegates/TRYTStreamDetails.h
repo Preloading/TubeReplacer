@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#import "../appheaders.h"
 
 @interface TRYTStreamDetails : NSObject 
 @property (nonatomic, assign) int type; // 1 = muxed, 2 = video, 3 = audio
@@ -13,7 +14,8 @@
 @property (nonatomic, strong) NSString *audioQuality;
 @property (nonatomic, assign) int averageBitrate;
 @property (nonatomic, assign) int bitrate;
-@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, assign) BOOL encrypted;
 
 +(TRYTStreamDetails*)initWithType:(int)type
                     itag:(int)itag
@@ -28,4 +30,5 @@
                     averageBitrate:(int)averageBitrate
                     bitrate:(int)bitrate
                     url:(NSURL*)url;
+
 @end
