@@ -606,6 +606,7 @@ typedef struct _TBXMLElement {
 
 @interface NSError (YouTubeAdditions)
 - (NSString *)logDescription;
++(NSError*)errorWithPlaybackError:(int)a3;
 @end
 
 @interface YTStream : NSObject
@@ -1233,5 +1234,166 @@ typedef struct _TBXMLElement {
 - (oneway void)release;
 - (unsigned int)retainCount;
 - (id)retain;
+
+@end
+
+@protocol YTPlayer <NSObject>
+- (void)setDelegate:(id)fp8;
+- (id)currentFrame;
+- (BOOL)isPlaying;
+- (double)downloadedTime;
+- (void)setTotalTimeHint:(double)fp8;
+- (double)totalTime;
+- (void)seekToTimeWithoutPlayerCreation:(double)fp8;
+- (void)seekToTime:(double)fp8;
+- (double)mediaTime;
+- (void)rewind;
+- (void)pause;
+- (void)play;
+- (void)setContentURL:(id)fp8;
+- (id)contentURL;
+- (void)releasePlayer;
+@end
+
+
+
+@interface YTPlayerController : NSObject
++ (void)pauseActivePlayer;
+- (void)setControlsVisibilityDelegate:(id)fp8;
+- (id)controlsVisibilityDelegate;
+- (void)startCPNServicesForAd;
+- (void)startCPNServicesForVideo;
+- (void)showAudioAirPlayToast;
+- (void)appDidBecomeActive;
+- (void)appWillResignActive;
+- (void)stopSecondScreen:(id)fp8;
+- (void)startSecondScreen:(id)fp8;
+- (id)selectStreamForVideo:(id)fp8;
+- (void)addVideoToHistory;
+- (void)animateControlsToHiddenWithDuration:(id)fp8;
+- (void)animateControlsToHiddenWithDelay;
+- (void)animateControlsToVisible;
+- (void)clearVisibilityTimer;
+- (void)loadAdThenVideoStreams;
+- (void)setAndPlayVideoStream:(id)fp8;
+- (void)loadVideoStream;
+- (void)playIfPermitted;
+- (void)restartDRMStreamConverterIfNeeded;
+- (void)didReceiveDRMErrorNotification:(id)fp8;
+- (void)pauseAndReleasePlayer;
+- (void)adPlaybackDidStop;
+- (id)videoOrAdVideo;
+- (void)subtitlesPickerDidClose;
+- (void)playerViewDidPinchToSmallscreen;
+- (void)playerViewDidPinchToFullscreen;
+- (void)playerViewDidPressAdTitle;
+- (void)playerViewDidPressAdLearnMore;
+- (void)playerViewDidPressSkipAd;
+- (void)playerViewDidShowSkipAd;
+- (void)playerViewDidReceiveTouch;
+- (void)playbackDidFailWithError:(id)fp8;
+- (void)playbackRenderingDidChangeToView:(id)fp8;
+- (void)playbackReadyToDisplay;
+- (void)playbackLoadingDidStop;
+- (void)playbackLoadingDidStart;
+- (void)playbackDidPause;
+- (void)playbackDidProgress;
+- (void)updatePlayerView;
+- (void)playbackDidPlay;
+- (void)playbackNotReadyToReplay;
+- (void)playbackReadyToReplay;
+- (void)playbackDidFinish;
+- (void)didPressReplay;
+- (void)didPressSmallscreen;
+- (void)didPressFullscreen;
+- (void)didEndScrubbing;
+- (void)didStartScrubbing;
+- (void)didPressSubtitlesInRect:(struct CGRect)fp8 inView:(id)fp24;
+- (void)didSeekToTime:(double)fp8;
+- (void)didPressPause;
+- (void)didPressPlay;
+- (void)animateControlsToHidden;
+- (void)viewWillDisappear;
+- (void)viewDidAppear;
+- (void)setBranding:(id)fp8;
+- (void)setPlayerControllerDelegate:(id)fp8;
+- (void)dealloc;
+- (id)init;
+- (id)initWithServices:(id)fp8 navigation:(id)fp12 playerView:(id)fp16 player:(id)fp20 video:(id)fp24 source:(int)fp28;
+
+@end
+
+@interface YTPlayerView : NSObject
++ (id)styledErrorLabel;
++ (id)styledSubtitlesLabel;
+- (void)setSkipAdNow;
+- (void)didTap:(id)fp8;
+- (void)didPinch:(id)fp8;
+- (void)didPressAdTitleButton:(id)fp8;
+- (void)didPressAdLearnMoreButton:(id)fp8;
+- (void)didPressSkipAd:(id)fp8;
+- (void)setWatermark:(id)fp8;
+- (void)setReplayButtonHidden:(BOOL)fp8;
+- (void)setSubtitlesButtonEnabled:(BOOL)fp8;
+- (void)setSubtitlesButtonHidden:(BOOL)fp8;
+- (void)setSubtitlesButtonSelected:(BOOL)fp8;
+- (void)setMediaTime:(double)fp8;
+- (void)setDownloadedTime:(double)fp8;
+- (void)setTotalTime:(double)fp8;
+- (void)showPauseButton;
+- (void)showPlayButton;
+- (void)setAirPlayAllowed:(BOOL)fp8;
+- (float)controlsAlpha;
+- (void)setControlsAlpha:(float)fp8;
+- (void)setControlsViewDelegate:(id)fp8;
+- (BOOL)gestureRecognizer:(id)fp8 shouldReceiveTouch:(id)fp12;
+- (void)setViewLayout:(int)fp8;
+- (void)setState:(int)fp8;
+- (void)setVideoRenderingView:(id)fp8;
+- (void)setDelegate:(id)fp8;
+- (void)setAdTitle:(id)fp8;
+- (void)enableSkipAdWithTime:(double)fp8;
+- (void)setAirPlayActive:(BOOL)fp8;
+- (void)setCurrentFrame:(id)fp8;
+- (void)setStateToErrorWithMessage:(id)fp8;
+- (void)setSubtitlesText:(id)fp8;
+- (BOOL)isSpinnerAnimating;
+- (void)setLoading:(BOOL)fp8;
+- (void)layoutSubviews;
+- (void)dealloc;
+- (id)initWithFrame:(struct CGRect)fp8;
+- (id)initWithResourceLoader:(id)fp8;
+
+@end
+
+@interface YTPlayer_iOS5 : NSObject
+// + (double)secondsWithCMTime:(CDAnonymousStruct1)fp8;
+- (void)setPlaybackState:(int)fp8;
+- (void)removePlayerItemNotifications;
+- (void)addPlayerItemNotifications;
+- (void)observeValueForKeyPath:(id)fp8 ofObject:(id)fp12 change:(id)fp16 context:(void *)fp20;
+- (void)playbackDidFinish:(id)fp8;
+- (void)stopPlaybackStatusObserver;
+- (void)startPlaybackStatusObserver;
+- (void)updateSpinnerStatusAndLastPlaybackTime;
+- (void)restartPlaybackIfNecessary;
+- (void)createPlayerIfNeeded;
+- (void)setDelegate:(id)fp8;
+- (id)currentFrame;
+- (BOOL)isPlaying;
+- (double)downloadedTime;
+- (double)totalTime;
+- (void)setTotalTimeHint:(double)fp8;
+- (double)mediaTime;
+- (void)seekToTimeWithoutPlayerCreation:(double)fp8;
+- (void)seekToTime:(double)fp8;
+- (void)rewind;
+- (void)pause;
+- (void)play;
+- (void)setContentURL:(id)fp8;
+- (id)contentURL;
+- (void)releasePlayer;
+- (void)dealloc;
+- (id)init;
 
 @end

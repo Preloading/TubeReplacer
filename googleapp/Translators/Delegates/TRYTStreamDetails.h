@@ -32,3 +32,12 @@
                     url:(NSURL*)url;
 
 @end
+
+@interface TRYTStreams : NSObject
+@property (nonatomic, strong) TRYTStreamDetails *videoStream;
+@property (nonatomic, strong) TRYTStreamDetails *audioStream;
+@property (nonatomic, assign) BOOL encrypted; // this just saves me a lot of work.
+
++(TRYTStreams*)initWithVideoStream:(TRYTStreamDetails*)videoStream
+                audioStream:(TRYTStreamDetails*)audioStream;
+@end

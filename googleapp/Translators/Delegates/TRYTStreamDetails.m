@@ -44,3 +44,22 @@
 }
 
 @end
+
+@implementation TRYTStreams
++(TRYTStreams*)initWithVideoStream:(TRYTStreamDetails*)videoStream
+                audioStream:(TRYTStreamDetails*)audioStream 
+{
+    TRYTStreams *streams = [[TRYTStreams alloc] init];
+    streams->_videoStream = videoStream;
+    streams->_audioStream = audioStream;
+    streams->_encrypted = NO; // encryption is likely to just be never supported. anyways it would need a lot more work :P
+    return streams;
+}
+
+- (void)dealloc {
+    [_videoStream release];
+    [_audioStream release];
+    [super dealloc];
+}
+
+@end
