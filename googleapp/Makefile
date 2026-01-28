@@ -40,7 +40,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
 
 before-all::
-	rm signinpolyfil.h
+	rm signinpolyfil.h || true
 	xxd -i signinpolyfil.js > signinpolyfil.h
 
 include $(THEOS_MAKE_PATH)/tweak.mk
