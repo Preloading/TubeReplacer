@@ -1180,3 +1180,28 @@ typedef struct _TBXMLElement {
 - (id)initWithEntries:(id)fp8 totalResults:(int)fp12 entriesPerPage:(int)fp16 startIndex:(int)fp20 nextURL:(id)fp24 previousURL:(id)fp28;
 
 @end
+
+@interface YTEvent : NSObject
+- (id)feedURL;
+- (id)groupID;
+- (YTVideo*)video;
+- (id)when;
+- (id)target;
+- (int)action;
+- (id)authorUserID;
+- (id)authorDisplayName;
+- (id)description;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithAuthorDisplayName:(id)fp8 authorUserID:(id)fp12 action:(int)fp16 target:(id)fp20 when:(id)fp24 video:(id)fp28 groupID:(id)fp32 feedURL:(id)fp36;
+
+@end
+
+@interface YTEventParser : YTTBParser
+
+- (id)parseElement:(id)fp8 error:(id *)fp12;
+- (void)dealloc;
+- (id)initWithVideoParser:(id)fp8;
+
+@end
+

@@ -166,6 +166,12 @@
     return [self serializeBody:body];
 }
 
++ (NSData *)getPopularVideosFromChannelId:(NSString *)channelId 
+                               client:(YoutubeClientType *)client {    
+    return [self continueWithContext:[self encodePopularChannelVideos:channelId] client:client];
+}
+
+
 #pragma mark - Comments/Continuation Requests
 
 + (NSData *)commentsBodyWithVideoId:(NSString *)videoId 
@@ -222,6 +228,40 @@
     
     NSData *out = [enc dataRepresentation];
     [enc release];
+    
+    return [self urlEncodeBase64:out];
+}
+
++ (NSString *)encodePopularChannelVideos:(NSString *)channelId {
+    ProtobufEncoder *enc = [[ProtobufEncoder alloc] init];
+    
+    [enc writeMessageField:110 usingBlock:^(ProtobufEncoder *a) {
+        [a writeMessageField:3 usingBlock:^(ProtobufEncoder *b) {
+            [b writeMessageField:15 usingBlock:^(ProtobufEncoder *c) {
+                [c writeMessageField:2 usingBlock:^(ProtobufEncoder *d) {
+                    [d writeStringField:1 string:@"6e2801c0-0000-28a8-ac69-582429a74ce0"];
+                }];
+                [c writeUInt64Field:4 value:2];
+                [c writeMessageField:8 usingBlock:^(ProtobufEncoder *d) {
+                    [d writeStringField:1 string:@"6e2801c0-0000-28a8-ac69-582429a74ce0"];
+                    [d writeUInt64Field:2 value:3];
+                }];
+            }];
+        }];
+
+    }];
+    
+    ProtobufEncoder *enc2 = [[ProtobufEncoder alloc] init];
+    
+    [enc2 writeMessageField:80226972 usingBlock:^(ProtobufEncoder *a) {
+        [a writeStringField:2 string:channelId];
+        [a writeStringField:3 string:[self urlEncodeBase64:[enc dataRepresentation]]];
+    }];
+
+    [enc release];
+    
+    NSData *out = [enc2 dataRepresentation];
+    [enc2 release];
     
     return [self urlEncodeBase64:out];
 }

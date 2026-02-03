@@ -13,6 +13,7 @@
  * Handles various feed types: home, subscriptions, channel videos, search, etc.
  */
 - (id)translateJSON:(NSDictionary *)json error:(NSError **)error;
+- (id)translateJSONAsEvent:(NSDictionary *)json error:(NSError **)error;
 
 /**
  * Extract the items array from various feed response structures.

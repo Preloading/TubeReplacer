@@ -54,6 +54,9 @@
 + (NSData *)nextBodyWithVideoId:(NSString *)videoId 
                          client:(YoutubeClientType *)client;
 
++ (NSData *)getPopularVideosFromChannelId:(NSString *)channelId 
+                                   client:(YoutubeClientType *)client;
+
 #pragma mark - Search Requests
 
 /**

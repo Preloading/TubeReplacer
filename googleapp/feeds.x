@@ -36,9 +36,14 @@
         [entryParser isKindOfClass:[%c(YTPlaylistParser) class]]) {
         return [self parseSpecializedFeed:bodyDict withEntryParser:entryParser error:error];
     }
-    
+
+    NSLog(@"class -> %@", [entryParser class]);
+
     // Use TRFeedTranslator for standard video/channel feeds
     TRFeedTranslator *translator = [[[TRFeedTranslator alloc] init] autorelease];
+    if ([entryParser isKindOfClass:[%c(YTEventParser) class]]) {
+        return [translator translateJSONAsEvent:bodyDict error:error];
+    }
     return [translator translateJSON:bodyDict error:error];
 }
 
