@@ -167,42 +167,6 @@
 
 @end
 
-@interface YTGDataService : YTBaseService
-- (void)makeDELETERequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
-- (void)makePOSTRequest:(YTGDataRequest*)request withParser:(id)parser responseBlock:(id)responseBlock errorBlock:(id)errorBlock;
-- (void)makeWriteRequest:(YTGDataRequest*)request method:(NSString*)method parser:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
-- (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
-- (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
-- (void)makeVideoRequestWithVideoID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
-- (void)makeChannelRequestWithID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
-- (void)authenticationDidChange:(id)fp8;
-- (void)evictElementsFromCache:(id)fp8 forRequest:(id)fp12;
-- (void)clearSubscriptionDependentCaches;
-- (void)cacheSubscriptionsFromSubscriptionPage:(id)fp8;
-- (void)cacheVideosFromPurchasePage:(id)fp8;
-- (void)cacheVideosFromEventPage:(id)fp8;
-- (void)cacheVideosFromVideoPage:(id)fp8;
-@end
-
-@interface YTServices : NSObject
-- (void)didReceiveMemoryWarning;
-- (id)settings;
-- (id)reachability;
-- (id)resourceLoader;
-- (id)userAuthenticator;
-- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
-- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
-- (id)videoStatsServiceWithSource:(int)fp8;
-- (id)subtitlesService;
-- (id)suggestService;
-- (id)searchHistory;
-- (id)musicService;
-- (id)imageService;
-- (YTGDataService*)gDataService;
-- (id)adTrackingServiceForAd:(id)fp8;
-- (id)adsService;
-@end
-
 @interface GTMURLBuilder : NSObject
 {
     NSMutableDictionary *params_;
@@ -1059,6 +1023,62 @@ typedef struct _TBXMLElement {
 
 @end
 
+@interface YTCache : NSObject
+
+- (id)valueWrapperForKeyWrapper:(id)fp8;
+- (void)evict;
+- (void)removeAllObjects;
+- (void)removeObjectForKey:(id)fp8;
+- (id)objectForKey:(id)fp8;
+- (void)setObject:(id)fp8 forKey:(id)fp12;
+- (id)allKeys;
+- (void)dealloc;
+- (id)init;
+- (id)initWithCountLimit:(unsigned int)fp8;
+- (id)initWithExpirationInterval:(double)fp8 countLimit:(unsigned int)fp16;
+
+@end
+
+
+@interface YTGDataService : YTBaseService
+- (void)makeDELETERequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
+- (void)makePOSTRequest:(YTGDataRequest*)request withParser:(id)parser responseBlock:(id)responseBlock errorBlock:(id)errorBlock;
+- (void)makeWriteRequest:(YTGDataRequest*)request method:(NSString*)method parser:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
+- (void)makeGETRequest:(YTGDataRequest*)request withParser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
+- (void)makeGETRequest:(id)request withParser:(id)fp12 cache:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
+- (void)makeVideoRequestWithVideoID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
+- (void)makeChannelRequestWithID:(id)fp8 responseBlock:(id)fp errorBlock:(id)fp12;
+- (void)authenticationDidChange:(id)fp8;
+- (void)evictElementsFromCache:(id)fp8 forRequest:(id)fp12;
+- (void)clearSubscriptionDependentCaches;
+- (void)cacheSubscriptionsFromSubscriptionPage:(id)fp8;
+- (void)cacheVideosFromPurchasePage:(id)fp8;
+- (void)cacheVideosFromEventPage:(id)fp8;
+- (void)cacheVideosFromVideoPage:(id)fp8;
+- (void)cacheChannel:(YTChannel*)channel;
+-(YTCache*)channelCache ;
+@end
+
+
+@interface YTServices : NSObject
+- (void)didReceiveMemoryWarning;
+- (id)settings;
+- (id)reachability;
+- (id)resourceLoader;
+- (id)userAuthenticator;
+- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
+- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
+- (id)videoStatsServiceWithSource:(int)fp8;
+- (id)subtitlesService;
+- (id)suggestService;
+- (id)searchHistory;
+- (id)musicService;
+- (id)imageService;
+- (YTGDataService*)gDataService;
+- (id)adTrackingServiceForAd:(id)fp8;
+- (id)adsService;
+@end
+
 
 @interface YTSubscription : NSObject
 - (id)updatedDate;
@@ -1108,21 +1128,6 @@ typedef struct _TBXMLElement {
 
 @end
 
-@interface YTCache : NSObject
-
-- (id)valueWrapperForKeyWrapper:(id)fp8;
-- (void)evict;
-- (void)removeAllObjects;
-- (void)removeObjectForKey:(id)fp8;
-- (id)objectForKey:(id)fp8;
-- (void)setObject:(id)fp8 forKey:(id)fp12;
-- (id)allKeys;
-- (void)dealloc;
-- (id)init;
-- (id)initWithCountLimit:(unsigned int)fp8;
-- (id)initWithExpirationInterval:(double)fp8 countLimit:(unsigned int)fp16;
-
-@end
 
 @interface YTVideoInfoTableController_iPhone : NSObject
 - (void)loadWithChannelID:(id)fp8;

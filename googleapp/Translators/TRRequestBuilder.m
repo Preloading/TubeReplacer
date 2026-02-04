@@ -244,7 +244,7 @@
                 [c writeUInt64Field:4 value:2];
                 [c writeMessageField:8 usingBlock:^(ProtobufEncoder *d) {
                     [d writeStringField:1 string:@"6e2801c0-0000-28a8-ac69-582429a74ce0"];
-                    [d writeUInt64Field:2 value:3];
+                    [d writeUInt64Field:3 value:2];
                 }];
             }];
         }];

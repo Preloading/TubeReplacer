@@ -6,6 +6,7 @@
 #import <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 
 #pragma mark - Request Building
 
@@ -20,14 +21,11 @@
 }
 
 +(id)requestForEventsWithChannelID:(NSString*)channelId {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:channelId
                  authentication:nil 
-                //  body:[TRRequestBuilder browseBodyWithId:channelId 
-                //                                             params:@"EgZ2aWRlb3PyBgQKAjoA" 
-                //                                             client:[YoutubeClientType webMobileClient]]];
-                           body:[TRRequestBuilder getPopularVideosFromChannelId:channelId
-                                                            client:[YoutubeClientType webMobileClient]]];
-}
+                           body:[TRRequestBuilder browseBodyWithId:channelId 
+                                                            params:@"EgZ2aWRlb3PyBgQKAjoA" 
+                                                            client:[YoutubeClientType webMobileClient]]];}
 
 %end
 
@@ -53,16 +51,47 @@
 -(void)makeEventsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock
 {
     id actualRequest = request;
-    if ([[request URL] isKindOfClass:[NSString class]]) {
+    id newResponseBlock = responseBlock;
+
+    if ([[request URL] isKindOfClass:[TRContinuation class]]) {
         actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                  authentication:nil // i hope this wont cause issues... 
-                           body:[TRRequestBuilder continueWithContext:[request URL] 
+                           body:[TRRequestBuilder continueWithContext:[[request URL] token]
                                                         client:[YoutubeClientType webMobileClient]]];
+    } else {
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder getPopularVideosFromChannelId:[request URL]
+                                                            client:[YoutubeClientType webMobileClient]]];
+        void (^originalResponseBlock)(id) = [responseBlock copy];
+        void (^newResponseBlock)(id) = ^(id response) {
+            NSLog(@"ajosajpo");
+            NSLog(@"response -> %@", response);
+            [response setValue:nil forKey:@"nextURL_"];
+            for (YTEvent *event in [response entries]) {
+                [event setValue:[request URL] forKey:@"authorUserID_"];
+                [event setValue:[[[self channelCache] objectForKey:[request URL]] displayName] forKey:@"authorDisplayName_"];
+                [[event video] setValue:[request URL] forKey:@"uploaderChannelID_"];
+                [[event video] setValue:[[[self channelCache] objectForKey:[request URL]] displayName] forKey:@"uploaderDisplayName_"];
+            }
+
+            if (originalResponseBlock) {
+                originalResponseBlock(response);
+            }
+        };
+
+        [self makePOSTRequest:actualRequest 
+               withParser:[self valueForKey:@"eventPageParser_"] 
+            responseBlock:newResponseBlock 
+               errorBlock:errorBlock];
+
+               return;
+        
     }
 
     [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"eventPageParser_"] 
-            responseBlock:responseBlock 
+            responseBlock:newResponseBlock 
                errorBlock:errorBlock];
 }
 

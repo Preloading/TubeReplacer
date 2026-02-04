@@ -7,6 +7,7 @@
 #import "TRVideoTranslator.h"
 #import "TRChannelTranslator.h"
 #import "TRJSONUtils.h"
+#import "TRContinuation.h"
 #import "../appheaders.h"
 
 @implementation TRFeedTranslator
@@ -106,7 +107,7 @@
         totalResults:100000 // todo: make better
         entriesPerPage:[entries count] 
         startIndex:1 
-        nextURL:nil 
+        nextURL:[TRContinuation initWithToken:continuationToken] // right now continuation has some issues missing the channel information, and I don't wanna bother with it right now.
         previousURL:nil
     ] autorelease];
     

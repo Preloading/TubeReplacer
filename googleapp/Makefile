@@ -25,6 +25,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	accountfeeds.x \
 	playlist.x \
 	likes.x \
+	general.x \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \

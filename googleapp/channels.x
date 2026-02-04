@@ -26,11 +26,19 @@
 %hook YTGDataService
 
 -(void)makeChannelRequestWithID:(NSString*)channelId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    id url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
-    [self makePOSTRequest:url 
-               withParser:[self valueForKey:@"channelParser_"] 
-            responseBlock:responseBlock 
-               errorBlock:errorBlock];
+    id cache = [[self channelCache] objectForKey:channelId];
+    if (cache) {
+        if (cache == [NSNull null]) {
+            cache = nil;
+        }
+        [self performResponseBlock:responseBlock response:cache];
+    } else {
+        id url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
+        [self makePOSTRequest:url 
+                withParser:[self valueForKey:@"channelParser_"] 
+                responseBlock:responseBlock 
+                errorBlock:errorBlock];
+    }
 }
 
 %end

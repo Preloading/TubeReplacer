@@ -91,12 +91,16 @@
 
     void (^wrappedResponseBlock)(id) = ^(id response) {
         // Cache subscriptions when fetching subscription page
-        id subscriptionParser = [self valueForKey:@"subscriptionPageParser_"];
-        if (parser == subscriptionParser) {
-            // Increase cache limit for heavy users
+        if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
             id cache = [self valueForKey:@"subscriptionCache_"];
             [cache setValue:@100000 forKey:@"countLimit_"];
             [self cacheSubscriptionsFromSubscriptionPage:response];
+        }
+
+        if (parser == [self valueForKey:@"channelParser_"]) {
+            id cache = [self channelCache];
+            [cache setValue:@100000 forKey:@"countLimit_"];
+            [self cacheChannel:response];
         }
 
         if (originalResponseBlock) {
