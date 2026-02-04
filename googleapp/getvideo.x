@@ -28,7 +28,7 @@
     return [self requestWithURL:fullURL 
                  authentication:nil 
                            body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:[YoutubeClientType androidClient]]];
+                                                                 client:[YoutubeClientType iosClient]]];
 }
 
 %end

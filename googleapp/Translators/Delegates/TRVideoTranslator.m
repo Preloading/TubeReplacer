@@ -73,19 +73,28 @@
     NSDictionary *thumbnails = [TRJSONUtils thumbnailsFromArray:thumbArray];
     
     NSMutableArray *ytStreams = [NSMutableArray array];
-    NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
-    for (NSDictionary *format in formats) {
-        NSString *urlString = format[@"url"];
-        if (urlString) {
-            NSURL *url = [NSURL URLWithString:urlString];
-            if (url) {
-                id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:3 encrypted:NO];
-                if (stream) {
-                    [ytStreams addObject:stream];
+    NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
+    if (hlsStreamURL) {
+        id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL URLWithString:hlsStreamURL] format:3 encrypted:NO];
+        if (stream) {
+            [ytStreams addObject:stream];
+        }
+    } else {
+        NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
+        for (NSDictionary *format in formats) {
+            NSString *urlString = format[@"url"];
+            if (urlString) {
+                NSURL *url = [NSURL URLWithString:urlString];
+                if (url) {
+                    id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:3 encrypted:NO];
+                    if (stream) {
+                        [ytStreams addObject:stream];
+                    }
                 }
             }
         }
     }
+    
     
     NSMutableArray *availableCountries = [NSMutableArray array];
     NSArray *countries = [TRJSONUtils arrayFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.availableCountries"];

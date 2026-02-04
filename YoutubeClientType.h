@@ -18,6 +18,7 @@
 +(YoutubeClientType*)webSafariClient;
 +(YoutubeClientType*)tvEmbeddedClient;
 +(YoutubeClientType*)webMobileClient;
++(YoutubeClientType*)iosClient;
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;
 

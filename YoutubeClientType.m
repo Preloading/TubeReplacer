@@ -57,6 +57,15 @@
     client.platform  = @"MOBILE";
     return client;
 }
++(YoutubeClientType*)iosClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"IOS";
+    client.version   = @"20.11.6";
+    client.osName    = @"iPhone";
+    client.osVersion = @"18.5.0.22F76";
+    client.platform  = @"MOBILE";
+    return client;
+}
 +(YoutubeClientType*)tvEmbeddedClient {
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"TVHTML5_SIMPLY_EMBEDDED_PLAYER";
