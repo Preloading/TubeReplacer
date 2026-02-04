@@ -4,7 +4,9 @@
 @implementation TRContinuation
 +(TRContinuation*)initWithToken:(NSString*)token {
     TRContinuation *continuation = [TRContinuation alloc];
-    [continuation setToken:token];
+    if (token) {
+        [continuation setToken:token];
+    }
     return continuation;
 }
 @end

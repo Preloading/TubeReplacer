@@ -88,7 +88,7 @@
         if (entry) {
             [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
                 authorUserID:[entry uploaderChannelID]
-                action:1
+                action:9 // 5 = uploaded 9 = recommended
                 target:[entry uploaderChannelID]
                 when:[entry uploadedDate]
                 video:entry
@@ -101,16 +101,21 @@
 
     NSLog(@"continuation token -> %@", continuationToken);
     
+    id contiunationData = nil;
+    if (continuationToken) {
+        contiunationData = [TRContinuation initWithToken:continuationToken];
+    }
+
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
         totalResults:100000 // todo: make better
         entriesPerPage:[entries count] 
         startIndex:1 
-        nextURL:[TRContinuation initWithToken:continuationToken] // right now continuation has some issues missing the channel information, and I don't wanna bother with it right now.
+        nextURL:contiunationData //// right now continuation has some issues missing the channel information, and I don't wanna bother with it right now.
         previousURL:nil
     ] autorelease];
-    
+  
     return page;
 }
 
@@ -239,6 +244,11 @@
     items = [TRJSONUtils arrayFromJSON:json 
         keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[1].tabRenderer.content.richGridRenderer.contents"];
     if (items) return items;
+
+    // Home Feed
+    items = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents"];
+    if (items) return items;
     
     // Search results
     items = [TRJSONUtils arrayFromJSON:json 
@@ -275,6 +285,7 @@
         keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents"];
     if (items) return items;
     
+    NSLog(@"No array of content found!!!");
     return @[];
 }
 

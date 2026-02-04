@@ -65,10 +65,9 @@
                                                             client:[YoutubeClientType webMobileClient]]];
         void (^originalResponseBlock)(id) = [responseBlock copy];
         void (^newResponseBlock)(id) = ^(id response) {
-            NSLog(@"ajosajpo");
-            NSLog(@"response -> %@", response);
             [response setValue:nil forKey:@"nextURL_"];
             for (YTEvent *event in [response entries]) {
+                [event setValue:@5 forKey:@"action_"];
                 [event setValue:[request URL] forKey:@"authorUserID_"];
                 [event setValue:[[[self channelCache] objectForKey:[request URL]] displayName] forKey:@"authorDisplayName_"];
                 [[event video] setValue:[request URL] forKey:@"uploaderChannelID_"];

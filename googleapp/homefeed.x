@@ -6,6 +6,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 
 #pragma mark - Request Dispatch
 
@@ -23,6 +24,24 @@
     
     [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"videoPageParser_"] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
+}
+
+-(void)makeMySubscriptionEventsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+// something for future, it may be worth it to figure out the entire pagination stuff so we dont have to do this everywhere
+    id actualRequest = request;
+    if ([[request URL] isKindOfClass:[TRContinuation class]]) {
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:nil // i hope this wont cause issues... 
+                           body:[TRRequestBuilder continueWithContext:[[request URL] token]
+                                                            client:[YoutubeClientType webMobileClient]]];
+    }
+    
+
+    NSLog(@"makeMySubscriptionEventsRequest");
+    [self makePOSTRequest:actualRequest 
+               withParser:[self valueForKey:@"eventPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }

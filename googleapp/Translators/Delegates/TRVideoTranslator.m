@@ -217,33 +217,46 @@
         accessibilityLabel = [TRJSONUtils stringFromJSON:videoData 
                                                  keyPath:@"title.accessibility.accessibilityData.label"];
     }
+
+    NSLog(@"accessiblity label -> %@", accessibilityLabel);
     
     if (accessibilityLabel && [accessibilityLabel length] > 0) {
         // Parse accessibility label for views and date
+        // Instead of calculating word positions, search for "views" keyword
         NSArray *accessibilityParts = [accessibilityLabel componentsSeparatedByString:@" "];
         
-        // Calculate how many words to skip (title + "by" + uploader name)
-        int titleWords = [[title componentsSeparatedByString:@" "] count];
-        int uploaderWords = [[uploaderName componentsSeparatedByString:@" "] count];
-        int removedParts = titleWords + 1 + uploaderWords - 1; // +1 for "by", -1 for indexing
-        
-        // Extract views (next word after removed parts)
-        if ([accessibilityParts count] > removedParts + 1) {
-            NSString *viewsPart = accessibilityParts[removedParts + 1];
-            viewsPart = [viewsPart stringByReplacingOccurrencesOfString:@"," withString:@""];
-            views = [viewsPart longLongValue];
+        // Find the index of "views" keyword
+        NSInteger viewsIndex = NSNotFound;
+        for (NSInteger i = 0; i < [accessibilityParts count]; i++) {
+            if ([[accessibilityParts[i] lowercaseString] isEqualToString:@"views"]) {
+                viewsIndex = i;
+                break;
+            }
         }
         
-        // Extract upload date (remaining words after views + "views")
-        // Format: "5 days ago" or "3 weeks ago" etc.
-        if ([accessibilityParts count] > removedParts + 3) {
-            NSMutableString *dateString = [NSMutableString string];
-            for (int i = removedParts + 3; i < [accessibilityParts count]; i++) {
-                NSString *part = accessibilityParts[i];
-                part = [part stringByReplacingOccurrencesOfString:@"," withString:@""];
-                [dateString appendFormat:@"%@ ", part];
+        if (viewsIndex != NSNotFound && viewsIndex > 0) {
+            // The views count is the word before "views"
+            NSString *viewsPart = accessibilityParts[viewsIndex - 1];
+            viewsPart = [viewsPart stringByReplacingOccurrencesOfString:@"," withString:@""];
+            views = [viewsPart longLongValue];
+            
+            // Extract upload date (remaining words after "views")
+            // Format: "5 days ago" or "3 weeks ago" etc.
+            if ([accessibilityParts count] > viewsIndex + 1) {
+                NSMutableString *dateString = [NSMutableString string];
+                for (NSInteger i = viewsIndex + 1; i < [accessibilityParts count]; i++) {
+                    NSString *part = accessibilityParts[i];
+                    // Stop if we hit the duration part (contains "minute" or "second")
+                    if ([part rangeOfString:@"minute" options:NSCaseInsensitiveSearch].location != NSNotFound ||
+                        [part rangeOfString:@"second" options:NSCaseInsensitiveSearch].location != NSNotFound ||
+                        [part rangeOfString:@"hour" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                        break;
+                    }
+                    part = [part stringByReplacingOccurrencesOfString:@"," withString:@""];
+                    [dateString appendFormat:@"%@ ", part];
+                }
+                uploadDate = [TRJSONUtils dateFromTimeAgo:dateString];
             }
-            uploadDate = [TRJSONUtils dateFromTimeAgo:dateString];
         }
     } else {
         // Fallback: try direct viewCountText path
@@ -281,7 +294,7 @@
                                    @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", 
                                    @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", 
                                    @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
-    
+    NSLog(@"views -> %llu", views);
     id video = [[NSClassFromString(@"YTVideo") alloc] 
         initWithID:videoId
         title:title
