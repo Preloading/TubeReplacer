@@ -146,3 +146,5 @@
     return nil; // things go wrong here
 }
 %end
+
+// Youtube likes to send dubbed audio tracks, which sucks and is bad. This was the best way i found to fix it. In of itself this sux ass

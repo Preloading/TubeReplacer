@@ -1210,3 +1210,73 @@ typedef struct _TBXMLElement {
 
 @end
 
+
+@interface YTLiveServices : NSObject
+
+- (void)didReceiveMemoryWarning;
+- (id)settings;
+- (id)reachability;
+- (id)resourceLoader;
+- (id)userAuthenticator;
+- (id)PTrackingServiceWithAdVideo:(id)fp8 video:(id)fp12 CPN:(id)fp16;
+- (id)PTrackingServiceWithVideo:(id)fp8 CPN:(id)fp12;
+- (id)videoStatsServiceWithSource:(int)fp8;
+- (id)subtitlesService;
+- (id)suggestService;
+- (id)searchHistory;
+- (id)musicService;
+- (id)imageService;
+- (YTGDataService*)gDataService;
+- (id)adTrackingServiceForAd:(id)fp8;
+- (id)adsService;
+- (void)dealloc;
+- (id)init;
+
+@end
+
+@interface YTNotificationCenter : NSObject
++ (void)removeNotificationObserver:(id)fp8;
++ (void)addWillMaximizeGuideObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifyWillMaximizeGuideFromSwipe:(BOOL)fp8;
++ (void)removeUIOrientationChangeObserver:(id)fp8;
++ (void)addUIOrientationChangeObserver:(id)fp8 selector:(SEL)fp12;
++ (void)removeDeviceOrientationChangeObserver:(id)fp8;
++ (void)addDeviceOrientationChangeObserver:(id)fp8 selector:(SEL)fp12;
++ (void)removeReleasePortraitUIObserver:(id)fp8;
++ (void)addReleasePortraitUIObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifyReleasePortraitUI:(id)fp8;
++ (void)removeRequestPortraitUIObserver:(id)fp8;
++ (void)addRequestPortraitUIObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifyRequestPortraitUI:(id)fp8;
++ (void)addDRMErrorObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifyDRMError:(id)fp8;
++ (void)addPlaybackDidStopObserver:(id)fp8 selector:(SEL)fp12 forVideo:(id)fp16;
++ (void)notifyPlaybackDidStopWithVideo:(id)fp8 mediaTime:(double)fp12;
++ (void)addPlaybackDidPauseObserver:(id)fp8 selector:(SEL)fp12 forVideo:(id)fp16;
++ (void)notifyPlaybackDidPauseWithVideo:(id)fp8 mediaTime:(double)fp12;
++ (void)addPlaybackDidProgressObserver:(id)fp8 selector:(SEL)fp12 forVideo:(id)fp16;
++ (void)notifyPlaybackDidProgressWithVideo:(id)fp8 mediaTime:(double)fp12;
++ (void)addPlaybackDidPlayObserver:(id)fp8 selector:(SEL)fp12 forVideo:(id)fp16;
++ (void)notifyPlaybackDidPlayWithVideo:(id)fp8 mediaTime:(double)fp12;
++ (void)addSubscriptionChangeObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifySubscriptionChange:(id)fp8 subscribed:(BOOL)fp12;
++ (void)addAuthenticationChangedObserver:(id)fp8 selector:(SEL)fp12;
++ (void)notifyAuthenticationChanged:(id)fp8;
++ (id)allocWithZone:(struct _NSZone *)fp8;
++ (id)instance;
+- (id)queue;
+- (void)deviceOrientationDidChange:(id)fp8;
+- (void)instanceRemoveDeviceOrientationListener:(id)fp8;
+- (void)instanceAddDeviceOrientationChangeObserver:(id)fp8 selector:(SEL)fp12;
+- (void)removeObserver:(id)fp8;
+- (void)observeValueForKeyPath:(id)fp8 ofObject:(id)fp12 change:(id)fp16 context:(void *)fp20;
+- (void)dealloc;
+- (id)init;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (id)autorelease;
+- (oneway void)release;
+- (unsigned int)retainCount;
+- (id)retain;
+
+@end
+

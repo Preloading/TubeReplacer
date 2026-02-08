@@ -8,6 +8,8 @@
 #import "TRJSONUtils.h"
 #import <objc/runtime.h>
 #import "../appheaders.h"
+#import "../../base64/NSString+Base64.h"
+#import "../../base64/NSData+Base64.h"
 
 @implementation TRVideoTranslator
 
@@ -75,6 +77,102 @@
     NSMutableArray *ytStreams = [NSMutableArray array];
     NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
     if (hlsStreamURL) {
+        // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
+        // NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:hlsStreamURL]];
+        // NSURLResponse *response = nil;
+        // NSError *error = nil;
+
+        // // This call blocks the thread
+        // NSData *data = [NSURLConnection sendSynchronousRequest:request
+        //                                     returningResponse:&response
+        //                                                 error:&error];
+
+        // if (data != nil && error == nil) {
+        //     NSLog(@"asdf");
+        //     // Handle success
+        //     // data:application/vnd.apple.mpegurl;base64,
+        //     NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+        //     // Parse the M3U8 to remove bad audio :)
+        //     NSCharacterSet *separator = [NSCharacterSet newlineCharacterSet];
+        //     NSArray *elements = [result componentsSeparatedByCharactersInSet:separator];
+        //     NSMutableArray *newPlaylist = [NSMutableArray array];
+        //     for (NSString *element in elements) {
+        //         if ([element hasPrefix:@"#EXT-X-MEDIA:"]) {
+        //             NSMutableDictionary *components = [NSMutableDictionary dictionary];
+        //             NSString *attributeList = [element substringFromIndex:13];
+                    
+        //             // Parse attributes while respecting quoted values
+        //             NSMutableString *currentKey = [NSMutableString string];
+        //             NSMutableString *currentValue = [NSMutableString string];
+        //             BOOL inQuotes = NO;
+                    
+        //             for (NSInteger i = 0; i < [attributeList length]; i++) {
+        //                 unichar c = [attributeList characterAtIndex:i];
+                        
+        //                 if (c == '"') {
+        //                     inQuotes = !inQuotes;
+        //                     [currentValue appendFormat:@"%c", c];
+        //                 } else if (c == '=' && !inQuotes) {
+        //                     // Key-value separator
+        //                     [currentKey appendFormat:@"%c", c];
+        //                 } else if (c == ',' && !inQuotes) {
+        //                     // Attribute separator - save current pair
+        //                     if ([currentKey length] > 0) {
+        //                         NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
+        //                         if ([keyValue count] == 2) {
+        //                             NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        //                             NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        //                             components[key] = value;
+        //                         }
+        //                     }
+        //                     [currentKey setString:@""];
+        //                     [currentValue setString:@""];
+        //                 } else {
+        //                     if ([currentKey rangeOfString:@"="].location != NSNotFound) {
+        //                         [currentValue appendFormat:@"%c", c];
+        //                     } else {
+        //                         [currentKey appendFormat:@"%c", c];
+        //                     }
+        //                 }
+        //             }
+                    
+        //             // Don't forget the last pair
+        //             if ([currentKey length] > 0) {
+        //                 NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
+        //                 if ([keyValue count] == 2) {
+        //                     NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        //                     NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        //                     components[key] = value;
+        //                 }
+        //             }
+                    
+        //             // Now that it's parsed, lets check and see if we should include it
+        //             if ([components[@"name"] hasSuffix:@" - dubbed-auto\""]) {
+        //                 continue;
+        //             }
+        //             [newPlaylist addObject:element];
+
+        //             // NSLog(@"components -> %@", components);
+        //         } else {
+        //             [newPlaylist addObject:element];
+        //         }
+        //     }
+        //     // NSLog(@"newPlaylist -> %@", newPlaylist);
+        //     NSString *streamURL = [NSString stringWithFormat:@"data:application/vnd.apple.mpegurl;base64,%@", [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] base64EncodedString]];
+        //     id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL URLWithString:streamURL] format:3 encrypted:NO];
+        //     if (stream) {
+        //         [ytStreams addObject:stream];
+        //     }
+        //     NSLog(@"stream -> %@", streamURL);
+        //     // NSLog(@"%@", result); 
+        // } else {
+        //     // Handle error
+        //     NSLog(@"Error fetching HLS Playlist: %@", error.localizedDescription);
+        // }
+        //myhls://
+        hlsStreamURL = [hlsStreamURL stringByReplacingOccurrencesOfString:@"https://"
+                                                        withString:@"myhls://"];
         id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL URLWithString:hlsStreamURL] format:3 encrypted:NO];
         if (stream) {
             [ytStreams addObject:stream];
