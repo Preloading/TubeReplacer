@@ -131,6 +131,7 @@
     NSArray *items = [self extractItemsFromFeed:json];
     NSMutableArray *entries = [NSMutableArray array];
     NSString *continuationToken = nil;
+    int type = 0; // bit of a hack till the comment below is done.
     
     // TODO: move this somewhat to it's own space like comments, how that app actually expects it
     TRVideoTranslator *videoTranslator = [[[TRVideoTranslator alloc] init] autorelease];
@@ -154,12 +155,14 @@
         id entry = nil;
         
         // Try video first
-        if ([videoTranslator canTranslateJSON:item]) {
+        if ((type == 0 || type == 1) && [videoTranslator canTranslateJSON:item]) {
             entry = [videoTranslator translateFeedItem:item withContext:json error:&itemError];
+            type = 1;
         }
         // Then try channel
-        else if ([channelTranslator canTranslateJSON:item]) {
+        else if ((type == 0 || type == 2) && [channelTranslator canTranslateJSON:item]) {
             entry = [channelTranslator translateJSON:item error:&itemError];
+            type = 2;
         }
         
         if (entry) {
