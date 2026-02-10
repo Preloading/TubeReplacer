@@ -6,6 +6,7 @@
 #import <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 
 #pragma mark - Request Building
 
@@ -43,38 +44,71 @@
 
 %hook YTGDataService
 
--(void)makeMyPlaylistsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+-(void)makeMyPlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     // Rebuild request with channelID from authentication
-    NSData *body = [TRRequestBuilder browseBodyWithId:[[request authentication] channelID] 
+    id actualRequest = nil;
+    if ([[request valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
+        TRContinuation *continuation = [request valueForKey:@"URL_"];
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            authentication:nil // i hope this wont cause issues... 
+            body:[TRRequestBuilder continueWithContext:[continuation token]
+                    client:[YoutubeClientType webMobileClient]]];
+        
+    } else {
+        NSData *body = [TRRequestBuilder browseBodyWithId:[[request authentication] channelID] 
                                                params:@"EglwbGF5bGlzdHPyBgQKAkIA" 
                                                client:[YoutubeClientType webMobileClient]];
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                authentication:nil 
+                        body:body];
+    }    
     
-    YTGDataRequest *newRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
-                                                     authentication:nil 
-                                                               body:body];
-    
-    [self makePOSTRequest:newRequest 
+    [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"playlistPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
 
--(void)makePlaylistsRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    [self makePOSTRequest:request 
+-(void)makePlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    id actualRequest = request;
+    if ([[request valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
+        TRContinuation *continuation = [request valueForKey:@"URL_"];
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            authentication:nil // i hope this wont cause issues... 
+            body:[TRRequestBuilder continueWithContext:[continuation token]
+                    client:[YoutubeClientType webMobileClient]]];
+        
+    }
+    [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"playlistPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
 
 -(void)makePlaylistVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    [self makePOSTRequest:request 
+    id actualRequest = request;
+    if ([[request URL] isKindOfClass:[NSString class]]) {
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:nil // i hope this wont cause issues... 
+                           body:[TRRequestBuilder continueWithContext:[request URL] 
+                                                            client:[YoutubeClientType webMobileClient]]];
+    }
+    
+    [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"videoPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
 
 -(void)makeMyPlaylistVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    [self makePOSTRequest:request 
+    id actualRequest = request;
+    if ([[request URL] isKindOfClass:[NSString class]]) {
+        actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+                 authentication:nil // i hope this wont cause issues... 
+                           body:[TRRequestBuilder continueWithContext:[request URL] 
+                                                            client:[YoutubeClientType webMobileClient]]];
+    }
+    [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:@"videoPageParser_"] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];

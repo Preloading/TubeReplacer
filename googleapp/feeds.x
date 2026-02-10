@@ -118,6 +118,10 @@
     
     // Playlist items (find the "Playlists" tab)
     if ([parser isKindOfClass:[%c(YTPlaylistParser) class]]) {
+        NSArray *items = [TRJSONUtils arrayFromJSON:bodyDict 
+            keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
+        if (items) return items;
+
         NSArray *tabs = [TRJSONUtils arrayFromJSON:bodyDict 
             keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs"];
         
