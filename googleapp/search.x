@@ -35,17 +35,6 @@
                              filters:(YTSearchFilters*)filters 
                           safeSearch:(NSString*)safeSearchLevel {
 
-        // + (NSData *)searchBodyWithQuery:(NSString *)query
-    //                 channelOnly:(BOOL)channelOnly
-    //                 sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
-    //                 duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
-    //                 hasCC:(BOOL)hasCC
-    //                 posted:(int)posted  // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
-    //                 client:(YoutubeClientType *)client;
-    NSLog(@"sort by -> %i", [filters sortBy]);
-    NSLog(@"duration -> %i", [filters duration]);
-    NSLog(@"upload date -> %i", [filters uploadDate]);
-
     int sortBy = 0;
     int uploadDate = 0;
     int duration = 0;

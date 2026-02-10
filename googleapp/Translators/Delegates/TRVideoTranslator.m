@@ -552,11 +552,15 @@
                         objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                     }
 
-                    NSString *dateString = nextData[@"next"][@"engagementPanels"][2][@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
-                    NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
-                    [video setValue:date forKey:@"uploadedDate_"];
-                    [video setValue:date forKey:@"publishedDate_"];
-
+                    for (NSDictionary *engagementPanel in nextData[@"next"][@"engagementPanels"]) {
+                        NSString *dateString = engagementPanel[@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
+                        if (dateString != nil) {
+                            NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
+                            [video setValue:date forKey:@"uploadedDate_"];
+                            [video setValue:date forKey:@"publishedDate_"];
+                        }
+                    }
+                    
                     if (!hasLikeDataAlready) {
                         // Extract like count
                         NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
