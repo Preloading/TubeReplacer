@@ -17,11 +17,11 @@
 - (void)setCC:(BOOL)cc;
 - (BOOL)hasCC;
 - (void)setDuration:(int)duration;
-- (id)duration;
+- (int)duration;
 - (void)setUploadDate:(int)uploadDate;
-- (id)uploadDate;
+- (int)uploadDate;
 - (void)setSortBy:(int)sortBy;
-- (id)sortBy;
+- (int)sortBy;
 - (id)copyWithZone:(struct _NSZone *)zone;
 
 @end
@@ -34,19 +34,78 @@
                         languageCode:(NSString*)language 
                              filters:(YTSearchFilters*)filters 
                           safeSearch:(NSString*)safeSearchLevel {
-    // TODO: Implement full filter support in TRRequestBuilder
+
+        // + (NSData *)searchBodyWithQuery:(NSString *)query
+    //                 channelOnly:(BOOL)channelOnly
+    //                 sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
+    //                 duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
+    //                 hasCC:(BOOL)hasCC
+    //                 posted:(int)posted  // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
+    //                 client:(YoutubeClientType *)client;
+    NSLog(@"sort by -> %i", [filters sortBy]);
+    NSLog(@"duration -> %i", [filters duration]);
+    NSLog(@"upload date -> %i", [filters uploadDate]);
+
+    int sortBy = 0;
+    int uploadDate = 0;
+    int duration = 0;
+
+    switch ([filters sortBy]) {
+        case 1: // upload date
+            sortBy = 2;
+            break;
+        case 2: // view count
+            sortBy = 3;
+            break;
+        case 3: // rating
+            sortBy = 1;
+            break;
+    }
+
+    switch ([filters uploadDate]) {
+        case 1: // today
+            uploadDate = 2;
+            break;
+        case 2: // this week
+            uploadDate = 3;
+            break;
+        case 3: // this month
+            uploadDate = 4;
+            break;
+    }
+
+
+    switch ([filters duration]) {
+        case 1: // <4 minutes
+            duration = 1;
+            break;
+        case 2: // 20+ minutes
+            duration = 2;
+            break;
+    }
+    NSLog(@"sortBy #2 -> %i", sortBy);
+
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
                                                           channelOnly:NO 
+                                                          sortBy:sortBy
+                                                          duration:duration
+                                                          hasCC:[filters hasCC]
+                                                          posted:uploadDate
                                                                client:[YoutubeClientType webMobileClient]]];
 }
 
 +(id)requestForChannelsWithSearchQuery:(NSString*)query {
+
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
                                                           channelOnly:YES 
+                                                          sortBy:0
+                                                          duration:0
+                                                          hasCC:NO
+                                                          posted:0
                                                                client:[YoutubeClientType webMobileClient]]];
 }
 

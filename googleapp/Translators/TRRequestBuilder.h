@@ -64,7 +64,11 @@
  */
 + (NSData *)searchBodyWithQuery:(NSString *)query
                     channelOnly:(BOOL)channelOnly
-                         client:(YoutubeClientType *)client;
+                    sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
+                    duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
+                    hasCC:(BOOL)hasCC
+                    posted:(int)posted  // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
+                    client:(YoutubeClientType *)client;
 
 #pragma mark - Action Requests
 

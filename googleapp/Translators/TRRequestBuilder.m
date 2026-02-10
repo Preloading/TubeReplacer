@@ -114,7 +114,11 @@
 
 + (NSData *)searchBodyWithQuery:(NSString *)query
                     channelOnly:(BOOL)channelOnly
-                         client:(YoutubeClientType *)client {
+                    sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
+                    duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
+                    hasCC:(BOOL)hasCC
+                    posted:(int)posted  // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
+                    client:(YoutubeClientType *)client {
     
     NSMutableDictionary *body = [self baseBodyWithClient:client];
     
@@ -122,9 +126,38 @@
         [body setObject:query forKey:@"query"];
     }
     
+    ProtobufEncoder *enc = [[ProtobufEncoder alloc] init];
+    
+    [enc writeMessageField:2 usingBlock:^(ProtobufEncoder *a) {
+        [a writeUInt64Field:2 value:channelOnly ? 2 : 1];
+        if (posted != 0)
+            [a writeUInt64Field:1 value:posted]; // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
+        if (duration != 0)
+            [a writeUInt64Field:3 value:1]; //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
+        if (hasCC)
+            [a writeUInt64Field:5 value:1]; // has closed captions
+
+    }];
+
+    if (sortBy != 0)
+        [enc writeUInt64Field:1 value:sortBy] ;// 0 - relevance, 1 = rating, 2 = date, 3 = views
+        
+    // [enc writeMessageField:6 usingBlock:^(ProtobufEncoder *a) {
+    //     [a writeMessageField:4 usingBlock:^(ProtobufEncoder *b) {
+    //         [b writeStringField:4 string:videoId];
+    //         [b writeUInt64Field:6 value:sortByVal];
+    //     }];
+    //     [a writeUInt64Field:6 value:1];
+    //     [a writeStringField:8 string:@"engagement-panel-comments-section"];
+    // }];
+    
+    NSData *out = [enc dataRepresentation];
+    [enc release];
+    NSLog(@"param -> %@", [self urlEncodeBase64:out]);
+
     // Filter params: EgIQAg%3D%3D = channels, EgIQAQ%3D%3D = videos
-    NSString *filterParams = channelOnly ? @"EgIQAg%3D%3D" : @"EgIQAQ%3D%3D";
-    [body setObject:filterParams forKey:@"params"];
+    // NSString *filterParams = channelOnly ? @"EgIQAg%3D%3D" : @"EgIQAQ%3D%3D";
+    [body setObject:[self urlEncodeBase64:out] forKey:@"params"];
     
     return [self serializeBody:body];
 }

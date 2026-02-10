@@ -96,7 +96,6 @@
                                                         error:&error];
 
         if (data != nil && error == nil) {
-            NSLog(@"asdf");
             // Handle success
             // data:application/vnd.apple.mpegurl;base64,
             NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
