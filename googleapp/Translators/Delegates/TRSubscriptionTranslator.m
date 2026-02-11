@@ -4,6 +4,7 @@
 // Subscription translator implementation
 
 #import "TRSubscriptionTranslator.h"
+#import "TRChannelTranslator.h"
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
 
@@ -54,7 +55,7 @@
 #pragma mark - List Item (Subscription Page)
 
 - (id)translateListItem:(NSDictionary *)json error:(NSError **)error {
-    NSDictionary *subscription = [TRJSONUtils dictFromJSON:json keyPath:@"i.channelListItemRenderer"];
+    NSDictionary *subscription = [TRJSONUtils dictFromJSON:json keyPath:@"i"];
     
     if (!subscription) {
         if (error) {
@@ -64,25 +65,19 @@
         return nil;
     }
     
-    NSString *channelID = [subscription objectForKey:@"channelId"];
-    NSString *displayName = [TRJSONUtils stringFromJSON:subscription keyPath:@"title.runs[0].text"];
-    
-    NSString *thumbUrl = [TRJSONUtils stringFromJSON:subscription keyPath:@"thumbnail.thumbnails[0].url"];
-    if (thumbUrl && ![thumbUrl hasPrefix:@"http"]) {
-        thumbUrl = [@"https:" stringByAppendingString:thumbUrl];
-    }
-    NSURL *thumbnailURL = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
-    
+    YTChannel *channel = [[TRChannelTranslator alloc] translateCompactChannel:subscription error:error];
+    // todo check for error
+
     id sub = [[[NSClassFromString(@"YTSubscription") alloc] 
-        initWithUsername:displayName
-        displayName:displayName
-        channelID:channelID
+        initWithUsername:[channel channelID] // i could fix this but im lazy
+        displayName:[channel displayName]
+        channelID:[channel channelID]
         type:1
         publishedDate:[NSDate date]
-        updatedDate:[NSDate date]
+        updatedDate:[channel updated]
         countHint:0
         editURL:[NSURL URLWithString:@"https://youtube.com"]
-        thumbnailURL:thumbnailURL
+        thumbnailURL:[channel thumbnailURL]
     ] autorelease];
     
     return sub;

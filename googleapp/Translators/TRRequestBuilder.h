@@ -21,7 +21,7 @@
  * All YouTube API requests require this.
  */
 + (NSMutableDictionary *)baseBodyWithClient:(YoutubeClientType *)client;
-
++ (NSData *)bodyWithClient:(YoutubeClientType *)client;
 /**
  * Serialize a dictionary to JSON NSData.
  * Handles errors gracefully, returns nil on failure.

@@ -49,6 +49,12 @@
     return data;
 }
 
++ (NSData *)bodyWithClient:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+    return [self serializeBody:body];
+}
+
 #pragma mark - Browse Requests
 
 + (NSData *)browseBodyWithId:(NSString *)browseId 

@@ -16,7 +16,7 @@
                        authentication:authentication 
                                  body:[TRRequestBuilder browseBodyWithId:@"FEchannels" 
                                                                   params:nil 
-                                                                  client:[YoutubeClientType webMobileClient]]];
+                                                                  client:[YoutubeClientType webClient]]];
 }
 
 +(id)requestForMySubscriptionWithChannelID:(NSString*)channelId auth:(id)authentication {

@@ -95,7 +95,7 @@
                                             startIndex:1 
                                                nextURL:continuation 
                                            previousURL:nil];
-    
+
     return [page autorelease];
 }
 
@@ -104,7 +104,7 @@
     // Subscription feed items
     if ([parser isKindOfClass:[%c(YTSubscriptionParser) class]]) {
         return [TRJSONUtils arrayFromJSON:bodyDict 
-            keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].shelfRenderer.content.verticalListRenderer.items"];
+            keyPath:@"contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
     }
     
     // Comment items

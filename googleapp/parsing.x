@@ -23,6 +23,8 @@
         NSLog(@"TubeReplacer: Empty data received");
         return nil;
     }
+
+    // NSLog(@"rawData -> %@", rawData);
     
     const unsigned char* bytes = [rawData bytes];
     NSUInteger length = [rawData length];
