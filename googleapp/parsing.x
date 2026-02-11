@@ -105,6 +105,15 @@
             [self cacheChannel:response];
         }
 
+        if (parser == [self valueForKey:@"channelPageParser_"]) {
+            id cache = [self channelCache];
+            for (id channel in [response entries]) {
+                [cache setValue:@100000 forKey:@"countLimit_"];
+                [self cacheChannel:channel];
+            }
+            
+        }
+
         if (originalResponseBlock) {
             originalResponseBlock(response);
         }
