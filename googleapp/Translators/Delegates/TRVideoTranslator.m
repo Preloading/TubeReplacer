@@ -378,16 +378,16 @@
                 NSMutableString *dateString = [NSMutableString string];
                 for (NSInteger i = viewsIndex + 1; i < [accessibilityParts count]; i++) {
                     NSString *part = accessibilityParts[i];
-                    // Stop if we hit the duration part (contains "minute" or "second")
-                    if ([part rangeOfString:@"minute" options:NSCaseInsensitiveSearch].location != NSNotFound ||
-                        [part rangeOfString:@"second" options:NSCaseInsensitiveSearch].location != NSNotFound ||
-                        [part rangeOfString:@"hour" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-                        break;
-                    }
                     part = [part stringByReplacingOccurrencesOfString:@"," withString:@""];
                     [dateString appendFormat:@"%@ ", part];
+                    
+                    // Stop after we collect the time unit and "ago"
+                    // Pattern: "41 minutes ago" 
+                    if ([[part lowercaseString] isEqualToString:@"ago"]) {
+                        break;
+                    }
                 }
-                uploadDate = [TRJSONUtils dateFromTimeAgo:dateString];
+                uploadDate = [TRJSONUtils dateFromTimeAgo:[dateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
             }
         }
     } else {
