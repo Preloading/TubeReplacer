@@ -151,11 +151,11 @@
 
 @interface YTBaseService : NSObject
 - (void)didReceiveMemoryWarning;
-- (void)performMASFRequest:(id)fp8 serviceURI:(id)fp12 dataBlock:(id)fp errorBlock:(void)fp16;
-- (void)performHTTPRequest:(id)fp8 parser:(id)fp12 responseBlock:(id)fp errorBlock:(void)fp16;
-- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 parser:(id)fp16 responseBlock:(id)fp errorBlock:(void)fp20;
-- (void)performHTTPRequest:(id)fp8 dataBlock:(id)fp errorBlock:(void)fp12;
-- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 dataBlock:(id)fp errorBlock:(void)fp16;
+- (void)performMASFRequest:(id)fp8 serviceURI:(id)fp12 dataBlock:(id)fp errorBlock:(id)fp16;
+- (void)performHTTPRequest:(id)fp8 parser:(id)fp12 responseBlock:(id)fp errorBlock:(id)fp16;
+- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 parser:(id)fp16 responseBlock:(id)fp errorBlock:(id)fp20;
+- (void)performHTTPRequest:(id)fp8 dataBlock:(id)fp errorBlock:(id)fp12;
+- (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 dataBlock:(id)fp errorBlock:(id)fp16;
 - (void)performHTTPRequest:(id)fp8 withAuthorizer:(id)fp12 completionBlock:(id)fp;
 - (void)performErrorBlock:(id)fp error:(void)fp8;
 - (void)performResponseBlock:(id)fp response:(id)fp8;
@@ -1280,3 +1280,68 @@ typedef struct _TBXMLElement {
 
 @end
 
+
+@interface YTSubtitlesTrack : NSObject
+- (id)trackName;
+- (id)languageName;
+- (id)languageCode;
+- (id)copyWithZone:(struct _NSZone *)fp8;
+- (void)dealloc;
+- (id)initWithLanguageCode:(id)fp8 languageName:(id)fp12 trackName:(id)fp16;
+
+@end
+
+@interface YTSubtitlesController : NSObject
+- (void)setSubtitlesTracks:(id)fp8;
+- (id)subtitlesTracks;
+- (void)setSubtitles:(id)fp8;
+- (id)subtitles;
+- (void)subtitlePickerDidClose;
+- (void)loadSubtitles:(id)fp8;
+- (void)loadUserSubtitles;
+- (void)loadSubtitlesTracksWithBlock:(id)fp;
+- (int)pickerView:(id)fp8 numberOfRowsInComponent:(int)fp12;
+- (int)numberOfComponentsInPickerView:(id)fp8;
+- (id)pickerView:(id)fp8 titleForRow:(int)fp12 forComponent:(int)fp16;
+- (void)pickerDidCancel:(id)fp8;
+- (void)picker:(id)fp8 didSelectItemAtIndex:(int)fp12;
+- (void)updateSubtitlesPositionWithMediaTime:(double)fp8;
+- (void)showSubtitlesPickerFromRect:(struct CGRect)fp8 inView:(id)fp24;
+- (void)setDelegate:(id)fp8;
+- (void)dealloc;
+- (id)init;
+- (id)initWithVideo:(id)fp8 playerView:(id)fp12 services:(id)fp16 navigation:(id)fp20;
+
+@end
+
+@interface TBXML : NSObject
++ (id)tbxmlWithXMLFile:(id)fp8 fileExtension:(id)fp12 error:(id *)fp16;
++ (id)tbxmlWithXMLFile:(id)fp8 fileExtension:(id)fp12;
++ (id)tbxmlWithXMLFile:(id)fp8 error:(id *)fp12;
++ (id)tbxmlWithXMLFile:(id)fp8;
++ (id)tbxmlWithXMLData:(id)fp8 error:(id *)fp12;
++ (id)tbxmlWithXMLData:(id)fp8;
++ (id)tbxmlWithXMLString:(id)fp8 error:(id *)fp12;
++ (id)tbxmlWithXMLString:(id)fp8;
+- (struct _TBXMLElement *)rootXMLElement;
+- (void)decodeData:(id)fp8 withError:(id *)fp12;
+- (void)decodeData:(id)fp8;
+- (id)initWithXMLFile:(id)fp8 fileExtension:(id)fp12 error:(id *)fp16;
+- (id)initWithXMLFile:(id)fp8 fileExtension:(id)fp12;
+- (id)initWithXMLFile:(id)fp8 error:(id *)fp12;
+- (id)initWithXMLFile:(id)fp8;
+- (id)initWithXMLData:(id)fp8 error:(id *)fp12;
+- (id)initWithXMLData:(id)fp8;
+- (id)initWithXMLString:(id)fp8 error:(id *)fp12;
+- (id)initWithXMLString:(id)fp8;
+- (id)init;
+
+// this failed to get headers for -_-
++(id)childElementNamed:(id)a3 parentElement:(id)a4;
++(id)childElementNamed:(id)a3 parentElement:(id)a4 error:(id*)error;
++(id)valueOfAttributeNamed:(id)a3 forElement:(id)a4;
++(id)nextSiblingNamed:(id)a3 searchFromElement:(id)a4;
++(id)textForElement:(id)a3;
+
+
+@end

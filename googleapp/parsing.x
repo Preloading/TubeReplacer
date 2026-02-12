@@ -8,12 +8,6 @@
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
 
-// TBXML interface for legacy XML parsing
-@interface TBXML : NSObject
-+ (id)tbxmlWithXMLData:(id)data error:(id *)error;
-- (struct _TBXMLElement *)rootXMLElement;
-@end
-
 #pragma mark - Format Detection & Parsing
 
 %hook YTTBParser

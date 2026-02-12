@@ -230,6 +230,15 @@
     NSString *category = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.category"];
     
     id videoState = [[NSClassFromString(@"YTVideoState") alloc] initWithCode:0 reason:@""];
+
+    // subtitles
+    NSMutableArray *subtitleTracks = [NSMutableArray array];
+    NSArray *subtitleTracksUnparsed = [TRJSONUtils arrayFromJSON:json keyPath:@"captions.playerCaptionsTracklistRenderer.captionTracks"];
+    if (subtitleTracksUnparsed) {
+        for (NSDictionary *track in subtitleTracksUnparsed) {
+            [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]]]];
+        }
+    }
     
     id video = [[NSClassFromString(@"YTVideo") alloc] 
         initWithID:videoId
@@ -246,7 +255,7 @@
         state:videoState
         streams:ytStreams
         thumbnailURLs:thumbnails
-        subtitlesTracksURL:nil
+        subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
         commentsAllowed:YES
         commentsURL:videoId
         commentsCountHint:0
