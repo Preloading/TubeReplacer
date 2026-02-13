@@ -298,6 +298,10 @@
     if (videoData[@"upcomingEventData"]) {
         return nil;
     }
+
+    if ([[TRJSONUtils stringFromJSON:videoData keyPath:@"thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.style"] isEqualToString:@"LIVE"]) {
+        return nil; // TODO: add something to allow live videos to show up, since they do play, least on HLS mode.
+    }
     
     NSString *videoId = videoData[@"videoId"];
     if (!videoId) {
