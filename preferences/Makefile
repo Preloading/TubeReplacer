@@ -1,0 +1,15 @@
+TARGET := iphone:clang:latest:5.0
+INSTALL_TARGET_PROCESSES = Preferences
+ARCHS := armv7
+
+include $(THEOS)/makefiles/common.mk
+
+BUNDLE_NAME = TubeReplacerPrefs
+
+TubeReplacerPrefs_FILES = YTRPRootListController.m
+TubeReplacerPrefs_FRAMEWORKS = UIKit
+TubeReplacerPrefs_PRIVATE_FRAMEWORKS = Preferences
+TubeReplacerPrefs_INSTALL_PATH = /Library/PreferenceBundles
+TubeReplacerPrefs_CFLAGS = -fobjc-arc # todo: figure out how to remove arc stuff
+
+include $(THEOS_MAKE_PATH)/bundle.mk

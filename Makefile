@@ -7,4 +7,5 @@ include $(THEOS)/makefiles/common.mk
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 SUBPROJECTS += googleapp
+SUBPROJECTS += preferences
 include $(THEOS_MAKE_PATH)/aggregate.mk

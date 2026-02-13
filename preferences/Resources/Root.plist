@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Video</string>
+			<key>footerText</key>
+			<string>%v is replaced with the video id.&#10;TubeRepair: https://tuberepair.server.lol/getvideo/%v</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>default</key>
+			<string>option1</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>StreamType</string>
+			<key>label</key>
+			<string>Video Stream</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			<key>validValues</key>
+			<array>
+				<string>adaptive</string>
+				<string>360p</string>
+				<string>custom</string>
+			</array>
+			<key>validTitles</key>
+			<array>
+				<string>Adaptive</string>
+				<string>360p</string>
+				<string>Custom</string>
+			</array>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>CustomStreamURL</string>
+			<key>label</key>
+			<string>Custom Stream URL</string>
+			<key>placeholder</key>
+			<string>https://tuberepair.uptimetrackers.com/getvideo/%v</string>
+			<key>isController</key>
+			<true/>
+			<key>cellClass</key>
+			<string>PSEditTextCell</string>
+</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Experimental Settings</string>
+			<key>footerText</key>
+			<string>No support will be given for these settings</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>ShowLiveContent</string>
+			<key>label</key>
+			<string>Show live content</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>TubeReplacer</string>
+</dict>
+</plist>
