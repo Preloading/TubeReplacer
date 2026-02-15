@@ -25,10 +25,17 @@
 +(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
     GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
     NSURL *fullURL = [urlBuilder URL];
+
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    YoutubeClientType *client = [YoutubeClientType androidClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
+        client = [YoutubeClientType iosClient];
+    }
+
     return [self requestWithURL:fullURL 
                  authentication:nil 
                            body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:[YoutubeClientType iosClient]]];
+                                                                 client:client]];
 }
 
 %end

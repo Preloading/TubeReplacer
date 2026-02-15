@@ -83,129 +83,139 @@
     NSDictionary *thumbnails = [TRJSONUtils thumbnailsFromArray:thumbArray];
     
     NSMutableArray *ytStreams = [NSMutableArray array];
-    NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
-    if (hlsStreamURL) {
-        // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:hlsStreamURL]];
-        NSURLResponse *response = nil;
-        NSError *error = nil;
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    if (![preferences[@"StreamType"] isEqualToString:@"custom"]) {
+        NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
+        if (hlsStreamURL) {
+            // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
+            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:hlsStreamURL]];
+            NSURLResponse *response = nil;
+            NSError *error = nil;
 
-        // This call blocks the thread
-        NSData *data = [NSURLConnection sendSynchronousRequest:request
-                                            returningResponse:&response
-                                                        error:&error];
+            // This call blocks the thread
+            NSData *data = [NSURLConnection sendSynchronousRequest:request
+                                                returningResponse:&response
+                                                            error:&error];
 
-        if (data != nil && error == nil) {
-            // Handle success
-            // data:application/vnd.apple.mpegurl;base64,
-            NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            if (data != nil && error == nil) {
+                // Handle success
+                // data:application/vnd.apple.mpegurl;base64,
+                NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
-            // Parse the M3U8 to remove bad audio :)
-            NSCharacterSet *separator = [NSCharacterSet newlineCharacterSet];
-            NSArray *elements = [result componentsSeparatedByCharactersInSet:separator];
-            NSMutableArray *newPlaylist = [NSMutableArray array];
-            for (NSString *element in elements) {
-                if ([element hasPrefix:@"#EXT-X-MEDIA:"]) {
-                    // NSMutableDictionary *components = [NSMutableDictionary dictionary];
-                    // NSString *attributeList = [element substringFromIndex:13];
-                    
-                    // Parse attributes while respecting quoted values
-                    // NSMutableString *currentKey = [NSMutableString string];
-                    // NSMutableString *currentValue = [NSMutableString string];
-                    // BOOL inQuotes = NO;
-                    
-                    // for (NSInteger i = 0; i < [attributeList length]; i++) {
-                    //     unichar c = [attributeList characterAtIndex:i];
+                // Parse the M3U8 to remove bad audio :)
+                NSCharacterSet *separator = [NSCharacterSet newlineCharacterSet];
+                NSArray *elements = [result componentsSeparatedByCharactersInSet:separator];
+                NSMutableArray *newPlaylist = [NSMutableArray array];
+                for (NSString *element in elements) {
+                    if ([element hasPrefix:@"#EXT-X-MEDIA:"]) {
+                        // NSMutableDictionary *components = [NSMutableDictionary dictionary];
+                        // NSString *attributeList = [element substringFromIndex:13];
                         
-                    //     if (c == '"') {
-                    //         inQuotes = !inQuotes;
-                    //         [currentValue appendFormat:@"%c", c];
-                    //     } else if (c == '=' && !inQuotes) {
-                    //         // Key-value separator
-                    //         [currentKey appendFormat:@"%c", c];
-                    //     } else if (c == ',' && !inQuotes) {
-                    //         // Attribute separator - save current pair
-                    //         if ([currentKey length] > 0) {
-                    //             NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
-                    //             if ([keyValue count] == 2) {
-                    //                 NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                    //                 NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                    //                 components[key] = value;
-                    //             }
-                    //         }
-                    //         [currentKey setString:@""];
-                    //         [currentValue setString:@""];
-                    //     } else {
-                    //         if ([currentKey rangeOfString:@"="].location != NSNotFound) {
-                    //             [currentValue appendFormat:@"%c", c];
-                    //         } else {
-                    //             [currentKey appendFormat:@"%c", c];
-                    //         }
-                    //     }
-                    // }
-                    
-                    // Don't forget the last pair
-                    // if ([currentKey length] > 0) {
-                    //     NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
-                    //     if ([keyValue count] == 2) {
-                    //         NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                    //         NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                    //         components[key] = value;
-                    //     }
-                    // }
-                    
-                    // Now that it's parsed, lets check and see if we should include it
-                    // if ([components[@"name"] hasSuffix:@" - dubbed-auto\""]) {
-                    //     continue;
-                    // }
+                        // Parse attributes while respecting quoted values
+                        // NSMutableString *currentKey = [NSMutableString string];
+                        // NSMutableString *currentValue = [NSMutableString string];
+                        // BOOL inQuotes = NO;
+                        
+                        // for (NSInteger i = 0; i < [attributeList length]; i++) {
+                        //     unichar c = [attributeList characterAtIndex:i];
+                            
+                        //     if (c == '"') {
+                        //         inQuotes = !inQuotes;
+                        //         [currentValue appendFormat:@"%c", c];
+                        //     } else if (c == '=' && !inQuotes) {
+                        //         // Key-value separator
+                        //         [currentKey appendFormat:@"%c", c];
+                        //     } else if (c == ',' && !inQuotes) {
+                        //         // Attribute separator - save current pair
+                        //         if ([currentKey length] > 0) {
+                        //             NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
+                        //             if ([keyValue count] == 2) {
+                        //                 NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        //                 NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        //                 components[key] = value;
+                        //             }
+                        //         }
+                        //         [currentKey setString:@""];
+                        //         [currentValue setString:@""];
+                        //     } else {
+                        //         if ([currentKey rangeOfString:@"="].location != NSNotFound) {
+                        //             [currentValue appendFormat:@"%c", c];
+                        //         } else {
+                        //             [currentKey appendFormat:@"%c", c];
+                        //         }
+                        //     }
+                        // }
+                        
+                        // Don't forget the last pair
+                        // if ([currentKey length] > 0) {
+                        //     NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
+                        //     if ([keyValue count] == 2) {
+                        //         NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        //         NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        //         components[key] = value;
+                        //     }
+                        // }
+                        
+                        // Now that it's parsed, lets check and see if we should include it
+                        // if ([components[@"name"] hasSuffix:@" - dubbed-auto\""]) {
+                        //     continue;
+                        // }
 
-                    if ([element rangeOfString:@" - dubbed-auto\""].location == NSNotFound) {
+                        if ([element rangeOfString:@" - dubbed-auto\""].location == NSNotFound) {
+                            [newPlaylist addObject:element];
+                        }
+                        
+
+                        // NSLog(@"components -> %@", components);
+                    } else {
                         [newPlaylist addObject:element];
                     }
-                    
-
-                    // NSLog(@"components -> %@", components);
-                } else {
-                    [newPlaylist addObject:element];
                 }
+                // NSLog(@"newPlaylist -> %@", newPlaylist);
+                // store the M3U8 in a file
+
+                NSString *mediaPath = [NSString stringWithFormat:@"%@%@.m3u8", NSTemporaryDirectory(), [TRVideoTranslator uuid]];
+                NSLog(@"HLS Stream is at %@", mediaPath);
+
+                [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+
+                id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
+                if (stream) {
+                    [ytStreams addObject:stream];
+                }
+                // NSLog(@"stream -> %@", streamURL);
+                // NSLog(@"%@", result); 
+            } else {
+                // Handle error
+                NSLog(@"Error fetching HLS Playlist: %@", error.localizedDescription);
             }
-            // NSLog(@"newPlaylist -> %@", newPlaylist);
-            // store the M3U8 in a file
 
-            NSString *mediaPath = [NSString stringWithFormat:@"%@%@.m3u8", NSTemporaryDirectory(), [TRVideoTranslator uuid]];
-            NSLog(@"HLS Stream is at %@", mediaPath);
 
-            [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-
-            id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:3 encrypted:NO];
-            if (stream) {
-                [ytStreams addObject:stream];
-            }
-            // NSLog(@"stream -> %@", streamURL);
-            // NSLog(@"%@", result); 
+            // id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL URLWithString:hlsStreamURL] format:3 encrypted:NO];
+            // if (stream) {
+            //     [ytStreams addObject:stream];
+            // }
         } else {
-            // Handle error
-            NSLog(@"Error fetching HLS Playlist: %@", error.localizedDescription);
-        }
-
-
-        // id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL URLWithString:hlsStreamURL] format:3 encrypted:NO];
-        // if (stream) {
-        //     [ytStreams addObject:stream];
-        // }
-    } else {
-        NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
-        for (NSDictionary *format in formats) {
-            NSString *urlString = format[@"url"];
-            if (urlString) {
-                NSURL *url = [NSURL URLWithString:urlString];
-                if (url) {
-                    id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:3 encrypted:NO];
-                    if (stream) {
-                        [ytStreams addObject:stream];
+            NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
+            for (NSDictionary *format in formats) {
+                NSString *urlString = format[@"url"];
+                if (urlString) {
+                    NSURL *url = [NSURL URLWithString:urlString];
+                    if (url) {
+                        id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+                        if (stream) {
+                            [ytStreams addObject:stream];
+                        }
                     }
                 }
             }
+        }
+    } else {
+        // they wanna use a custom url for playback.
+        NSURL *url = [NSURL URLWithString:[preferences[@"CustomStreamURL"] stringByReplacingOccurrencesOfString:@"%v" withString:videoId]];
+        id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO]; // we don't really have a way of knowing the video quality so
+        if (stream) {
+            [ytStreams addObject:stream];
         }
     }
     
