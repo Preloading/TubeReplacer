@@ -7,16 +7,674 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>key</key>
+			<string>Feeds</string>
+			<key>label</key>
+			<string>From Youtube feeds</string>
+			
+		</dict>
+
+		<!-- trending -->
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Trending</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>TrendingBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL</string>
+		</dict>
+
+		<!-- film -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Film</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>FilmName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Film &amp; Animation</string>
+			<key>default</key>
+			<string>Film &amp; Animation</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>FilmBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY</string>
+		</dict>
+
+		<!-- auto -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Autos</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AutoName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Autos &amp; Vehicles</string>
+			<key>default</key>
+			<string>Autos &amp; Vehicles</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AutoBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U</string>
+		</dict>
+
+		<!-- music -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Music</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>MusicName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Music</string>
+			<key>default</key>
+			<string>Music</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>MusicBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi</string>
+		</dict>
+
+		<!-- animals -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Animals</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AnimalsName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Pets &amp; Animals</string>
+			<key>default</key>
+			<string>Pets &amp; Animals</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AnimalsBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB</string>
+		</dict>
+
+		<!-- sports -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Sports</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>SportsName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Sports</string>
+			<key>default</key>
+			<string>Sports</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>SportsBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb</string>
+		</dict>
+
+		<!-- travel -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Travel</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>TravelName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Travel</string>
+			<key>default</key>
+			<string>Travel</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>TravelBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string></string>
+		</dict>
+
+		<!-- games -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Games</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>GamesName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Gaming</string>
+			<key>default</key>
+			<string>Gaming</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>GamesBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv</string>
+		</dict>
+
+		<!-- comedy -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Comedy</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>ComedyName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Comedy</string>
+			<key>default</key>
+			<string>Comedy</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>ComedyBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz</string>
+		</dict>
+
+		<!-- people -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>People</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>PeopleName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>People &amp; Blogs</string>
+			<key>default</key>
+			<string>People &amp; Blogs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>PeopleBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-</string>
+		</dict>
+
+		<!-- news -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>News</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>NewsName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>News &amp; Politics</string>
+			<key>default</key>
+			<string>News &amp; Politics</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>NewsBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO</string>
+		</dict>
+
+		<!-- entertainment -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Entertainment</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>EntertainmentName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Entertainment</string>
+			<key>default</key>
+			<string>Entertainment</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>EntertainmentBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF</string>
+		</dict>
+
+		<!-- education -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Education</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>EducationName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Education</string>
+			<key>default</key>
+			<string>Education</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>EducationBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string></string>
+		</dict>
+
+		<!-- howto -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Howto</string>
+			<key>default</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>HowtoName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Howto &amp; Style</string>
+			<key>default</key>
+			<string>Howto &amp; Style</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>HowtoBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn</string>
+		</dict>
+
+		<!-- nonprofit -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Nonprofit</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>NonprofitName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Nonprofits &amp; Activism</string>
+			<key>default</key>
+			<string>Nonprofits &amp; Activism</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>NonprofitBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string></string>
+		</dict>
+
+		<!-- tech -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Tech</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>TechName</string>
+			<key>label</key>
+			<string>Name</string>
+			<key>placeholder</key>
+			<string>Science &amp; Technology</string>
+			<key>default</key>
+			<string>Science &amp; Technology</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>TechBrowseId</string>
+			<key>label</key>
+			<string>Browse ID</string>
+			<key>placeholder</key>
+			<string>(hides when blank)</string>
+			<key>default</key>
+			<string>VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>For playlists, start with VL, then put the playlist ID from the URL</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>key</key>
+			<string>ResetCategorySettings</string>
+			<key>action</key>
+			<string>resetCategorySettings</string>
+			<key>label</key>
+			<string>Reset Category Settings</string>
+		</dict>
+
+
+
+
+
+
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>key</key>
+			<string>VideoCategory</string>
 			<key>label</key>
 			<string>Video</string>
 			<key>footerText</key>
-			<string>%v is replaced with the video id.&#10;TubeRepair: https://tuberepair.server.lol/getvideo/%v</string>
+			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;TubeRepair: https://tuberepair.server.lol/getvideo/%v</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSLinkListCell</string>
 			<key>default</key>
-			<string>option1</string>
+			<string>adaptive</string>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -53,7 +711,7 @@
 			<true/>
 			<key>cellClass</key>
 			<string>PSEditTextCell</string>
-</dict>
+		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -73,6 +731,8 @@
 			<string>ShowLiveContent</string>
 			<key>label</key>
 			<string>Show live content</string>
+			<key>default</key>
+			<false/>
 		</dict>
 	</array>
 	<key>title</key>
