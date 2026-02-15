@@ -309,8 +309,9 @@
         return nil;
     }
 
-    if ([[TRJSONUtils stringFromJSON:videoData keyPath:@"thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.style"] isEqualToString:@"LIVE"]) {
-        return nil; // TODO: add something to allow live videos to show up, since they do play, least on HLS mode.
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    if (!preferences[@"ShowLiveContent"] && [[TRJSONUtils stringFromJSON:videoData keyPath:@"thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.style"] isEqualToString:@"LIVE"]) {
+        return nil;
     }
     
     NSString *videoId = videoData[@"videoId"];
