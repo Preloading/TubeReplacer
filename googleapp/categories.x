@@ -24,32 +24,47 @@
 
 @interface YTGuideFeedController (TubeReplacer)
 -(void)addCategories;
+-(void)addCategoryTerm:(NSString*)term defaultLabel:(NSString*)defaultLabel toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault;
 @end
 
 %hook YTGuideFeedController
+
+%new
+-(void)addCategoryTerm:(NSString*)term defaultLabel:(NSString*)defaultLabel toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault {
+	NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+	NSArray *browsableCountries = @[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
+	if (![preferences[[NSString stringWithFormat:@"%@BrowseId", term]] isEqualToString:@""] && (enabledByDefault || preferences[[NSString stringWithFormat:@"%@BrowseId", term]])) {
+		if (preferences[[NSString stringWithFormat:@"%@Name", term]]) {
+			if (!([preferences[[NSString stringWithFormat:@"%@Name", term]] isEqualToString:@""])) {
+						[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:term label:preferences[[NSString stringWithFormat:@"%@Name", term]] browsableCountries:browsableCountries] autorelease]];
+			}
+		} else {
+			[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:term label:defaultLabel browsableCountries:browsableCountries] autorelease]];
+		}
+	}
+}
 
 %new
 -(void)addCategories {
 	NSMutableArray *categories = [NSMutableArray array];
 	
 	// TODO: The category fetching relies on the language being set correctly to have them all be translated correctly, we should move this 
-	// Also for my future knowlage, there are only 3 categories because fuckass youtube killed other categories
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Film"          label:@"Film & Animation" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Autos"         label:@"Autos & Vehicles" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Music"         label:@"Music" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Animals"       label:@"Pets & Animals" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Sports"        label:@"Sports" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	// [categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Travel"        label:@"Travel" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Games"         label:@"Gaming" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Comedy"        label:@"Comedy" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"People"        label:@"People & Blogs" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"News"          label:@"News & Politics" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Entertainment" label:@"Entertainment" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	// [categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Education"     label:@"Education" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Howto"         label:@"Howto & Style" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	// [categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Nonprofit"   label:@"Nonprofits & Activism" browsableCountries:@[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:@"Tech"          label:@"Science & Technology" browsableCountries:@[@"us", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"]] autorelease]];
-	
+	[self addCategoryTerm:@"Film" defaultLabel:@"Film & Animation" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Autos" defaultLabel:@"Autos & Vehicles" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Music" defaultLabel:@"Music" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Animals" defaultLabel:@"Pets & Animals" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Sports" defaultLabel:@"Sports" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Travel" defaultLabel:@"Travel" toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Games" defaultLabel:@"Gaming" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Comedy" defaultLabel:@"Comedy" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"People" defaultLabel:@"People & Blogs" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"News" defaultLabel:@"News & Politics" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Entertainment" defaultLabel:@"Entertainment" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Education" defaultLabel:@"Education" toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Howto" defaultLabel:@"Howto & Style" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Nonprofit" defaultLabel:@"Nonprofits & Activism" toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Tech" defaultLabel:@"Science & Technology" toArray:categories enabledByDefault:YES];
+
 	[self handleEntries:categories];
 	NSLog(@"categoriesCount_ = %@", [self valueForKey:@"categoriesCount_"]);
 	
