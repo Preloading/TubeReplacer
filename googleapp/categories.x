@@ -49,21 +49,21 @@
 	NSMutableArray *categories = [NSMutableArray array];
 	
 	// TODO: The category fetching relies on the language being set correctly to have them all be translated correctly, we should move this 
-	[self addCategoryTerm:@"Film" defaultLabel:@"Film & Animation" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Autos" defaultLabel:@"Autos & Vehicles" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Music" defaultLabel:@"Music" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Animals" defaultLabel:@"Pets & Animals" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Sports" defaultLabel:@"Sports" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Travel" defaultLabel:@"Travel" toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Games" defaultLabel:@"Gaming" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Comedy" defaultLabel:@"Comedy" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"People" defaultLabel:@"People & Blogs" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"News" defaultLabel:@"News & Politics" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Entertainment" defaultLabel:@"Entertainment" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Education" defaultLabel:@"Education" toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Howto" defaultLabel:@"Howto & Style" toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Nonprofit" defaultLabel:@"Nonprofits & Activism" toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Tech" defaultLabel:@"Science & Technology" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Film"          defaultLabel:@"Film & Animation"      toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Autos"         defaultLabel:@"Autos & Vehicles"      toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Music"         defaultLabel:@"Music"                 toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Animals"       defaultLabel:@"Pets & Animals"        toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Sports"        defaultLabel:@"Sports"                toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Travel"        defaultLabel:@"Travel"                toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Games"         defaultLabel:@"Gaming"                toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Comedy"        defaultLabel:@"Comedy"                toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"People"        defaultLabel:@"People & Blogs"        toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"News"          defaultLabel:@"News & Politics"       toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Entertainment" defaultLabel:@"Entertainment"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Education"     defaultLabel:@"Education"             toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Howto"         defaultLabel:@"Howto & Style"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Nonprofit"     defaultLabel:@"Nonprofits & Activism" toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Tech"          defaultLabel:@"Science & Technology"  toArray:categories enabledByDefault:YES];
 
 	[self handleEntries:categories];
 	NSLog(@"categoriesCount_ = %@", [self valueForKey:@"categoriesCount_"]);
