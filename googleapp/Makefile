@@ -8,7 +8,6 @@ TWEAK_NAME = TubeReplacerGoogle
 
 TubeReplacerGoogle_FILES = polyfill.x \
 	signin.x \
-	categories.x \
 	deviceauth.x \
 	frontfeed.x \
 	parsing.x \

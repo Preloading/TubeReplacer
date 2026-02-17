@@ -7,6 +7,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "general.h"
 
 #pragma mark - Request Building
 
@@ -20,12 +21,28 @@
 
 %end
 
+%hook YTGDataRequestFactory
+
+-(id)requestForMyUserProfileWithAuth:(id)authentication {
+    // Uses a special endpoint that returns account switcher data
+    return [self requestWithURLString:@"https://m.youtube.com/getAccountSwitcherEndpoint" 
+                       authentication:authentication];
+}
+
+%end
+
 #pragma mark - Request Dispatch
 
 %hook YTGDataService 
 
 -(void)makeMyUserProfileRequestWithAuth:(id)auth responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    id request = [%c(YTGDataRequest) requestForMyUserProfileWithAuth:auth];
+    id request;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])  {
+        request = [%c(YTGDataRequest) requestForMyUserProfileWithAuth:auth];
+    } else {
+        request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMyUserProfileWithAuth:auth];
+
+    }
     [self makeGETRequest:request 
               withParser:[self valueForKey:@"userProfileParser_"] 
            responseBlock:responseBlock 
@@ -68,20 +85,39 @@
     NSString *thumbUrl = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountPhoto.thumbnails[0].url"];
     NSURL *thumbnail = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
     
-    YTUserProfile *profile = [[[%c(YTUserProfile) alloc] 
-        initWithUsername:channelHandle
-        displayName:displayName
-        age:0
-        thumbnailURL:thumbnail
-        uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
-        playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
-        uploadedCount:0
-        favoritesCount:0
-        subscriptionsCount:0
-        uploadViewsCount:0
-        channelViewsCount:0
-        subscribersCount:subscribersCount
-    ] autorelease];
+    YTUserProfile *profile = nil;
+    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        profile = [[[%c(YTUserProfile) alloc] 
+            initWithUsername:channelHandle
+            displayName:displayName
+            age:0
+            thumbnailURL:thumbnail
+            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+            uploadedCount:0
+            favoritesCount:0
+            subscriptionsCount:0
+            uploadViewsCount:0
+            channelViewsCount:0
+            subscribersCount:subscribersCount
+        ] autorelease];
+    } else {
+        // cheating, TODO: actually see if we can make it the channel ID
+        profile = [[[%c(YTUserProfile) alloc] 
+            initWithDisplayName:displayName
+            channelID:channelHandle
+            age:0
+            thumbnailURL:thumbnail
+            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+            uploadedCount:0
+            favoritesCount:0
+            subscriptionsCount:0
+            uploadViewsCount:0
+            channelViewsCount:0
+            subscribersCount:subscribersCount
+        ] autorelease];
+    }
     
     return profile;
 }
