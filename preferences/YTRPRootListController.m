@@ -13,14 +13,14 @@
         
         // Check current preference value
         NSDictionary *prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        NSString *selectedValue = prefs[@"StreamType"] ?: @"adaptive";
+        NSString *selectedValue = [prefs objectForKey:@"StreamType"] ?: @"adaptive";
         
         // Only show text field if "custom" is selected
         if (![selectedValue isEqualToString:@"custom"]) {
             NSInteger indexToRemove = NSNotFound;
             for (NSInteger i = 0; i < specs.count; i++) {
-                PSSpecifier *spec = specs[i];
-                if ([spec.properties[@"key"] isEqualToString:@"CustomStreamURL"]) {
+                PSSpecifier *spec = [specs objectAtIndex:i];
+                if ([[spec.properties objectForKey:@"key"] isEqualToString:@"CustomStreamURL"]) {
                     indexToRemove = i;
                     break;
                 }
@@ -40,7 +40,7 @@
     [super setPreferenceValue:value specifier:specifier];
     
     // Reload when list selection changes
-    if ([specifier.properties[@"key"] isEqualToString:@"StreamType"]) {
+    if ([[specifier.properties objectForKey:@"key"] isEqualToString:@"StreamType"]) {
         _specifiers = nil;
         [self reloadSpecifiers];
     }
@@ -106,7 +106,7 @@
 
     // Set defaults for all category keys
     [defaultValues enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
-        prefs[key] = value;
+        [prefs setObject:value forKey:key];
     }];
 
     // Save back to disk
