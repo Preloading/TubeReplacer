@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
+#include "general.h"
 
 // -[YTCategoryParser parseElement:error:]
 // -[YTGuideFeedController handleEntries: is where categories are requested
@@ -75,8 +76,14 @@
 - (void)updateViews:(id)a3 {
 	
 
-	YTServices *services = [self valueForKey:@"services_"];
-    YTUserAuthenticator *userAuthenticator = [services userAuthenticator];
+	YTUserAuthenticator *userAuthenticator = nil;
+	if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+		YTServices *services = [self valueForKey:@"services_"];
+		userAuthenticator = [services userAuthenticator];
+	} else {
+		userAuthenticator = [self valueForKey:@"userAuthenticator_"];
+	}
+	
 
 	// might be GTMOAuth2Authentication, but ID is probably more reliable
 	id authentication = [userAuthenticator authentication];
@@ -89,9 +96,16 @@
 	if ( authentication )
 	{
 		[self loadAccountThumbnail];
-		YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
+
+		if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+			YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
+			[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
+		} else {
+			// todo: [(YTGuideEntry*)[self valueForKey:@"accountEntry_"] setAccessibilityLabel:localizedStringForKey(@"guide.account_loggedin.access")];
+			id requestSubscriptions = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMySubscriptionsWithAuth:authentication];
+			[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
+		}
 		// [self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:) extraRequest:requestCategories extraServiceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];
-		[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
 	} else {
 		[self addCategories];
 	}

@@ -29,6 +29,7 @@
     NSDictionary *bodyDict = body;
     id entryParser = [self valueForKey:@"entryParser_"];
     
+    NSLog(@"class -> %@", [entryParser class]);
     // Special handling for subscription, comment, and playlist parsers
     // These need individual item routing through their specific parsers
     if ([entryParser isKindOfClass:[%c(YTSubscriptionParser) class]] ||
@@ -37,7 +38,6 @@
         return [self parseSpecializedFeed:bodyDict withEntryParser:entryParser error:error];
     }
 
-    NSLog(@"class -> %@", [entryParser class]);
 
     // Use TRFeedTranslator for standard video/channel feeds
     TRFeedTranslator *translator = [[[TRFeedTranslator alloc] init] autorelease];

@@ -178,49 +178,49 @@
 - (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16 noCache:(BOOL)fp20;
 - (id)requestWithURL:(id)fp8 authentication:(id)fp12 body:(id)fp16;
 - (id)requestWithURL:(id)fp8 authentication:(id)fp12;
-+ (id)requestToAddCommentWithVideoID:(id)fp8 authentication:(id)fp12 content:(id)fp16;
-+ (id)requestToFlagWithVideoID:(id)fp8 authentication:(id)fp12;
-+ (id)requestForMyPurchases:(id)fp8;
-+ (id)requestForBrandingWithChannelID:(id)fp8;
-+ (id)requestForMyChannelRecommendationsWithAuth:(id)fp8;
-+ (id)requestToAddToFavoritesWithVideoID:(id)fp8 authentication:(id)fp12;
-+ (id)requestToRateWithVideoID:(id)fp8 authentication:(id)fp12 like:(BOOL)fp16;
-+ (id)requestForEventsWithChannelID:(id)fp8;
-+ (id)requestToUnsubscribeWithSubscription:(id)fp8 authentication:(id)fp12;
-+ (id)requestToSubscribeWithChannelID:(id)fp8 authentication:(id)fp12;
-+ (id)requestToAddToWatchLaterWithVideoID:(id)fp8 authentication:(id)fp12;
-+ (id)requestForMyWatchLaterVideosWithAuth:(id)fp8;
-+ (id)requestToClearWatchHistoryWithAuth:(id)fp8;
-+ (id)requestToAddToWatchHistoryWithVideoID:(id)fp8 authentication:(id)fp12;
-+ (id)requestForMyWatchHistoryVideosWithAuth:(id)fp8;
-+ (id)requestForMySubscriptionWithChannelID:(id)fp8 auth:(id)fp12;
-+ (id)requestForMySubscriptionsWithAuth:(id)fp8;
-+ (id)requestToAddToPlaylistWithVideoID:(id)fp8 contentURL:(id)fp12 auth:(id)fp16;
-+ (id)requestToAddPlaylistWithTitle:(id)fp8 description:(id)fp12 isPrivate:(BOOL)fp16 auth:(id)fp20;
-+ (id)requestForMyPlaylistsWithAuth:(id)fp8;
-+ (id)requestForPlaylistsWithChannelID:(id)fp8;
-+ (id)requestForPlaylistWithURL:(id)fp8;
+- (id)requestToAddCommentWithVideoID:(id)fp8 authentication:(id)fp12 content:(id)fp16;
+- (id)requestToFlagWithVideoID:(id)fp8 authentication:(id)fp12;
+- (id)requestForMyPurchases:(id)fp8;
+- (id)requestForBrandingWithChannelID:(id)fp8;
+- (id)requestForMyChannelRecommendationsWithAuth:(id)fp8;
+- (id)requestToAddToFavoritesWithVideoID:(id)fp8 authentication:(id)fp12;
+- (id)requestToRateWithVideoID:(id)fp8 authentication:(id)fp12 like:(BOOL)fp16;
+- (id)requestForEventsWithChannelID:(id)fp8;
+- (id)requestToUnsubscribeWithSubscription:(id)fp8 authentication:(id)fp12;
+- (id)requestToSubscribeWithChannelID:(id)fp8 authentication:(id)fp12;
+- (id)requestToAddToWatchLaterWithVideoID:(id)fp8 authentication:(id)fp12;
+- (id)requestForMyWatchLaterVideosWithAuth:(id)fp8;
+- (id)requestToClearWatchHistoryWithAuth:(id)fp8;
+- (id)requestToAddToWatchHistoryWithVideoID:(id)fp8 authentication:(id)fp12;
+- (id)requestForMyWatchHistoryVideosWithAuth:(id)fp8;
+- (id)requestForMySubscriptionWithChannelID:(id)fp8 auth:(id)fp12;
+- (id)requestForMySubscriptionsWithAuth:(id)fp8;
+- (id)requestToAddToPlaylistWithVideoID:(id)fp8 contentURL:(id)fp12 auth:(id)fp16;
+- (id)requestToAddPlaylistWithTitle:(id)fp8 description:(id)fp12 isPrivate:(BOOL)fp16 auth:(id)fp20;
+- (id)requestForMyPlaylistsWithAuth:(id)fp8;
+- (id)requestForPlaylistsWithChannelID:(id)fp8;
+- (id)requestForPlaylistWithURL:(id)fp8;
 - (id)requestForMyUserProfileWithAuth:(id)fp8;
-+ (id)requestForChannelWithID:(id)fp8;
-+ (id)requestForMyPlaylistVideosWithURL:(id)fp8 authentication:(id)fp12;
-+ (id)requestForPlaylistVideosWithPlaylistID:(id)fp8;
-+ (id)requestForPlaylistVideosWithURL:(id)fp8;
-+ (id)requestForMySubscriptionUploadsWithAuth:(id)fp8 safeSearch:(int)fp12;
-+ (id)requestForMySubscriptionUpdatesWithAuth:(id)fp8;
-+ (id)requestForMyUploadedVideosWithAuth:(id)fp8;
-+ (id)requestForUploadedVideosWithChannelID:(id)fp8;
-+ (id)requestForMyFavoriteVideosWithAuth:(id)fp8;
-+ (id)requestForFavoriteVideosWithURL:(id)fp8;
-+ (id)requestForVideosWithStandardFeed:(int)fp8 categoryTerm:(id)fp12 uploadDate:(int)fp16 safeSearch:(int)fp20;
-+ (id)requestForRelatedVideosWithURL:(id)fp8 safeSearch:(int)fp12;
-+ (id)requestForChannelsWithStandardFeed:(int)fp8;
-+ (id)requestForChannelsWithSearchQuery:(id)fp8;
-+ (id)requestForVideosWithSearchQuery:(id)fp8 languageCode:(id)fp12 filters:(id)fp16 safeSearch:(int)fp20;
-+ (id)requestForVideoWithVideoID:(id)fp8;
-+ (id)requestForCategoriesWithLanguageCode:(id)fp8;
-+ (id)requestWithRequest:(id)fp8 noCache:(BOOL)fp12;
-+ (id)requestWithRequest:(id)fp8 URL:(id)fp12;
-+ (id)requestWithURL:(id)fp8;
+- (id)requestForChannelWithID:(id)fp8;
+- (id)requestForMyPlaylistVideosWithURL:(id)fp8 authentication:(id)fp12;
+- (id)requestForPlaylistVideosWithPlaylistID:(id)fp8;
+- (id)requestForPlaylistVideosWithURL:(id)fp8;
+- (id)requestForMySubscriptionUploadsWithAuth:(id)fp8 safeSearch:(int)fp12;
+- (id)requestForMySubscriptionUpdatesWithAuth:(id)fp8;
+- (id)requestForMyUploadedVideosWithAuth:(id)fp8;
+- (id)requestForUploadedVideosWithChannelID:(id)fp8;
+- (id)requestForMyFavoriteVideosWithAuth:(id)fp8;
+- (id)requestForFavoriteVideosWithURL:(id)fp8;
+- (id)requestForVideosWithStandardFeed:(int)fp8 categoryTerm:(id)fp12 uploadDate:(int)fp16 safeSearch:(int)fp20;
+- (id)requestForRelatedVideosWithURL:(id)fp8 safeSearch:(int)fp12;
+- (id)requestForChannelsWithStandardFeed:(int)fp8;
+- (id)requestForChannelsWithSearchQuery:(id)fp8;
+- (id)requestForVideosWithSearchQuery:(id)fp8 languageCode:(id)fp12 filters:(id)fp16 safeSearch:(int)fp20;
+- (id)requestForVideoWithVideoID:(id)fp8;
+- (id)requestForCategoriesWithLanguageCode:(id)fp8;
+- (id)requestWithRequest:(id)fp8 noCache:(BOOL)fp12;
+- (id)requestWithRequest:(id)fp8 URL:(id)fp12;
+- (id)requestWithURL:(id)fp8;
 - (BOOL)noCache;
 - (id)body;
 - (id)authentication;
@@ -402,6 +402,8 @@ typedef struct _TBXMLElement {
 - (id)init;
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 allowedCountries:(id)fp112 deniedCountries:(id)fp116 categoryLabel:(id)fp120 categoryTerm:(id)fp124 tags:(id)fp128 adultContent:(BOOL)fp132 videoPro:(id)fp136;
 
+// 1.1.0+
+- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 allowedCountries:(id)fp112 deniedCountries:(id)fp116 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL videoPro:(id)fp136;
 @end
 
 @interface YTVideoState : NSObject
@@ -1183,6 +1185,8 @@ typedef struct _TBXMLElement {
 - (void)dealloc;
 - (id)initWithUsername:(id)fp8 displayName:(id)fp12 channelID:(id)fp16 type:(int)fp20 publishedDate:(id)fp24 updatedDate:(id)fp28 countHint:(unsigned long long)fp32 editURL:(id)fp40 thumbnailURL:(id)fp44;
 
+// 1.1.0+
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp16 type:(int)fp20 publishedDate:(id)fp24 updatedDate:(id)fp28 countHint:(unsigned long long)fp32 unreadCount:(unsigned long long)unreadCount editURL:(id)fp40 thumbnailURL:(id)fp44;
 @end
 
 /// EXTRA/MODIFIED HEADERS
@@ -1288,6 +1292,8 @@ typedef struct _TBXMLElement {
 - (void)dealloc;
 - (id)initWithAuthorDisplayName:(id)fp8 authorUserID:(id)fp12 action:(int)fp16 target:(id)fp20 when:(id)fp24 video:(id)fp28 groupID:(id)fp32 feedURL:(id)fp36;
 
+// 1.1.0+
+- (id)initWithAuthorDisplayName:(id)fp8 authorUserID:(id)fp12 action:(int)fp16 target:(id)fp20 targetDisplayName:(NSString*)targetDisplayName when:(id)fp24 video:(id)fp28 groupID:(id)fp32 feedURL:(id)fp36 title:(id)title;
 @end
 
 @interface YTEventParser : YTTBParser

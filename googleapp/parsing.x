@@ -87,6 +87,7 @@
 
     void (^wrappedResponseBlock)(id) = ^(id response) {
         // Cache subscriptions when fetching subscription page
+        NSLog(@"parser -> %@", parser);
         if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
             id cache = [self valueForKey:@"subscriptionCache_"];
             [cache setValue:@100000 forKey:@"countLimit_"];
@@ -94,12 +95,14 @@
         }
 
         if (parser == [self valueForKey:@"channelParser_"]) {
+            NSLog(@"triggered channel parser");
             id cache = [self channelCache];
             [cache setValue:@100000 forKey:@"countLimit_"];
             [self cacheChannel:response];
         }
 
         if (parser == [self valueForKey:@"channelPageParser_"]) {
+            NSLog(@"triggered channel page parser");
             id cache = [self channelCache];
             for (id channel in [response entries]) {
                 [cache setValue:@100000 forKey:@"countLimit_"];

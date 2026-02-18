@@ -1,5 +1,5 @@
 TARGET := iphone:clang:latest:5.0
-INSTALL_TARGET_PROCESSES = YouTube
+# INSTALL_TARGET_PROCESSES = YouTube
 ARCHS := armv7
 
 include $(THEOS)/makefiles/common.mk
@@ -11,6 +11,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	deviceauth.x \
 	frontfeed.x \
 	parsing.x \
+	categories.x \
 	getvideo.x \
 	channels.x \
 	channelfeed.x \
