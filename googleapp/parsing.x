@@ -7,6 +7,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "general.h"
 
 #pragma mark - Format Detection & Parsing
 
@@ -87,6 +88,7 @@
 
     void (^wrappedResponseBlock)(id) = ^(id response) {
         // Cache subscriptions when fetching subscription page
+        NSLog(@"parser -> %@", parser);
         if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
             id cache = [self valueForKey:@"subscriptionCache_"];
             [cache setValue:@100000 forKey:@"countLimit_"];
@@ -98,6 +100,8 @@
             [cache setValue:@100000 forKey:@"countLimit_"];
             [self cacheChannel:response];
         }
+
+        
 
         if (parser == [self valueForKey:@"channelPageParser_"]) {
             id cache = [self channelCache];
@@ -125,5 +129,66 @@
 +(id)localizedCount:(uint64_t)number
 {
   return [NSNumberFormatter localizedStringFromNumber:[NSNumber numberWithLongLong:number] numberStyle:1];
+}
+%end
+
+%hook YTUIUtils
++(id)localizedCount:(uint64_t)number
+{
+  return [NSNumberFormatter localizedStringFromNumber:[NSNumber numberWithLongLong:number] numberStyle:1];
+}
+%end
+
+@interface PendingRequestKey
+
+-(id)keyWithRequest:(id)a3 authorizer:(id)a4;
+
+@end
+
+// i hate you youtube for not writing this correctly!!!!
+%hook YTBaseService
+
+-(void)performHTTPRequest:(id)request withAuthorizer:(id)withAuthorizer completionBlock:(id)completionBlock
+{
+    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        return %orig;
+    } else {
+        id copiedCompletionBlock = [completionBlock copy];
+
+        NSBlockOperation *operation =
+        [NSBlockOperation blockOperationWithBlock:^{
+
+            id requestKey =
+            [%c(PendingRequestKey) keyWithRequest:request authorizer:withAuthorizer];
+
+            id completionBlock2 = [copiedCompletionBlock autorelease];
+
+            NSMutableArray *v6 =
+            [NSMutableArray arrayWithObject:completionBlock2];
+
+            [[self valueForKey:@"pendingRequests_"]
+                setObject:v6 forKey:requestKey];
+
+            GTMHTTPFetcher *fetcher =
+            [[self valueForKey:@"httpFetcherService_"]
+                fetcherWithRequest:request];
+
+            [fetcher setAuthorizer:withAuthorizer];
+
+            [fetcher beginFetchWithCompletionHandler:
+            ^(NSData *data, NSError *error) {
+
+                for (void (^block)(NSData *, NSError *) in v6) {
+                    block(data, error);
+                }
+
+                [(NSMutableDictionary*)
+                [self valueForKey:@"pendingRequests_"]
+                removeObjectForKey:requestKey];
+            }];
+        }];
+
+        [[NSOperationQueue mainQueue] addOperation:operation];
+    }
 }
 %end

@@ -10,6 +10,7 @@
 #import "../appheaders.h"
 #import "../../base64/NSString+Base64.h"
 #import "../../base64/NSData+Base64.h"
+#import "../general.h"
 
 @implementation TRVideoTranslator
 
@@ -250,36 +251,71 @@
         }
     }
     
-    id video = [[NSClassFromString(@"YTVideo") alloc] 
-        initWithID:videoId
-        title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
-        description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
-        uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
-        uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
-        uploadedDate:uploadDate
-        publishedDate:publishDate
-        duration:duration
-        viewCount:viewCount
-        likesCount:likesCount
-        dislikesCount:0
-        state:videoState
-        streams:ytStreams
-        thumbnailURLs:thumbnails
-        subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
-        commentsAllowed:YES
-        commentsURL:videoId
-        commentsCountHint:0
-        relatedURL:videoId
-        claimed:NO
-        monetized:NO
-        monetizedCountries:@[]
-        allowedCountries:availableCountries
-        deniedCountries:@[]
-        categoryLabel:@"Gaming"
-        categoryTerm:category ?: @"Unknown"
-        tags:@[]
-        adultContent:NO
-        videoPro:nil];
+    id video = nil;
+    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
+            description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
+            uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
+            uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
+            uploadedDate:uploadDate
+            publishedDate:publishDate
+            duration:duration
+            viewCount:viewCount
+            likesCount:likesCount
+            dislikesCount:0
+            state:videoState
+            streams:ytStreams
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            allowedCountries:availableCountries
+            deniedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:category ?: @"Unknown"
+            tags:@[]
+            adultContent:NO
+            videoPro:nil];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
+            description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
+            uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
+            uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
+            uploadedDate:uploadDate
+            publishedDate:publishDate
+            duration:duration
+            viewCount:viewCount
+            likesCount:likesCount
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:ytStreams
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            allowedCountries:availableCountries
+            deniedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:category ?: @"Unknown"
+            adultContent:NO
+            editURL:nil
+            videoPro:nil];
+    }
     
     [videoState release];
     
@@ -442,37 +478,71 @@
                                    @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", 
                                    @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
     NSLog(@"views -> %llu", views);
-    id video = [[NSClassFromString(@"YTVideo") alloc] 
-        initWithID:videoId
-        title:title
-        description:@""
-        uploaderDisplayName:uploaderName
-        uploaderChannelID:channelId ?: @""
-        uploadedDate:uploadDate
-        publishedDate:uploadDate
-        duration:duration
-        viewCount:views
-        likesCount:0
-        dislikesCount:0
-        state:videoState
-        streams:@[]
-        thumbnailURLs:thumbnails
-        subtitlesTracksURL:nil
-        commentsAllowed:YES
-        commentsURL:videoId
-        commentsCountHint:0
-        relatedURL:videoId
-        claimed:NO
-        monetized:NO
-        monetizedCountries:@[]
-        allowedCountries:defaultCountries
-        deniedCountries:@[]
-        categoryLabel:@"Gaming"
-        categoryTerm:@"Unknown"
-        tags:@[]
-        adultContent:NO
-        videoPro:nil];
-    
+    id video = nil;
+    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            state:videoState
+            streams:@[]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            allowedCountries:defaultCountries
+            deniedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            tags:@[]
+            adultContent:NO
+            videoPro:nil];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:@[]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            allowedCountries:defaultCountries
+            deniedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            adultContent:NO
+            editURL:nil
+            videoPro:nil];
+    }
     [videoState release];
     
     return video;

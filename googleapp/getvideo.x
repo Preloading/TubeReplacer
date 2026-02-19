@@ -40,6 +40,26 @@
 
 %end
 
+%hook YTGDataRequestFactory
+
+-(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
+    NSURL *fullURL = [urlBuilder URL];
+
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    YoutubeClientType *client = [YoutubeClientType androidClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
+        client = [YoutubeClientType iosClient];
+    }
+
+    return [self requestWithURL:fullURL 
+                 authentication:nil 
+                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                                                 client:client]];
+}
+
+%end
+
 #pragma mark - Request Dispatch
 
 %hook YTGDataService
@@ -51,11 +71,18 @@
     if (cachedVideo) {
         [self performResponseBlock:responseBlock response:cachedVideo];
     } else {
-        YTGDataRequest *request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
+        YTGDataRequest *request = nil;
+        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+            request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
+        } else {
+            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId];
+        }
+
         [self makePOSTRequest:request 
-                   withParser:[self valueForKey:@"videoParser_"] 
-                responseBlock:responseBlock 
-                   errorBlock:errorBlock];
+                    withParser:[self valueForKey:@"videoParser_"] 
+                    responseBlock:responseBlock 
+                    errorBlock:errorBlock];
+
     }
 }
 

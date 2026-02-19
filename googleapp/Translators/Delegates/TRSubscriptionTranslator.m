@@ -7,6 +7,7 @@
 #import "TRChannelTranslator.h"
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
+#import "../general.h"
 
 @implementation TRSubscriptionTranslator
 
@@ -55,6 +56,7 @@
 #pragma mark - List Item (Subscription Page)
 
 - (id)translateListItem:(NSDictionary *)json error:(NSError **)error {
+    NSLog(@"we are actually parsing a subscription");
     NSDictionary *subscription = [TRJSONUtils dictFromJSON:json keyPath:@"i"];
     
     if (!subscription) {
@@ -68,17 +70,32 @@
     YTChannel *channel = [[TRChannelTranslator alloc] translateCompactChannel:subscription error:error];
     // todo check for error
 
-    id sub = [[[NSClassFromString(@"YTSubscription") alloc] 
-        initWithUsername:[channel channelID] // i could fix this but im lazy
-        displayName:[channel displayName]
-        channelID:[channel channelID]
-        type:1
-        publishedDate:[NSDate date]
-        updatedDate:[channel updated]
-        countHint:0
-        editURL:[NSURL URLWithString:@"https://youtube.com"]
-        thumbnailURL:[channel thumbnailURL]
-    ] autorelease];
+    id sub = nil;
+    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithUsername:[channel channelID] // i could fix this but im lazy
+            displayName:[channel displayName]
+            channelID:[channel channelID]
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[channel updated]
+            countHint:0
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:[channel thumbnailURL]
+        ] autorelease];
+    } else {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithDisplayName:[channel displayName]
+            channelID:[channel channelID]
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[channel updated]
+            countHint:0
+            unreadCount:0 // todo: see if i can actually make this correct
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:[channel thumbnailURL]
+        ] autorelease];
+    }
     
     return sub;
 }

@@ -6,6 +6,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "general.h"
 
 #pragma mark - Request Building
 
@@ -21,24 +22,42 @@
 
 %end
 
+%hook YTGDataRequestFactory
+
+-(id)requestForChannelWithID:(NSString*)channelId {
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false" 
+                       authentication:nil 
+                                 body:[TRRequestBuilder browseBodyWithId:channelId 
+                                                                  params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" 
+                                                                  client:[YoutubeClientType webMobileClient]]];
+}
+
+%end
+
 #pragma mark - Request Dispatch
 
 %hook YTGDataService
 
 -(void)makeChannelRequestWithID:(NSString*)channelId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    id cache = [[self channelCache] objectForKey:channelId];
-    if (cache) {
-        if (cache == [NSNull null]) {
-            cache = nil;
+    // id cache = [[self channelCache] objectForKey:channelId];
+    // if (cache) {
+    //     if (cache == [NSNull null]) {
+    //         cache = nil;
+    //     }
+    //     [self performResponseBlock:responseBlock response:cache];
+    // } else {
+        id url = nil;
+        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+            url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
+            
+        } else {
+            url = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForChannelWithID:channelId];
         }
-        [self performResponseBlock:responseBlock response:cache];
-    } else {
-        id url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
         [self makePOSTRequest:url 
-                withParser:[self valueForKey:@"channelParser_"] 
-                responseBlock:responseBlock 
-                errorBlock:errorBlock];
-    }
+                    withParser:[self valueForKey:@"channelParser_"] 
+                    responseBlock:responseBlock 
+                    errorBlock:errorBlock];
+    // }
 }
 
 %end

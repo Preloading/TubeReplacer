@@ -6,6 +6,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "general.h"
 
 #pragma mark - Request Building
 
@@ -42,6 +43,39 @@
 }
 %end
 
+%hook YTGDataRequestFactory
+
+-(id)requestForMySubscriptionsWithAuth:(id)authentication {
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" 
+                       authentication:authentication 
+                                 body:[TRRequestBuilder browseBodyWithId:@"FEchannels" 
+                                                                  params:nil 
+                                                                  client:[YoutubeClientType webClient]]];
+}
+
+-(id)requestForMySubscriptionWithChannelID:(NSString*)channelId auth:(id)authentication {
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false" 
+                       authentication:authentication 
+                                 body:[TRRequestBuilder browseBodyWithId:channelId 
+                                                                  params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" 
+                                                                  client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestToSubscribeWithChannelID:(NSString*)channelId authentication:(id)authentication {
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/subscription/subscribe?prettyPrint=false" 
+                       authentication:authentication 
+                                 body:[TRRequestBuilder subscribeBodyWithChannelId:channelId 
+                                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestToUnsubscribeWithSubscription:(YTSubscription*)subscription authentication:(id)authentication {
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/subscription/unsubscribe?prettyPrint=false" 
+                       authentication:authentication 
+                                 body:[TRRequestBuilder subscribeBodyWithChannelId:[subscription channelID] 
+                                                                            client:[YoutubeClientType webMobileClient]]];
+}
+%end
+
 #pragma mark - Request Dispatch
 
 %hook YTGDataService
@@ -55,7 +89,12 @@
         }
         [self performResponseBlock:responseBlock response:cache];
     } else {
-        id request = [%c(YTGDataRequest) requestForMySubscriptionWithChannelID:channelId auth:authentication];
+        id request = nil;
+        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+            request = [%c(YTGDataRequest) requestForMySubscriptionWithChannelID:channelId auth:authentication];
+        } else {
+            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMySubscriptionWithChannelID:channelId auth:authentication];
+        }
         [self makePOSTRequest:request 
                    withParser:[self valueForKey:@"subscriptionParser_"] 
                 responseBlock:responseBlock 
@@ -98,7 +137,13 @@
 
 -(void)makeUnsubscribeRequestWithSubscription:(YTSubscription*)subscription authentication:(id)authentication responseBlock:(void (^)(void))responseBlock errorBlock:(void (^)(NSError *error))errorBlock
 {
-  id request = [%c(YTGDataRequest) requestToUnsubscribeWithSubscription:subscription authentication:authentication];
+  id request = nil;
+  
+  if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    request = [%c(YTGDataRequest) requestToUnsubscribeWithSubscription:subscription authentication:authentication];
+  } else {
+    request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestToUnsubscribeWithSubscription:subscription authentication:authentication];
+  }
 
     void (^successBlock)(id) = ^(id response) {
         [self clearSubscriptionDependentCaches];

@@ -9,6 +9,7 @@
 #import "TRJSONUtils.h"
 #import "TRContinuation.h"
 #import "../appheaders.h"
+#import "../general.h"
 
 @implementation TRFeedTranslator
 
@@ -86,15 +87,29 @@
         // NSLog(@"actions -> %@", [self valueForKey:@"actionsLookup_"]);
         NSLog(@"uploader display name -> %@", [entry uploaderDisplayName]);
         if (entry) {
-            [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
-                authorUserID:[entry uploaderChannelID]
-                action:9 // 5 = uploaded 9 = recommended
-                target:[entry uploaderChannelID]
-                when:[entry uploadedDate]
-                video:entry
-                groupID:[entry title]
-                feedURL:[NSURL URLWithString:@"https://google.com"]
-            ]];
+            if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+                [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
+                    authorUserID:[entry uploaderChannelID]
+                    action:9 // 5 = uploaded 9 = recommended
+                    target:[entry uploaderChannelID]
+                    when:[entry uploadedDate]
+                    video:entry
+                    groupID:[entry title]
+                    feedURL:[NSURL URLWithString:@"https://google.com"]
+                ]];
+            } else {
+                [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
+                    authorUserID:[entry uploaderChannelID]
+                    action:9 // 5 = uploaded 9 = recommended
+                    target:[entry uploaderChannelID]
+                    targetDisplayName:[entry uploaderDisplayName]
+                    when:[entry uploadedDate]
+                    video:entry
+                    groupID:[entry title]
+                    feedURL:[NSURL URLWithString:@"https://google.com"]
+                    title:@"title"
+                ]];
+            }
             // [entries addObject:entry];
         }
     }
