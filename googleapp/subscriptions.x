@@ -90,7 +90,7 @@
         [self performResponseBlock:responseBlock response:cache];
     } else {
         id request = nil;
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestForMySubscriptionWithChannelID:channelId auth:authentication];
         } else {
             request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMySubscriptionWithChannelID:channelId auth:authentication];
@@ -139,7 +139,7 @@
 {
   id request = nil;
   
-  if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+  if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
     request = [%c(YTGDataRequest) requestToUnsubscribeWithSubscription:subscription authentication:authentication];
   } else {
     request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestToUnsubscribeWithSubscription:subscription authentication:authentication];

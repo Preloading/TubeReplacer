@@ -71,7 +71,7 @@
     // todo check for error
 
     id sub = nil;
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         sub = [[[NSClassFromString(@"YTSubscription") alloc] 
             initWithUsername:[channel channelID] // i could fix this but im lazy
             displayName:[channel displayName]

@@ -86,7 +86,7 @@
     NSURL *thumbnail = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
     
     YTUserProfile *profile = nil;
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         profile = [[[%c(YTUserProfile) alloc] 
             initWithUsername:channelHandle
             displayName:displayName

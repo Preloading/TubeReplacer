@@ -252,7 +252,7 @@
     }
     
     id video = nil;
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
@@ -479,7 +479,7 @@
                                    @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
     NSLog(@"views -> %llu", views);
     id video = nil;
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:title

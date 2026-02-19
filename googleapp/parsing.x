@@ -150,7 +150,7 @@
 
 -(void)performHTTPRequest:(id)request withAuthorizer:(id)withAuthorizer completionBlock:(id)completionBlock
 {
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         return %orig;
     } else {
         id copiedCompletionBlock = [completionBlock copy];

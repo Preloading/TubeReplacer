@@ -72,7 +72,7 @@
         [self performResponseBlock:responseBlock response:cachedVideo];
     } else {
         YTGDataRequest *request = nil;
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
         } else {
             request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId];

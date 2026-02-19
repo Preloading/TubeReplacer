@@ -100,7 +100,7 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false"] 
                             authentication:nil // i hope this wont cause issues... 
                                     body:[TRRequestBuilder continueWithContext:[request URL] 
@@ -122,7 +122,7 @@
 -(void)makeMyWatchHistoryVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
@@ -143,7 +143,7 @@
 -(void)makeMyWatchLaterVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
@@ -164,7 +164,7 @@
 -(void)makeMyUploadedVideosRequest:(YTGDataRequest*)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 

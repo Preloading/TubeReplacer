@@ -47,7 +47,7 @@
     //     [self performResponseBlock:responseBlock response:cache];
     // } else {
         id url = nil;
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
             
         } else {

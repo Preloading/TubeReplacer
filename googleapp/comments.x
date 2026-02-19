@@ -44,7 +44,7 @@
     
     if ([[originalRequest valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
         TRContinuation *continuation = [originalRequest valueForKey:@"URL_"];
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
@@ -58,7 +58,7 @@
         
     } else {
         NSString* videoId = [originalRequest valueForKey:@"URL_"];
-        if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
                 authentication:nil 
                 body:[TRRequestBuilder commentsBodyWithVideoId:videoId 

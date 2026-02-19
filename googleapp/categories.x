@@ -77,7 +77,7 @@
 	
 
 	YTUserAuthenticator *userAuthenticator = nil;
-	if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+	if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
 		YTServices *services = [self valueForKey:@"services_"];
 		userAuthenticator = [services userAuthenticator];
 	} else {
@@ -97,7 +97,7 @@
 	{
 		[self loadAccountThumbnail];
 
-		if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+		if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
 			YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
 			[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
 		} else {

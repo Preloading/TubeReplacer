@@ -87,7 +87,7 @@
         // NSLog(@"actions -> %@", [self valueForKey:@"actionsLookup_"]);
         NSLog(@"uploader display name -> %@", [entry uploaderDisplayName]);
         if (entry) {
-            if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+            if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
                 [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
                     authorUserID:[entry uploaderChannelID]
                     action:9 // 5 = uploaded 9 = recommended

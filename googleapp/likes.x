@@ -56,7 +56,7 @@
 -(void)makeRateRequestWithVideoID:(NSString*)videoId authentication:(id)authentication like:(BOOL)like responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     
     YTGDataRequest *request = nil;
-    if ([version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.0.1"]) {
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         request = [%c(YTGDataRequest) requestToRateWithVideoID:videoId 
                                         authentication:authentication 
                                                     like:like];
