@@ -96,7 +96,6 @@
         }
 
         if (parser == [self valueForKey:@"channelParser_"]) {
-            NSLog(@"triggered channel parser");
             id cache = [self channelCache];
             [cache setValue:@100000 forKey:@"countLimit_"];
             [self cacheChannel:response];
@@ -105,15 +104,8 @@
         
 
         if (parser == [self valueForKey:@"channelPageParser_"]) {
-            NSLog(@"triggered channel page parser");
             id cache = [self channelCache];
             for (id channel in [response entries]) {
-                if ([channel isKindOfClass:[%c(YTVideo) class]]) {
-                    NSLog(@"title of stoopid video why -> %@", [(YTVideo*)channel title]);
-                    NSLog(@"what the fuck????");
-                    continue;
-                }
-                NSLog(@"channelParser");
                 [cache setValue:@100000 forKey:@"countLimit_"];
                 [self cacheChannel:channel];
             }
