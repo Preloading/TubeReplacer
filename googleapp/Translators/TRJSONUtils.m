@@ -229,7 +229,7 @@
     [formatter setDateFormat:@"MMM dd, yyyy"];
     [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
-    NSDate *result = [formatter dateFromString:string];
+    NSDate *result = [formatter dateFromString:[[string stringByReplacingOccurrencesOfString:@"Premiered " withString:@""] stringByReplacingOccurrencesOfString:@"Streamed live on " withString:@""]];
     [formatter release];
     [enUSPOSIXLocale release];
     
