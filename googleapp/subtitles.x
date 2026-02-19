@@ -1,11 +1,19 @@
 #import <Foundation/Foundation.h>
 #import "appheaders.h"
+#include "general.h"
 
 %hook YTSubtitlesController
 
 -(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
 {
-    YTSubtitlesService *service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
+    YTSubtitlesService *service = nil; 
+    
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+        service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
+    } else {
+        service = [self valueForKey:@"subtitlesService_"];
+    }
+    
     NSArray *trackURLs = [(YTVideo*)[self valueForKey:@"video_"] subtitlesTracksURL];
 
     [service performResponseBlock:^(id response)
