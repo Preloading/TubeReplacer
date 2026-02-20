@@ -108,24 +108,27 @@
                     }
                     
                     NSError *error = nil;
-
-                    // you may say "this is bad you shouldn't use regex to filter out HTML!!!!", however, this isnt actually being rendered, it's just to remove style tags we can't render
-                    NSRegularExpression *regex = [NSRegularExpression 
-                        regularExpressionWithPattern:@"<[^>]+>"
-                        options:NSRegularExpressionCaseInsensitive 
-                        error:&error];
-                    textContent = [regex stringByReplacingMatchesInString:textContent
-                        options:0
-                        range:NSMakeRange(0, [textContent length])
-                        withTemplate:@""];
-
-                    // Decode common HTML entities
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&#39;" withString:@"'"];
-                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&nbsp;" withString:@" "];
+                    
+                    if (textContent) {
+                        // you may say "this is bad you shouldn't use regex to filter out HTML!!!!", however, this isnt actually being rendered, it's just to remove style tags we can't render
+                        NSRegularExpression *regex = [NSRegularExpression 
+                            regularExpressionWithPattern:@"<[^>]+>"
+                            options:NSRegularExpressionCaseInsensitive 
+                            error:&error];
+                        textContent = [regex stringByReplacingMatchesInString:textContent
+                            options:0
+                            range:NSMakeRange(0, [textContent length])
+                            withTemplate:@""];
+                            
+                        // Decode common HTML entities
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&#39;" withString:@"'"];
+                        textContent = [textContent stringByReplacingOccurrencesOfString:@"&nbsp;" withString:@" "];
+                    }
+                    
 
                     if (previousText) {
                         if (previousEnd >= start) {
@@ -138,7 +141,7 @@
                     previousEnd = endDuration;
                     previousText = textContent;                
                     
-                    NSLog(@"Start: %f, Duration: %f, Text: %@", start, dur, textContent);
+                    // NSLog(@"Start: %f, Duration: %f, Text: %@", start, dur, textContent);
                     
                     // Move to next <text> element
                     textBlock = [textBlock nextSiblingNamed:@"p"];

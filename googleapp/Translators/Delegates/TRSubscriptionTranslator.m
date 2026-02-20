@@ -106,7 +106,7 @@
     NSNumber *isSubscribed = [TRJSONUtils valueFromJSON:json 
         keyPathWithArrays:@"frameworkUpdates.entityBatchUpdate.mutations[0].payload.subscriptionStateEntity.subscribed"];
     
-    if (![isSubscribed isEqual:@1]) {
+    if ([isSubscribed isEqual:@0]) {
         return nil;
     }
     
@@ -118,17 +118,34 @@
         keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.image.decoratedAvatarViewModel.avatar.avatarViewModel.image.sources[0].url"];
     NSURL *thumbnailURL = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
     
-    id sub = [[[NSClassFromString(@"YTSubscription") alloc] 
-        initWithUsername:displayName
-        displayName:displayName
-        channelID:channelID
-        type:1
-        publishedDate:[NSDate date]
-        updatedDate:[NSDate date]
-        countHint:0
-        editURL:[NSURL URLWithString:@"https://youtube.com"]
-        thumbnailURL:thumbnailURL
-    ] autorelease];
+    id sub = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithUsername:displayName
+            displayName:displayName
+            channelID:channelID
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[NSDate date]
+            countHint:0
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:thumbnailURL
+        ] autorelease];
+    } else {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithDisplayName:displayName
+            channelID:channelID
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[NSDate date]
+            countHint:0
+            unreadCount:0 // todo: see if i can actually make this correct
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:thumbnailURL
+        ] autorelease];
+    }
+
+    
     
     return sub;
 }
