@@ -78,56 +78,127 @@
         YTSubtitles *subtitles = [[[%c(YTSubtitles) alloc] init] autorelease];
         if (root) {            
             // Iterate through all <text> elements
-            YTTBXMLElement *textElement = [root childElementNamed:@"text"];
+            YTTBXMLElement *bodyElement = [root childElementNamed:@"body"];
             
-            double previousEnd = 0;
-            double previousStart = 0;
-            NSString *previousText = nil;
+            if (bodyElement) {
+                // 360p (android)
+                YTTBXMLElement *textBlock = [bodyElement childElementNamed:@"p"];
+                
+                double previousEnd = 0;
+                double previousStart = 0;
+                NSString *previousText = nil;
 
-            while (textElement != nil) {
-                // Extract attributes
-                double start = [[textElement valueOfAttributeNamed:@"start"] doubleValue]*1000;
-                double dur = [[textElement valueOfAttributeNamed:@"dur"] doubleValue]*1000;
-                double endDuration = start + dur;
-                NSString *textContent = [textElement text];
-                NSError *error = nil;
+                while (textBlock != nil) {
+                    // Extract attributes
+                    double start = [[textBlock valueOfAttributeNamed:@"t"] doubleValue];
+                    double dur = [[textBlock valueOfAttributeNamed:@"d"] doubleValue];
+                    double endDuration = start + dur;
 
-                // you may say "this is bad you shouldn't use regex to filter out HTML!!!!", however, this isnt actually being rendered, it's just to remove style tags we can't render
-                NSRegularExpression *regex = [NSRegularExpression 
-                    regularExpressionWithPattern:@"<[^>]+>"
-                    options:NSRegularExpressionCaseInsensitive 
-                    error:&error];
-                textContent = [regex stringByReplacingMatchesInString:textContent
-                    options:0
-                    range:NSMakeRange(0, [textContent length])
-                    withTemplate:@""];
+                    NSString *textContent = nil;
 
-                // Decode common HTML entities
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&#39;" withString:@"'"];
-                textContent = [textContent stringByReplacingOccurrencesOfString:@"&nbsp;" withString:@" "];
+                    YTTBXMLElement *textElement = [textBlock childElementNamed:@"s"];
 
-                if (previousText) {
-                    if (previousEnd >= start) {
-                        previousEnd = start-0.001;
+                    while (textElement != nil) { 
+                        if (textContent) {
+                            textContent = [NSString stringWithFormat:@"%@ %@",textContent, [textElement text]];
+                        } else {
+                            textContent = [textElement text];
+                        }
+                        textElement = [textElement nextSiblingNamed:@"s"];
                     }
-                    [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
+                    
+                    NSError *error = nil;
+
+                    // you may say "this is bad you shouldn't use regex to filter out HTML!!!!", however, this isnt actually being rendered, it's just to remove style tags we can't render
+                    NSRegularExpression *regex = [NSRegularExpression 
+                        regularExpressionWithPattern:@"<[^>]+>"
+                        options:NSRegularExpressionCaseInsensitive 
+                        error:&error];
+                    textContent = [regex stringByReplacingMatchesInString:textContent
+                        options:0
+                        range:NSMakeRange(0, [textContent length])
+                        withTemplate:@""];
+
+                    // Decode common HTML entities
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&#39;" withString:@"'"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&nbsp;" withString:@" "];
+
+                    if (previousText) {
+                        if (previousEnd >= start) {
+                            previousEnd = start-0.001;
+                        }
+                        [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
+                    }
+                    
+                    previousStart = start;
+                    previousEnd = endDuration;
+                    previousText = textContent;                
+                    
+                    NSLog(@"Start: %f, Duration: %f, Text: %@", start, dur, textContent);
+                    
+                    // Move to next <text> element
+                    textBlock = [textBlock nextSiblingNamed:@"p"];
                 }
+                if (previousText)
+                    [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
+
+            } else {
+                // HLS (iOS)
+                YTTBXMLElement *textElement = [root childElementNamed:@"text"];
                 
-                previousStart = start;
-                previousEnd = endDuration;
-                previousText = textContent;                
-                
-                // NSLog(@"Start: %f, Duration: %f, Text: %@", start, dur, textContent);
-                
-                // Move to next <text> element
-                textElement = [textElement nextSiblingNamed:@"text"];
+                double previousEnd = 0;
+                double previousStart = 0;
+                NSString *previousText = nil;
+
+                while (textElement != nil) {
+                    // Extract attributes
+                    double start = [[textElement valueOfAttributeNamed:@"start"] doubleValue]*1000;
+                    double dur = [[textElement valueOfAttributeNamed:@"dur"] doubleValue]*1000;
+                    double endDuration = start + dur;
+                    NSString *textContent = [textElement text];
+                    NSError *error = nil;
+
+                    // you may say "this is bad you shouldn't use regex to filter out HTML!!!!", however, this isnt actually being rendered, it's just to remove style tags we can't render
+                    NSRegularExpression *regex = [NSRegularExpression 
+                        regularExpressionWithPattern:@"<[^>]+>"
+                        options:NSRegularExpressionCaseInsensitive 
+                        error:&error];
+                    textContent = [regex stringByReplacingMatchesInString:textContent
+                        options:0
+                        range:NSMakeRange(0, [textContent length])
+                        withTemplate:@""];
+
+                    // Decode common HTML entities
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&#39;" withString:@"'"];
+                    textContent = [textContent stringByReplacingOccurrencesOfString:@"&nbsp;" withString:@" "];
+
+                    if (previousText) {
+                        if (previousEnd >= start) {
+                            previousEnd = start-0.001;
+                        }
+                        [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
+                    }
+                    
+                    previousStart = start;
+                    previousEnd = endDuration;
+                    previousText = textContent;                
+                    
+                    // NSLog(@"Start: %f, Duration: %f, Text: %@", start, dur, textContent);
+                    
+                    // Move to next <text> element
+                    textElement = [textElement nextSiblingNamed:@"text"];
+                }
+                if (previousText)
+                    [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
             }
-            if (previousText)
-                [subtitles appendLine:previousText startTime:previousStart endTime:previousEnd];
 
         }
         return subtitles;
