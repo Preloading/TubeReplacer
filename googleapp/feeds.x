@@ -43,8 +43,12 @@
     TRFeedTranslator *translator = [[[TRFeedTranslator alloc] init] autorelease];
     if ([entryParser isKindOfClass:[%c(YTEventParser) class]]) {
         return [translator translateJSONAsEvent:bodyDict error:error];
+    } else if ([entryParser isKindOfClass:[%c(YTVideoParser) class]]) {
+        return [translator translateVideoJSON:bodyDict error:error];
+    } else if ([entryParser isKindOfClass:[%c(YTChannelParser) class]]) {
+        return [translator translateChannelJSON:bodyDict error:error];
     }
-    return [translator translateJSON:bodyDict error:error];
+    return [translator translateVideoJSON:bodyDict error:error];
 }
 
 #pragma mark - Specialized Feed Parsing (subscriptions, comments, playlists)

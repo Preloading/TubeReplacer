@@ -301,7 +301,14 @@
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
 
             NSString *channelID = nil;
-            NSRange chanSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
+            NSRange firstSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
+            NSRange chanSearch = NSMakeRange(NSNotFound, 0);
+            if (firstSearch.location != NSNotFound) {
+                NSInteger searchStart = firstSearch.location + firstSearch.length;
+                if (searchStart < [htmlString length]) {
+                    chanSearch = [htmlString rangeOfString:@"\"url\":\"/channel/" options:0 range:NSMakeRange(searchStart, [htmlString length] - searchStart)];
+                }
+            }
             if (chanSearch.location != NSNotFound) {
               NSInteger chanStart = chanSearch.location + chanSearch.length;
               NSRange chanEnd = [htmlString rangeOfString:@"\"" options:0 range:NSMakeRange(chanStart, [htmlString length] - chanStart)];

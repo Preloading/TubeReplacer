@@ -134,7 +134,8 @@
     return page;
 }
 
-- (id)translateJSON:(NSDictionary *)json error:(NSError **)error {
+-(id)translateJSON:(NSDictionary *)json error:(NSError **)error {
+    // todo: make this go bye bye
     if (!json || ![json isKindOfClass:[NSDictionary class]]) {
         if (error) {
             *error = [NSError errorWithDomain:@"TRFeedTranslator" code:1 
@@ -150,7 +151,6 @@
     
     // TODO: move this somewhat to it's own space like comments, how that app actually expects it
     TRVideoTranslator *videoTranslator = [[[TRVideoTranslator alloc] init] autorelease];
-    TRChannelTranslator *channelTranslator = [[[TRChannelTranslator alloc] init] autorelease];
     
     continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"contents.sectionListRenderer.contents[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
     if (!continuationToken) continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
@@ -174,8 +174,123 @@
             entry = [videoTranslator translateFeedItem:item withContext:json error:&itemError];
             type = 1;
         }
-        // Then try channel
-        else if ((type == 0 || type == 2) && [channelTranslator canTranslateJSON:item]) {
+        
+        if (entry) {
+            [entries addObject:entry];
+        }
+    }
+
+    NSLog(@"continuation token -> %@", continuationToken);
+    
+    // Create YTPage
+    id page = [[[NSClassFromString(@"YTPage") alloc] 
+        initWithEntries:entries 
+        totalResults:100000 // todo: make better
+        entriesPerPage:[entries count] 
+        startIndex:1 
+        nextURL:continuationToken 
+        previousURL:nil
+    ] autorelease];
+    
+    return page;
+}
+
+- (id)translateVideoJSON:(NSDictionary *)json error:(NSError **)error {
+    if (!json || ![json isKindOfClass:[NSDictionary class]]) {
+        if (error) {
+            *error = [NSError errorWithDomain:@"TRFeedTranslator" code:1 
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Invalid input"}];
+        }
+        return nil;
+    }
+    
+    NSArray *items = [self extractItemsFromFeed:json];
+    NSMutableArray *entries = [NSMutableArray array];
+    NSString *continuationToken = nil;
+    int type = 0; // bit of a hack till the comment below is done.
+    
+    // TODO: move this somewhat to it's own space like comments, how that app actually expects it
+    TRVideoTranslator *videoTranslator = [[[TRVideoTranslator alloc] init] autorelease];
+    
+    continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"contents.sectionListRenderer.contents[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+    if (!continuationToken) continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+
+    for (NSDictionary *item in items) {
+        if (![item isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        
+        // Skip continuation items
+        if ([item objectForKey:@"continuationItemRenderer"]) {
+            continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];
+            continue;
+        }
+        
+        NSError *itemError = nil;
+        id entry = nil;
+        
+        // Try video first
+        if ((type == 0 || type == 1) && [videoTranslator canTranslateJSON:item]) {
+            entry = [videoTranslator translateFeedItem:item withContext:json error:&itemError];
+            type = 1;
+        }
+        
+        if (entry) {
+            [entries addObject:entry];
+        }
+    }
+
+    NSLog(@"continuation token -> %@", continuationToken);
+    
+    // Create YTPage
+    id page = [[[NSClassFromString(@"YTPage") alloc] 
+        initWithEntries:entries 
+        totalResults:100000 // todo: make better
+        entriesPerPage:[entries count] 
+        startIndex:1 
+        nextURL:continuationToken 
+        previousURL:nil
+    ] autorelease];
+    
+    return page;
+}
+
+- (id)translateChannelJSON:(NSDictionary *)json error:(NSError **)error {
+    if (!json || ![json isKindOfClass:[NSDictionary class]]) {
+        if (error) {
+            *error = [NSError errorWithDomain:@"TRFeedTranslator" code:1 
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Invalid input"}];
+        }
+        return nil;
+    }
+    
+    NSArray *items = [self extractItemsFromFeed:json];
+    NSMutableArray *entries = [NSMutableArray array];
+    NSString *continuationToken = nil;
+    int type = 0; // bit of a hack till the comment below is done.
+    
+    // TODO: move this somewhat to it's own space like comments, how that app actually expects it
+    TRChannelTranslator *channelTranslator = [[[TRChannelTranslator alloc] init] autorelease];
+    
+    continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"contents.sectionListRenderer.contents[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+    if (!continuationToken) continuationToken = [TRJSONUtils stringFromJSON:json keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token"];
+
+    for (NSDictionary *item in items) {
+        if (![item isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        
+        // Skip continuation items
+        if ([item objectForKey:@"continuationItemRenderer"]) {
+            continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];
+            continue;
+        }
+        
+        NSError *itemError = nil;
+        id entry = nil;
+        
+        // Try video first
+        if ((type == 0 || type == 2) && [channelTranslator canTranslateJSON:item]) {
             entry = [channelTranslator translateJSON:item error:&itemError];
             type = 2;
         }
