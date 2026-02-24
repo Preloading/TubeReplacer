@@ -89,24 +89,24 @@
     void (^wrappedResponseBlock)(id) = ^(id response) {
         // Cache subscriptions when fetching subscription page
         NSLog(@"parser -> %@", parser);
-        if (parser == [self valueForKey:@"subscriptionPageParser_"]) {
-            id cache = [self valueForKey:@"subscriptionCache_"];
-            [cache setValue:@100000 forKey:@"countLimit_"];
+        if (parser == [self valueForKey:l(@"subscriptionPageParser")]) {
+            id cache = [self valueForKey:l(@"subscriptionCache")];
+            [cache setValue:@100000 forKey:l(@"countLimit")];
             [self cacheSubscriptionsFromSubscriptionPage:response];
         }
 
-        if (parser == [self valueForKey:@"channelParser_"]) {
+        if (parser == [self valueForKey:l(@"channelParser")]) {
             id cache = [self channelCache];
-            [cache setValue:@100000 forKey:@"countLimit_"];
+            [cache setValue:@100000 forKey:l(@"countLimit")];
             [self cacheChannel:response];
         }
 
         
 
-        if (parser == [self valueForKey:@"channelPageParser_"]) {
+        if (parser == [self valueForKey:l(@"channelPageParser")]) {
             id cache = [self channelCache];
             for (id channel in [response entries]) {
-                [cache setValue:@100000 forKey:@"countLimit_"];
+                [cache setValue:@100000 forKey:l(@"countLimit")];
                 [self cacheChannel:channel];
             }
             
@@ -166,11 +166,11 @@
             NSMutableArray *v6 =
             [NSMutableArray arrayWithObject:completionBlock2];
 
-            [[self valueForKey:@"pendingRequests_"]
+            [[self valueForKey:l(@"pendingRequests")]
                 setObject:v6 forKey:requestKey];
 
             GTMHTTPFetcher *fetcher =
-            [[self valueForKey:@"httpFetcherService_"]
+            [[self valueForKey:l(@"httpFetcherService")]
                 fetcherWithRequest:request];
 
             [fetcher setAuthorizer:withAuthorizer];
@@ -183,7 +183,7 @@
                 }
 
                 [(NSMutableDictionary*)
-                [self valueForKey:@"pendingRequests_"]
+                [self valueForKey:l(@"pendingRequests")]
                 removeObjectForKey:requestKey];
             }];
         }];

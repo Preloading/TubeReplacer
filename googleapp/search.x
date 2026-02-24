@@ -186,7 +186,7 @@
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -194,7 +194,7 @@
     }
 
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"videoPageParser_"] 
+               withParser:[self valueForKey:l(@"videoPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
@@ -208,14 +208,14 @@
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                     body:[TRRequestBuilder continueWithContext:[request URL] 
                     client:[YoutubeClientType webMobileClient]]];
         }
     }
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"channelPageParser_"] 
+               withParser:[self valueForKey:l(@"channelPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }

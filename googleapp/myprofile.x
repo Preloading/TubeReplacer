@@ -40,11 +40,11 @@
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])  {
         request = [%c(YTGDataRequest) requestForMyUserProfileWithAuth:auth];
     } else {
-        request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMyUserProfileWithAuth:auth];
+        request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForMyUserProfileWithAuth:auth];
 
     }
     [self makeGETRequest:request 
-              withParser:[self valueForKey:@"userProfileParser_"] 
+              withParser:[self valueForKey:l(@"userProfileParser")] 
            responseBlock:responseBlock 
               errorBlock:errorBlock];
 }

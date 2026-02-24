@@ -7,6 +7,7 @@
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
 #include "Translators/TRContinuation.h"
+#include "general.h"
 
 @interface YTPageParser : NSObject
 +(id)parseLockupViewModelVideo:(NSDictionary*)unparsedVideo;
@@ -27,7 +28,7 @@
     }
     
     NSDictionary *bodyDict = body;
-    id entryParser = [self valueForKey:@"entryParser_"];
+    id entryParser = [self valueForKey:l(@"entryParser")];
     
     NSLog(@"class -> %@", [entryParser class]);
     // Special handling for subscription, comment, and playlist parsers

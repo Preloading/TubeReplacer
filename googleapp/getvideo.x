@@ -84,7 +84,7 @@
 %hook YTGDataService
 
 -(void)makeVideoRequestWithVideoID:(NSString*)videoId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    id videoCache = [self valueForKey:@"videoCache_"];
+    id videoCache = [self valueForKey:l(@"videoCache")];
     id cachedVideo = [videoCache objectForKey:videoId];
     
     if (cachedVideo) {
@@ -94,13 +94,13 @@
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
         } else if ([version() isEqualToString:@"1.1.0"]) {
-            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId];
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForVideoWithVideoID:videoId];
         } else {
-            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId authentication:nil]; // im fucking LAZY
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForVideoWithVideoID:videoId authentication:nil]; // im fucking LAZY
         }
 
         [self makePOSTRequest:request 
-                    withParser:[self valueForKey:@"videoParser_"] 
+                    withParser:[self valueForKey:l(@"videoParser")] 
                     responseBlock:responseBlock 
                     errorBlock:errorBlock];
 

@@ -693,8 +693,8 @@
 
         BOOL hasLikeDataAlready = false;
         if (nextData[@"dislikes"]) {
-            [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:@"dislikesCount_"];
-            [video setValue:nextData[@"dislikes"][@"likes"] forKey:@"likesCount_"];
+            [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:l(@"dislikesCount")];
+            [video setValue:nextData[@"dislikes"][@"likes"] forKey:l(@"likesCount")];
             // NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
@@ -734,8 +734,8 @@
                         NSString *dateString = engagementPanel[@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
                         if (dateString != nil) {
                             NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
-                            [video setValue:date forKey:@"uploadedDate_"];
-                            [video setValue:date forKey:@"publishedDate_"];
+                            [video setValue:date forKey:l(@"uploadedDate")];
+                            [video setValue:date forKey:l(@"publishedDate")];
                         }
                     }
                     
@@ -747,7 +747,7 @@
                             NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                             long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
                             if (likes > 0) {
-                                [video setValue:[NSNumber numberWithLong:likes] forKey:@"likesCount_"];
+                                [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
                             }
                         }
                     }

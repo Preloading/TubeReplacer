@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#include "general.h"
 
 
 @interface YTDeviceAuth : NSObject
@@ -31,9 +32,9 @@
 // youtube tries to register the device before using. This is useless to us since we are rewriting most of it. It would be best to eventually make this function never need to be called
 // Actually, if i'm guessing correctly, this is how it does logged out personalized recommendations.1
 -(void)beginDeviceRegistration {
-	id decryptedSecret = [%c(YTDeviceAuthorizer) decryptDeviceKey:@"ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk=" secret:[self valueForKey:@"secret_"]];
+	id decryptedSecret = [%c(YTDeviceAuthorizer) decryptDeviceKey:@"ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk=" secret:[self valueForKey:l(@"secret")]];
     YTDeviceAuth *deviceAuth = [[%c(YTDeviceAuth) alloc] initWithDeviceId:@"dmVyeSBzZWN1cmUgaWQ=" deviceKey:decryptedSecret];
-	[self setValue:[deviceAuth retain] forKey:@"deviceAuth_"];
+	[self setValue:[deviceAuth retain] forKey:l(@"deviceAuth")];
     if (deviceAuth)
     {
       [self saveRegistrationToStorage];

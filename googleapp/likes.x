@@ -61,7 +61,7 @@
                                         authentication:authentication 
                                                     like:like];
     } else {
-        request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestToRateWithVideoID:videoId 
+        request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestToRateWithVideoID:videoId 
                                         authentication:authentication 
                                                     like:like];
     }

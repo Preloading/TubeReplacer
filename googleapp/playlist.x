@@ -78,15 +78,15 @@
 -(void)makeMyPlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     // Rebuild request with channelID from authentication
     id actualRequest = nil;
-    if ([[request valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
-        TRContinuation *continuation = [request valueForKey:@"URL_"];
+    if ([[request valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
+        TRContinuation *continuation = [request valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
@@ -101,29 +101,29 @@
                     authentication:nil 
                             body:body];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                     authentication:nil 
                             body:body];
         }
     }    
     
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"playlistPageParser_"] 
+               withParser:[self valueForKey:l(@"playlistPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
 
 -(void)makePlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id actualRequest = request;
-    if ([[request valueForKey:@"URL_"] isKindOfClass:[TRContinuation class]]) {
-        TRContinuation *continuation = [request valueForKey:@"URL_"];
+    if ([[request valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
+        TRContinuation *continuation = [request valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
@@ -131,7 +131,7 @@
         
     }
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"playlistPageParser_"] 
+               withParser:[self valueForKey:l(@"playlistPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
@@ -145,7 +145,7 @@
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -153,7 +153,7 @@
     }
     
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"videoPageParser_"] 
+               withParser:[self valueForKey:l(@"videoPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
@@ -167,14 +167,14 @@
                                 body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
                         authentication:nil // i hope this wont cause issues... 
                                 body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         }
     }
     [self makePOSTRequest:actualRequest 
-               withParser:[self valueForKey:@"videoPageParser_"] 
+               withParser:[self valueForKey:l(@"videoPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }

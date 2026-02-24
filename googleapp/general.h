@@ -2,3 +2,4 @@
 
 NSString* localizedStringForKey(NSString *key);
 NSString* version();
+NSString* l(NSString *local);

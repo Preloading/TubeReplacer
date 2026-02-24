@@ -32,7 +32,7 @@
     if (channel) {
         NSLog(@"Cached Channel!");
         [[self channelCache] setObject:channel forKey:[channel channelID]];
-        NSLog(@"cache count a -> %i", [(NSArray*)[[self channelCache] allKeys] count]);
+        // NSLog(@"cache count a -> %i", [(NSArray*)[[self channelCache] allKeys] count]);
     }
 
     // }

@@ -67,7 +67,7 @@
 	[self addCategoryTerm:@"Tech"          defaultLabel:@"Science & Technology"  toArray:categories enabledByDefault:YES];
 
 	[self handleEntries:categories];
-	NSLog(@"categoriesCount_ = %@", [self valueForKey:@"categoriesCount_"]);
+	NSLog(@"categoriesCount_ = %@", [self valueForKey:l(@"categoriesCount")]);
 	
 	NSLog(@"entryCount = %d", [self entryCount]);
 }
@@ -78,10 +78,10 @@
 
 	YTUserAuthenticator *userAuthenticator = nil;
 	if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-		YTServices *services = [self valueForKey:@"services_"];
+		YTServices *services = [self valueForKey:l(@"services")];
 		userAuthenticator = [services userAuthenticator];
 	} else {
-		userAuthenticator = [self valueForKey:@"userAuthenticator_"];
+		userAuthenticator = [self valueForKey:l(@"userAuthenticator")];
 	}
 	
 
@@ -101,8 +101,8 @@
 			YTGDataRequest *requestSubscriptions = [%c(YTGDataRequest) requestForMySubscriptionsWithAuth:authentication];
 			[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
 		} else {
-			// todo: [(YTGuideEntry*)[self valueForKey:@"accountEntry_"] setAccessibilityLabel:localizedStringForKey(@"guide.account_loggedin.access")];
-			id requestSubscriptions = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMySubscriptionsWithAuth:authentication];
+			// todo: [(YTGuideEntry*)[self valueForKey:l(@"accountEntry")] setAccessibilityLabel:localizedStringForKey(@"guide.account_loggedin.access")];
+			id requestSubscriptions = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForMySubscriptionsWithAuth:authentication];
 			[self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)]; // i'm hardcoding the categories so we shouldnt need them
 		}
 		// [self makeRequest:requestSubscriptions serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:) extraRequest:requestCategories extraServiceSelector:@selector(makeCategoriesRequest:responseBlock:errorBlock:)];

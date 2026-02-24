@@ -81,7 +81,7 @@
 %hook YTGDataService
 
 -(void)makeMySubscriptionRequestWithChannelID:(NSString*)channelId authentication:(id)authentication responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    id cache = [[self valueForKey:@"subscriptionCache_"] objectForKey:channelId];
+    id cache = [[self valueForKey:l(@"subscriptionCache")] objectForKey:channelId];
     
     if (cache) {
         if (cache == [NSNull null]) {
@@ -93,10 +93,10 @@
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestForMySubscriptionWithChannelID:channelId auth:authentication];
         } else {
-            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForMySubscriptionWithChannelID:channelId auth:authentication];
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForMySubscriptionWithChannelID:channelId auth:authentication];
         }
         [self makePOSTRequest:request 
-                   withParser:[self valueForKey:@"subscriptionParser_"] 
+                   withParser:[self valueForKey:l(@"subscriptionParser")] 
                 responseBlock:responseBlock 
                    errorBlock:errorBlock];
     }
@@ -104,7 +104,7 @@
 
 -(void)makeMySubscriptionsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     [self makePOSTRequest:request 
-               withParser:[self valueForKey:@"subscriptionPageParser_"] 
+               withParser:[self valueForKey:l(@"subscriptionPageParser")] 
             responseBlock:responseBlock
                errorBlock:errorBlock];               
 }
@@ -116,8 +116,8 @@
     void (^newResponseBlock)(id) = ^(id response) {
         YTChannel *channel = [[self channelCache] objectForKey:request];
 
-        [response setValue:[channel displayName] forKey:@"displayName_"];
-        [response setValue:[channel thumbnailURL] forKey:@"thumbnailURL_"];
+        [response setValue:[channel displayName] forKey:l(@"displayName")];
+        [response setValue:[channel thumbnailURL] forKey:l(@"thumbnailURL")];
 
 
         // for (YTEvent *event in [response entries]) {
@@ -142,14 +142,14 @@
   if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
     request = [%c(YTGDataRequest) requestToUnsubscribeWithSubscription:subscription authentication:authentication];
   } else {
-    request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestToUnsubscribeWithSubscription:subscription authentication:authentication];
+    request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestToUnsubscribeWithSubscription:subscription authentication:authentication];
   }
 
     void (^successBlock)(id) = ^(id response) {
         [self clearSubscriptionDependentCaches];
 
         id channelID = [subscription channelID];
-        [[self valueForKey:@"subscriptionCache_"] setObject:[NSNull null] forKey:channelID];
+        [[self valueForKey:l(@"subscriptionCache")] setObject:[NSNull null] forKey:channelID];
 
         // Notify the app that subscription changed (now unsubscribed)
         [%c(YTNotificationCenter) notifySubscriptionChange:subscription
@@ -175,7 +175,7 @@
 //   ^(id response) {
 //     [self clearSubscriptionDependentCaches];
 //     // v3 = *(void **)(block->superSelf + 28);
-//     [[self valueForKey:@"subscriptionPageCache_"] setObject:[NSNull null] forKey:channelId];
+//     [[self valueForKey:l(@"subscriptionPageCache")] setObject:[NSNull null] forKey:channelId];
 //     // [%c(YTNotificationCenter) notifySubscriptionChange: subscribed:0];
 //     // (*(void (**)(void))(block->responseBlock + 12))();
 //   } 

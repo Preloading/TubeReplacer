@@ -47,16 +47,15 @@
         [self performResponseBlock:responseBlock response:cache];
     } else {
         NSLog(@"Channel cache miss!");
-        NSLog(@"cache count -> %i", [(NSArray*)[self channelCache] count]);
         id url = nil;
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
             
         } else {
-            url = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForChannelWithID:channelId];
+            url = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForChannelWithID:channelId];
         }
         [self makePOSTRequest:url 
-                    withParser:[self valueForKey:@"channelParser_"] 
+                    withParser:[self valueForKey:l(@"channelParser")] 
                     responseBlock:responseBlock 
                     errorBlock:errorBlock];
     }

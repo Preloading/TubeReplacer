@@ -11,10 +11,10 @@
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
     } else {
-        service = [self valueForKey:@"subtitlesService_"];
+        service = [self valueForKey:l(@"subtitlesService")];
     }
     
-    NSArray *trackURLs = [(YTVideo*)[self valueForKey:@"video_"] subtitlesTracksURL];
+    NSArray *trackURLs = [(YTVideo*)[self valueForKey:l(@"video")] subtitlesTracksURL];
 
     [service performResponseBlock:^(id response)
     {
@@ -45,7 +45,7 @@
 //     -[YTBaseService performResponseBlock:response:](self, a5);
 //   }
     NSURLRequest *request = [NSURLRequest requestWithURL:[track trackName]];
-    [self performHTTPRequest:request parser:[self valueForKey:@"subtitlesParser_"] responseBlock:responseBlock errorBlock:errorBlock];
+    [self performHTTPRequest:request parser:[self valueForKey:l(@"subtitlesParser")] responseBlock:responseBlock errorBlock:errorBlock];
   
 }
 
