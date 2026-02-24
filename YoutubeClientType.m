@@ -60,7 +60,7 @@
 +(YoutubeClientType*)iosClient {
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"IOS";
-    client.version   = @"20.11.6";
+    client.version   = @"21.08.3";
     client.osName    = @"iPhone";
     client.osVersion = @"18.5.0.22F76";
     client.platform  = @"MOBILE";
