@@ -674,7 +674,7 @@
 			<key>cell</key>
 			<string>PSLinkListCell</string>
 			<key>default</key>
-			<string>adaptive</string>
+			<string>360p</string>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>

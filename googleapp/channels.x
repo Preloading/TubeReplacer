@@ -39,13 +39,15 @@
 %hook YTGDataService
 
 -(void)makeChannelRequestWithID:(NSString*)channelId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    // id cache = [[self channelCache] objectForKey:channelId];
-    // if (cache) {
-    //     if (cache == [NSNull null]) {
-    //         cache = nil;
-    //     }
-    //     [self performResponseBlock:responseBlock response:cache];
-    // } else {
+    id cache = [[self channelCache] objectForKey:channelId];
+    if (cache) {
+        if (cache == [NSNull null]) {
+            cache = nil;
+        }
+        [self performResponseBlock:responseBlock response:cache];
+    } else {
+        NSLog(@"Channel cache miss!");
+        NSLog(@"cache count -> %i", [(NSArray*)[self channelCache] count]);
         id url = nil;
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             url = [%c(YTGDataRequest) requestForChannelWithID:channelId];
@@ -57,7 +59,7 @@
                     withParser:[self valueForKey:@"channelParser_"] 
                     responseBlock:responseBlock 
                     errorBlock:errorBlock];
-    // }
+    }
 }
 
 %end

@@ -180,7 +180,13 @@
 
                 [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
 
-                id stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
+                id stream = nil;
+                if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
+                } else {
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO];
+                }
+
                 if (stream) {
                     [ytStreams addObject:stream];
                 }
@@ -203,7 +209,12 @@
                 if (urlString) {
                     NSURL *url = [NSURL URLWithString:urlString];
                     if (url) {
-                        id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+                        id stream = nil;
+                        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+                        } else {
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+                        }
                         if (stream) {
                             [ytStreams addObject:stream];
                         }
@@ -214,7 +225,13 @@
     } else {
         // they wanna use a custom url for playback.
         NSURL *url = [NSURL URLWithString:[preferences[@"CustomStreamURL"] stringByReplacingOccurrencesOfString:@"%v" withString:videoId]];
-        id stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO]; // we don't really have a way of knowing the video quality so
+        // we don't really have a way of knowing the video quality so
+        id stream = nil;
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+        } else {
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+        }
         if (stream) {
             [ytStreams addObject:stream];
         }
@@ -283,7 +300,7 @@
             tags:@[]
             adultContent:NO
             videoPro:nil];
-    } else {
+    } else if ([version() isEqualToString:@"1.1.0"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
@@ -315,6 +332,40 @@
             adultContent:NO
             editURL:nil
             videoPro:nil];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
+            description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
+            uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
+            uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
+            uploadedDate:uploadDate
+            publishedDate:publishDate
+            duration:duration
+            viewCount:viewCount
+            likesCount:likesCount
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:ytStreams
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:category ?: @"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:nil
+        ];
     }
     
     [videoState release];
@@ -510,7 +561,7 @@
             tags:@[]
             adultContent:NO
             videoPro:nil];
-    } else {
+    } else if ([version() isEqualToString:@"1.1.0"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:title
@@ -542,6 +593,39 @@
             adultContent:NO
             editURL:nil
             videoPro:nil];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:@[]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:nil];
     }
     [videoState release];
     

@@ -6,6 +6,7 @@
 #import "TRPlaylistTranslator.h"
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
+#import "../general.h"
 #import <CoreGraphics/CoreGraphics.h>
 
 @implementation TRPlaylistTranslator
@@ -90,17 +91,33 @@
     NSString *bylineText = [TRJSONUtils stringFromJSON:data keyPath:@"shortBylineText.runs[0].text"];
     BOOL isPrivate = [bylineText isEqualToString:@"Private"];
     
-    id playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
-        initWithTitle:title ?: @""
-        summary:@""
-        authorDisplayName:author
-        updated:[NSDate date]
-        thumbnailURLs:thumbnails
-        contentURL:playlistId
-        editURL:[NSURL URLWithString:@"https://youtube.com"]
-        size:videoCount
-        isPrivate:isPrivate
-    ] autorelease];
+    id playlist = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithTitle:title ?: @""
+            summary:@""
+            authorDisplayName:author
+            updated:[NSDate date]
+            thumbnailURLs:thumbnails
+            contentURL:playlistId
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            size:videoCount
+            isPrivate:isPrivate
+        ] autorelease];
+    } else {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithID:playlistId
+            title:title ?: @""
+            summary:@""
+            authorDisplayName:author
+            updated:[NSDate date]
+            thumbnailURLs:thumbnails
+            contentURL:playlistId
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            size:videoCount
+            isPrivate:isPrivate
+        ] autorelease];
+    }
     
     return playlist;
 }

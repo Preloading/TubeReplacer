@@ -101,11 +101,28 @@
             channelViewsCount:0
             subscribersCount:subscribersCount
         ] autorelease];
-    } else {
-        // cheating, TODO: actually see if we can make it the channel ID
+    } else if ([version() isEqualToString:@"1.1.0"])  {
         profile = [[[%c(YTUserProfile) alloc] 
             initWithDisplayName:displayName
             channelID:channelHandle
+            age:0
+            thumbnailURL:thumbnail
+            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+            uploadedCount:0
+            favoritesCount:0
+            subscriptionsCount:0
+            uploadViewsCount:0
+            channelViewsCount:0
+            subscribersCount:subscribersCount
+        ] autorelease];
+    } else {
+        profile = [[[%c(YTUserProfile) alloc] 
+            initWithDisplayName:displayName
+            hasChannel:true // i mean probably lmao
+            channelID:channelHandle
+            eligibleForChannel:true // i mean i guess??????
+            googlePlusUserID:nil // google plus is colon three
             age:0
             thumbnailURL:thumbnail
             uploadsURL:[NSURL URLWithString:@"https://youtube.com"]

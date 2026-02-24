@@ -217,6 +217,7 @@
 - (id)requestForChannelsWithSearchQuery:(id)fp8;
 - (id)requestForVideosWithSearchQuery:(id)fp8 languageCode:(id)fp12 filters:(id)fp16 safeSearch:(int)fp20;
 - (id)requestForVideoWithVideoID:(id)fp8;
+- (id)requestForVideoWithVideoID:(id)fp8 authentication:(id)authentication;
 - (id)requestForCategoriesWithLanguageCode:(id)fp8;
 - (id)requestWithRequest:(id)fp8 noCache:(BOOL)fp12;
 - (id)requestWithRequest:(id)fp8 URL:(id)fp12;
@@ -402,8 +403,11 @@ typedef struct _TBXMLElement {
 - (id)init;
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 allowedCountries:(id)fp112 deniedCountries:(id)fp116 categoryLabel:(id)fp120 categoryTerm:(id)fp124 tags:(id)fp128 adultContent:(BOOL)fp132 videoPro:(id)fp136;
 
-// 1.1.0+
+// 1.1.0
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 allowedCountries:(id)fp112 deniedCountries:(id)fp116 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL videoPro:(id)fp136;
+
+// 1.2.1
+- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(id)currentViewers;
 @end
 
 @interface YTVideoState : NSObject
@@ -652,6 +656,7 @@ typedef struct _TBXMLElement {
 + (int)selectAdSenseiTagOnWiFi:(BOOL)fp8;
 + (id)selectStreamForVideo:(id)fp8 onWiFi:(BOOL)fp12;
 + (id)streamWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
++ (id)streamWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16 precached:(BOOL)precached;
 - (BOOL)encrypted;
 - (int)format;
 - (id)URL;
@@ -659,7 +664,6 @@ typedef struct _TBXMLElement {
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
-
 @end
 
 @interface YTChannel : NSObject
@@ -682,8 +686,11 @@ typedef struct _TBXMLElement {
 - (id)summary;
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
-- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36;
 
+// 1.0.0 - 1.1.0
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36;
+// 1.2.1+
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent;
 @end
 
 @interface GIPToast : NSObject
@@ -1109,8 +1116,10 @@ typedef struct _TBXMLElement {
 - (id)initWithUsername:(id)fp8 displayName:(id)fp12 age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
 
 
-// 1.1.0+
+// 1.1.0
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
+// 1.2.1+
+- (id)initWithDisplayName:(id)fp8 hasChannel:(BOOL)hasChannel channelID:(id)fp12 eligibleForChannel:(BOOL)eligibleForChannel googlePlusUserID:(id)googlePlusUserID age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
 @end
 
 @interface YTCache : NSObject
@@ -1218,6 +1227,8 @@ typedef struct _TBXMLElement {
 - (void)dealloc;
 - (id)initWithTitle:(id)fp8 summary:(id)fp12 authorDisplayName:(id)fp16 updated:(id)fp20 thumbnailURLs:(id)fp24 contentURL:(id)fp28 editURL:(id)fp32 size:(unsigned int)fp36 isPrivate:(BOOL)fp40;
 
+// 1.2.0+
+- (id)initWithID:(id)fp8 title:(id)title summary:(id)fp12 authorDisplayName:(id)fp16 updated:(id)fp20 thumbnailURLs:(id)fp24 contentURL:(id)fp28 editURL:(id)fp32 size:(unsigned int)fp36 isPrivate:(BOOL)fp40;
 @end
 
 

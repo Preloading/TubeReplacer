@@ -6,9 +6,12 @@
 #import "TRCommentTranslator.h"
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
+#import "../general.h"
 
 @interface YTComment : NSObject
 - (id)initWithTitle:(id)title content:(id)content authorDisplayName:(id)displayName publishedDate:(id)date;
+// 1.2.1+
+- (id)initWithTitle:(id)title content:(id)content authorDisplayName:(id)displayName publishedDate:(id)date isSpam:(BOOL)isSpam;
 @end
 
 @implementation TRCommentTranslator
@@ -77,13 +80,24 @@
     NSString *timeAgo = [TRJSONUtils stringFromJSON:commentData keyPath:@"publishedTimeText.runs[0].text"];
     NSDate *publishedDate = [TRJSONUtils dateFromTimeAgo:timeAgo];
     
-    id comment = [[[NSClassFromString(@"YTComment") alloc] 
-        initWithTitle:username
-        content:commentText
-        authorDisplayName:username
-        publishedDate:publishedDate
-    ] autorelease];
-    
+    id comment = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        comment = [[[NSClassFromString(@"YTComment") alloc] 
+            initWithTitle:username
+            content:commentText
+            authorDisplayName:username
+            publishedDate:publishedDate
+        ] autorelease];
+    } else {
+        comment = [[[NSClassFromString(@"YTComment") alloc] 
+            initWithTitle:username
+            content:commentText
+            authorDisplayName:username
+            publishedDate:publishedDate
+            isSpam:NO // well i hope not :)
+        ] autorelease];
+    }
+
     return comment;
 }
 

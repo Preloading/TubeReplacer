@@ -6,6 +6,7 @@
 #import "TRChannelTranslator.h"
 #import "TRJSONUtils.h"
 #import "../appheaders.h"
+#import "../general.h"
 
 @implementation TRChannelTranslator
 
@@ -89,15 +90,29 @@
         keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.image.decoratedAvatarViewModel.avatar.avatarViewModel.image.sources[0].url"];
     NSURL *thumbnailURL = thumbnailUrl ? [NSURL URLWithString:thumbnailUrl] : nil;
     
-    id channel = [[[NSClassFromString(@"YTChannel") alloc] 
-        initWithDisplayName:title ?: @""
-        channelID:channelId
-        summary:description ?: @""
-        updated:[NSDate date]
-        videoCount:videoCount
-        thumbnailURL:thumbnailURL
-        subscribersCount:subs
-    ] autorelease];
+    id channel = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:title ?: @""
+            channelID:channelId
+            summary:description ?: @""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+        ] autorelease];
+    } else {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:title ?: @""
+            channelID:channelId
+            summary:description ?: @""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+            paidContent:false
+        ] autorelease];
+    }
     
     return channel;
 }
@@ -147,15 +162,29 @@
         }
     }
     
-    id channel = [[[NSClassFromString(@"YTChannel") alloc] 
-        initWithDisplayName:displayName ?: @""
-        channelID:channelId
-        summary:@""
-        updated:[NSDate date]
-        videoCount:videoCount
-        thumbnailURL:thumbnailURL
-        subscribersCount:subs
-    ] autorelease];
+    id channel = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:displayName ?: @""
+            channelID:channelId
+            summary:@""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+        ] autorelease];
+    } else {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:displayName ?: @""
+            channelID:channelId
+            summary:@""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+            paidContent:false
+        ] autorelease];
+    }
     
     return channel;
 }

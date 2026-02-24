@@ -42,6 +42,7 @@
 
 %hook YTGDataRequestFactory
 
+// 1.1.0
 -(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
     GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
     NSURL *fullURL = [urlBuilder URL];
@@ -57,6 +58,24 @@
                            body:[TRRequestBuilder playerBodyWithVideoId:videoId 
                                                                  client:client]];
 }
+
+// 1.2.1
+-(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId authentication:(id)authentication {
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
+    NSURL *fullURL = [urlBuilder URL];
+
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    YoutubeClientType *client = [YoutubeClientType androidClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
+        client = [YoutubeClientType iosClient];
+    }
+
+    return [self requestWithURL:fullURL 
+                 authentication:authentication 
+                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                                                 client:client]];
+}
+
 
 %end
 
@@ -74,8 +93,10 @@
         YTGDataRequest *request = nil;
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
-        } else {
+        } else if ([version() isEqualToString:@"1.1.0"]) {
             request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId];
+        } else {
+            request = [(YTGDataRequestFactory*)[self valueForKey:@"GDataRequestFactory_"] requestForVideoWithVideoID:videoId authentication:nil]; // im fucking LAZY
         }
 
         [self makePOSTRequest:request 
