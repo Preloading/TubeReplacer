@@ -407,7 +407,9 @@ typedef struct _TBXMLElement {
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 allowedCountries:(id)fp112 deniedCountries:(id)fp116 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL videoPro:(id)fp136;
 
 // 1.2.1
-- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(id)currentViewers;
+- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
+// 1.3.0
+- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 listed:(BOOL)listed categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
 @end
 
 @interface YTVideoState : NSObject
@@ -689,8 +691,10 @@ typedef struct _TBXMLElement {
 
 // 1.0.0 - 1.1.0
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36;
-// 1.2.1+
+// 1.2.1
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent;
+// 1.3.0
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent parentChannelURLs:(id)parentChannelURLs;
 @end
 
 @interface GIPToast : NSObject

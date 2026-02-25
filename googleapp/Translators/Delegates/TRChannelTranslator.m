@@ -101,6 +101,17 @@
             thumbnailURL:thumbnailURL
             subscribersCount:subs
         ] autorelease];
+    } else if ([version() isEqualToString:@"1.2.1"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:title ?: @""
+            channelID:channelId
+            summary:description ?: @""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+            paidContent:false
+        ] autorelease];
     } else {
         channel = [[[NSClassFromString(@"YTChannel") alloc] 
             initWithDisplayName:title ?: @""
@@ -111,6 +122,7 @@
             thumbnailURL:thumbnailURL
             subscribersCount:subs
             paidContent:false
+            parentChannelURLs:nil
         ] autorelease];
     }
     
@@ -173,6 +185,17 @@
             thumbnailURL:thumbnailURL
             subscribersCount:subs
         ] autorelease];
+    } else if ([version() isEqualToString:@"1.2.1"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:displayName ?: @""
+            channelID:channelId
+            summary:@""
+            updated:[NSDate date]
+            videoCount:videoCount
+            thumbnailURL:thumbnailURL
+            subscribersCount:subs
+            paidContent:false
+        ] autorelease];
     } else {
         channel = [[[NSClassFromString(@"YTChannel") alloc] 
             initWithDisplayName:displayName ?: @""
@@ -183,6 +206,7 @@
             thumbnailURL:thumbnailURL
             subscribersCount:subs
             paidContent:false
+            parentChannelURLs:nil
         ] autorelease];
     }
     

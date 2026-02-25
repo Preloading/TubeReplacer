@@ -332,7 +332,7 @@
             adultContent:NO
             editURL:nil
             videoPro:nil];
-    } else {
+    } else if ([version() isEqualToString:@"1.2.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
@@ -364,12 +364,45 @@
             paidContent:NO
             videoPro:nil
             liveEventURL:nil
-            currentViewers:nil
+            currentViewers:0
+        ];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
+            description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
+            uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
+            uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
+            uploadedDate:uploadDate
+            publishedDate:publishDate
+            duration:duration
+            viewCount:viewCount
+            likesCount:likesCount
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:ytStreams
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            listed:YES // todo: this should be easy enough to implement
+            categoryLabel:@"Gaming"
+            categoryTerm:category ?: @"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:39
         ];
     }
-    
-    [videoState release];
-    
+        
     return video;
 }
 
@@ -529,6 +562,7 @@
                                    @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", 
                                    @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
     NSLog(@"views -> %llu", views);
+
     id video = nil;
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
@@ -593,7 +627,7 @@
             adultContent:NO
             editURL:nil
             videoPro:nil];
-    } else {
+    } else if ([version() isEqualToString:@"1.2.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:title
@@ -625,11 +659,44 @@
             paidContent:NO
             videoPro:nil
             liveEventURL:nil
-            currentViewers:nil];
+            currentViewers:0];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:@[[NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:@"https://google.com"] format:1 encrypted:NO precached:NO]]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            listed:YES // TODO: this should be easy enough to implement properly
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:0];
     }
-    [videoState release];
     
-    return video;
+    return [video autorelease];
 }
 
 #pragma mark - Helpers
