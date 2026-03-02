@@ -24,6 +24,8 @@
 
 // android
 +(YoutubeClientType*)androidClient;
++(YoutubeClientType*)androidVrClient;
+
 
 -(NSDictionary*)makeContext;
 @end

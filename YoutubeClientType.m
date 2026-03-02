@@ -57,6 +57,17 @@
     client.platform  = @"MOBILE";
     return client;
 }
+
++(YoutubeClientType*)androidVrClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"ANDROID_VR";
+    client.version   = @"1.60.19";
+    client.osName    = @"Oculus";
+    client.osVersion = @"12L";
+    client.platform  = @"MOBILE";
+    return client;
+}
+
 +(YoutubeClientType*)iosClient {
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"IOS";

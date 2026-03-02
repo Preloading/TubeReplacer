@@ -447,6 +447,8 @@
         title = [TRJSONUtils stringFromJSON:videoData keyPath:@"title.runs[0].text"];
     }
     if (!title) title = @"";
+
+    if ([title isEqualToString:@"[Deleted video]"]) return nil;
     
     // Uploader display name
     NSString *uploaderName = [TRJSONUtils stringFromJSON:videoData keyPath:@"shortBylineText.runs[0].text"];
@@ -459,6 +461,10 @@
     // Channel ID
     NSString *channelId = [TRJSONUtils stringFromJSON:videoData 
                                               keyPath:@"shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId"];
+
+    // if ([channelId isEqualToString:@"UCStfhR2V58QkCCyq_8dlk6g"]) {
+    //     NSLog(@"channel id is the bad one!!! title -> %@, channelName -> %@", title, uploaderName);
+    // }
     
     // Thumbnails 
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:videoData keyPath:@"thumbnail.thumbnails"];
@@ -471,7 +477,7 @@
     // === CRITICAL: Views and Date from Accessibility Label ===
     // The accessibility label has format:
     // "Video Title by Channel Name 35,908 views 5 days ago 4 minutes, 20 seconds"
-    
+
     uint64_t views = 0;
     NSDate *uploadDate = nil;
     

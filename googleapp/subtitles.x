@@ -7,7 +7,8 @@
 -(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
 {
     YTSubtitlesService *service = nil; 
-    
+
+    NSLog(@"subtitles 1");
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
     } else {
@@ -24,6 +25,7 @@
             responseBlock(response);
         }
     } response:trackURLs];
+    NSLog(@"subtitles 2");
 }
 
 %end

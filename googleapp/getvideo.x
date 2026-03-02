@@ -27,7 +27,7 @@
     NSURL *fullURL = [urlBuilder URL];
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    YoutubeClientType *client = [YoutubeClientType androidClient];
+    YoutubeClientType *client = [YoutubeClientType androidVrClient];
     if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
         client = [YoutubeClientType iosClient];
     }

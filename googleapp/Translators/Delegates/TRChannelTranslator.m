@@ -129,6 +129,45 @@
     return channel;
 }
 
++(id)badChannel {
+    id channel = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:@"Deleted Account"
+            channelID:@"deleted" // pain
+            summary:@""
+            updated:[NSDate date]
+            videoCount:0
+            thumbnailURL:nil
+            subscribersCount:0
+        ] autorelease];
+    } else if ([version() isEqualToString:@"1.2.1"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:@"Deleted Account"
+            channelID:@"deleted"
+            summary:@""
+            updated:[NSDate date]
+            videoCount:0
+            thumbnailURL:nil
+            subscribersCount:0
+            paidContent:false
+        ] autorelease];
+    } else {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:@"Deleted Account"
+            channelID:@"deleted"
+            summary:@""
+            updated:[NSDate date]
+            videoCount:0
+            thumbnailURL:nil
+            subscribersCount:0
+            paidContent:false
+            parentChannelURLs:nil
+        ] autorelease];
+    }
+    return channel;
+}
+
 #pragma mark - Compact Channel (Search/Feed)
 
 - (id)translateCompactChannel:(NSDictionary *)json error:(NSError **)error {
@@ -136,17 +175,20 @@
     if (!channelData) {
         channelData = [json objectForKey:@"channelRenderer"];
     }
+    NSLog(@"parsing channel");
     if (!channelData) {
         if (error) {
             *error = [NSError errorWithDomain:@"TRChannelTranslator" code:3 
                                      userInfo:@{NSLocalizedDescriptionKey: @"Could not find channel data"}];
         }
-        return nil;
+        return [TRChannelTranslator badChannel];
+
+        // we have to do this since youtube failed to check if the parsing succeeded before using it.
     }
     
     NSString *channelId = [channelData objectForKey:@"channelId"];
     if (!channelId) {
-        return nil;
+        return [TRChannelTranslator badChannel];
     }
     
     NSString *displayName = [TRJSONUtils stringFromJSON:channelData keyPath:@"displayName.runs[0].text"];
@@ -212,5 +254,6 @@
     
     return channel;
 }
+
 
 @end

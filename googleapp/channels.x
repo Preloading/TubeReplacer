@@ -75,6 +75,7 @@
         
         if (translatorError) {
             NSLog(@"TRChannelTranslator error: %@", translatorError);
+            error = translatorError;
         }
         
         return channel;
