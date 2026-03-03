@@ -94,7 +94,7 @@
         @"HowtoBrowseId": @"VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn",
         // Nonprofit
         @"NonprofitName": @"Nonprofits & Activism",
-        @"NonprofitBrowseId": @"",
+        @"NonprofitBrowseId": @"VLPL-p0-Yh03xphnE3_KKGzkbmGNPqKF8rXp",
         // Tech
         @"TechName": @"Science & Technology",
         @"TechBrowseId": @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY"
