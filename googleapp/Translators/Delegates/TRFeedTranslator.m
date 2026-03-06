@@ -143,6 +143,7 @@
         }
         return nil;
     }
+    NSLog(@"json -> %@", json);
     
     NSArray *items = [self extractItemsFromFeed:json];
     NSMutableArray *entries = [NSMutableArray array];
@@ -160,6 +161,8 @@
             continue;
         }
         
+        NSLog(@"ajdsiojf");
+
         // Skip continuation items
         if ([item objectForKey:@"continuationItemRenderer"]) {
             continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];

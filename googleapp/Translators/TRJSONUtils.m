@@ -175,8 +175,8 @@
         return nil;
     }
     
-    NSString *lower = [[string lowercaseString] stringByReplacingOccurrencesOfString:@"streamed " withString:@""];
-    
+    NSString *lower = [[[[string lowercaseString] stringByReplacingOccurrencesOfString:@"streamed live " withString:@""] stringByReplacingOccurrencesOfString:@"streamed " withString:@""] stringByReplacingOccurrencesOfString:@" ago" withString:@""];
+    NSLog(@"lower -> %@", lower);
     NSScanner *scanner = [NSScanner scannerWithString:lower];
     NSInteger value = 0;
     [scanner scanInteger:&value];

@@ -41,7 +41,8 @@
         return YES;
     }
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"] ||
-        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"]) {
+        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"] ||
+        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"]) {
         return YES;
     }
     
@@ -416,16 +417,25 @@
     NSDictionary *videoData = [self unwrapVideoData:json];
     NSString *dataType = [self detectDataType:json];
     
+    NSLog(@"itsa colon three video");
     if (!videoData) {
         if (error) {
             *error = [NSError errorWithDomain:@"TRVideoTranslator" code:3 
                                      userInfo:@{NSLocalizedDescriptionKey: @"Could not find video data"}];
         }
+        NSLog(@"Could not find video data!");
         return nil;
+    }
+
+    if ([dataType isEqualToString:@"playlistVideoRenderer"]) {
+        if (![TRJSONUtils stringFromJSON:videoData keyPath:@"videoInfo.runs[1].text"]) {
+            return nil;
+        }
     }
     
     // Skip upcoming/scheduled videos
     if (videoData[@"upcomingEventData"]) {
+        NSLog(@"skipping upcoming & scheduled video");
         return nil;
     }
 
@@ -732,6 +742,9 @@
     
     result = [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"];
     if (result) return result;
+
+    result = [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"];
+    if (result) return result;
     
     // Nested in itemSectionRenderer
     result = [TRJSONUtils dictFromJSON:json keyPath:@"itemSectionRenderer.contents[0].compactVideoRenderer"];
@@ -748,6 +761,7 @@
     if ([json objectForKey:@"videoWithContextRenderer"]) return @"videoWithContextRenderer";
     if ([json objectForKey:@"lockupViewModel"]) return @"lockupViewModel";
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"]) return @"videoRenderer";
+    if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"]) return @"videoRenderer";
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"]) return @"videoWithContextRenderer";
     return @"unknown";
 }
@@ -806,9 +820,15 @@
                     for (NSDictionary *engagementPanel in nextData[@"next"][@"engagementPanels"]) {
                         NSString *dateString = engagementPanel[@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
                         if (dateString != nil) {
-                            NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
-                            [video setValue:date forKey:l(@"uploadedDate")];
-                            [video setValue:date forKey:l(@"publishedDate")];
+                            if ([dateString hasSuffix:@" ago"]) {
+                                NSDate *date = [TRJSONUtils dateFromTimeAgo:dateString];
+                                [video setValue:date forKey:l(@"uploadedDate")];
+                                [video setValue:date forKey:l(@"publishedDate")];
+                            } else {
+                                NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
+                                [video setValue:date forKey:l(@"uploadedDate")];
+                                [video setValue:date forKey:l(@"publishedDate")];
+                            }
                         }
                     }
                     
