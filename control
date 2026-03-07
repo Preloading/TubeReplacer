@@ -6,7 +6,7 @@ Description: A fix for some versions of YouTube versions with sign-in.
 Maintainer: Preloading <me@preloading.dev>
 Author: Preloading <me@preloading.dev>
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 5.0)
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 5.0), firmware (<< 10.0)
 Conflicts: bag.xml.tuberepair
 Homepage: https://cydia.preloading.dev/depictions/tubereplacer/1.0/
 Depiction: https://cydia.preloading.dev/depictions/tubereplacer/1.0/

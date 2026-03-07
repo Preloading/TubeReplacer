@@ -30,7 +30,7 @@
 
 
 // youtube tries to register the device before using. This is useless to us since we are rewriting most of it. It would be best to eventually make this function never need to be called
-// Actually, if i'm guessing correctly, this is how it does logged out personalized recommendations.1
+// Actually, if i'm guessing correctly, this is how it does logged out personalized recommendations.
 -(void)beginDeviceRegistration {
 	id decryptedSecret = [%c(YTDeviceAuthorizer) decryptDeviceKey:@"ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk=" secret:[self valueForKey:l(@"secret")]];
     YTDeviceAuth *deviceAuth = [[%c(YTDeviceAuth) alloc] initWithDeviceId:@"dmVyeSBzZWN1cmUgaWQ=" deviceKey:decryptedSecret];

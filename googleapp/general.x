@@ -1,4 +1,5 @@
 #include "appheaders.h"
+#include "general.h"
 #import <objc/runtime.h>
 
 %hook YTGDataService
@@ -10,11 +11,21 @@
     return orig;
 }
 
-// 1.1.0+
+// 1.1.0
 -(YTGDataService*)initWithOperationQueue:(id)a3 HTTPFetcherService:(id)a4 deviceAuthorizer:(id)a5 userAuth:(id)a6 requestFactory:(id)a7 {
     id orig = %orig();
     if (orig) {
         objc_setAssociatedObject(orig, @"channelCache_", [[%c(YTCache) alloc] initWithExpirationInterval:1086070784 countLimit:500], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return orig;
+}
+
+// 1.2.1+
+-(YTGDataService*)initWithOperationQueue:(id)a3 HTTPFetcherService:(id)a4 deviceAuthorizer:(id)a5 requestFactory:(id)a7 {
+    id orig = %orig();
+    if (orig) {
+        id channelCache = [[%c(YTCache) alloc] initWithExpirationInterval:1086070784 countLimit:500];
+        objc_setAssociatedObject(orig, @"channelCache_", channelCache, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return orig;
 }
@@ -30,9 +41,7 @@
 //     for (id entry in [channel entries]) {
 //         id video = [entry video]; 
     if (channel) {
-        NSLog(@"Cached Channel!");
         [[self channelCache] setObject:channel forKey:[channel channelID]];
-        // NSLog(@"cache count a -> %i", [(NSArray*)[[self channelCache] allKeys] count]);
     }
 
     // }
