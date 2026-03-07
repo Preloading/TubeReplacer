@@ -4,6 +4,36 @@
 
 %hook YTSubtitlesController
 
+// 1.0.0-1.1.0
+-(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
+{
+    YTSubtitlesService *service = nil; 
+
+    NSLog(@"subtitles 1");
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+        service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
+    } else {
+        service = [self valueForKey:l(@"subtitlesService")];
+    }
+    
+    NSArray *trackURLs = [(YTVideo*)[self valueForKey:l(@"video")] subtitlesTracksURL];
+
+    [service performResponseBlock:^(id response)
+    {
+        if ([response count])
+        {
+            [self setSubtitlesTracks:response];
+            responseBlock(response);
+        }
+    } response:trackURLs];
+    NSLog(@"subtitles 2");
+}
+
+%end
+
+%hook YTBaseSubtitlesController
+
+// 1.0.0-1.1.0
 -(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
 {
     YTSubtitlesService *service = nil; 
@@ -32,6 +62,7 @@
 
 %hook YTSubtitlesService
 
+// 1.2.1+
 -(void)makeSubtitlesRequestWithVideoID:(NSString*)videoId track:(YTSubtitlesTrack*)track responseBlock:(id)responseBlock errorBlock:(id)errorBlock 
 {
 //   GTMURLBuilder *urlBuilder; // r5
