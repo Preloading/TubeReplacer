@@ -136,7 +136,7 @@
         if (preferences[@"NonprofitBrowseId"]) {
             browseId = preferences[@"NonprofitBrowseId"];
         } else {
-            browseId = @"";
+            browseId = @"VLPL-p0-Yh03xphnE3_KKGzkbmGNPqKF8rXp";
         }
     } else {
         // trending
