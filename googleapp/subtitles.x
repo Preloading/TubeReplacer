@@ -9,7 +9,6 @@
 {
     YTSubtitlesService *service = nil; 
 
-    NSLog(@"subtitles 1");
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
     } else {
@@ -26,19 +25,17 @@
             responseBlock(response);
         }
     } response:trackURLs];
-    NSLog(@"subtitles 2");
 }
 
 %end
 
 %hook YTBaseSubtitlesController
 
-// 1.0.0-1.1.0
+// 1.2.1+
 -(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
 {
     YTSubtitlesService *service = nil; 
 
-    NSLog(@"subtitles 1");
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
     } else {
@@ -55,14 +52,12 @@
             responseBlock(response);
         }
     } response:trackURLs];
-    NSLog(@"subtitles 2");
 }
 
 %end
 
 %hook YTSubtitlesService
 
-// 1.2.1+
 -(void)makeSubtitlesRequestWithVideoID:(NSString*)videoId track:(YTSubtitlesTrack*)track responseBlock:(id)responseBlock errorBlock:(id)errorBlock 
 {
 //   GTMURLBuilder *urlBuilder; // r5
