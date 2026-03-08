@@ -45,12 +45,12 @@
     if ([[originalRequest valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
         TRContinuation *continuation = [originalRequest valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
@@ -59,13 +59,13 @@
     } else {
         NSString* videoId = [originalRequest valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            request = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                 authentication:nil 
                 body:[TRRequestBuilder commentsBodyWithVideoId:videoId 
                                                         sortBy:@"top" 
                                                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                 authentication:nil 
                 body:[TRRequestBuilder commentsBodyWithVideoId:videoId 
                                                         sortBy:@"top" 

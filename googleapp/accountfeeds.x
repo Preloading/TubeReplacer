@@ -13,7 +13,7 @@
 %hook YTGDataRequest
 
 +(id)requestForMyFavoriteVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"VLLL" 
                                                             params:nil 
@@ -21,7 +21,7 @@
 }
 
 +(id)requestForMyWatchHistoryVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEhistory" 
                                                             params:nil 
@@ -29,7 +29,7 @@
 }
 
 +(id)requestForMyWatchLaterVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"VLWL" 
                                                             params:nil 
@@ -42,7 +42,7 @@
 }
 
 +(id)requestForMyUploadedVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:[authentication channelID] 
                                                             params:@"EgZ2aWRlb3PyBgQKAjoA" 
@@ -54,7 +54,7 @@
 %hook YTGDataRequestFactory
 
 -(id)requestForMyFavoriteVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"VLLL" 
                                                             params:nil 
@@ -62,7 +62,7 @@
 }
 
 -(id)requestForMyWatchHistoryVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEhistory" 
                                                             params:nil 
@@ -70,7 +70,7 @@
 }
 
 -(id)requestForMyWatchLaterVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"VLWL" 
                                                             params:nil 
@@ -83,7 +83,7 @@
 }
 
 -(id)requestForMyUploadedVideosWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:[authentication channelID] 
                                                             params:@"EgZ2aWRlb3PyBgQKAjoA" 

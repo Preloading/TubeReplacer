@@ -14,7 +14,7 @@
 %hook YTGDataRequest
 
 +(id)requestForPlaylistsWithChannelID:(id)channelId {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:channelId 
                                                             params:@"EglwbGF5bGlzdHPyBgQKAkIA" 
@@ -23,7 +23,7 @@
 
 +(id)requestForPlaylistVideosWithURL:(NSString*)playlistId {
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:browseId 
                                                             params:nil 
@@ -32,7 +32,7 @@
 
 +(id)requestForMyPlaylistVideosWithURL:(NSString*)playlistId authentication:(id)authentication {
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:browseId 
                                                             params:nil 
@@ -44,7 +44,7 @@
 %hook YTGDataRequestFactory
 
 -(id)requestForPlaylistsWithChannelID:(id)channelId {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:channelId 
                                                             params:@"EglwbGF5bGlzdHPyBgQKAkIA" 
@@ -53,7 +53,7 @@
 
 -(id)requestForPlaylistVideosWithURL:(NSString*)playlistId {
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:browseId 
                                                             params:nil 
@@ -62,7 +62,7 @@
 
 -(id)requestForMyPlaylistVideosWithURL:(NSString*)playlistId authentication:(id)authentication {
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:browseId 
                                                             params:nil 
@@ -81,12 +81,12 @@
     if ([[request valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
         TRContinuation *continuation = [request valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
@@ -97,11 +97,11 @@
                                                params:@"EglwbGF5bGlzdHPyBgQKAkIA" 
                                                client:[YoutubeClientType webMobileClient]];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil 
                             body:body];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil 
                             body:body];
         }
@@ -118,12 +118,12 @@
     if ([[request valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
         TRContinuation *continuation = [request valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                 authentication:nil // i hope this wont cause issues... 
                 body:[TRRequestBuilder continueWithContext:[continuation token]
                         client:[YoutubeClientType webMobileClient]]];
@@ -140,12 +140,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -162,12 +162,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                         authentication:nil // i hope this wont cause issues... 
                                 body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                         authentication:nil // i hope this wont cause issues... 
                                 body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];

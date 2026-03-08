@@ -16,12 +16,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -147,7 +147,7 @@
         }
     }
     
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/browse"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
     
     return [self requestWithURL:fullURL 
@@ -267,7 +267,7 @@
         }
     }
     
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/browse"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
     
     return [self requestWithURL:fullURL 

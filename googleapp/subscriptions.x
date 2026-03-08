@@ -13,7 +13,7 @@
 %hook YTGDataRequest
 
 +(id)requestForMySubscriptionsWithAuth:(id)authentication {
-    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" 
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false" 
                        authentication:authentication 
                                  body:[TRRequestBuilder browseBodyWithId:@"FEchannels" 
                                                                   params:nil 
@@ -21,7 +21,7 @@
 }
 
 +(id)requestForMySubscriptionWithChannelID:(NSString*)channelId auth:(id)authentication {
-    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false&subscription=true" 
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false&subscription=true" 
                        authentication:authentication 
                                  body:[TRRequestBuilder browseBodyWithId:channelId 
                                                                   params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" 
@@ -46,7 +46,7 @@
 %hook YTGDataRequestFactory
 
 -(id)requestForMySubscriptionsWithAuth:(id)authentication {
-    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse" 
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false" 
                        authentication:authentication 
                                  body:[TRRequestBuilder browseBodyWithId:@"FEchannels" 
                                                                   params:nil 

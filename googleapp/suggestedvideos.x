@@ -13,7 +13,7 @@
 %hook YTGDataRequest 
 
 +(id)requestForRelatedVideosWithURL:(id)videoId safeSearch:(id)safeSearch {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder nextBodyWithVideoId:videoId 
                                                                client:[YoutubeClientType webMobileClient]]];
@@ -24,7 +24,7 @@
 %hook YTGDataRequestFactory
 
 -(id)requestForRelatedVideosWithURL:(id)videoId safeSearch:(id)safeSearch {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder nextBodyWithVideoId:videoId 
                                                                client:[YoutubeClientType webMobileClient]]];
@@ -40,12 +40,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];

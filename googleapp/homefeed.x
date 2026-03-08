@@ -18,12 +18,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -41,12 +41,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[TRContinuation class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[[request URL] token]
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[[request URL] token]
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -69,7 +69,7 @@
 
 +(id)requestForMySubscriptionUploadsWithAuth:(id)authentication safeSearch:(BOOL)isSafeSearch {
     %log;
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEsubscriptions" 
                                                             params:nil 
@@ -77,7 +77,7 @@
 }
 
 +(id)requestForMySubscriptionUpdatesWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEwhat_to_watch" 
                                                             params:nil 
@@ -90,7 +90,7 @@
 
 -(id)requestForMySubscriptionUploadsWithAuth:(id)authentication safeSearch:(BOOL)isSafeSearch {
     %log;
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEsubscriptions" 
                                                             params:nil 
@@ -98,7 +98,7 @@
 }
 
 -(id)requestForMySubscriptionUpdatesWithAuth:(id)authentication {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:@"FEwhat_to_watch" 
                                                             params:nil 

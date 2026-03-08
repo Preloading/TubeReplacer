@@ -17,8 +17,8 @@
     // Choose endpoint based on like/unlike
     // TODO: Add RYTDL support
     NSString *endpoint = like 
-        ? @"https://www.youtube.com/youtubei/v1/like/like" 
-        : @"https://www.youtube.com/youtubei/v1/like/removelike";
+        ? @"https://www.youtube.com/youtubei/v1/like/like?prettyPrint=false" 
+        : @"https://www.youtube.com/youtubei/v1/like/removelike?prettyPrint=false";
     
     NSData *body = [TRRequestBuilder likeBodyWithVideoId:videoId 
                                                   client:[YoutubeClientType webMobileClient]];
@@ -36,8 +36,8 @@
     // Choose endpoint based on like/unlike
     // TODO: Add RYTDL support
     NSString *endpoint = like 
-        ? @"https://www.youtube.com/youtubei/v1/like/like" 
-        : @"https://www.youtube.com/youtubei/v1/like/removelike";
+        ? @"https://www.youtube.com/youtubei/v1/like/like?prettyPrint=false" 
+        : @"https://www.youtube.com/youtubei/v1/like/removelike?prettyPrint=false";
     
     NSData *body = [TRRequestBuilder likeBodyWithVideoId:videoId 
                                                   client:[YoutubeClientType webMobileClient]];

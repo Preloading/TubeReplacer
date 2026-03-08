@@ -14,7 +14,7 @@
 %hook YTGDataRequest
 
 +(id)requestForUploadedVideosWithChannelID:(NSString*)channelId {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:channelId 
                                                             params:@"EgZ2aWRlb3PyBgQKAjoA" 
@@ -33,7 +33,7 @@
 %hook YTGDataRequestFactory
 
 -(id)requestForUploadedVideosWithChannelID:(NSString*)channelId {
-    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder browseBodyWithId:channelId 
                                                             params:@"EgZ2aWRlb3PyBgQKAjoA" 
@@ -57,12 +57,12 @@
     id actualRequest = request;
     if ([[request URL] isKindOfClass:[NSString class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[request URL] 
                                                                 client:[YoutubeClientType webMobileClient]]];
@@ -82,24 +82,24 @@
 
     if ([[request URL] isKindOfClass:[TRContinuation class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[[request URL] token]
                                                             client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil // i hope this wont cause issues... 
                             body:[TRRequestBuilder continueWithContext:[[request URL] token]
                                                             client:[YoutubeClientType webMobileClient]]];
         }
     } else {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil 
                             body:[TRRequestBuilder getPopularVideosFromChannelId:[request URL]
                                                                 client:[YoutubeClientType webMobileClient]]];
         } else {
-            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse"] 
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                     authentication:nil 
                             body:[TRRequestBuilder getPopularVideosFromChannelId:[request URL]
                                                                 client:[YoutubeClientType webMobileClient]]];

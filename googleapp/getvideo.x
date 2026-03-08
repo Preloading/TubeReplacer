@@ -23,7 +23,7 @@
 %hook YTGDataRequest
 
 +(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
@@ -44,7 +44,7 @@
 
 // 1.1.0
 -(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
@@ -61,7 +61,7 @@
 
 // 1.2.1
 -(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId authentication:(id)authentication {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
@@ -152,7 +152,7 @@
 
     NSMutableDictionary *allData = [NSMutableDictionary dictionary];
 
-    NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next"];
+    NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"POST"];
