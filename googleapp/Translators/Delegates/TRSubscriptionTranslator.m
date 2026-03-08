@@ -103,10 +103,31 @@
 #pragma mark - Channel Header (Subscription Check)
 
 - (id)translateFromChannelHeader:(NSDictionary *)json error:(NSError **)error {
-    NSNumber *isSubscribed = [TRJSONUtils valueFromJSON:json 
-        keyPathWithArrays:@"frameworkUpdates.entityBatchUpdate.mutations[0].payload.subscriptionStateEntity.subscribed"];
+    // PAIN
+    NSString *mutationKey = [TRJSONUtils stringFromJSON:json 
+        keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.actionsRows[0].subscribeButtonViewModel.stateEntityStoreKey"];
+
+    if (!mutationKey) {
+        return nil; // we can't tell if we don't have this key.
+    }
     
-    if ([isSubscribed isEqual:@0]) {
+    NSArray *mutations = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"frameworkUpdates.entityBatchUpdate.mutations"];
+
+
+    //.payload.subscriptionStateEntity.subscribed
+    BOOL isSubscribed = false;
+    for (NSDictionary *mutation in mutations) {
+        if ([mutation[@"entityKey"] isEqualToString:mutationKey]) {
+            if ([TRJSONUtils boolFromJSON:mutation keyPath:@"payload.subscriptionStateEntity.subscribed"]) {
+                isSubscribed = true;
+            }
+            break;
+        }
+    }
+
+    
+    if (!isSubscribed) {
         return nil;
     }
     

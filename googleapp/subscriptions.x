@@ -21,7 +21,7 @@
 }
 
 +(id)requestForMySubscriptionWithChannelID:(NSString*)channelId auth:(id)authentication {
-    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false" 
+    return [self requestWithURLString:@"https://www.youtube.com/youtubei/v1/browse?prettyprint=false&subscription=true" 
                        authentication:authentication 
                                  body:[TRRequestBuilder browseBodyWithId:channelId 
                                                                   params:@"EgZzaG9ydHPyBgUKA5oBAA%3D%3D" 

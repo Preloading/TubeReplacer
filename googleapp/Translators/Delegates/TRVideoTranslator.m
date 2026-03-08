@@ -417,7 +417,6 @@
     NSDictionary *videoData = [self unwrapVideoData:json];
     NSString *dataType = [self detectDataType:json];
     
-    NSLog(@"itsa colon three video");
     if (!videoData) {
         if (error) {
             *error = [NSError errorWithDomain:@"TRVideoTranslator" code:3 
@@ -577,7 +576,7 @@
                                    @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", 
                                    @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", 
                                    @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
-    NSLog(@"views -> %llu", views);
+    // NSLog(@"views -> %llu", views);
 
     id video = nil;
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
