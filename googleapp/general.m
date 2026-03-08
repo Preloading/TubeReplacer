@@ -22,3 +22,25 @@ NSString* l(NSString *local) {
     return [NSString stringWithFormat:@"_%@", local];
   }
 }
+
+NSString *TRPackageVersion(NSString *packageID) {
+    NSError *err = nil;
+    NSString *status = [NSString stringWithContentsOfFile:@"/var/lib/dpkg/status"
+                                                 encoding:NSUTF8StringEncoding
+                                                    error:&err];
+    if (!status.length) return nil;
+
+    NSArray<NSString *> *blocks = [status componentsSeparatedByString:@"\n\n"];
+    NSString *needle = [NSString stringWithFormat:@"Package: %@", packageID];
+
+    for (NSString *block in blocks) {
+        if ([block containsString:needle]) {
+            for (NSString *line in [block componentsSeparatedByString:@"\n"]) {
+                if ([line hasPrefix:@"Version: "]) {
+                    return [line substringFromIndex:@"Version: ".length];
+                }
+            }
+        }
+    }
+    return nil;
+}
