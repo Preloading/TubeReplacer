@@ -943,6 +943,9 @@ typedef struct _TBXMLElement {
 - (void)dealloc;
 - (id)initWithAuthentication:(id)fp8 authorizationURL:(id)fp12 delegate:(id)fp16 webRequestSelector:(SEL)fp20 finishedSelector:(SEL)fp24;
 
+// 1.2.1+
+- (void)authCodeObtained;
+
 @end
 
 @interface GTMCookieStorage : NSObject

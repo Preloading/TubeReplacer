@@ -2,6 +2,7 @@
 #import "signinpolyfil.h"
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
+#include "general.h"
 
 
 //// START HEADERS
@@ -119,7 +120,11 @@
             };
             GTMOAuth2Authentication *auth = [self authentication];
             [auth setKeysForResponseDictionary:code];
-            [self handleCallbackReached];
+            if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+              [self handleCallbackReached];
+            } else {
+              [self authCodeObtained];
+            }
             [cookieStorage deleteCookie:sid];
             return 1;
             // }
@@ -197,6 +202,7 @@
 -(id)persistenceResponseString
 {
 
+  NSLog(@"persistance string called!");
   NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:10];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
@@ -208,6 +214,7 @@
   [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
   [data setValue:[self channelID] forKey:@"CHANNEL_ID"];
+  [data setValue:[self datasyncID] forKey:@"userId"]; // idk
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
   [data setValue:@"me@preloading.dev" forKey:@"email"];

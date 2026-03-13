@@ -87,7 +87,7 @@
     [postDict setValue:[[UIDevice currentDevice] systemVersion] forKey:@"deviceversion"];
     [postDict setValue:currentVersion forKey:@"tweakversion"];
     [postDict setValue:version() forKey:@"appversion"];
-    [postDict setValue:[[[NSUserDefaults standardUserDefaults]objectForKey:@"AppleLanguages"] firstObject] forKey:@"language"];
+    [postDict setValue:[[[NSUserDefaults standardUserDefaults] objectForKey:@"AppleLanguages"] firstObject] forKey:@"language"];
     [postDict setValue:[[NSLocale currentLocale] objectForKey:NSLocaleCountryCode] forKey:@"country"];
     [postDict setValue:@(was_updated) forKey:@"was_updated"];
 

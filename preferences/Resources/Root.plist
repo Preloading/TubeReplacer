@@ -668,7 +668,7 @@
 			<key>label</key>
 			<string>Video</string>
 			<key>footerText</key>
-			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;TubeRepair: https://tuberepair.server.lol/getvideo/%v</string>
+			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -687,12 +687,14 @@
 			<array>
 				<string>adaptive</string>
 				<string>360p</string>
+				<string>tuberepair</string>
 				<string>custom</string>
 			</array>
 			<key>validTitles</key>
 			<array>
 				<string>Adaptive</string>
 				<string>360p</string>
+				<string>kevinf100's tuberepair server</string>
 				<string>Custom</string>
 			</array>
 		</dict>

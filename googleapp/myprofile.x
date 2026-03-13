@@ -49,6 +49,36 @@
               errorBlock:errorBlock];
 }
 
+
+-(void)makeMyManagedChannelsRequestWithAuth:(id)auth responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    //todo: actually make this uhhh do something lmao
+    // this has to be here, idk where its used, but auth fails if it isnt here.
+    id sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithDisplayName:@"channel name"
+            channelID:@"channel id"
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[NSDate date]
+            countHint:0
+            unreadCount:0 // todo: see if i can actually make this correct
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:[NSURL URLWithString:@"https://youtube.com"]
+        ] autorelease];
+
+
+    id page = [[[NSClassFromString(@"YTPage") alloc] 
+        initWithEntries:@[sub] 
+        totalResults:1 // todo: make better
+        entriesPerPage:1
+        startIndex:1 
+        nextURL:nil 
+        previousURL:nil
+    ] autorelease];
+    [self performResponseBlock:responseBlock response:page];
+
+}
+
+
 %end
 
 #pragma mark - Profile Parsing
