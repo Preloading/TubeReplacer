@@ -152,8 +152,15 @@
         [[self valueForKey:l(@"subscriptionCache")] setObject:[NSNull null] forKey:channelID];
 
         // Notify the app that subscription changed (now unsubscribed)
-        [%c(YTNotificationCenter) notifySubscriptionChange:subscription
+
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+            [%c(YTNotificationCenter) notifySubscriptionChange:subscription
                                              subscribed:NO];
+        } else {
+            [self notifySubscriptionDidChange:subscription
+                                             subscribed:NO];
+        }
+        
 
         if (responseBlock) {
             responseBlock();

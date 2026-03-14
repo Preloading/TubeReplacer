@@ -126,12 +126,24 @@
     // Just created, so use current date
     NSDate *publishedDate = [NSDate date];
     
-    id comment = [[[NSClassFromString(@"YTComment") alloc] 
-        initWithTitle:username
-        content:content ?: @""
-        authorDisplayName:username ?: @""
-        publishedDate:publishedDate
-    ] autorelease];
+    id comment = nil;
+
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        comment =[[[NSClassFromString(@"YTComment") alloc] 
+            initWithTitle:username
+            content:content ?: @""
+            authorDisplayName:username ?: @""
+            publishedDate:publishedDate
+        ] autorelease];
+    } else {
+        comment = [[[NSClassFromString(@"YTComment") alloc] 
+            initWithTitle:username
+            content:content ?: @""
+            authorDisplayName:username ?: @""
+            publishedDate:publishedDate
+            isSpam:NO // well i hope not :)
+        ] autorelease];
+    }
     
     return comment;
 }

@@ -1163,6 +1163,8 @@ typedef struct _TBXMLElement {
 - (void)cacheVideosFromVideoPage:(id)fp8;
 - (void)cacheChannel:(YTChannel*)channel;
 -(YTCache*)channelCache ;
+
+-(void)notifySubscriptionDidChange:(id)fp8 subscribed:(BOOL)fp12;
 @end
 
 
@@ -1389,7 +1391,6 @@ typedef struct _TBXMLElement {
 - (oneway void)release;
 - (unsigned int)retainCount;
 - (id)retain;
-
 @end
 
 

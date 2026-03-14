@@ -185,17 +185,32 @@
         return nil;
     }
     
-    id sub = [[[NSClassFromString(@"YTSubscription") alloc] 
-        initWithUsername:nil
-        displayName:@""
-        channelID:channelID
-        type:1
-        publishedDate:[NSDate date]
-        updatedDate:[NSDate date]
-        countHint:0
-        editURL:[NSURL URLWithString:@"https://youtube.com"]
-        thumbnailURL:nil
-    ] autorelease];
+    id sub = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithUsername:nil
+            displayName:@""
+            channelID:channelID
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[NSDate date]
+            countHint:0
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:nil
+        ] autorelease];
+    } else {
+        sub = [[[NSClassFromString(@"YTSubscription") alloc] 
+            initWithDisplayName:@""
+            channelID:channelID
+            type:1
+            publishedDate:[NSDate date]
+            updatedDate:[NSDate date]
+            countHint:0
+            unreadCount:0 // todo: see if i can actually make this correct
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            thumbnailURL:nil
+        ] autorelease];
+    }
     
     return sub;
 }

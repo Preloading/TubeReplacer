@@ -224,7 +224,7 @@
 }
 
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
-  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/feed/you?app=desktop"]];
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/feed/library?app=mobile"]];
 
    NSString *sid = [self sid];
   NSString *hsid = [self hsid];
@@ -292,7 +292,7 @@
         NSString *htmlString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         NSString *datasyncID = nil;
         
-        NSRange searchRange = [htmlString rangeOfString:@"\"DATASYNC_ID\":\""];
+        NSRange searchRange = [htmlString rangeOfString:@"\"datasyncId\":\""];
         if (searchRange.location != NSNotFound) {
           NSInteger startPos = searchRange.location + searchRange.length;
           NSRange endRange = [htmlString rangeOfString:@"||" options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
@@ -308,22 +308,38 @@
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
 
             NSString *channelID = nil;
-            NSRange firstSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
-            NSRange chanSearch = NSMakeRange(NSNotFound, 0);
-            if (firstSearch.location != NSNotFound) {
-                NSInteger searchStart = firstSearch.location + firstSearch.length;
-                if (searchStart < [htmlString length]) {
-                    chanSearch = [htmlString rangeOfString:@"\"url\":\"/channel/" options:0 range:NSMakeRange(searchStart, [htmlString length] - searchStart)];
+            NSString *channelStartMarker = @"\\x22\\/channel\\/";
+            NSString *channelEndMarker = @"\\/videos\\x22,\\x22webPageType\\x22:\\x22WEB_PAGE_TYPE_CHANNEL\\x22,";
+            NSRange channelEndRange = [htmlString rangeOfString:channelEndMarker];
+            if (channelEndRange.location != NSNotFound) {
+              NSRange searchBeforeEnd = NSMakeRange(0, channelEndRange.location);
+              NSRange channelStartRange = [htmlString rangeOfString:channelStartMarker
+                                                            options:NSBackwardsSearch
+                                                              range:searchBeforeEnd];
+              if (channelStartRange.location != NSNotFound) {
+                NSInteger channelStart = channelStartRange.location + channelStartRange.length;
+                if (channelStart < channelEndRange.location) {
+                  channelID = [htmlString substringWithRange:NSMakeRange(channelStart, channelEndRange.location - channelStart)];
                 }
-            }
-            if (chanSearch.location != NSNotFound) {
-              NSInteger chanStart = chanSearch.location + chanSearch.length;
-              NSRange chanEnd = [htmlString rangeOfString:@"\"" options:0 range:NSMakeRange(chanStart, [htmlString length] - chanStart)];
-              if (chanEnd.location != NSNotFound) {
-                channelID = [htmlString substringWithRange:NSMakeRange(chanStart, chanEnd.location - chanStart)];
-                NSLog(@"Extracted CHANNEL_ID: %@", channelID);
-                [params setObject:channelID forKey:@"CHANNEL_ID"];
               }
+            }
+
+            if (!channelID) {
+              NSRange fallbackSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
+              if (fallbackSearch.location != NSNotFound) {
+                NSInteger fallbackStart = fallbackSearch.location + fallbackSearch.length;
+                NSRange fallbackEnd = [htmlString rangeOfString:@"/videos\""
+                                                        options:0
+                                                          range:NSMakeRange(fallbackStart, [htmlString length] - fallbackStart)];
+                if (fallbackEnd.location != NSNotFound) {
+                  channelID = [htmlString substringWithRange:NSMakeRange(fallbackStart, fallbackEnd.location - fallbackStart)];
+                }
+              }
+            }
+
+            if (channelID) {
+              NSLog(@"Extracted CHANNEL_ID: %@", channelID);
+              [params setObject:channelID forKey:@"CHANNEL_ID"];
             }
 
             NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
