@@ -86,7 +86,7 @@
     
     NSMutableArray *ytStreams = [NSMutableArray array];
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    if (![preferences[@"StreamType"] isEqualToString:@"custom"]) {
+    if (!([preferences[@"StreamType"] isEqualToString:@"custom"] || [preferences[@"StreamType"] isEqualToString:@"tuberepair"]) ) {
         NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
         if (hlsStreamURL) {
             // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
@@ -225,7 +225,12 @@
         }
     } else {
         // they wanna use a custom url for playback.
-        NSURL *url = [NSURL URLWithString:[preferences[@"CustomStreamURL"] stringByReplacingOccurrencesOfString:@"%v" withString:videoId]];
+        NSURL *url = nil;
+        if ([preferences[@"StreamType"] isEqualToString:@"tuberepair"]) {
+            url = [NSURL URLWithString:[NSString stringWithFormat:@"https://tuberepair.uptimetrackers.com/getvideo/%@", videoId]];
+        } else {
+            url = [NSURL URLWithString:[preferences[@"CustomStreamURL"] stringByReplacingOccurrencesOfString:@"%v" withString:videoId]];
+        }
         // we don't really have a way of knowing the video quality so
         id stream = nil;
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
