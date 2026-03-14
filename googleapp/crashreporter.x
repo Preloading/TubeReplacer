@@ -45,7 +45,7 @@
 
     // Build request
     NSURL *url = [NSURL URLWithString:
-        @"https://preloading.dev/tweaks/tubereplacer/crashreports.php"];
+        @"http://preloading.dev/tweaks/tubereplacer/crashreports.php"];
 
     NSMutableURLRequest *request =
         [NSMutableURLRequest requestWithURL:url];
