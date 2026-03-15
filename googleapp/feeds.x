@@ -112,7 +112,9 @@
         //     keyPath:@"contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
         NSArray *guideSections = [TRJSONUtils arrayFromJSON:bodyDict 
             keyPath:@"contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents"];
-        if ([guideSections count] == 1) {
+        if ([guideSections count] == 0) {
+            return nil;
+        } else if ([guideSections count] == 1) {
             return [TRJSONUtils arrayFromJSON:guideSections[0] 
                     keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
         }

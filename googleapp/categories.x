@@ -123,6 +123,11 @@
 -(void) handleEntries:(NSArray*)entries
 {
 	%orig;
+	if ([entries count] == 0) { // todo: this may break if someone disables every single category, but why would you???
+		[self addCategories];
+		return;
+	}
+
 	if ([entries[0] isKindOfClass:[%c(YTSubscription) class]]) {
 		[self addCategories];
 	}
