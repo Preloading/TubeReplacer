@@ -93,7 +93,7 @@
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
-			<string>AutoName</string>
+			<string>AutosName</string>
 			<key>label</key>
 			<string>Name</string>
 			<key>placeholder</key>
@@ -107,7 +107,7 @@
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
-			<string>AutoBrowseId</string>
+			<string>AutosBrowseId</string>
 			<key>label</key>
 			<string>Browse ID</string>
 			<key>placeholder</key>

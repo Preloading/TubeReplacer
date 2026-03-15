@@ -118,7 +118,6 @@
         }
         for (NSDictionary *section in guideSections) {
             NSString *title = [TRJSONUtils stringFromJSON:section keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.title.runs[0].text"];
-            NSLog(@"title -> %@", title);
             if ([title isEqualToString:@"Subscribed"]) {
                 return [TRJSONUtils arrayFromJSON:section 
                     keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
