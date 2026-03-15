@@ -1,8 +1,11 @@
 <div align="center">
-<img src="https://github.com/ObscureMosquito/Skyglow-Notifications-Client/blob/main/preferences/Resources/icon@full.png" width=20% height=20%>
+<img src="https://github.com/Preloading/TubeReplacer/blob/main/preferences/Resources/icon@full.png" width=20% height=20%>
 <h1>TubeReplacer</h1>
+  
 ![Hackatime Badge](https://hackatime-badge.hackclub.com/U091X12CFFG/TubeReplacer)
+
 </div>
+
 ###### it's like tuberepair but i replaced the whole backend of the app, instead of the server
 
 ## What is this?
@@ -23,3 +26,4 @@ There are a few ways you can contact me
 - Send in a github issue.
 - I guess on the bag.xml discord server somewhere.
 - Make a post on reddit or smth. I read it sometimes.
+If you issue with the app or tweak, the crash reporter & the send feedback button redirects to me, so you can send stuff there.
