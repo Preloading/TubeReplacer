@@ -1,6 +1,6 @@
 TARGET := iphone:clang:latest:5.0
 INSTALL_TARGET_PROCESSES = Preferences
-ARCHS := armv7
+ARCHS := armv7 arm64
 
 include $(THEOS)/makefiles/common.mk
 
