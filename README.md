@@ -26,4 +26,4 @@ There are a few ways you can contact me
 - Send in a github issue.
 - I guess on the bag.xml discord server somewhere.
 - Make a post on reddit or smth. I read it sometimes.
-If you issue with the app or tweak, the crash reporter & the send feedback button redirects to me, so you can send stuff there.
+- If you issue with the app or tweak, the crash reporter & the send feedback button redirects to me, so you can send stuff there.
