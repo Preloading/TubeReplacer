@@ -38,7 +38,7 @@
 
 %hook GTMOAuth2SignInInternal
 +(NSURL*)googleAuthorizationURL {
-    return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/signin?action_handle_signin=true&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
+    return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
 }
 
 
@@ -310,17 +310,14 @@
             NSString *channelID = nil;
             NSString *channelStartMarker = @"\\x22\\/channel\\/";
             NSString *channelEndMarker = @"\\/videos\\x22,\\x22webPageType\\x22:\\x22WEB_PAGE_TYPE_CHANNEL\\x22,";
-            NSRange channelEndRange = [htmlString rangeOfString:channelEndMarker];
-            if (channelEndRange.location != NSNotFound) {
-              NSRange searchBeforeEnd = NSMakeRange(0, channelEndRange.location);
-              NSRange channelStartRange = [htmlString rangeOfString:channelStartMarker
-                                                            options:NSBackwardsSearch
-                                                              range:searchBeforeEnd];
-              if (channelStartRange.location != NSNotFound) {
-                NSInteger channelStart = channelStartRange.location + channelStartRange.length;
-                if (channelStart < channelEndRange.location) {
-                  channelID = [htmlString substringWithRange:NSMakeRange(channelStart, channelEndRange.location - channelStart)];
-                }
+            NSRange channelStartRange = [htmlString rangeOfString:channelStartMarker];
+            if (channelStartRange.location != NSNotFound) {
+              NSInteger channelStart = channelStartRange.location + channelStartRange.length;
+              NSRange channelEndRange = [htmlString rangeOfString:channelEndMarker
+                                                           options:0
+                                                             range:NSMakeRange(channelStart, [htmlString length] - channelStart)];
+              if (channelEndRange.location != NSNotFound) {
+                channelID = [htmlString substringWithRange:NSMakeRange(channelStart, channelEndRange.location - channelStart)];
               }
             }
 
