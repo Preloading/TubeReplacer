@@ -28,6 +28,12 @@
                                  body:body];
 }
 
++(id)requestToAddToFavoritesWithVideoID:(NSString *)videoId authentication:(id)authentication {
+    // TODO: see if i can make this actually run the like video stuff.
+    return [%c(YTGDataRequest) requestToRateWithVideoID:videoId authentication:authentication like:YES]; // i mean i think it used to be a seperate playlist but not it's not so
+}
+
+
 %end
 
 %hook YTGDataRequestFactory
@@ -45,6 +51,10 @@
     return [self requestWithURLString:endpoint 
                        authentication:authentication 
                                  body:body];
+}
+
+-(id)requestToAddToFavoritesWithVideoID:(NSString *)videoId authentication:(id)authentication {
+    return [self requestToRateWithVideoID:videoId authentication:authentication like:YES]; // i mean i think it used to be a seperate playlist but not it's not so
 }
 
 %end
