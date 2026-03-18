@@ -39,6 +39,14 @@
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 
++(id)requestToAddToWatchLaterWithVideoID:(NSString*)videoId authentication:(id)authentication {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse/edit_playlist?prettyPrint=false"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder addVideoToPlaylistBodyWithVideoIds:@[videoId] 
+                                                            playlistId:@"WL" 
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
 %end
 
 %hook YTGDataRequestFactory
@@ -66,6 +74,14 @@
                  authentication:authentication 
                            body:[TRRequestBuilder browseBodyWithId:browseId 
                                                             params:nil 
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestToAddToWatchLaterWithVideoID:(NSString*)videoId authentication:(id)authentication {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse/edit_playlist?prettyPrint=false"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder addVideoToPlaylistBodyWithVideoIds:@[videoId] 
+                                                            playlistId:@"WL" 
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 

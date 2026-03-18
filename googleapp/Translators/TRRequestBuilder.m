@@ -349,4 +349,29 @@
     return [self likeBodyWithVideoId:videoId client:client];
 }
 
+#pragma mark - Playlist Management
+
++ (NSData *)addVideoToPlaylistBodyWithVideoIds:(NSArray *)videoIds playlistId:(NSString*)playlistId
+                         client:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+    
+    if (videoIds && [videoIds count] != 0) {
+        // The target structure for like endpoint
+        NSMutableArray *actions = [[NSMutableArray alloc] init];
+        for (NSString *videoId in videoIds) {
+            [actions addObject:@{
+                @"addedVideoId":videoId,
+                @"action":@"ACTION_ADD_VIDEO"
+            }];
+        }
+
+        [body setObject:actions forKey:@"actions"];
+        [body setObject:playlistId forKey:@"playlistId"];
+
+    }
+    
+    return [self serializeBody:body];
+}
+
 @end

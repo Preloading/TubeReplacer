@@ -108,4 +108,8 @@
 + (NSData *)unlikeBodyWithVideoId:(NSString *)videoId 
                            client:(YoutubeClientType *)client;
 
+
++ (NSData *)addVideoToPlaylistBodyWithVideoIds:(NSArray *)videoIds playlistId:(NSString*)playlistId
+                         client:(YoutubeClientType *)client;
+
 @end
