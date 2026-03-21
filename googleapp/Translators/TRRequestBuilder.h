@@ -112,4 +112,6 @@
 + (NSData *)addVideoToPlaylistBodyWithVideoIds:(NSArray *)videoIds playlistId:(NSString*)playlistId
                          client:(YoutubeClientType *)client;
 
++ (NSData *)createPlaylistWithTitle:(NSString *)title description:(NSString*)description visibilityType:(NSString*)visibilityType
+                         client:(YoutubeClientType *)client;
 @end

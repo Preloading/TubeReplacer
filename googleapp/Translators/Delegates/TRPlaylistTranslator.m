@@ -37,6 +37,10 @@
         return nil;
     }
     
+    if (json[@"playlistId"]) {
+        return [self translateCreatedPlaylist:json error:error];
+    }
+
     NSDictionary *context = [json objectForKey:@"all"];
     return [self translateCompactPlaylist:json withContext:context error:error];
 }
@@ -100,7 +104,7 @@
             updated:[NSDate date]
             thumbnailURLs:thumbnails
             contentURL:playlistId
-            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            editURL:playlistId
             size:videoCount
             isPrivate:isPrivate
         ] autorelease];
@@ -113,9 +117,44 @@
             updated:[NSDate date]
             thumbnailURLs:thumbnails
             contentURL:playlistId
-            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            editURL:playlistId
             size:videoCount
             isPrivate:isPrivate
+        ] autorelease];
+    }
+    
+    return playlist;
+}
+
+- (id)translateCreatedPlaylist:(NSDictionary *)json 
+                         error:(NSError **)error {
+    // thankfully none of these seem to be used except for playlist id. thank god.
+    NSString *playlistId = json[@"playlistId"];
+    id playlist = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithTitle:nil
+            summary:nil
+            authorDisplayName:nil
+            updated:[NSDate date]
+            thumbnailURLs:nil
+            contentURL:playlistId
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            size:0
+            isPrivate:NO // i dont know
+        ] autorelease];
+    } else {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithID:playlistId
+            title:nil
+            summary:nil
+            authorDisplayName:nil
+            updated:[NSDate date]
+            thumbnailURLs:nil
+            contentURL:playlistId
+            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            size:0
+            isPrivate:NO // i don't know
         ] autorelease];
     }
     

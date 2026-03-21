@@ -47,6 +47,31 @@
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 
++(id)requestToAddToPlaylistWithVideoID:(NSString*)videoId contentURL:(id)contentURL auth:(id)authentication
+{
+  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse/edit_playlist?prettyPrint=false"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder addVideoToPlaylistBodyWithVideoIds:@[videoId] 
+                                                            playlistId:contentURL
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+
++(id)requestToAddPlaylistWithTitle:(NSString*)title description:(NSString*)description isPrivate:(BOOL)isPrivate auth:(id)authentication
+{
+    NSString *visibilityType = @"PUBLIC";
+    if (isPrivate) {
+        visibilityType = @"PRIVATE";
+    }
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/playlist/create?prettyPrint=false"] 
+                 authentication:authentication
+                           body:[TRRequestBuilder createPlaylistWithTitle:title
+                                                            description:description
+                                                            visibilityType:visibilityType
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+
 %end
 
 %hook YTGDataRequestFactory
@@ -85,6 +110,28 @@
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 
+-(id)requestToAddToPlaylistWithVideoID:(NSString*)videoId contentURL:(id)contentURL auth:(id)authentication
+{
+  return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse/edit_playlist?prettyPrint=false"] 
+                 authentication:authentication 
+                           body:[TRRequestBuilder addVideoToPlaylistBodyWithVideoIds:@[videoId] 
+                                                            playlistId:contentURL
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestToAddPlaylistWithTitle:(NSString*)title description:(NSString*)description isPrivate:(BOOL)isPrivate auth:(id)authentication
+{
+    NSString *visibilityType = @"PUBLIC";
+    if (isPrivate) {
+        visibilityType = @"PRIVATE";
+    }
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/playlist/create?prettyPrint=false"] 
+                 authentication:authentication
+                           body:[TRRequestBuilder createPlaylistWithTitle:title
+                                                            description:description
+                                                            visibilityType:visibilityType
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
 %end
 
 #pragma mark - Request Dispatch

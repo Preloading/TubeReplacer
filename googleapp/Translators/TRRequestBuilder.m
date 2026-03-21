@@ -374,4 +374,19 @@
     return [self serializeBody:body];
 }
 
++ (NSData *)createPlaylistWithTitle:(NSString *)title description:(NSString*)description visibilityType:(NSString*)visibilityType
+                         client:(YoutubeClientType *)client {
+    
+    NSMutableDictionary *body = [self baseBodyWithClient:client];
+
+    [body setObject:title forKey:@"title"];
+    if (description) {
+        [body setObject:description forKey:@"description"]; // i really hope
+    }
+    [body setObject:visibilityType forKey:@"privacyStatus"];
+    [body setObject:@"CAAoAA%3D%3D" forKey:@"params"]; // i don't know what this does
+    
+    return [self serializeBody:body];
+}
+
 @end
