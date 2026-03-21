@@ -700,6 +700,20 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>UseRTYDL</string>
+			<key>label</key>
+			<string>Use RYTD</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSEditTextCell</string>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>

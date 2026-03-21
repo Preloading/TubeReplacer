@@ -172,6 +172,13 @@
     
     
     // TODO: this should be running at the same time as the next request
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    id rawUseRTYDL = preferences[@"UseRTYDL"];
+    BOOL useRTYDL = rawUseRTYDL ? [rawUseRTYDL boolValue] : YES; // default YES when unset
+
+    if (!useRTYDL) {
+        return allData;
+    }
     NSURL *rytdl = [NSURL URLWithString:[NSString stringWithFormat:@"https://returnyoutubedislikeapi.com/votes?videoId=%@", videoId]];
     
     NSMutableURLRequest *requestDL = [NSMutableURLRequest requestWithURL:rytdl];
