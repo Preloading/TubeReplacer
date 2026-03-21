@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "appheaders.h"
+#import "general.h"
 
 @interface YTSettingsViewController : YTBaseViewController_iPhone
 
@@ -153,6 +154,10 @@
 
 @end
 
+@interface YTSettingsTableControllerDelegate
+-(void)presentViewController:(id)fp8;
+@end
+
 
 %hook YTSettingsViewController
 // -(YTSettingsViewController*) initWithServices:(YTServices*)services navigation:(YTLiveServices*)navigation {
@@ -222,30 +227,65 @@
 }
 
 %end
-//  Version 1.0
-//
-//  Created by Nick Lockwood on 12/01/2012.
-//  Copyright (C) 2012 Charcoal Design
-//
-//  Distributed under the permissive zlib License
-//  Get the latest version from here:
-//
-//  https://github.com/nicklockwood/Base64
-//
-//  This software is provided 'as-is', without any express or implied
-//  warranty.  In no event will the authors be held liable for any damages
-//  arising from the use of this software.
-//
-//  Permission is granted to anyone to use this software for any purpose,
-//  including commercial applications, and to alter it and redistribute it
-//  freely, subject to the following restrictions:
-//
-//  1. The origin of this software must not be misrepresented; you must not
-//  claim that you wrote the original software. If you use this software
-//  in a product, an acknowledgment in the product documentation would be
-//  appreciated but is not required.
-//
-//  2. Altered source versions must be plainly marked as such, and must not be
-//  misrepresented as being the original software.
-//
-//  3. This notice may not be removed or altered from any source distribution.
+
+%hook YTSettingsTableController
+// per the license, you are allowed are not allowed to remove this bit.
+-(void)showWebViewWithURL:(id)url {
+    NSURL *targetURL = [%c(YTSettingsTableController) openSourceLicensesURL];
+    if (![[url standardizedURL] isEqual:[targetURL standardizedURL]]) {
+        return %orig;
+    }
+  GIPResourceLoader *resourseLoader = [[[%c(GIPResourceLoader) alloc] initWithBundleName:@"GIPWebViewResources.bundle"] autorelease];
+  GIPWebViewController *webView = [[[%c(GIPWebViewController) alloc] initWithDelegate:nil loader:resourseLoader] autorelease];
+  [webView setToolbarColor:[UIColor backgroundDarkColor]];
+  [webView loadURL:url];
+  // [self presentModalViewController:webView];
+  [(YTSettingsTableControllerDelegate*)[self valueForKey:l(@"delegate")] presentViewController:webView];
+  [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString: // todo: make this text easier to manage
+   @"window.addEventListener('load', function () {"
+    "document.body.insertAdjacentHTML('afterbegin', '<h3>TubeReplacer Specific</h3><pre>"
+    "TubeReplacer<br>"
+    "Copyright (C) 2026 Preloading<br><br>"
+    "This program is free software: you can redistribute it and/or modify "
+    "it under the terms of the GNU General Public License as published by "
+    "the Free Software Foundation, either version 3 of the License, or "
+    "(at your option) any later version.<br><br>"
+
+    "This program is distributed in the hope that it will be useful,"
+    " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
+    "GNU General Public License for more details.<br><br>"
+
+    "You should have received a copy of the GNU General Public License "
+    "along with this program.  If not, see <a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.<br><br>"
+    "A copy of this program\\'s source can be found at <a href=\"https://github.com/Preloading/TubeReplacer\">https://github.com/Preloading/TubeReplacer</a>"
+  "</pre>"
+  "<p><a href=\"https://github.com/nicklockwood/Base64\">Base64</a></p><pre>"
+  "Version 1.0<br><br>"
+  "Created by Nick Lockwood on 12/01/2012.<br>"
+  "Copyright (C) 2012 Charcoal Design<br><br>"
+
+  "Distributed under the permissive zlib License<br>"
+  "Get the latest version from here: <a href=\"https://github.com/nicklockwood/Base64\">https://github.com/nicklockwood/Base64</a><br><br>"
+
+  "This software is provided \\'as-is\\', without any express or implied"
+  "warranty.  In no event will the authors be held liable for any damages"
+  "arising from the use of this software."
+  "Permission is granted to anyone to use this software for any purpose,"
+  "including commercial applications, and to alter it and redistribute it"
+  "freely, subject to the following restrictions:<br>"
+  "1. The origin of this software must not be misrepresented; you must not"
+  "claim that you wrote the original software. If you use this software"
+  "in a product, an acknowledgment in the product documentation would be"
+  "appreciated but is not required.<br><br>"
+  "2. Altered source versions must be plainly marked as such, and must not be"
+  "misrepresented as being the original software.<br>"
+  "3. This notice may not be removed or altered from any source distribution."
+  "</pre>"
+  "');"
+  "})"
+  ];
+
+}
+
+%end
