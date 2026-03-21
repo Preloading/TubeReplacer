@@ -5,6 +5,7 @@
 // Makes both /player (for streams) and /next (for likes) requests
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 #include "appheaders.h"
 #include "general.h"
@@ -209,4 +210,47 @@
 }
 %end
 
-// Youtube likes to send dubbed audio tracks, which sucks and is bad. This was the best way i found to fix it. In of itself this sux ass
+%hook YTPlayer
+-(BOOL)backgroundPlaybackAllowed
+{
+    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
+        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        id rawBkgPlay = preferences[@"BkgPlay"];
+        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
+
+        if (bkgPlay) {
+            return YES;
+        }
+    }
+    return %orig;
+}
+-(void)setStreamURL:(id)streamURL initialMediaTime:(double)initialMediaTime airPlayAllowed:(BOOL)airPlayAllowed {
+    %orig;
+    // currently crashes on 1.0.1, and fades out on 1.1.0.
+    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
+        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        id rawBkgPlay = preferences[@"BkgPlay"];
+        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
+
+        if (bkgPlay) {
+            [self setValue:@YES forKey:l(@"backgroundPlaybackAllowed")];
+        }
+    }
+}
+%end
+
+%hook YTPlayerController
+-(void)loadVideoStream
+{
+    %orig;
+    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
+        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        id rawBkgPlay = preferences[@"BkgPlay"];
+        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
+
+        if (bkgPlay) {
+            [self setValue:@YES forKey:l(@"backgroundPlaybackAllowed")];
+        }
+    }
+}
+%end

@@ -668,7 +668,7 @@
 			<key>label</key>
 			<string>Video</string>
 			<key>footerText</key>
-			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v</string>
+			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1+ for now.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -709,6 +709,20 @@
 			<string>UseRTYDL</string>
 			<key>label</key>
 			<string>Use RYTD</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>BkgPlay</string>
+			<key>label</key>
+			<string>Background Playback</string>
 			<key>default</key>
 			<true/>
 		</dict>
