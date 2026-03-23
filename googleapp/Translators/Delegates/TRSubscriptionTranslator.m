@@ -105,7 +105,7 @@
 - (id)translateFromChannelHeader:(NSDictionary *)json error:(NSError **)error {
     // PAIN
     NSString *mutationKey = [TRJSONUtils stringFromJSON:json 
-        keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.actionsRows[0].subscribeButtonViewModel.stateEntityStoreKey"];
+        keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.actions.flexibleActionsViewModel.actionsRows[0].actions[0].subscribeButtonViewModel.stateEntityStoreKey"];
 
     if (!mutationKey) {
         return nil; // we can't tell if we don't have this key.

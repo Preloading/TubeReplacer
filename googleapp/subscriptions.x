@@ -81,6 +81,7 @@
 %hook YTGDataService
 
 -(void)makeMySubscriptionRequestWithChannelID:(NSString*)channelId authentication:(id)authentication responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    // todo: uncomment this out, since this is only blanked for testing
     id cache = [[self valueForKey:l(@"subscriptionCache")] objectForKey:channelId];
     
     if (cache) {
