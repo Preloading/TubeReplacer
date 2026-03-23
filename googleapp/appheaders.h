@@ -410,6 +410,8 @@ typedef struct _TBXMLElement {
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
 // 1.3.0
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 listed:(BOOL)listed categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
+// 1.4.0
+- (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 listed:(BOOL)listed categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent privateContent:(BOOL)privateContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
 @end
 
 @interface YTVideoState : NSObject
@@ -666,6 +668,9 @@ typedef struct _TBXMLElement {
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithURL:(id)fp8 format:(int)fp12 encrypted:(BOOL)fp16;
+
+// 2.0.0+
++ (id)streamWithURL:(id)fp8 MIMEType:(NSString*)mimeType format:(int)fp12;
 @end
 
 @interface YTChannel : NSObject
@@ -695,6 +700,8 @@ typedef struct _TBXMLElement {
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent;
 // 1.3.0
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent parentChannelURLs:(id)parentChannelURLs;
+// 1.4.0
+- (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 title:(id)title summary:(id)fp16 updated:(id)fp20 videoCount:(unsigned long long)fp24 thumbnailURL:(id)fp32 subscribersCount:(unsigned long long)fp36 paidContent:(BOOL)paidContent parentChannelURLs:(id)parentChannelURLs;
 @end
 
 @interface GIPToast : NSObject
@@ -1401,7 +1408,7 @@ typedef struct _TBXMLElement {
 - (id)copyWithZone:(struct _NSZone *)fp8;
 - (void)dealloc;
 - (id)initWithLanguageCode:(id)fp8 languageName:(id)fp12 trackName:(id)fp16;
-
+- (id)initWithLanguageCode:(id)fp8 languageName:(id)fp12 trackName:(id)fp16 format:(id)format;
 @end
 
 @interface YTSubtitlesController : NSObject

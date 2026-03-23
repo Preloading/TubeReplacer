@@ -183,10 +183,12 @@
                 [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
 
                 id stream = nil;
-                if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
-                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
+                if ([version() isEqualToString:@"1.3.0"]) {
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO]; // idk why lol
+                } else if ([version() isEqualToString:@"2.0.0"]) {
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] MIMEType:@"video/mp4" format:4];
                 } else {
-                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO];
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
                 }
 
                 if (stream) {
@@ -212,10 +214,12 @@
                     NSURL *url = [NSURL URLWithString:urlString];
                     if (url) {
                         id stream = nil;
-                        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
-                        } else {
+                        if ([version() isEqualToString:@"1.3.0"]) {
                             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+                        } else if ([version() isEqualToString:@"2.0.0"]) {
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
+                        } else {
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
                         }
                         if (stream) {
                             [ytStreams addObject:stream];
@@ -234,10 +238,12 @@
         }
         // we don't really have a way of knowing the video quality so
         id stream = nil;
-        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
-            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
-        } else {
+        if ([version() isEqualToString:@"1.3.0"]) {
             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+        } else if ([version() isEqualToString:@"2.0.0"]) {
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
+        } else {
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
         }
         if (stream) {
             [ytStreams addObject:stream];
@@ -271,7 +277,11 @@
     NSArray *subtitleTracksUnparsed = [TRJSONUtils arrayFromJSON:json keyPath:@"captions.playerCaptionsTracklistRenderer.captionTracks"];
     if (subtitleTracksUnparsed) {
         for (NSDictionary *track in subtitleTracksUnparsed) {
-            [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]]]];
+            if ([version() isEqualToString:@"2.0.0"]) {
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]] format:@"ass"]];
+            } else {
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]]]];
+            }
         }
     }
     
@@ -373,6 +383,41 @@
             liveEventURL:nil
             currentViewers:0
         ];
+    } else if ([version() isEqualToString:@"1.3.0"]) {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
+            description:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.shortDescription"]
+            uploaderDisplayName:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.author"]
+            uploaderChannelID:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.channelId"]
+            uploadedDate:uploadDate
+            publishedDate:publishDate
+            duration:duration
+            viewCount:viewCount
+            likesCount:likesCount
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:ytStreams
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            listed:YES // todo: this should be easy enough to implement
+            categoryLabel:@"Gaming"
+            categoryTerm:category ?: @"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:39
+        ];
     } else {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
@@ -404,6 +449,7 @@
             adultContent:NO
             editURL:nil
             paidContent:NO
+            privateContent:NO // todo: should also be easy enough to implement
             videoPro:nil
             liveEventURL:nil
             currentViewers:39
@@ -710,7 +756,7 @@
             videoPro:nil
             liveEventURL:nil
             currentViewers:0];
-    } else {
+    } else if ([version() isEqualToString:@"1.3.0"]){
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:title
@@ -741,6 +787,76 @@
             adultContent:NO
             editURL:nil
             paidContent:NO
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:0];
+    } else if ([version() isEqualToString:@"1.4.0"]) {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:@[[NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:@"https://google.com"] format:1 encrypted:NO]]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            listed:YES // TODO: this should be easy enough to implement properly
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            privateContent:NO // todo: should also be easy enough to implement
+            videoPro:nil
+            liveEventURL:nil
+            currentViewers:0];
+    } else {
+        video = [[NSClassFromString(@"YTVideo") alloc] 
+            initWithID:videoId
+            title:title
+            description:@""
+            uploaderDisplayName:uploaderName
+            uploaderChannelID:channelId ?: @""
+            uploadedDate:uploadDate
+            publishedDate:uploadDate
+            duration:duration
+            viewCount:views
+            likesCount:0
+            dislikesCount:0
+            ratingAllowed:YES
+            state:videoState
+            streams:@[[NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:@"https://google.com"] MIMEType:@"video/mp4" format:1]]
+            thumbnailURLs:thumbnails
+            subtitlesTracksURL:nil
+            commentsAllowed:YES
+            commentsURL:videoId
+            commentsCountHint:0
+            relatedURL:videoId
+            claimed:NO
+            monetized:NO
+            monetizedCountries:@[]
+            listed:YES // TODO: this should be easy enough to implement properly
+            categoryLabel:@"Gaming"
+            categoryTerm:@"Unknown"
+            adultContent:NO
+            editURL:nil
+            paidContent:NO
+            privateContent:NO // todo: should also be easy enough to implement
             videoPro:nil
             liveEventURL:nil
             currentViewers:0];
