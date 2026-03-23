@@ -118,11 +118,23 @@
             return [TRJSONUtils arrayFromJSON:guideSections[0] 
                     keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
         }
+        NSDictionary *continuation = nil;
+        for (NSDictionary *section in guideSections) {
+            if (section[@"continuationItemRenderer"]) {
+                continuation = section[@"continuationItemRenderer"];
+                break;
+            }
+        }
         for (NSDictionary *section in guideSections) {
             NSString *title = [TRJSONUtils stringFromJSON:section keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.title.runs[0].text"];
-            if ([title isEqualToString:@"Subscribed"]) {
-                return [TRJSONUtils arrayFromJSON:section 
-                    keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
+            if (!title || [title isEqualToString:@"Subscribed"]) {
+                if (continuation) {
+                    return [[TRJSONUtils arrayFromJSON:section 
+                        keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"] arrayByAddingObjectsFromArray:@[continuation]];
+                } else {
+                    return [TRJSONUtils arrayFromJSON:section 
+                        keyPath:@"itemSectionRenderer.contents[0].shelfRenderer.content.expandedShelfContentsRenderer.items"];
+                }
             }
         }
         return nil;

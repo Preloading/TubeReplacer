@@ -42,7 +42,8 @@
     }
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"] ||
         [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"] ||
-        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"]) {
+        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"] ||
+        [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.lockupViewModel"]) {
         return YES;
     }
     
@@ -448,7 +449,12 @@
         return nil;
     }
     
-    NSString *videoId = videoData[@"videoId"];
+    NSString *videoId = nil;
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+        videoId = videoData[@"contentId"];
+    } else {
+        videoId = videoData[@"videoId"];
+    }
     if (!videoId) {
         return nil;
     }
@@ -457,15 +463,22 @@
     NSString *title = nil;
     if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
         title = [TRJSONUtils stringFromJSON:videoData keyPath:@"headline.runs[0].text"];
+    } else if ([dataType isEqualToString:@"lockupViewModel"]) {
+        NSLog(@"metadata.lockupMetadataViewModel.title.content");
+        title = [TRJSONUtils stringFromJSON:videoData keyPath:@"metadata.lockupMetadataViewModel.title.content"];
     } else {
         title = [TRJSONUtils stringFromJSON:videoData keyPath:@"title.runs[0].text"];
     }
+    NSLog(@"title -> %@", title);
     if (!title) title = @"";
 
     if ([title isEqualToString:@"[Deleted video]"]) return nil;
     
     // Uploader display name
     NSString *uploaderName = [TRJSONUtils stringFromJSON:videoData keyPath:@"shortBylineText.runs[0].text"];
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+        uploaderName = [TRJSONUtils stringFromJSON:videoData keyPath:@"metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0].text.content"];
+    }
     if (!uploaderName && context) {
         // For channel videos, get from page header
         uploaderName = [TRJSONUtils stringFromJSON:context keyPath:@"header.pageHeaderRenderer.pageTitle"];
@@ -473,19 +486,27 @@
     if (!uploaderName) uploaderName = @"";
     
     // Channel ID
-    NSString *channelId = [TRJSONUtils stringFromJSON:videoData 
-                                              keyPath:@"shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId"];
-
-    // if ([channelId isEqualToString:@"UCStfhR2V58QkCCyq_8dlk6g"]) {
-    //     NSLog(@"channel id is the bad one!!! title -> %@, channelName -> %@", title, uploaderName);
-    // }
+    NSString *channelId = nil;
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+        channelId = [TRJSONUtils stringFromJSON:videoData 
+                        keyPath:@"metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.renderContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId"];
+    } else {
+        channelId = [TRJSONUtils stringFromJSON:videoData 
+                        keyPath:@"shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId"];
+    }
     
     // Thumbnails 
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:videoData keyPath:@"thumbnail.thumbnails"];
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+        thumbArray = [TRJSONUtils arrayFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.image.sources"];
+    }
     NSDictionary *thumbnails = [TRJSONUtils thumbnailsFromArray:thumbArray];
     
     // Duration from lengthText
     NSString *durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"lengthText.runs[0].text"];
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+            durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.overlays[0].thumbnailBottomOverlayViewModel.badges[0].thumbnailBadgeViewModel.text"];
+    }
     long duration = [TRJSONUtils secondsFromDurationText:durationText];
     
     // === CRITICAL: Views and Date from Accessibility Label ===
@@ -500,6 +521,9 @@
     if ([dataType isEqualToString:@"videoWithContextRenderer"]) {
         accessibilityLabel = [TRJSONUtils stringFromJSON:videoData 
                                                  keyPath:@"headline.accessibility.accessibilityData.label"];
+    } else if ([dataType isEqualToString:@"lockupViewModel"]) {
+        accessibilityLabel = [TRJSONUtils stringFromJSON:videoData 
+                                                 keyPath:@"rendererContext.accessibilityContext.label"];
     } else {
         accessibilityLabel = [TRJSONUtils stringFromJSON:videoData 
                                                  keyPath:@"title.accessibility.accessibilityData.label"];
@@ -551,6 +575,9 @@
         if (!viewText) {
             viewText = [TRJSONUtils stringFromJSON:videoData keyPath:@"viewCountText.simpleText"];
         }
+        if ([dataType isEqualToString:@"lockupViewModel"]) {
+            viewText = [TRJSONUtils stringFromJSON:videoData keyPath:@"metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[1].text.content"];
+        }
         if (viewText) {
             viewText = [viewText stringByReplacingOccurrencesOfString:@" views" withString:@""];
             viewText = [viewText stringByReplacingOccurrencesOfString:@"," withString:@""];
@@ -561,6 +588,9 @@
         NSString *timeAgo = [TRJSONUtils stringFromJSON:videoData keyPath:@"publishedTimeText.runs[0].text"];
         if (!timeAgo) {
             timeAgo = [TRJSONUtils stringFromJSON:videoData keyPath:@"publishedTimeText.simpleText"];
+        }
+        if ([dataType isEqualToString:@"lockupViewModel"]) {
+            timeAgo = [TRJSONUtils stringFromJSON:videoData keyPath:@"metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[2].text.content"];
         }
         if (timeAgo) {
             uploadDate = [TRJSONUtils dateFromTimeAgo:timeAgo];
@@ -750,6 +780,9 @@
     result = [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"];
     if (result) return result;
     
+    result = [TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.lockupViewModel"];
+    if (result) return result;
+
     // Nested in itemSectionRenderer
     result = [TRJSONUtils dictFromJSON:json keyPath:@"itemSectionRenderer.contents[0].compactVideoRenderer"];
     if (result) return result;
@@ -767,6 +800,7 @@
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoRenderer"]) return @"videoRenderer";
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.compactVideoRenderer"]) return @"videoRenderer";
     if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.videoWithContextRenderer"]) return @"videoWithContextRenderer";
+    if ([TRJSONUtils dictFromJSON:json keyPath:@"richItemRenderer.content.lockupViewModel"]) return @"lockupViewModel";
     return @"unknown";
 }
 
