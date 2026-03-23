@@ -183,7 +183,7 @@
                 [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
 
                 id stream = nil;
-                if ([version() isEqualToString:@"1.3.0"]) {
+                if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
                     stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO]; // idk why lol
                 } else if ([version() isEqualToString:@"2.0.0"]) {
                     stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] MIMEType:@"video/mp4" format:4];
@@ -214,7 +214,7 @@
                     NSURL *url = [NSURL URLWithString:urlString];
                     if (url) {
                         id stream = nil;
-                        if ([version() isEqualToString:@"1.3.0"]) {
+                        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
                             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
                         } else if ([version() isEqualToString:@"2.0.0"]) {
                             stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
@@ -238,7 +238,7 @@
         }
         // we don't really have a way of knowing the video quality so
         id stream = nil;
-        if ([version() isEqualToString:@"1.3.0"]) {
+        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
         } else if ([version() isEqualToString:@"2.0.0"]) {
             stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
@@ -383,7 +383,7 @@
             liveEventURL:nil
             currentViewers:0
         ];
-    } else if ([version() isEqualToString:@"1.3.0"]) {
+    } else if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 
             initWithID:videoId
             title:[TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.title"]
