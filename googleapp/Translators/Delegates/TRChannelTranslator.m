@@ -165,10 +165,23 @@
             subscribersCount:0
             paidContent:false
         ] autorelease];
+    } else if ([version() isEqualToString:@"1.3.0"]) {
+        channel = [[[NSClassFromString(@"YTChannel") alloc] 
+            initWithDisplayName:@"Deleted Account"
+            channelID:@"deleted"
+            summary:@""
+            updated:[NSDate date]
+            videoCount:0
+            thumbnailURL:nil
+            subscribersCount:0
+            paidContent:false
+            parentChannelURLs:nil
+        ] autorelease];
     } else {
         channel = [[[NSClassFromString(@"YTChannel") alloc] 
             initWithDisplayName:@"Deleted Account"
             channelID:@"deleted"
+            title:@"Deleted Account"
             summary:@""
             updated:[NSDate date]
             videoCount:0
