@@ -186,7 +186,7 @@
                 if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
                     stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO]; // idk why lol
                 } else if ([version() isEqualToString:@"2.0.0"]) {
-                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] MIMEType:@"video/mp4" format:4];
+                    stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] MIMEType:@"video/mp4" format:1];
                 } else {
                     stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO];
                 }
@@ -214,12 +214,12 @@
                     NSURL *url = [NSURL URLWithString:urlString];
                     if (url) {
                         id stream = nil;
-                        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+                        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
                         } else if ([version() isEqualToString:@"2.0.0"]) {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:2];
                         } else {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO];
                         }
                         if (stream) {
                             [ytStreams addObject:stream];
@@ -238,12 +238,12 @@
         }
         // we don't really have a way of knowing the video quality so
         id stream = nil;
-        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
-            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO precached:NO];
+        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
         } else if ([version() isEqualToString:@"2.0.0"]) {
-            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:4];
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:2];
         } else {
-            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:4 encrypted:NO];
+            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO];
         }
         if (stream) {
             [ytStreams addObject:stream];
