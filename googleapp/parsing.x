@@ -135,6 +135,7 @@
 %hook YTUIUtils
 +(id)localizedCount:(uint64_t)number
 {
+    // NSLog(@"number => %lld", number);
   return [NSNumberFormatter localizedStringFromNumber:[NSNumber numberWithLongLong:number] numberStyle:1];
 }
 %end

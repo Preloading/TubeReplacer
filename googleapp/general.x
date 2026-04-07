@@ -20,6 +20,9 @@ static void analytics() {
             if ([currentVersion isEqualToString:fileContent]) {
                 return;
             }
+            if ([currentVersion isEqualToString:@"disable"]) {
+                return; // used to prevent my own device from posting useless analytics to my server
+            }
             was_updated = YES;
         } else if (readError && readError.code != NSFileReadNoSuchFileError) {
             NSLog(@"Error reading version file: %@", readError.localizedDescription);
@@ -122,3 +125,11 @@ static void analytics() {
 
 %end
 
+%hook GIPSpeechController 
+
+-(NSString*)serverURL
+{
+  return @"http://www.google.com/m/voice-search"; // this may be useful for debugging it later, but it's C++ bullshit that frankly, i don't wanna deal with.
+}
+    
+%end
