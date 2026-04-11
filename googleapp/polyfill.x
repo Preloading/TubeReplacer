@@ -35,12 +35,18 @@
 
 %new
 - (id)objectAtIndexedSubscript:(NSUInteger)idx {
-    return [self objectAtIndex:idx];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
+        return [self objectAtIndex:idx];
+    }
+    return %orig;
 }
 
 %new
 - (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx {
-    [self replaceObjectAtIndex:idx withObject:obj];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
+        [self replaceObjectAtIndex:idx withObject:obj];
+    }
+    return %orig;
 }
 
 %end
@@ -49,12 +55,18 @@
 
 %new
 - (id)objectForKeyedSubscript:(id)key {
-    return [self objectForKey:key];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
+        return [self objectForKey:key];
+    }
+    return %orig;
 }
 
 %new
 - (void)setObject:(id)obj forKeyedSubscript:(id)key {
-    [self setObject:obj forKey:key];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
+        [self setObject:obj forKey:key];
+    }
+    return %orig;
 }
 
 %end

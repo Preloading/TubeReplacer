@@ -1,2 +1,5 @@
 #include <Foundation/Foundation.h>
-#import <execinfo.h>
+
+%ctor {
+    NSLog(@"sdhoieyaishfdiuohriudfs0usdzu");
+}
