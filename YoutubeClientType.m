@@ -89,8 +89,8 @@
 
 -(NSDictionary*)makeContext {
     NSMutableDictionary *clientContext = [[NSMutableDictionary alloc] init];
-    [clientContext setObject:@"en" forKey:@"hl"]; // todo: make this a correct language
-    [clientContext setObject:@"US" forKey:@"gl"]; // todo: also make this a correct country, since we get given the country.
+    [clientContext setObject:@"en" forKey:@"hl"]; //[[NSLocale preferredLanguages] objectAtIndex:0] forKey:@"hl"]; // so this also localizes a few other things, like time :)
+    [clientContext setObject:[[NSLocale currentLocale] objectForKey:NSLocaleCountryCode] forKey:@"gl"];
     [clientContext setObject:[self name] forKey:@"clientName"];
     [clientContext setObject:[self version] forKey:@"clientVersion"];
     if ([self osName]) {

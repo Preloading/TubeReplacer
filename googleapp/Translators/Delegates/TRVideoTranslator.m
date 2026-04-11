@@ -14,6 +14,8 @@
 
 @implementation TRVideoTranslator
 
+
+
 // this should really be in a seperate file but idc right now
 + (NSString *)uuid {
     CFUUIDRef theUUID = CFUUIDCreate(NULL);
@@ -109,7 +111,19 @@
                 NSCharacterSet *separator = [NSCharacterSet newlineCharacterSet];
                 NSArray *elements = [result componentsSeparatedByCharactersInSet:separator];
                 NSMutableArray *newPlaylist = [NSMutableArray array];
+
+                // language stuff
+                NSString *language = nil;
+                if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+                    language = [NSClassFromString(@"YTUtils") userLanguageCode];
+                } else {
+                    language = [NSClassFromString(@"YTDataUtils") userLanguageCode];
+                }
+                int idx = -1;
+                NSMutableArray *original_audio_ids = [NSMutableArray array];
+                bool has_removed_original = false;
                 for (NSString *element in elements) {
+                    idx++;
                     if ([element hasPrefix:@"#EXT-X-MEDIA:"]) {
                         // NSMutableDictionary *components = [NSMutableDictionary dictionary];
                         // NSString *attributeList = [element substringFromIndex:13];
@@ -164,9 +178,34 @@
                         //     continue;
                         // }
 
-                        if ([element rangeOfString:@" - dubbed-auto\""].location == NSNotFound) {
-                            [newPlaylist addObject:element];
+                        if ([element rangeOfString:@" - dubbed-auto\""].location != NSNotFound) {
+                            continue; // its really bad
                         }
+
+                        
+                        if ([element rangeOfString:@" - dubbed\""].location != NSNotFound) {
+                            if (!PreferencesBoolValue(preferences, @"UseDubbedAudio", true)) {
+                                continue;
+                            }
+                            if ([element rangeOfString:[NSString stringWithFormat:@"LANGUAGE=\"%@\"", language]].location != NSNotFound) {
+                                has_removed_original = true;
+                                for (NSNumber *original_id in original_audio_ids) {
+                                    // original_audio_ids are ordered in reverse
+                                    [newPlaylist removeObjectAtIndex:[original_id intValue]];
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        
+
+                        if ([element rangeOfString:@" - original\""].location != NSNotFound) {
+                            if (has_removed_original) {
+                                continue;
+                            }
+                            [original_audio_ids insertObject:@(idx) atIndex:0]; 
+                        }
+                        [newPlaylist addObject:element];
                         
 
                         // NSLog(@"components -> %@", components);
@@ -181,7 +220,6 @@
                 NSLog(@"HLS Stream is at %@", mediaPath);
 
                 [[[newPlaylist valueForKey:@"description"] componentsJoinedByString:@"\n"] writeToFile:mediaPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-
                 id stream = nil;
                 if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
                     stream = [NSClassFromString(@"YTStream") streamWithURL:[NSURL fileURLWithPath:mediaPath] format:1 encrypted:NO precached:NO]; // idk why lol
