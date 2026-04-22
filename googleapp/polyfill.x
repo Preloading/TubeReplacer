@@ -24,6 +24,7 @@
 
 
 #include <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface __NSArrayM : NSMutableArray
 @end
@@ -31,22 +32,17 @@
 @interface __NSCFDictionary : NSMutableDictionary
 @end
 
+%group Subscripts
 %hook __NSArrayM
 
 %new
 - (id)objectAtIndexedSubscript:(NSUInteger)idx {
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
-        return [self objectAtIndex:idx];
-    }
-    return %orig;
+    return [self objectAtIndex:idx];
 }
 
 %new
 - (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)idx {
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
-        [self replaceObjectAtIndex:idx withObject:obj];
-    }
-    return %orig;
+    [self replaceObjectAtIndex:idx withObject:obj];
 }
 
 %end
@@ -55,18 +51,20 @@
 
 %new
 - (id)objectForKeyedSubscript:(id)key {
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
-        return [self objectForKey:key];
-    }
-    return %orig;
+    return [self objectForKey:key];
 }
 
 %new
 - (void)setObject:(id)obj forKeyedSubscript:(id)key {
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
-        [self setObject:obj forKey:key];
-    }
-    return %orig;
+    [self setObject:obj forKey:key];
 }
 
 %end
+%end
+
+%ctor {
+    // Check if the class responds to the selector at runtime
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
+        %init(Subscripts);
+    }
+}

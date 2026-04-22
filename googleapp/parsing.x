@@ -24,6 +24,8 @@
     const unsigned char* bytes = [rawData bytes];
     NSUInteger length = [rawData length];
     NSData *cleanData = rawData;
+
+    
     
     // Strip Google's anti-XSS prefix: )]}'\\n
     // This is prepended to JSON responses to prevent JSONP hijacking

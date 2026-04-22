@@ -778,6 +778,16 @@
 			<key>default</key>
 			<false/>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Super Secret Debug Options</string>
+			<key>detail</key>
+			<string>YTRPDebugListController</string>
+			<key>isController</key>
+			<true/>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>TubeReplacer</string>

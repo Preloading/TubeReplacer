@@ -6,7 +6,7 @@ include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = TubeReplacerPrefs
 
-TubeReplacerPrefs_FILES = YTRPRootListController.m
+TubeReplacerPrefs_FILES = YTRPRootListController.m YTRPDebugListController.m
 TubeReplacerPrefs_FRAMEWORKS = UIKit
 TubeReplacerPrefs_PRIVATE_FRAMEWORKS = Preferences
 TubeReplacerPrefs_INSTALL_PATH = /Library/PreferenceBundles

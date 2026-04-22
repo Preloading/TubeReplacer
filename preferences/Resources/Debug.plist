@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>key</key>
+			<string>DebugRequests</string>
+			<key>label</key>
+			<string>Debugging</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>If you don't know what you are doing, don't touch anything.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>key</key>
+			<string>EmailResults</string>
+			
+			<key>label</key>
+			<string>Email Network Log</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>key</key>
+			<string>ClearLog</string>
+			<key>label</key>
+			<string>Clear Debug Log</string>
+		</dict>
+		
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>DebugNetworkRequests</string>
+			<key>label</key>
+			<string>Debug Requests</string>
+			<key>default</key>
+			<false/>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Super Secret Settings</string>
+</dict>
+</plist>
