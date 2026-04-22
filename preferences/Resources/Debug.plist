@@ -23,7 +23,8 @@
 			<string>PSButtonCell</string>
 			<key>key</key>
 			<string>EmailResults</string>
-			
+			<key>action</key>
+			<string>emailLogs</string>
 			<key>label</key>
 			<string>Email Network Log</string>
 		</dict>
@@ -34,6 +35,8 @@
 			<string>ClearLog</string>
 			<key>label</key>
 			<string>Clear Debug Log</string>
+			<key>action</key>
+			<string>clearLogs</string>
 		</dict>
 		
 		<dict>

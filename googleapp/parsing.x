@@ -25,7 +25,23 @@
     NSUInteger length = [rawData length];
     NSData *cleanData = rawData;
 
-    
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    if (preferences[@"DebugNetworkRequests"]) {
+        NSString *path = @"/var/mobile/Library/Preferences/tubereplacer_network_log.txt";
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+
+        if (![fileManager fileExistsAtPath:path]) {
+            [fileManager createFileAtPath:path contents:nil attributes:nil];
+        }
+        NSMutableData *dataToWrite = [NSMutableData data];
+        [dataToWrite appendData:[@"========Tub3R3p1@c3r_Un1qu3-S3p3r@t0r_!&479(21!#9hfa@a1===============" dataUsingEncoding:NSUTF8StringEncoding]];
+        [dataToWrite appendData:rawData];
+
+        NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:path];
+        [fileHandle seekToEndOfFile];
+        [fileHandle writeData:dataToWrite];
+        [fileHandle closeFile];
+    }
     
     // Strip Google's anti-XSS prefix: )]}'\\n
     // This is prepended to JSON responses to prevent JSONP hijacking
