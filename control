@@ -1,6 +1,6 @@
 Package: dev.preloading.tubereplacer
 Name: TubeReplacer
-Version: 1.0.3
+Version: 1.0.5
 Architecture: iphoneos-arm
 Description: A fix for YouTube with sign-in.
 Maintainer: Preloading <me@preloading.dev>
