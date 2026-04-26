@@ -980,66 +980,81 @@
             hasLikeDataAlready = true;
         }
 
+        // like & upload date
+        if ([resultContents isKindOfClass:[NSArray class]]) {
 
-        if (![resultContents isKindOfClass:[NSArray class]]) return;
+            for (NSDictionary *item in resultContents) {
+                NSDictionary *metaContents = item[@"slimVideoMetadataSectionRenderer"][@"contents"];    
+                if (![metaContents isKindOfClass:[NSArray class]]) continue;
+                for (NSDictionary *metaItem in metaContents) {
+                    NSDictionary *actionBar = metaItem[@"slimVideoActionBarRenderer"];
+                    if (!actionBar) continue;
+                    
+                    NSArray *buttons = actionBar[@"buttons"];
+                    if (![buttons isKindOfClass:[NSArray class]]) continue;
+                    
+                    for (NSDictionary *buttonItem in buttons) {
+                        NSDictionary *smbr = [buttonItem objectForKey:@"slimMetadataButtonRenderer"];
+                        if (!smbr) continue;
+                        
+                        NSDictionary *sldbvm = [[smbr objectForKey:@"button"] objectForKey:@"segmentedLikeDislikeButtonViewModel"];
+                        if (!sldbvm) continue;
+                        
+                        // Extract like status
+                        NSDictionary *likeButtonVM = [sldbvm objectForKey:@"likeButtonViewModel"];
+                        NSString *status = likeButtonVM[@"likeStatusEntity"][@"likeStatus"];
+                        
+                        // todo dislikes
+                        if (status) {
+                            objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                        }
 
-        for (NSDictionary *item in resultContents) {
-            NSDictionary *metaContents = item[@"slimVideoMetadataSectionRenderer"][@"contents"];    
-            if (![metaContents isKindOfClass:[NSArray class]]) continue;
-            for (NSDictionary *metaItem in metaContents) {
-                NSDictionary *actionBar = metaItem[@"slimVideoActionBarRenderer"];
-                if (!actionBar) continue;
-                
-                NSArray *buttons = actionBar[@"buttons"];
-                if (![buttons isKindOfClass:[NSArray class]]) continue;
-                
-                for (NSDictionary *buttonItem in buttons) {
-                    NSDictionary *smbr = [buttonItem objectForKey:@"slimMetadataButtonRenderer"];
-                    if (!smbr) continue;
-                    
-                    NSDictionary *sldbvm = [[smbr objectForKey:@"button"] objectForKey:@"segmentedLikeDislikeButtonViewModel"];
-                    if (!sldbvm) continue;
-                    
-                    // Extract like status
-                    NSDictionary *likeButtonVM = [sldbvm objectForKey:@"likeButtonViewModel"];
-                    NSString *status = likeButtonVM[@"likeStatusEntity"][@"likeStatus"];
-                    
-                    // todo dislikes
-                    if (status) {
-                        objc_setAssociatedObject(video, "TRLikeStatus", status, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-                    }
-
-                    for (NSDictionary *engagementPanel in nextData[@"next"][@"engagementPanels"]) {
-                        NSString *dateString = engagementPanel[@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
-                        if (dateString != nil) {
-                            if ([dateString hasSuffix:@" ago"]) {
-                                NSDate *date = [TRJSONUtils dateFromTimeAgo:dateString];
-                                [video setValue:date forKey:l(@"uploadedDate")];
-                                [video setValue:date forKey:l(@"publishedDate")];
-                            } else {
-                                NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
-                                [video setValue:date forKey:l(@"uploadedDate")];
-                                [video setValue:date forKey:l(@"publishedDate")];
+                        for (NSDictionary *engagementPanel in nextData[@"next"][@"engagementPanels"]) {
+                            NSString *dateString = engagementPanel[@"engagementPanelSectionListRenderer"][@"content"][@"structuredDescriptionContentRenderer"][@"items"][0][@"videoDescriptionHeaderRenderer"][@"publishDate"][@"runs"][0][@"text"];
+                            if (dateString != nil) {
+                                if ([dateString hasSuffix:@" ago"]) {
+                                    NSDate *date = [TRJSONUtils dateFromTimeAgo:dateString];
+                                    [video setValue:date forKey:l(@"uploadedDate")];
+                                    [video setValue:date forKey:l(@"publishedDate")];
+                                } else {
+                                    NSDate *date = [TRJSONUtils dateFromShortDate:dateString];
+                                    [video setValue:date forKey:l(@"uploadedDate")];
+                                    [video setValue:date forKey:l(@"publishedDate")];
+                                }
                             }
                         }
-                    }
-                    
-                    if (!hasLikeDataAlready) {
-                        // Extract like count
-                        NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
+                        
+                        if (!hasLikeDataAlready) {
+                            // Extract like count
+                            NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
 
-                        if (accessibilityText) { 
-                            NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                            long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
-                            if (likes > 0) {
-                                [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
+                            if (accessibilityText) { 
+                                NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                                long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
+                                if (likes > 0) {
+                                    [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
+                                }
                             }
                         }
+                        break;
                     }
-                    return;
                 }
             }
         }
+
+        // comment count
+        // this number *could* be more accurate, normal web serves it with the full count.
+        NSArray *engagementPanels = nextData[@"next"][@"engagementPanels"];
+        if ([engagementPanels isKindOfClass:[NSArray class]]) {
+            for (NSDictionary *panel in engagementPanels) {
+                if (![panel[@"engagementPanelSectionListRenderer"][@"panelIdentifier"] isEqualToString:@"engagement-panel-comments-section"]) continue;
+                NSString *commentCount = panel[@"engagementPanelSectionListRenderer"][@"header"][@"engagementPanelTitleHeaderRenderer"][@"contextualInfo"][@"runs"][0][@"text"];
+                if (commentCount) {
+                    [video setValue:[NSNumber numberWithLong:[TRJSONUtils numberFromText:commentCount]] forKey:l(@"commentsCountHint")];
+                }
+            }
+        }
+    
         
         
     } @catch (NSException *e) {
