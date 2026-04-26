@@ -132,4 +132,25 @@
 		[self addCategories];
 	}
 }
+
+// 2.x
+-(void)authenticationDidChangeWithAuth:(id)authentication
+{
+	[self setValue:@(authentication != nil) forKey:@"_isAuthenticated"];
+	[self setValue:@([(NSNumber*)[self valueForKey:@"_authenticationChangedCount"] intValue]+1) forKey:@"_authenticationChangedCount"];
+
+	if ([[self valueForKey:@"_isAuthenticated"] intValue] == 1)
+	{
+		YTGDataRequestFactory *GDataRequestFactory = [self valueForKey:@"_GDataRequestFactory"];
+		id guideTableView = [(YTGuideTableView*)[self valueForKey:@"_guideTableView"] cellForAccount];
+		[self updateAccountCell:guideTableView];
+		YTGuideEntry *accountEntry = [self valueForKey:@"_accountEntry"];
+		NSString *accessibilityText = localizedStringForKey(@"guide.account_loggedin.access");
+		[accountEntry setAccessibilityLabel:accessibilityText];
+		id subscriptionsRequest = [GDataRequestFactory requestForMySubscriptionsWithAuth:authentication];
+		[self makeRequest:subscriptionsRequest serviceSelector:@selector(makeMySubscriptionsRequest:responseBlock:errorBlock:)];
+	} else {
+		[self addCategories];
+	}
+}
 %end

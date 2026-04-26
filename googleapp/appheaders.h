@@ -66,6 +66,7 @@
 @interface YTGuideFeedController: YTFeedController
 - (void)loadAccountThumbnail;
 - (void)handleEntries:(id)fp8;
+- (void)updateAccountCell:(id)fp8;
 
 @end 
 
@@ -1464,4 +1465,13 @@ typedef struct _TBXMLElement {
 +(id)textForElement:(id)a3;
 
 
+@end
+
+
+@interface YTGuideTableView : NSObject
+-(id)cellForAccount;
+@end
+
+@interface YTGuideEntry : NSObject
+-(void)setAccessibilityLabel:(id)fp8;
 @end
