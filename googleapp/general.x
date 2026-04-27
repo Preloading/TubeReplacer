@@ -133,3 +133,13 @@ static void analytics() {
 }
     
 %end
+
+
+%hook NSAssertionHandler
+    
+-(void)handleFailureInFunction:(NSString*)function file:(NSString*)file lineNumber:(int)lineNumber description:(NSString*)description {
+    NSLog(@"Assert failed! Function %@ @ %@:%i, %@",function,file,lineNumber,description);
+    return %orig;
+}
+
+%end

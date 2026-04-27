@@ -1,1 +1,1 @@
-{ Filter = { Bundles = ( "com.google.ios.youtube", "com.google.ios.youtube1.0.0", "com.google.ios.youtube1.1.0", "com.google.ios.youtube1.2.1", "com.google.ios.youtube1.3.0", "com.google.ios.youtube1.4.0", "com.google.ios.youtube2.0.0" ); }; }
+{ Filter = { Bundles = ( "com.google.ios.youtube", "com.google.ios.youtube1.0.0", "com.google.ios.youtube1.1.0", "com.google.ios.youtube1.2.1", "com.google.ios.youtube1.3.0", "com.google.ios.youtube1.4.0", "com.google.ios.youtube2.0.0","com.google.ios.capture" ); }; }

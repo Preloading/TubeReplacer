@@ -4,6 +4,8 @@
 #include "appheaders.h"
 #include "general.h"
 
+#import <execinfo.h>
+
 
 //// START HEADERS
 
@@ -34,9 +36,188 @@
 
 @end
 
+@interface SSOAuthAdvice : NSObject
+
+@property (readonly, nonatomic) NSDictionary *json; // ivar: _json
+@property (readonly, nonatomic) int adviceCode; // ivar: _adviceCode
+@property (readonly, nonatomic) NSURL *URI; // ivar: _URI
+@property (readonly, nonatomic) NSString *verifier; // ivar: _verifier
+@property (readonly, nonatomic) NSString *clientState; // ivar: _clientState
+@property (readonly, nonatomic) NSString *error; // ivar: _error
+@property (readonly, nonatomic) NSString *errorDescription; // ivar: _errorDescription
+@property (readonly, nonatomic) NSURL *errorURI; // ivar: _errorURI
+
+
+-(id)init;
+-(id)initWithJSONDictionary:(id)arg0 ;
+-(id)description;
+
+
+@end
+
+// 2.0.0
+@interface SSOIdentity : NSObject
+
+
+
+-(id)userEmail;
+-(id)userID;
+-(char)isSignedIn;
+-(id)userFullName;
+
+
+@end
+
+@interface SSOIdentityPrivate : SSOIdentity
+
+// @property (readonly, nonatomic) SSOConfiguration *configuration; // ivar: _configuration
+@property (retain) GTMOAuth2Authentication *auth; // ivar: _auth
+@property (copy, nonatomic) NSString *userFullName; // ivar: _userFullName
+@property (getter=isSignedIn) char signedIn; // ivar: _signedIn
+@property (getter=isGuestIdentity) char guestIdentity; // ivar: _guestIdentity
+// @property (copy, nonatomic) id *signInCallback; // ivar: _signInCallback
+@property (nonatomic, getter=isDisabled) char disabled; // ivar: _disabled
+@property (copy, nonatomic) NSString *filterAnnotation; // ivar: _filterAnnotation
+
+
+-(id)fetcherWithRequest:(id)arg0 ;
+// -(id)parseJSONResponse:(id)arg0 error:(*id)arg1 ;
+-(id)appendJSONDataToError:(id)arg0 data:(id)arg1 fetcher:(id)arg2 ;
+// -(void)authenticateWithPresentBlock:(id)arg0 callback:(unk)arg1 authorizationURL:(id)arg2  ;
+-(void)signInWithCode:(id)arg0 finishedWithAuth:(id)arg1 error:(id)arg2 ;
+-(void)authenticateWithCode:(id)arg0 verifier:(id)arg1 callback:(id)arg2 ;
+-(void)requestTokenForService:(id)arg0 callback:(id)arg1 ;
+-(void)requestTokenAuthURL:(id)arg0 service:(id)arg1 source:(id)arg2 callback:(id)arg3 ;
+-(void)requestResultsOfType:(id)arg0 scopes:(id)arg1 extraParameters:(id)arg2 callback:(id)arg3 ;
+-(void)requestAccessTokenForScopes:(id)arg0 callback:(id)arg1 ;
+-(void)requestAuthorizationCodeForScopes:(id)arg0 auth:(id)arg1 clientID:(id)arg2 applicationID:(id)arg3 extraParameters:(id)arg4 callback:(id)arg5 ;
+-(void)requestAuthAdviceReauthenticating:(id)arg0 callback:(id)arg1 ;
+-(id)revokeToken:(id)arg0 ;
+-(id)initWithConfiguration:(id)arg0 keychainItem:(id)arg1 ;
+-(id)keychainItem;
+-(id)initWithConfiguration:(id)arg0 ;
+-(id)description;
+-(id)userEmail;
+-(id)userID;
+-(char)isAuthAdviceCleared;
++(id)guestIdentity;
+
+
+@end
+
+@interface SSOKeychain : NSObject
+
++(void)setAuthAdviceState:(NSString*)adviceState error:(NSError*)error;
+
+@end
+
 //// END HEADERS
 
+%hook SSOIdentityPrivate
+-(void)requestAuthAdviceReauthenticating:(id)a3 callback:(void (^)(SSOAuthAdvice *, NSError*))callback {
+    NSLog (@"callback class -> %@", NSStringFromClass([callback class]));
+    NSString *email = [self userEmail];
+    BOOL isSignedIn = ([email length] != 0);
+
+    if (isSignedIn) { // wait is this is we *were* logged in 
+        return %orig; // todo: see if this impacts anything
+    }
+    
+
+    SSOAuthAdvice *authAdvice = [%c(SSOAuthAdvice) alloc];
+
+// @property (readonly, nonatomic) NSString *verifier; // ivar: _verifier
+// @property (readonly, nonatomic) NSString *clientState; // ivar: _clientState
+// @property (readonly, nonatomic) NSString *error; // ivar: _error
+// @property (readonly, nonatomic) NSString *errorDescription; // ivar: _errorDescription
+// @property (readonly, nonatomic) NSURL *errorURI; // ivar: _errorURI
+
+    [authAdvice setValue:[NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"] forKey:l(@"URI")];
+    [authAdvice setValue:@(2) forKey:l(@"adviceCode")]; // 2 = embeeded
+    [authAdvice setValue:@"ChIiEAiDoPbg0jIQ-tua6twzGCESAzAuMQ" forKey:l(@"clientState")]; // i don't know what this does....
+
+    [%c(SSOKeychain) setAuthAdviceState:@"ChIiEAiDoPbg0jIQ-tua6twzGCESAzAuMQ" error:nil];
+
+    callback(authAdvice, nil);
+
+  // v13 = -[SSOAuthAdvice initWithJSONDictionary:](v12, v10);
+  // v14 = -[SSOAuthAdvice clientState](v13);
+  // v15 = objc_retainAutoreleasedReturnValue(v14);
+  // objc_release(v15);
+  // if ( v15 )
+  // {
+  //   v16 = -[SSOAuthAdvice clientState](v13);
+  //   v17 = objc_retainAutoreleasedReturnValue(v16);
+  //   +[SSOKeychain setAuthAdviceState:error:](v17, 0);
+
+  // }
+}
+
+-(NSDictionary*)keychainItem
+{
+  GTMOAuth2Authentication *auth = [self auth];
+
+  if ([[auth sid] length] > 0) {
+    NSDictionary *fun = @{
+        (__bridge id)kSecAttrAccount:[auth datasyncID],
+        (__bridge id)kSecValueData:[[auth persistenceResponseString] dataUsingEncoding:NSUTF8StringEncoding]
+      };
+      NSLog(@"fun -> %@", fun);
+      return fun;
+  }
+  return nil;
+
+
+//     v20 = 
+//     v21 = objc_retainAutoreleasedReturnValue(v20);
+//     v22 = objc_msgSend(v21, "dataUsingEncoding:", 4);
+//     v23 = objc_retainAutoreleasedReturnValue(v22);
+//     v28[0] = kSecAttrAccount;
+//     v24 = -[SSOIdentityPrivate userID](self);
+//     v25 = objc_retainAutoreleasedReturnValue(v24);
+//     v29[0] = v25;
+//     v29[1] = v23;
+//     v28[1] = kSecValueData;
+//     v11 = +[NSDictionary dictionaryWithObjects:forKeys:count:](
+//             v29,
+//             v28,
+//             2);
+//     objc_retainAutoreleasedReturnValue(v11);
+//     objc_release(v25);
+//     objc_release(v23);
+//     objc_release(v21);
+//     objc_release(v19);
+//   }
+// LABEL_7:
+//   objc_release(v3);
+//   return objc_autoreleaseReturnValue(v11);
+}
+
+%end
+
+
+%hook SSOKeychain
++(BOOL)writeSharedKeychain:(NSMutableDictionary*)keys error:(NSError**)error {
+  NSLog(@"dnagling keys -> %@", keys);
+  return %orig;
+}
+
+%end
+
 %hook GTMOAuth2SignInInternal
++(void)fetchAuthTokenWithValues:(id)values service:(id)service isSessionOnly:(BOOL)sessionOnly completionHandler:(id)completionHandler {
+void *callstack[128];
+int frames = backtrace(callstack, 128);
+char **symbols = backtrace_symbols(callstack, frames);
+NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+for (int i = 0; i < frames; i++) {
+[callstackString appendFormat:@"%s\n", symbols[i]];
+}
+  NSLog(@"%@", callstackString);
+  return %orig;
+}
+
+
 +(NSURL*)googleAuthorizationURL {
     return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
 }
@@ -135,7 +316,21 @@
 
 %end
 
+%ctor {
+NSArray *secItemClasses = @[
+    (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecClassInternetPassword,
+    (__bridge id)kSecClassCertificate,
+    (__bridge id)kSecClassKey,
+    (__bridge id)kSecClassIdentity
+];
 
+for (id secItemClass in secItemClasses) {
+    NSDictionary *spec = @{(__bridge id)kSecClass: secItemClass};
+    SecItemDelete((__bridge CFDictionaryRef)spec);
+}
+
+}
 
 %hook GTMOAuth2Authentication
 
@@ -306,22 +501,43 @@
               params = [NSMutableDictionary dictionary];
             }
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
+            [params setObject:datasyncID forKey:@"userID"];
+            [params setValue:@"me@preloading.dev" forKey:@"email"]; // TODO: THIS IS SHOWN TO THE USER!!!!
+            [params setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
 
+
+            // BY FAR this is the most unreliable logic here, i change it like every update!
             NSString *channelID = nil;
-            NSString *channelStartMarker = @"\\x22\\/channel\\/";
-            NSString *channelEndMarker = @"\\/videos\\x22,\\x22webPageType\\x22:\\x22WEB_PAGE_TYPE_CHANNEL\\x22,";
-            NSRange channelStartRange = [htmlString rangeOfString:channelStartMarker];
-            if (channelStartRange.location != NSNotFound) {
-              NSInteger channelStart = channelStartRange.location + channelStartRange.length;
-              NSRange channelEndRange = [htmlString rangeOfString:channelEndMarker
-                                                           options:0
-                                                             range:NSMakeRange(channelStart, [htmlString length] - channelStart)];
-              if (channelEndRange.location != NSNotFound) {
-                channelID = [htmlString substringWithRange:NSMakeRange(channelStart, channelEndRange.location - channelStart)];
-              }
+
+            // 1. Find the LAST occurrence of the end marker
+            NSString *endMarker = @"\\x22,\\x22webPageType\\x22:\\x22WEB_PAGE_TYPE_CHANNEL\\x22";
+            NSRange endRange = [htmlString rangeOfString:endMarker options:NSBackwardsSearch];
+
+            if (endRange.location != NSNotFound) {
+                // 2. Search BACKWARDS from that position to find the nearest "/channel/"
+                NSRange searchRange = NSMakeRange(0, endRange.location);
+                NSRange startRange = [htmlString rangeOfString:@"\\/channel\\/" 
+                                                      options:NSBackwardsSearch 
+                                                        range:searchRange];
+
+                if (startRange.location != NSNotFound) {
+                    NSInteger idStart = startRange.location + startRange.length;
+                    NSInteger idLength = endRange.location - idStart;
+                    
+                    if (idLength > 0) {
+                        channelID = [htmlString substringWithRange:NSMakeRange(idStart, idLength)];
+                        
+                        // Clean up any remaining escapes or slashes
+                        channelID = [channelID stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"];
+                        if ([channelID hasSuffix:@"/"]) {
+                            channelID = [channelID substringToIndex:[channelID length] - 1];
+                        }
+                    }
+                }
             }
 
             if (!channelID) {
+              NSLog(@"fallback fetcher!!!");
               NSRange fallbackSearch = [htmlString rangeOfString:@"\"url\":\"/channel/"];
               if (fallbackSearch.location != NSNotFound) {
                 NSInteger fallbackStart = fallbackSearch.location + fallbackSearch.length;
@@ -363,6 +579,7 @@
   SEL selector = nil;
   if ( selectorStr )
     selector = NSSelectorFromString(selectorStr);
+  NSLog(@"error from token thingy -> %@", error);
   [%c(GTMOAuth2Authentication) invokeDelegate:delegate selector:selector object:self object:fetcher object:error];
   [fetcher setProperty:nil forKey:@"delegate"];
 }
@@ -640,6 +857,24 @@ done:
 
 // %end
 
+
+// %hook YTNavigation_iPhone 
+// -(void)authenticateFailedWithError:(id)error message:(NSString*)message {
+//         void *callstack[128];
+// 	int frames = backtrace(callstack, 128);
+// 	char **symbols = backtrace_symbols(callstack, frames);
+// 	NSMutableString *callstackString = [NSMutableString stringWithFormat:@"YTNavigation_iPhone authenticateFailedWithError message: %@", message];
+// 	for (int i = 0; i < frames; i++) {
+// 		[callstackString appendFormat:@"%s\n", symbols[i]];
+// 	}
+// 	NSLog(@"%@", callstackString);
+// }
+
+
+// %end
+
+
+
 // TODO: check if polyfil isn't loaded already (._.)
 // JS Polyfils (i blame iOS 5!) Sadly, this makes iOS 5 kinda slow...
 %hook GTMOAuth2ViewControllerTouch
@@ -657,5 +892,4 @@ done:
       [js release];
     }
 }
-
 %end
