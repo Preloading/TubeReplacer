@@ -3,9 +3,9 @@
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 #include "general.h"
+#include "Translators/TRTranslators.h"
 
 #import <execinfo.h>
-
 
 //// START HEADERS
 
@@ -101,7 +101,7 @@
 -(id)userID;
 -(char)isAuthAdviceCleared;
 +(id)guestIdentity;
-
+-(GTMOAuth2Authentication*)auth;
 
 @end
 
@@ -109,6 +109,16 @@
 
 +(void)setAuthAdviceState:(NSString*)adviceState error:(NSError*)error;
 
+@end
+
+@interface AuthorizerCallback : NSObject
++(id)callbackWithRequest:(id)request handler:(id)handler delegate:(id)delegate selector:(SEL)selector thread:(NSThread*)thread;
+@end
+
+@interface SSOAuthorizationImpl : NSObject
+-(SSOIdentityPrivate*)identity; // **TECHNICALLY** this isn't correct, it's actually SSOIdentity, but objc magic stuff just makes this easier lol
+-(id)invokeCallback:(id)callback;
+-(BOOL)shouldAuthorizeAllRequests;
 @end
 
 //// END HEADERS
@@ -166,31 +176,59 @@
       return fun;
   }
   return nil;
+}
+-(SSOIdentityPrivate*)initWithConfiguration:(id)configuration keychainItem:(NSDictionary*)keychainItem {
+  SSOIdentityPrivate *identity = [self initWithConfiguration:configuration];
+  if ( identity )
+  {
+    NSData *keychainData = [keychainItem objectForKey:(__bridge id)kSecValueData];
+    if ( keychainData )
+    {
+      NSDictionary *decodedData = [%c(GTMOAuth2Authentication) dictionaryWithResponseString:[[NSString alloc] initWithData:keychainData encoding:4]];
+      GTMOAuth2Authentication *auth = [identity auth];
+      [auth setParameters:decodedData]; // easiest way to do this
+      if ([[auth parameters][@"fullName"] length] > 0) {
+        [self setUserFullName:[auth parameters][@"fullName"]];
+      }
+    }
 
+    // later
+    // fullNameData = +[SSOKeychain optionalDataForKey:identity:](
+    //                  off_660AA0,
+    //                  identity);
+    // fullNameData = objc_retainAutoreleasedReturnValue(fullNameData);
+    // if ( -[NSData length](fullNameData) )
+    // {
+    //   fullNameString = +[NSString alloc]();
+    //   fullNameString = -[NSString initWithData:encoding:](fullNameString, fullNameData, 4);
+    //   -[SSOIdentityPrivate setUserFullName:](identity, fullNameString);
+    //   objc_release(fullNameString);
+    // }
+    // objc_release(fullNameData);
+    // objc_release(keychainData);
+  }
+  return identity;
+}
 
-//     v20 = 
-//     v21 = objc_retainAutoreleasedReturnValue(v20);
-//     v22 = objc_msgSend(v21, "dataUsingEncoding:", 4);
-//     v23 = objc_retainAutoreleasedReturnValue(v22);
-//     v28[0] = kSecAttrAccount;
-//     v24 = -[SSOIdentityPrivate userID](self);
-//     v25 = objc_retainAutoreleasedReturnValue(v24);
-//     v29[0] = v25;
-//     v29[1] = v23;
-//     v28[1] = kSecValueData;
-//     v11 = +[NSDictionary dictionaryWithObjects:forKeys:count:](
-//             v29,
-//             v28,
-//             2);
-//     objc_retainAutoreleasedReturnValue(v11);
-//     objc_release(v25);
-//     objc_release(v23);
-//     objc_release(v21);
-//     objc_release(v19);
+// -(void)requestResultsOfType:(id)type scopes:(id)scopes extraParameters:(id)extraParameters callback:(id)callback {
+//   void *callstack[128];
+//   int frames = backtrace(callstack, 128);
+//   char **symbols = backtrace_symbols(callstack, frames);
+//   NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+//   for (int i = 0; i < frames; i++) {
+//   [callstackString appendFormat:@"%s\n", symbols[i]];
 //   }
-// LABEL_7:
-//   objc_release(v3);
-//   return objc_autoreleaseReturnValue(v11);
+//     NSLog(@"%@", callstackString);
+//     return %orig;
+// }
+%end
+
+%hook SSOService
+ -(void)requestProfileForIdentity:(SSOIdentity*)identity callback:(void(^)(id)(id)(NSDictionary*))callback {
+    // this doesn't do jack shit lmao
+    NSLog(@"callback type -> %@", NSStringFromClass([callback class]));
+    // void __cdecl sub_EC810(Block_layout_EC6D2 *block, id a2, id profile, NSDictionary *json)
+    // [self invokeCallback:callback];
 }
 
 %end
@@ -205,18 +243,6 @@
 %end
 
 %hook GTMOAuth2SignInInternal
-+(void)fetchAuthTokenWithValues:(id)values service:(id)service isSessionOnly:(BOOL)sessionOnly completionHandler:(id)completionHandler {
-void *callstack[128];
-int frames = backtrace(callstack, 128);
-char **symbols = backtrace_symbols(callstack, frames);
-NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
-for (int i = 0; i < frames; i++) {
-[callstackString appendFormat:@"%s\n", symbols[i]];
-}
-  NSLog(@"%@", callstackString);
-  return %orig;
-}
-
 
 +(NSURL*)googleAuthorizationURL {
     return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
@@ -316,21 +342,117 @@ for (int i = 0; i < frames; i++) {
 
 %end
 
-%ctor {
-NSArray *secItemClasses = @[
-    (__bridge id)kSecClassGenericPassword,
-    (__bridge id)kSecClassInternetPassword,
-    (__bridge id)kSecClassCertificate,
-    (__bridge id)kSecClassKey,
-    (__bridge id)kSecClassIdentity
-];
+%hook SSOAuthorizationImpl
 
-for (id secItemClass in secItemClasses) {
-    NSDictionary *spec = @{(__bridge id)kSecClass: secItemClass};
-    SecItemDelete((__bridge CFDictionaryRef)spec);
+-(void)authorizeRequest:(NSMutableURLRequest*)request handler:(id)handler delegate:(id)delegate didFinishSelector:(SEL)selector {
+  NSThread *thread = [NSThread currentThread];
+  id callback = [%c(AuthorizerCallback) callbackWithRequest:request handler:handler delegate:delegate selector:selector thread:thread];
+
+  // the following is a bit of a hack, but oh well
+
+  GTMOAuth2Authentication *auth = [[self identity] auth];
+  int errorCode = 0;
+  NSURL *url = [request URL];
+
+  NSString *sid = [auth sid];
+  NSString *hsid = [auth hsid];
+  NSString *ssid = [auth ssid];
+  NSString *sidcc = [auth sidcc];
+  NSString *sapisid = [auth sapisid];
+  NSString *datasyncID = [auth datasyncID];
+
+  if (![self shouldAuthorizeAllRequests]) {
+    errorCode = -1004;
+    BOOL isSecure = [[url scheme] caseInsensitiveCompare:@"https"];
+    if (isSecure)
+      goto requestOK;
+  }
+
+  NSString *query = [url query];
+  BOOL hasNoauth = NO;
+  for (NSString *pair in [query componentsSeparatedByString:@"&"]) {
+      NSArray *kv = [pair componentsSeparatedByString:@"="];
+      if (kv.count == 2 && [kv[0] isEqualToString:@"noauth"] && [kv[1] isEqualToString:@"1"]) {
+          hasNoauth = YES;
+          break;
+      }
+  }
+
+  if (hasNoauth) {
+    goto done;
+  }
+
+  errorCode = -1001;
+  if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
+  {
+    if ( request )
+    {
+        // NSHTTPCookieStorage *sharedHTTPCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        // NSArray *cookies = [sharedHTTPCookieStorage cookies];
+        // for (id cookie in cookies) {
+        //     [sharedHTTPCookieStorage deleteCookie:cookie];
+        // }
+        [request setHTTPShouldHandleCookies:NO];
+        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
+        [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+
+        // SAPISIDHASH
+        long unixTime = (long)[[NSDate date] timeIntervalSince1970];
+        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ https://www.youtube.com", datasyncID, unixTime, sapisid];
+        // NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
+
+        NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
+        uint8_t digest[CC_SHA1_DIGEST_LENGTH];
+
+        CC_SHA1(unhashedData.bytes, (CC_LONG)unhashedData.length, digest);
+
+        NSMutableString *output = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 2];
+
+        for (int i = 0; i < CC_SHA1_DIGEST_LENGTH; i++)
+        {
+            [output appendFormat:@"%02x", digest[i]];
+        }
+        // NSLog(@"Hashed SAPISID: %@", output);
+        [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
+        [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+    }
+    goto done;
+  }
+requestOK: ; // i hate compilers, why is this semicolon needed                                                                                                                         
+  // todo: i forget why i named it requestOK
+  NSDictionary *userInfo = nil;
+  if (request)
+    userInfo = [NSDictionary dictionaryWithObject:request forKey:@"request"];
+  NSError *error = [NSError errorWithDomain:@"com.google.sso" code:errorCode userInfo:userInfo];
+  [callback setError:error];
+
+done:
+  [self invokeCallback:callback];
 }
 
+%new
+-(NSString*)channelID {
+  return [[[self identity] auth] channelID]; // im lazy and dont wanna change shit
 }
+
+%end
+
+// clears all keychain items on start
+// %ctor {
+// NSArray *secItemClasses = @[
+//     (__bridge id)kSecClassGenericPassword,
+//     (__bridge id)kSecClassInternetPassword,
+//     (__bridge id)kSecClassCertificate,
+//     (__bridge id)kSecClassKey,
+//     (__bridge id)kSecClassIdentity
+// ];
+
+// for (id secItemClass in secItemClasses) {
+//     NSDictionary *spec = @{(__bridge id)kSecClass: secItemClass};
+//     SecItemDelete((__bridge CFDictionaryRef)spec);
+// }
+
+// }
 
 %hook GTMOAuth2Authentication
 
@@ -398,9 +520,11 @@ for (id secItemClass in secItemClasses) {
 {
 
   NSLog(@"persistance string called!");
-  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:10];
+  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:16];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
+
+  [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refreshToken"];
 
   [data setValue:[self sid] forKey:@"SID"];
   [data setValue:[self hsid] forKey:@"HSID"];
@@ -409,17 +533,18 @@ for (id secItemClass in secItemClasses) {
   [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
   [data setValue:[self channelID] forKey:@"CHANNEL_ID"];
-  [data setValue:[self datasyncID] forKey:@"userId"]; // idk
+  [data setValue:[self datasyncID] forKey:@"userID"]; // idk
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
-  [data setValue:@"me@preloading.dev" forKey:@"email"];
+  [data setValue:[self parameters][@"userEmail"] forKey:@"email"];
+  [data setValue:[self parameters][@"userEmail"] forKey:@"userEmail"];
   [data setValue:[self userEmailIsVerified] forKey:@"isVerified"];
   [data setValue:[self scope] forKey:@"scope"];
   return [%c(GTMOAuth2Authentication) encodedQueryParametersForDictionary:data];
 }
 
 -(id)beginTokenFetchWithDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector {
-  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/feed/library?app=mobile"]];
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/feed/library?app=mobile"]]; // we need to use this to get the channel id & datasync id. Pain.
 
    NSString *sid = [self sid];
   NSString *hsid = [self hsid];
@@ -468,6 +593,58 @@ for (id secItemClass in secItemClasses) {
   return httpFetcher;
 }
 
+// purpose is to get extra data which isn't included in the other requests. Mainly email & full name
+%new
+-(void)fillInTokenExtraDataWithParameters:(NSDictionary*)params {
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/getAccountSwitcherEndpoint"]]; // thanks for asking, yes, it is the same as the user in myprofile.x. it doesn't include channel id, so we can't use this outright, would make my life easier tho.
+
+    NSString *sid = [self sid];
+    NSString *hsid = [self hsid];
+    NSString *ssid = [self ssid];
+    NSString *sapisid = [self sapisid];
+
+    NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+    [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+
+    // simple get request, so we don't need the datasync id. Yay!
+
+    [params setValue:@"invalid@email.address" forKey:@"userEmail"];
+    [params setValue:@"invalid@email.address" forKey:@"email"];
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *rsp, NSData *rawData, NSError *err) {
+        if (err) {
+            NSLog(@"Error fetching extra token data! %@",err);
+            return;
+        } else {
+              const unsigned char* bytes = [rawData bytes];
+              NSUInteger length = [rawData length];
+              NSData *cleanData = rawData;
+              if (length >= 5 &&  // jsonp stuff because hell
+                bytes[0] == ')' && 
+                bytes[1] == ']' && 
+                bytes[2] == '}' && 
+                bytes[3] == '\'' && 
+                bytes[4] == '\n') {
+                bytes += 5;
+                length -= 5;
+                cleanData = [NSData dataWithBytes:bytes length:length];
+            }
+            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:NSJSONReadingMutableContainers error:nil];
+
+            NSDictionary *headerInfo = [TRJSONUtils dictFromJSON:json 
+                keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.header.googleAccountHeaderRenderer"];
+            
+            NSString *email = headerInfo[@"email"][@"simpleText"];
+            NSString *name = headerInfo[@"name"][@"simpleText"];
+            if ([email length] &&
+                [name length]) {
+              [params setValue:email forKey:@"userEmail"];
+              [params setValue:email forKey:@"email"];
+              [params setValue:name forKey:@"fullName"];
+            }
+        }
+    }];
+}
+
 // check for V6c17240b|| and call it bad
 -(void)tokenFetcher:(GTMHTTPFetcher*)fetcher finishedWithData:(NSData*)data error:(NSError*)error
 {
@@ -502,7 +679,16 @@ for (id secItemClass in secItemClasses) {
             }
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
             [params setObject:datasyncID forKey:@"userID"];
-            [params setValue:@"me@preloading.dev" forKey:@"email"]; // TODO: THIS IS SHOWN TO THE USER!!!!
+
+            // I want to at least **try** to get a correct email & full name, so if we are on 2.0.0+, we will run this pain, since I want to do it synchronously. Otherwise, invalid@email.address will suffice.
+            
+            if ([version() characterAtIndex:0] != '1') {
+              [self fillInTokenExtraDataWithParameters:params];
+            } else {
+                  [params setValue:@"invalid@email.address" forKey:@"userEmail"];
+                  [params setValue:@"invalid@email.address" forKey:@"email"];
+            }
+
             [params setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
 
 
@@ -583,8 +769,6 @@ for (id secItemClass in secItemClasses) {
   [%c(GTMOAuth2Authentication) invokeDelegate:delegate selector:selector object:self object:fetcher object:error];
   [fetcher setProperty:nil forKey:@"delegate"];
 }
-
-
 
 -(BOOL)authorizeRequestImmediateArgs:(GTMOAuth2AuthorizationArgs*)authArgs
 {
@@ -733,7 +917,11 @@ done:
   // based on -[GTMOAuth2SignIn infoFetcher:finishedWithData:error:]
   GTMOAuth2Authentication *authentication = [self authentication];
   // [self setUserProfile:v9];
-  [authentication setUserEmail:@"me@preloading.dev"];
+
+  // probably not a smart idea to set this >_<
+  // [authentication setUserEmail:@"invalid@email.address"];
+
+
   // v12 = -[NSMutableDictionary objectForKey:](v9, CFSTR("verified_email"));
   // v13 = objc_msgSend(v12, "`");
   [authentication setUserEmailIsVerified:@"true"];

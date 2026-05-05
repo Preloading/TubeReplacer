@@ -248,7 +248,7 @@
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
-        totalResults:100000 // todo: make better
+        totalResults:2147483647 // todo: make better, see if we can actually get the actual value
         entriesPerPage:[entries count] 
         startIndex:1 
         nextURL:continuationToken 

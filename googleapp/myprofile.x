@@ -92,7 +92,6 @@
     }
     
     NSDictionary *data = body;
-    
     // Extract account info from the multi-page menu structure
     NSDictionary *accountInfo = [TRJSONUtils dictFromJSON:data 
         keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem"];
@@ -146,7 +145,7 @@
             channelViewsCount:0
             subscribersCount:subscribersCount
         ] autorelease];
-    } else {
+    } else if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.4.0"]) {
         profile = [[[%c(YTUserProfile) alloc] 
             initWithDisplayName:displayName
             hasChannel:true // i mean probably lmao
@@ -164,8 +163,26 @@
             channelViewsCount:0
             subscribersCount:subscribersCount
         ] autorelease];
+    } else { // 2.0.0
+        profile = [[[%c(YTUserProfile) alloc] 
+            initWithDisplayName:displayName
+            hasChannel:true // i mean probably lmao
+            channelID:channelHandle
+            channelName:displayName // I think channel name == display name?????
+            eligibleForChannel:true // i mean i guess??????
+            googlePlusUserID:nil // google plus is colon three
+            age:0
+            thumbnailURL:thumbnail
+            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+            uploadedCount:0
+            favoritesCount:0
+            subscriptionsCount:0
+            uploadViewsCount:0
+            channelViewsCount:0
+            subscribersCount:subscribersCount
+        ] autorelease];
     }
-    
     return profile;
 }
 

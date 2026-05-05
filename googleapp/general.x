@@ -143,3 +143,20 @@ static void analytics() {
 }
 
 %end
+
+// todo: so i don't forget this, i want to find a way of selectively blocking this.
+%hook YTItemListHeader 
+
+-(BOOL)itemCountHidden {
+    return NO;
+}
+
+%end
+
+%hook YTItemListHeader
+-(void)setItemCount:(unsigned int)count
+{
+    if (count == 2147483647) return;
+    return %orig;
+}
+%end
