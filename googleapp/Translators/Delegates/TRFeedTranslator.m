@@ -408,7 +408,7 @@
 
     // popular thingy
     items = [TRJSONUtils arrayFromJSON:json 
-        keyPath:@"onResponseReceivedActions[0].reloadContinuationItemsCommand.continuationItems"];
+        keyPath:@"onResponseReceivedActions[1].reloadContinuationItemsCommand.continuationItems"];
     if (items) return items;
 
     // suggestions continue
