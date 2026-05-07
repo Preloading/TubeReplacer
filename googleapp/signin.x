@@ -237,17 +237,20 @@
 
 %hook SSOService
 
-// todo: we could probably make this correct
 - (void)requestProfileForIdentity:(SSOIdentityPrivate *)identity callback:(void (^)(id profile, NSError *error))callback {
+  NSLog(@"requestProfileForIdentity called!!!!");
+
+  NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+  [[identity auth] fillInTokenExtraDataWithParameters:params];
   // i kinda did this strange so here's hoping this works.
     NSDictionary *newProfile = @{
         @"id": [identity userID],
         @"email": [identity userEmail],
         @"verified_email": @YES,
-        @"name": [[[identity auth] parameters] objectForKey:@"fullName"],
-        @"given_name": [[[identity auth] parameters] objectForKey:@"fullName"],
-        @"family_name": [[[identity auth] parameters] objectForKey:@"fullName"], // oh god did this have parental controls?
-        @"picture": @"https://lh3.googleusercontent.com/a/default-user",
+        @"name": [params objectForKey:@"fullName"],
+        @"given_name": [params objectForKey:@"fullName"],
+        @"family_name": [params objectForKey:@"fullName"], // oh god did this have parental controls?
+        @"picture": [params objectForKey:@"avatar"] ? : @"https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
         @"locale": @"en"
     };
 
@@ -259,6 +262,11 @@
     });
 }
 
+// this appends a size tag, which is super hacky and doesn't work here.
+-(id)terribleHackyResizedPhotoURL:(id)url byAddingSize:(unsigned int)size
+{
+  return url;
+}
 %end
 
 // %hook GTMOAuth2SignIn
@@ -685,7 +693,10 @@ done:
           [params setValue:email forKey:@"userEmail"];
           [params setValue:email forKey:@"email"];
           [params setValue:name forKey:@"fullName"];
+          [params setValue:name forKey:@"fullName"];
         }
+
+        [params setValue:[TRJSONUtils stringFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem.accountPhoto.thumbnails[0].url"] forKey:@"avatar"];
     }
 }
 
@@ -959,6 +970,8 @@ done:
 
 -(void)fetchGoogleUserInfo
 {
+
+
   // based on -[GTMOAuth2SignIn infoFetcher:finishedWithData:error:]
   GTMOAuth2Authentication *authentication = [self authentication];
   // [self setUserProfile:v9];
@@ -970,7 +983,6 @@ done:
   // v12 = -[NSMutableDictionary objectForKey:](v9, CFSTR("verified_email"));
   // v13 = objc_msgSend(v12, "`");
   [authentication setUserEmailIsVerified:@"true"];
-
   [self finishSignInWithError:nil];
   // GTMOAuth2Authentication *v3; // r4
   // id v4; // r0
