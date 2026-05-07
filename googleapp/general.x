@@ -137,9 +137,32 @@ static void analytics() {
 
 %hook NSAssertionHandler
     
--(void)handleFailureInFunction:(NSString*)function file:(NSString*)file lineNumber:(int)lineNumber description:(NSString*)description {
-    NSLog(@"Assert failed! Function %@ @ %@:%i, %@",function,file,lineNumber,description);
+- (void) handleFailureInFunction:(NSString *) functionName 
+                            file:(NSString *) fileName 
+                      lineNumber:(NSInteger) line 
+                     description:(NSString *) format {
+    NSLog(@"Assert failed! Function %@ @ %@:%i, %@",functionName,fileName,(int)line,format);
     return %orig;
+}
+
+- (void)handleFailureInMethod:(SEL)selector 
+                        object:(id)object 
+                          file:(NSString *)fileName 
+                    lineNumber:(NSInteger)line 
+                   description:(NSString *)format, ... {
+    
+    va_list args;
+    va_start(args, format);
+    NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
+    va_end(args);
+
+    NSLog(@"[GTM-Assert-Hook] Method: %@ | File: %@:%ld | Error: %@", 
+          NSStringFromSelector(selector), 
+          fileName.lastPathComponent, 
+          (long)line, 
+          description);
+
+    %orig;
 }
 
 %end

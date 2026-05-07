@@ -187,8 +187,9 @@
       NSDictionary *decodedData = [%c(GTMOAuth2Authentication) dictionaryWithResponseString:[[NSString alloc] initWithData:keychainData encoding:4]];
       GTMOAuth2Authentication *auth = [identity auth];
       [auth setParameters:decodedData]; // easiest way to do this
-      if ([[auth parameters][@"fullName"] length] > 0) {
-        [self setUserFullName:[auth parameters][@"fullName"]];
+      NSLog(@"fullName -> %@", decodedData[@"fullName"]);
+      if ([decodedData[@"fullName"] length] > 0) {
+        [self setUserFullName:decodedData[@"fullName"]];
       }
     }
 
@@ -221,17 +222,52 @@
 //     NSLog(@"%@", callstackString);
 //     return %orig;
 // }
+
+
+
+// "revoke" that token
+
+-(id)revokeToken:(void(^)(NSError* error))callback 
+{
+    callback(nil);
+    [self setAuth:nil];
+    return nil; // maybe this will be fine? it should return the request but like... what request?
+}
 %end
 
 %hook SSOService
- -(void)requestProfileForIdentity:(SSOIdentity*)identity callback:(void(^)(id)(id)(NSDictionary*))callback {
-    // this doesn't do jack shit lmao
-    NSLog(@"callback type -> %@", NSStringFromClass([callback class]));
-    // void __cdecl sub_EC810(Block_layout_EC6D2 *block, id a2, id profile, NSDictionary *json)
-    // [self invokeCallback:callback];
+
+// todo: we could probably make this correct
+- (void)requestProfileForIdentity:(SSOIdentity *)identity callback:(void (^)(id profile, NSError *error))callback {
+    NSDictionary *newProfile = @{
+        @"id": [identity userID],
+        @"email": [identity userEmail],
+        @"verified_email": @YES,
+        @"name": @"todo",
+        @"given_name": @"todo",
+        @"family_name": @"todo",
+        @"picture": @"https://lh3.googleusercontent.com/a/default-user",
+        @"locale": @"en"
+    };
+
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (callback) {
+            callback(newProfile, nil);
+        }
+    });
 }
 
 %end
+
+// %hook GTMOAuth2SignIn
+// +(id)googleUserInfoURL
+// {
+//   NSLog(@"fuck is in GTMO NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+//   return [NSURL URLWithString:@""];
+// }
+// %end
+
 
 
 %hook SSOKeychain
@@ -520,7 +556,7 @@ done:
 {
 
   NSLog(@"persistance string called!");
-  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:16];
+  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:17];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
 
@@ -536,8 +572,9 @@ done:
   [data setValue:[self datasyncID] forKey:@"userID"]; // idk
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
-  [data setValue:[self parameters][@"userEmail"] forKey:@"email"];
-  [data setValue:[self parameters][@"userEmail"] forKey:@"userEmail"];
+  [data setValue:[[self parameters] objectForKey:@"userEmail"] forKey:@"email"];
+  [data setValue:[[self parameters] objectForKey:@"userEmail"] forKey:@"userEmail"];
+  [data setValue:[[self parameters] objectForKey:@"fullName"] forKey:@"fullName"];
   [data setValue:[self userEmailIsVerified] forKey:@"isVerified"];
   [data setValue:[self scope] forKey:@"scope"];
   return [%c(GTMOAuth2Authentication) encodedQueryParametersForDictionary:data];
@@ -610,39 +647,45 @@ done:
 
     [params setValue:@"invalid@email.address" forKey:@"userEmail"];
     [params setValue:@"invalid@email.address" forKey:@"email"];
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *rsp, NSData *rawData, NSError *err) {
-        if (err) {
-            NSLog(@"Error fetching extra token data! %@",err);
-            return;
-        } else {
-              const unsigned char* bytes = [rawData bytes];
-              NSUInteger length = [rawData length];
-              NSData *cleanData = rawData;
-              if (length >= 5 &&  // jsonp stuff because hell
-                bytes[0] == ')' && 
-                bytes[1] == ']' && 
-                bytes[2] == '}' && 
-                bytes[3] == '\'' && 
-                bytes[4] == '\n') {
-                bytes += 5;
-                length -= 5;
-                cleanData = [NSData dataWithBytes:bytes length:length];
-            }
-            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:NSJSONReadingMutableContainers error:nil];
 
-            NSDictionary *headerInfo = [TRJSONUtils dictFromJSON:json 
-                keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.header.googleAccountHeaderRenderer"];
-            
-            NSString *email = headerInfo[@"email"][@"simpleText"];
-            NSString *name = headerInfo[@"name"][@"simpleText"];
-            if ([email length] &&
-                [name length]) {
-              [params setValue:email forKey:@"userEmail"];
-              [params setValue:email forKey:@"email"];
-              [params setValue:name forKey:@"fullName"];
-            }
+    NSURLResponse * rsp = nil;
+    NSError *err = nil;
+    NSData *rawData = [NSURLConnection sendSynchronousRequest:request
+                                              returningResponse:&rsp
+                                                          error:&err];
+
+    if (err) {
+        NSLog(@"Error fetching extra token data! %@",err);
+        return;
+    } else {
+          const unsigned char* bytes = [rawData bytes];
+          NSUInteger length = [rawData length];
+          NSData *cleanData = rawData;
+          if (length >= 5 &&  // jsonp stuff because hell
+            bytes[0] == ')' && 
+            bytes[1] == ']' && 
+            bytes[2] == '}' && 
+            bytes[3] == '\'' && 
+            bytes[4] == '\n') {
+            bytes += 5;
+            length -= 5;
+            cleanData = [NSData dataWithBytes:bytes length:length];
         }
-    }];
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:NSJSONReadingMutableContainers error:nil];
+        NSLog(@"json -> %@", json);
+        NSDictionary *headerInfo = [TRJSONUtils dictFromJSON:json 
+            keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.header.googleAccountHeaderRenderer"];
+
+        NSString *email = headerInfo[@"email"][@"simpleText"];
+        NSString *name = headerInfo[@"name"][@"simpleText"];
+
+        if ([email length] &&
+            [name length]) {
+          [params setValue:email forKey:@"userEmail"];
+          [params setValue:email forKey:@"email"];
+          [params setValue:name forKey:@"fullName"];
+        }
+    }
 }
 
 // check for V6c17240b|| and call it bad
@@ -750,6 +793,7 @@ done:
             }
 
             [self setParameters:params];
+              NSLog(@"params after thingy -> %@", params);
             [params release];
 
             [self setExpiresIn:@100000000];
