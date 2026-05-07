@@ -188,7 +188,7 @@
       GTMOAuth2Authentication *auth = [identity auth];
       [auth setParameters:decodedData]; // easiest way to do this
       NSLog(@"fullName -> %@", decodedData[@"fullName"]);
-      if ([decodedData[@"fullName"] length] > 0) {
+      if ([decodedData[@"fullName"] length]) {
         [self setUserFullName:decodedData[@"fullName"]];
       }
     }
@@ -238,14 +238,15 @@
 %hook SSOService
 
 // todo: we could probably make this correct
-- (void)requestProfileForIdentity:(SSOIdentity *)identity callback:(void (^)(id profile, NSError *error))callback {
+- (void)requestProfileForIdentity:(SSOIdentityPrivate *)identity callback:(void (^)(id profile, NSError *error))callback {
+  // i kinda did this strange so here's hoping this works.
     NSDictionary *newProfile = @{
         @"id": [identity userID],
         @"email": [identity userEmail],
         @"verified_email": @YES,
-        @"name": @"todo",
-        @"given_name": @"todo",
-        @"family_name": @"todo",
+        @"name": [[[identity auth] parameters] objectForKey:@"fullName"],
+        @"given_name": [[[identity auth] parameters] objectForKey:@"fullName"],
+        @"family_name": [[[identity auth] parameters] objectForKey:@"fullName"], // oh god did this have parental controls?
         @"picture": @"https://lh3.googleusercontent.com/a/default-user",
         @"locale": @"en"
     };
