@@ -158,6 +158,8 @@
 -(void)presentViewController:(id)fp8;
 @end
 
+@interface YTWebViewController : NSObject
+@end
 
 %hook YTSettingsViewController
 // -(YTSettingsViewController*) initWithServices:(YTServices*)services navigation:(YTLiveServices*)navigation {
@@ -174,11 +176,18 @@
     if (![[url standardizedURL] isEqual:[targetURL standardizedURL]]) {
         return %orig;
     }
-  GIPResourceLoader *resourseLoader = [[[%c(GIPResourceLoader) alloc] initWithBundleName:@"GIPWebViewResources.bundle"] autorelease];
-  GIPWebViewController *webView = [[[%c(GIPWebViewController) alloc] initWithDelegate:nil loader:resourseLoader] autorelease];
+  GIPWebViewController *webView = nil;
+
+  if ([version() characterAtIndex:0] == '1') {
+      GIPResourceLoader *resourseLoader = [[[%c(GIPResourceLoader) alloc] initWithBundleName:@"GIPWebViewResources.bundle"] autorelease];
+      webView = [[[%c(GIPWebViewController) alloc] initWithDelegate:nil loader:resourseLoader] autorelease];
+  } else {
+      webView = [[[%c(GIPWebViewController) alloc] initWithDelegate:[%c(YTWebViewController) alloc]] autorelease];
+  }
+
   [webView setToolbarColor:[UIColor backgroundDarkColor]];
   [webView loadURL:url];
-  [self presentModalViewController:webView];
+  [self presentModalViewController:webView]; // todo: the equiv doesn't decompile cleanly on 2.0.0 (  Weak = objc_loadWeak((id *)((char *)&self->_services + 1));), and it crashes here, figure this out
   [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString:
    @"window.addEventListener('load', function () {"
     "document.body.insertAdjacentHTML('afterbegin', '<h3>TubeReplacer Specific</h3><pre>"

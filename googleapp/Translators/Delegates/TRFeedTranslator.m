@@ -121,10 +121,14 @@
         contiunationData = [TRContinuation initWithToken:continuationToken];
     }
 
-    // Create YTPage
+    unsigned long long totalResults = 2147483647UL;
+    if (json[@"estimatedResults"] != nil) {
+        totalResults = [json[@"estimatedResults"] intValue];
+    }
+
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
-        totalResults:100000 // todo: make better
+        totalResults:totalResults // todo: make better
         entriesPerPage:[entries count] 
         startIndex:1 
         nextURL:contiunationData //// right now continuation has some issues missing the channel information, and I don't wanna bother with it right now.
@@ -161,8 +165,6 @@
             continue;
         }
         
-        NSLog(@"ajdsiojf");
-
         // Skip continuation items
         if ([item objectForKey:@"continuationItemRenderer"]) {
             continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];
@@ -243,12 +245,16 @@
         }
     }
 
-    NSLog(@"continuation token -> %@", continuationToken);
+
+    unsigned long long totalResults = 2147483647UL;
+    if (json[@"estimatedResults"] != nil) {
+        totalResults = [json[@"estimatedResults"] intValue];
+    }
     
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
-        totalResults:2147483647 // todo: make better, see if we can actually get the actual value
+        totalResults:totalResults
         entriesPerPage:[entries count] 
         startIndex:1 
         nextURL:continuationToken 
@@ -304,11 +310,16 @@
     }
 
     NSLog(@"continuation token -> %@", continuationToken);
+
+    unsigned long long totalResults = 2147483647UL;
+    if (json[@"estimatedResults"] != nil) {
+        totalResults = [json[@"estimatedResults"] intValue];
+    }
     
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
-        totalResults:100000 // todo: make better
+        totalResults:totalResults // todo: make better
         entriesPerPage:[entries count] 
         startIndex:1 
         nextURL:continuationToken 

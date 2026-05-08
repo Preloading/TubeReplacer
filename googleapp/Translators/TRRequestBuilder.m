@@ -119,7 +119,7 @@
 #pragma mark - Search Requests
 
 + (NSData *)searchBodyWithQuery:(NSString *)query
-                    channelOnly:(BOOL)channelOnly
+                    type:(int)type // 1 == video, 2 == channel, 3 == playlist
                     sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
                     duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
                     hasCC:(BOOL)hasCC
@@ -135,7 +135,7 @@
     ProtobufEncoder *enc = [[ProtobufEncoder alloc] init];
     
     [enc writeMessageField:2 usingBlock:^(ProtobufEncoder *a) {
-        [a writeUInt64Field:2 value:channelOnly ? 2 : 1];
+        [a writeUInt64Field:2 value:type];
         if (posted != 0)
             [a writeUInt64Field:1 value:posted]; // posted 2 == today, 3 == This week, 4 ==  this month, 5 == this year
         if (duration != 0)

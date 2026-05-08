@@ -168,13 +168,13 @@ static void analytics() {
 %end
 
 // todo: so i don't forget this, i want to find a way of selectively blocking this.
-%hook YTItemListHeader 
+// %hook YTItemListHeader 
 
--(BOOL)itemCountHidden {
-    return NO;
-}
+// -(BOOL)itemCountHidden {
+//     return NO;
+// }
 
-%end
+// %end
 
 %hook YTItemListHeader
 -(void)setItemCount:(unsigned int)count

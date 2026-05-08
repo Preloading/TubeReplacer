@@ -78,7 +78,7 @@
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
-                                                          channelOnly:NO 
+                                                          type:1 
                                                           sortBy:sortBy
                                                           duration:duration
                                                           hasCC:[filters hasCC]
@@ -91,7 +91,7 @@
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
-                                                          channelOnly:YES 
+                                                          type:2 
                                                           sortBy:0
                                                           duration:0
                                                           hasCC:NO
@@ -150,7 +150,7 @@
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
-                                                          channelOnly:NO 
+                                                          type:1 
                                                           sortBy:sortBy
                                                           duration:duration
                                                           hasCC:[filters hasCC]
@@ -163,7 +163,19 @@
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                  authentication:nil 
                            body:[TRRequestBuilder searchBodyWithQuery:query 
-                                                          channelOnly:YES 
+                                                          type:2 
+                                                          sortBy:0
+                                                          duration:0
+                                                          hasCC:NO
+                                                          posted:0
+                                                               client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestForPlaylistsWithSearchQuery:(NSString*)query {
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder searchBodyWithQuery:query 
+                                                          type:3
                                                           sortBy:0
                                                           duration:0
                                                           hasCC:NO
@@ -216,6 +228,27 @@
     }
     [self makePOSTRequest:actualRequest 
                withParser:[self valueForKey:l(@"channelPageParser")] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
+}
+
+-(void)makeSearchPlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    id actualRequest = request;
+    if ([[request URL] isKindOfClass:[NSString class]]) {
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+            actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+                    authentication:nil // i hope this wont cause issues... 
+                            body:[TRRequestBuilder continueWithContext:[request URL] 
+                                                                client:[YoutubeClientType webMobileClient]]];
+        } else {
+            actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
+                    authentication:nil // i hope this wont cause issues... 
+                    body:[TRRequestBuilder continueWithContext:[request URL] 
+                    client:[YoutubeClientType webMobileClient]]];
+        }
+    }
+    [self makePOSTRequest:actualRequest 
+               withParser:[self valueForKey:l(@"playlistPageParser")] 
             responseBlock:responseBlock 
                errorBlock:errorBlock];
 }
