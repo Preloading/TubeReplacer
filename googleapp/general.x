@@ -168,18 +168,38 @@ static void analytics() {
 %end
 
 // todo: so i don't forget this, i want to find a way of selectively blocking this.
-// %hook YTItemListHeader 
+%hook YTItemListHeader 
 
-// -(BOOL)itemCountHidden {
-//     return NO;
-// }
+-(BOOL)itemCountHidden {
+    return YES;
+}
 
-// %end
+%end
+
 
 %hook YTItemListHeader
 -(void)setItemCount:(unsigned int)count
 {
+    NSLog(@"the count is %i",count);
     if (count == 2147483647) return;
     return %orig;
+}
+%end
+#import <execinfo.h>
+
+%hook YTPage 
+-(int)totalResults
+{
+      void *callstack[128];
+  int frames = backtrace(callstack, 128);
+  char **symbols = backtrace_symbols(callstack, frames);
+  NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+  for (int i = 0; i < frames; i++) {
+  [callstackString appendFormat:@"%s\n", symbols[i]];
+  }
+    NSLog(@"%@", callstackString);
+    int orig = %orig;
+    NSLog(@"total results 2 = %i", orig);
+    return orig;
 }
 %end

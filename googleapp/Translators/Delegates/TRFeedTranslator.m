@@ -250,6 +250,7 @@
     if (json[@"estimatedResults"] != nil) {
         totalResults = [json[@"estimatedResults"] intValue];
     }
+    NSLog(@"total results -> %llu", totalResults);
     
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 

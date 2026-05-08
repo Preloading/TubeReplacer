@@ -6,6 +6,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
+#include "Translators/TRContinuation.h"
 #include "general.h"
 
 @interface YTSearchFilters : NSObject {
@@ -234,7 +235,7 @@
 
 -(void)makeSearchPlaylistsRequest:(id)request responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id actualRequest = request;
-    if ([[request URL] isKindOfClass:[NSString class]]) {
+    if ([[request URL] isKindOfClass:[TRContinuation class]]) {
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             actualRequest = [%c(YTGDataRequest) requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
@@ -243,7 +244,7 @@
         } else {
             actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/search?prettyprint=false"] 
                     authentication:nil // i hope this wont cause issues... 
-                    body:[TRRequestBuilder continueWithContext:[request URL] 
+                    body:[TRRequestBuilder continueWithContext:[(TRContinuation*)[request URL] token]
                     client:[YoutubeClientType webMobileClient]]];
         }
     }

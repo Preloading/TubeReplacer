@@ -125,7 +125,6 @@
 
 %hook SSOIdentityPrivate
 -(void)requestAuthAdviceReauthenticating:(id)a3 callback:(void (^)(SSOAuthAdvice *, NSError*))callback {
-    NSLog (@"callback class -> %@", NSStringFromClass([callback class]));
     NSString *email = [self userEmail];
     BOOL isSignedIn = ([email length] != 0);
 
@@ -172,7 +171,6 @@
         (__bridge id)kSecAttrAccount:[auth datasyncID],
         (__bridge id)kSecValueData:[[auth persistenceResponseString] dataUsingEncoding:NSUTF8StringEncoding]
       };
-      NSLog(@"fun -> %@", fun);
       return fun;
   }
   return nil;
@@ -187,7 +185,6 @@
       NSDictionary *decodedData = [%c(GTMOAuth2Authentication) dictionaryWithResponseString:[[NSString alloc] initWithData:keychainData encoding:4]];
       GTMOAuth2Authentication *auth = [identity auth];
       [auth setParameters:decodedData]; // easiest way to do this
-      NSLog(@"fullName -> %@", decodedData[@"fullName"]);
       if ([decodedData[@"fullName"] length]) {
         [self setUserFullName:decodedData[@"fullName"]];
       }
@@ -238,8 +235,6 @@
 %hook SSOService
 
 - (void)requestProfileForIdentity:(SSOIdentityPrivate *)identity callback:(void (^)(id profile, NSError *error))callback {
-  NSLog(@"requestProfileForIdentity called!!!!");
-
   NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
   [[identity auth] fillInTokenExtraDataWithParameters:params];
   // i kinda did this strange so here's hoping this works.
@@ -281,7 +276,6 @@
 
 %hook SSOKeychain
 +(BOOL)writeSharedKeychain:(NSMutableDictionary*)keys error:(NSError**)error {
-  NSLog(@"dnagling keys -> %@", keys);
   return %orig;
 }
 
@@ -681,7 +675,6 @@ done:
             cleanData = [NSData dataWithBytes:bytes length:length];
         }
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:NSJSONReadingMutableContainers error:nil];
-        NSLog(@"json -> %@", json);
         NSDictionary *headerInfo = [TRJSONUtils dictFromJSON:json 
             keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.header.googleAccountHeaderRenderer"];
 
@@ -805,7 +798,6 @@ done:
             }
 
             [self setParameters:params];
-              NSLog(@"params after thingy -> %@", params);
             [params release];
 
             [self setExpiresIn:@100000000];
