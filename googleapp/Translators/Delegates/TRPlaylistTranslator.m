@@ -134,8 +134,7 @@
                          error:(NSError **)error {
     // thankfully none of these seem to be used except for playlist id. thank god.
     NSDictionary *headerBody = [TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel"];
-    NSDictionary *contentBody = [TRJSONUtils dictFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0]"];
-    NSString *playlistId = [TRJSONUtils stringFromJSON:contentBody keyPath:@"playlistVideoListRenderer.playlistId"];
+    NSString *playlistId = [TRJSONUtils stringFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.playlistId"];
     NSString *title = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.pageTitle"];
     NSString *description = [TRJSONUtils stringFromJSON:headerBody keyPath:@"description.descriptionPreviewViewModel.description.content"];
     NSString *baseVideosCount = [TRJSONUtils stringFromJSON:headerBody keyPath:@"metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"];
@@ -183,8 +182,8 @@
             authorDisplayName:authorDisplayName
             updated:[NSDate date]
             thumbnailURLs:thumbnails
-            contentURL:[NSURL URLWithString:@"https://example.com/contenturl"] // what the fuck, why does this make it work????
-            editURL:[NSURL URLWithString:@"https://example.com/editurl"]
+            contentURL:playlistId // what the fuck, why does this make it work????
+            editURL:playlistId
             size:sizeOfPlaylist
             isPrivate:isPrivate
         ] autorelease];
@@ -206,7 +205,7 @@
             updated:[NSDate date]
             thumbnailURLs:nil
             contentURL:playlistId
-            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            editURL:playlistId
             size:0
             isPrivate:NO // i dont know
         ] autorelease];
@@ -219,7 +218,7 @@
             updated:[NSDate date]
             thumbnailURLs:nil
             contentURL:playlistId
-            editURL:[NSURL URLWithString:@"https://youtube.com"]
+            editURL:playlistId
             size:0
             isPrivate:NO // i don't know
         ] autorelease];

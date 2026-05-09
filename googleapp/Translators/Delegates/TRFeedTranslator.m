@@ -250,7 +250,13 @@
     if (json[@"estimatedResults"] != nil) {
         totalResults = [json[@"estimatedResults"] intValue];
     }
-    NSLog(@"total results -> %llu", totalResults);
+
+   
+    NSString *basePlaylistsVideosCount = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"];
+    if (basePlaylistsVideosCount) {
+        totalResults = [basePlaylistsVideosCount integerValue];
+    }
+    
     
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
