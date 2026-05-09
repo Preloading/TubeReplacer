@@ -255,7 +255,7 @@
                         if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
                             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
                         } else if ([version() isEqualToString:@"2.0.0"]) {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"application/vnd.apple.mpegurl" format:2];
+                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"video/mp4" format:2];
                         } else {
                             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO];
                         }
@@ -323,6 +323,8 @@
         }
     }
     
+    NSLog(@"streams -> %@", ytStreams);
+
     id video = nil;
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
         video = [[NSClassFromString(@"YTVideo") alloc] 

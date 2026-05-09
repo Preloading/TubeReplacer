@@ -41,6 +41,10 @@
         return [self translateCreatedPlaylist:json error:error];
     }
 
+    if (json[@"contents"]) {
+        return [self translateVideoListPlaylist:json error:error];
+    }
+
     NSDictionary *context = [json objectForKey:@"all"];
     return [self translateCompactPlaylist:json withContext:context error:error];
 }
@@ -119,6 +123,69 @@
             contentURL:playlistId
             editURL:playlistId
             size:videoCount
+            isPrivate:isPrivate
+        ] autorelease];
+    }
+    
+    return playlist;
+}
+
+- (id)translateVideoListPlaylist:(NSDictionary *)json 
+                         error:(NSError **)error {
+    // thankfully none of these seem to be used except for playlist id. thank god.
+    NSDictionary *headerBody = [TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel"];
+    NSDictionary *contentBody = [TRJSONUtils dictFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0]"];
+    NSString *playlistId = [TRJSONUtils stringFromJSON:contentBody keyPath:@"playlistVideoListRenderer.playlistId"];
+    NSString *title = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.pageTitle"];
+    NSString *description = [TRJSONUtils stringFromJSON:headerBody keyPath:@"description.descriptionPreviewViewModel.description.content"];
+    NSString *baseVideosCount = [TRJSONUtils stringFromJSON:headerBody keyPath:@"metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"];
+    int sizeOfPlaylist = [baseVideosCount integerValue];
+    BOOL isPrivate = [[TRJSONUtils stringFromJSON:headerBody keyPath:@"metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"] isEqualToString:@"Private"];
+    NSString *authorDisplayName = [TRJSONUtils stringFromJSON:headerBody keyPath:@"metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0].avatarStack.avatarStackViewModel.text.content"];
+
+    NSArray *thumbArray = [TRJSONUtils arrayFromJSON:headerBody keyPath:@"background.cinematicContainerViewModel.backgroundImageConfig.image.sources"];
+    NSMutableDictionary *thumbnails = [NSMutableDictionary dictionary];
+    for (NSDictionary *thumb in thumbArray) {
+        if (![thumb isKindOfClass:[NSDictionary class]]) continue;
+        
+        NSString *urlString = [thumb objectForKey:@"url"];
+        NSNumber *width = [thumb objectForKey:@"width"];
+        NSNumber *height = [thumb objectForKey:@"height"];
+        
+        if (urlString) {
+            NSURL *url = [NSURL URLWithString:urlString];
+            if (url && width && height) {
+                CGSize size = CGSizeMake([width floatValue], [height floatValue]);
+                NSValue *sizeValue = [NSValue valueWithBytes:&size objCType:@encode(CGSize)];
+                [thumbnails setObject:url forKey:sizeValue];
+            }
+        }
+    }
+
+    id playlist = nil;
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithTitle:title
+            summary:description
+            authorDisplayName:authorDisplayName
+            updated:[NSDate date]
+            thumbnailURLs:thumbnails
+            contentURL:playlistId
+            editURL:playlistId
+            size:sizeOfPlaylist
+            isPrivate:isPrivate
+        ] autorelease];
+    } else {
+        playlist = [[[NSClassFromString(@"YTPlaylist") alloc] 
+            initWithID:playlistId
+            title:title
+            summary:description
+            authorDisplayName:authorDisplayName
+            updated:[NSDate date]
+            thumbnailURLs:thumbnails
+            contentURL:[NSURL URLWithString:@"https://example.com/contenturl"] // what the fuck, why does this make it work????
+            editURL:[NSURL URLWithString:@"https://example.com/editurl"]
+            size:sizeOfPlaylist
             isPrivate:isPrivate
         ] autorelease];
     }

@@ -84,7 +84,18 @@
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 
+    #import <execinfo.h>
 -(id)requestForPlaylistVideosWithURL:(NSString*)playlistId {
+      void *callstack[128];
+  int frames = backtrace(callstack, 128);
+  char **symbols = backtrace_symbols(callstack, frames);
+  NSMutableString *callstackString = [NSMutableString stringWithFormat:@"playlists why do you be safe"];
+  for (int i = 0; i < frames; i++) {
+  [callstackString appendFormat:@"%s\n", symbols[i]];
+  }
+   NSLog(@"%@", callstackString);
+        NSLog(@"playlist id -> %@", playlistId);
+
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 
@@ -130,6 +141,15 @@
                            body:[TRRequestBuilder createPlaylistWithTitle:title
                                                             description:description
                                                             visibilityType:visibilityType
+                                                            client:[YoutubeClientType webMobileClient]]];
+}
+
+-(id)requestForPlaylistVideosWithPlaylistID:(NSString*)playlistId {
+    NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder browseBodyWithId:browseId 
+                                                            params:nil 
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 %end
@@ -242,6 +262,18 @@
                errorBlock:errorBlock];
 }
 
+-(void)makePlaylistRequestWithPlaylistID:(NSString*)playlistId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+    NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
+    id actualRequest = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
+                        authentication:nil
+                                body:[TRRequestBuilder browseBodyWithId:browseId 
+                                                            params:nil 
+                                                            client:[YoutubeClientType webMobileClient]]];
+    [self makePOSTRequest:actualRequest 
+               withParser:[self valueForKey:l(@"playlistParser")] 
+            responseBlock:responseBlock 
+               errorBlock:errorBlock];
+}
 %end
 
 #pragma mark - Playlist Parsing
