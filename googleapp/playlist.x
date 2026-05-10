@@ -300,21 +300,11 @@
 
 %end
 
+%hook YTVideoListView
 
-// welcome to hell. todo: remove this
-%hook YTVideoListSectionedTableViewController
-    
--(void)setPlaylist:(YTPlaylist*)playlist {
-    NSLog(@"[playlist contentURL] -> %@", [playlist contentURL]);
-          void *callstack[128];
-  int frames = backtrace(callstack, 128);
-  char **symbols = backtrace_symbols(callstack, frames);
-  NSMutableString *callstackString = [NSMutableString stringWithFormat:@"setPlaylist"];
-  for (int i = 0; i < frames; i++) {
-  [callstackString appendFormat:@"%s\n", symbols[i]];
-  }
-   NSLog(@"%@", callstackString);
-   return %orig;
+-(void)setVideoCount:(int)videoCount {
+    if (videoCount == 2147483647) return;
+    return %orig;
 }
-        
+
 %end
