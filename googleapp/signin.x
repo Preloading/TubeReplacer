@@ -3,7 +3,7 @@
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 #include "general.h"
-#include "Translators/TRTranslators.h"
+#include "Translators/TRJSONUtils.h"
 
 #import <execinfo.h>
 
@@ -272,8 +272,6 @@
 // }
 // %end
 
-
-
 %hook SSOKeychain
 +(BOOL)writeSharedKeychain:(NSMutableDictionary*)keys error:(NSError**)error {
   return %orig;
@@ -366,11 +364,15 @@
             };
             GTMOAuth2Authentication *auth = [self authentication];
             [auth setKeysForResponseDictionary:code];
+            #if GOOGLE_APP == 1
             if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"]) {
               [self handleCallbackReached];
             } else {
               [self authCodeObtained];
             }
+            #else
+              [self authCodeObtained];
+            #endif
             [cookieStorage deleteCookie:sid];
             return 1;
             // }
@@ -729,13 +731,16 @@ done:
             [params setObject:datasyncID forKey:@"userID"];
 
             // I want to at least **try** to get a correct email & full name, so if we are on 2.0.0+, we will run this pain, since I want to do it synchronously. Otherwise, invalid@email.address will suffice.
-            
+            #if GOOGLE_APP
             if ([version() characterAtIndex:0] != '1') {
               [self fillInTokenExtraDataWithParameters:params];
             } else {
                   [params setValue:@"invalid@email.address" forKey:@"userEmail"];
                   [params setValue:@"invalid@email.address" forKey:@"email"];
             }
+            #else
+            [self fillInTokenExtraDataWithParameters:params];
+            #endif
 
             [params setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
 
