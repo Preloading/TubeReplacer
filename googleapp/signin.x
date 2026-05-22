@@ -273,8 +273,27 @@
 // %end
 
 %hook SSOKeychain
-+(BOOL)writeSharedKeychain:(NSMutableDictionary*)keys error:(NSError**)error {
-  return %orig;
+
+// this intentionally breaks SSO signin across multiple google apps. If your working on a google signin fix, don't add this. 
+// Since my tokens are very incompatible, this is here to avoid issues with any future fix.
++(BOOL)writeSharedKeychain:(NSDictionary*)keys error:(NSError**)error {
+  NSMutableDictionary *mutableKeys = [keys mutableCopy];
+  [mutableKeys setObject:[[mutableKeys objectForKey:(NSString *)kSecAttrService] stringByReplacingOccurrencesOfString:@"com.google." withString:@"dev.preloading.tubereplacer."] forKey:(NSString *)kSecAttrService];
+  return %orig(mutableKeys, error);
+}
+
++(NSDictionary*)queryMatchingID:(id)matchingId serviceName:(NSString*)serviceName {
+  return %orig(matchingId, [serviceName stringByReplacingOccurrencesOfString:@"com.google." withString:@"dev.preloading.tubereplacer."]);
+}
+
++(NSDictionary*)queryAllMatching {
+  id orig = %orig;
+  [orig setObject:[[orig objectForKey:(NSString *)kSecAttrService] stringByReplacingOccurrencesOfString:@"com.google." withString:@"dev.preloading.tubereplacer."] forKey:(NSString *)kSecAttrService];
+  return orig;
+}
+
++(NSDictionary*)deleteQueryMatchingID:(id)matchingId serviceName:(NSString*)serviceName {
+  return %orig(matchingId, [serviceName stringByReplacingOccurrencesOfString:@"com.google." withString:@"dev.preloading.tubereplacer."]);
 }
 
 %end
