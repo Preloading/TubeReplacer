@@ -32,6 +32,8 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	subtitles.x \
 	crashreporter.x \
 	infooverflowfix.x \
+	potoken.m \
+	botguard_js.c \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \
@@ -45,10 +47,20 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
-
+TubeReplacerGoogle_LDFLAGS = ../lib/libquickjs.a ../lib/libposixshim.a
 
 before-all::
 	rm signinpolyfil.h || true
 	xxd -i signinpolyfil.js > signinpolyfil.h
+	rm botguard_js.c || true
+	../lib/qjsc -ss -o botguard_js.c botguard_js.js # if this gives you problems, build yourself with commit 3adc8c9
+
+ifeq (, $(shell which xxd))
+$(error "You are missing `xxd` from your system, which is required to build.")
+endif
+
+# ifeq (, $(shell which qjsc))
+# $(error "You are missing the quickjs-ng compiler from your system, which is required to build. (commit 3adc8c9)")
+# endif
 
 include $(THEOS_MAKE_PATH)/tweak.mk
