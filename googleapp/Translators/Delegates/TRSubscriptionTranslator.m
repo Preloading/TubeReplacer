@@ -56,7 +56,6 @@
 #pragma mark - List Item (Subscription Page)
 
 - (id)translateListItem:(NSDictionary *)json error:(NSError **)error {
-    NSLog(@"we are actually parsing a subscription");
     NSDictionary *subscription = [TRJSONUtils dictFromJSON:json keyPath:@"i"];
     
     if (!subscription) {

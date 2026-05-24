@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 #include "general.h"
+#include "potoken.h"
 
 // youtube google app
 @interface YTDeviceAuth : NSObject
@@ -66,6 +67,12 @@
       return;
     }
 	[self performRequestQueueWithError:0]; // a3 in codebase but who's counting
+}
+
+-(void)loadRegistrationFromStorage {
+    TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init]; // :4
+    [solver obtainPOToken];
+    return %orig;
 }
 
 %end

@@ -201,7 +201,6 @@
     if (!channelData) {
         channelData = [json objectForKey:@"channelRenderer"];
     }
-    NSLog(@"parsing channel");
     if (!channelData) {
         if (error) {
             *error = [NSError errorWithDomain:@"TRChannelTranslator" code:3 
