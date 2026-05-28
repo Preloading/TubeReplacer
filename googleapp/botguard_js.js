@@ -157,7 +157,31 @@ globalThis.atob = globalThis.atob || function (str) {
   return output;
 };
 
+// Add this at the top of your JS script so it's globally accessible
+globalThis.base64ToU8 = function(base64) {
+  // Handle URL-safe base64 strings if necessary
+  const normalized = base64.replace(/-/g, '+').replace(/_/g, '/');
+  const binaryString = atob(normalized);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+};
 
+globalThis.u8ToBase64 = function(u8Array, urlSafe = false) {
+  let binary = '';
+  const len = u8Array.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(u8Array[i]);
+  }
+  let base64 = btoa(binary);
+  if (urlSafe) {
+    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  return base64;
+};
 
 if (typeof globalThis.setTimeout === 'undefined') {
   globalThis.setTimeout = function(callback, delay) {
@@ -373,3 +397,94 @@ globalThis.crypto = {
 
 // 6. Node branch diversion
 globalThis.process = { browser: true, version: '', env: {} };
+
+
+// Actual stuff to finally solve it. It's in here so it can be compiled for speeeeeeed!
+
+globalThis.fetchIntegretyChallengeResp = (async function(globalName,program){
+  const globalObject = globalThis;
+  const vm = globalObject[globalName];
+
+  if (!vm) {globalThis.finalTokenOutput = 'error vm not found'; return;}
+  if (!vm.a) {globalThis.finalTokenOutput = 'error vm init not found'; return;}
+
+  const vmFunctions = {};
+  let syncSnapshotFunction = null
+  const vmFunctionsCallback = (asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction) => {
+    Object.assign(vmFunctions, { asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction });
+  }
+
+    try {
+      const initResult = await vm.a(program, vmFunctionsCallback, true, undefined, () => { /** no-op */ }, [ [], [] ]);
+      syncSnapshotFunction = initResult[0];
+    } catch (error) {
+      globalThis.finalTokenOutput = 'error vm failed to init'; return;
+    }
+
+    async function snapshot(args) {
+      return new Promise((resolve, reject) => {
+        if (!vmFunctions.asyncSnapshotFunction) {
+            return reject(new Error('[BotGuardClient]: Async snapshot function not found'));
+        }
+        vmFunctions.asyncSnapshotFunction((response) => resolve(response),[args.contentBinding, args.signedTimestamp, args.webPoSignalOutput, args.skipPrivacyBuffer]);
+      });
+    }
+
+    const webPoSignalOutput = [];
+    const botguardResponse = await snapshot({ webPoSignalOutput });
+    globalThis.finalTokenOutput = JSON.stringify(botguardResponse);
+    globalThis.webPoSignalOutput = webPoSignalOutput;
+    const getMinter = webPoSignalOutput[0];
+    if (!getMinter) {
+      console.error("minter doesn't exist in my early thingy");
+    }
+});
+
+
+
+globalThis.createMinter = (async function(integrityToken) {
+  const getMinter = globalThis.webPoSignalOutput[0];
+  
+  if (!getMinter) {
+    console.error("minter is undefined")
+    throw new Error('PMD:Undefined');
+  }
+    // return; // error handling might be tough here
+  try {
+    const mintCallback = await getMinter(base64ToU8(integrityToken));
+    if (!(mintCallback instanceof Function)) {
+      console.error("minter is not a function");
+    }
+    globalThis.mintCallback = mintCallback;
+  } catch (jsError) {
+    // This will catch network failures, type errors, or mintCallback rejections
+    console.error("error exception: " + jsError.toString());
+    console.error("JS Exception caught: " + jsError.stack || jsError);
+  }
+    // return; // error handling may be tough here
+
+});
+
+globalThis.mintPOToken = (async function(identifier) {
+  try {
+    if (!(globalThis.mintCallback instanceof Function)) {
+      console.error("what why ius it not a function????")
+    }
+    const result = await globalThis.mintCallback(new TextEncoder().encode(identifier));
+    
+    if (!result) {
+      console.error("no result from poToken");
+      globalThis.poToken = "error no result";
+    } else if (!(result instanceof Uint8Array)) {
+      globalThis.poToken = "error result invalid";
+    } else {
+      globalThis.poToken = u8ToBase64(result, true);
+    }
+  } catch (jsError) {
+    // This will catch network failures, type errors, or mintCallback rejections
+    console.error("JS Exception caught: " + jsError.stack || jsError);
+    globalThis.poToken = "error exception: " + jsError.toString();
+  }
+
+  globalThis.poTokenJobDone = true; 
+});
