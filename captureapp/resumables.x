@@ -159,8 +159,8 @@
                 @"context": @{
                     @"client": @{
                         @"clientName": @62,
-                        // @"clientVersion": @"1.20260518.01.00",
-                        @"clientVersion": @"1.20201130.03.00",
+                        @"clientVersion": @"1.20260518.01.00",
+                        // @"clientVersion": @"1.20201130.03.00",
                         @"hl": @"en-US",
                         @"gl": @"US",
                         @"experimentsToken": @"",
@@ -182,6 +182,9 @@
                         @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
                     },
                     @"externalChannelId": channelId
+                },
+                @"serviceIntegrityDimensions": @{
+                    @"poToken":@"MmPSdSAg-_ve6tI3Con4E0LmJLsYyYDO0vPTOWHyKW8p_38e6oYDR8gJoD_oVoxz85ARMW39qQtQvatnULL-QJCSRBuCue8LuOedtBXr3rtUdAwL3nqdMy1_tAXsuVpU9Hg1B_U"
                 }
             };
 

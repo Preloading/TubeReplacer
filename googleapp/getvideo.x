@@ -24,11 +24,11 @@
 %hook YTGDataRequest
 
 +(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
+    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    YoutubeClientType *client = [YoutubeClientType androidClient];
+    YoutubeClientType *client = [YoutubeClientType webMobileClient];
     if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
         client = [YoutubeClientType iosClient];
     }

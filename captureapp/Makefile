@@ -16,6 +16,8 @@ TubeReplacerCaptureApp_FILES = $(GOOGLE_APP)/signin.x \
 	$(GOOGLE_APP)/Translators/TRContiunation.m \
 	$(GOOGLE_APP)/Translators/TRRequestBuilder.m \
 	$(GOOGLE_APP)/general.m \
+	$(GOOGLE_APP)/botguard_js.c \
+	$(GOOGLE_APP)/potoken.m \
 	../Protobuf.m
 TubeReplacerCaptureApp_CFLAGS = -fno-objc-arc
 

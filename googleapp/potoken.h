@@ -17,9 +17,15 @@
 @property (nonatomic, assign) JSContext *jsCtx;
 
 // integrityToken
-@property (nonatomic, strong) NSString *integretyToken;
-@property (nonatomic, strong) NSDate *integretyTokenExpiration;
-@property (nonatomic, strong) NSDate *integretyTokenShouldProbablyRenew;
+@property (nonatomic, strong) NSString *integrityToken;
+@property (nonatomic, strong) NSDate *integrityTokenExpiration;
+@property (nonatomic, strong) NSDate *integrityTokenShouldProbablyRenew;
+
+// poToken
+@property (nonatomic, strong) NSString *cachedPOToken;
+// botguard
+@property (nonatomic, strong) NSString *botguardResponse;
+
 
 -(NSDictionary*)fetchChallengeWithMethod:(NSString*)method andBody:(NSDictionary*)body;
 -(void)descrambleChallenge:(NSString*)scrambledChallenge;

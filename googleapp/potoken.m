@@ -1,6 +1,7 @@
 #import "potoken.h"
 #import "../base64/NSData+Base64.h"
 #import "botguard_js.h"
+#import "../lib/quickjs.h"
 #import "../lib/quickjs-libc.h"
 
 @implementation TRPOTokenSolver
@@ -119,8 +120,7 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     return JS_UNDEFINED;
 }
 
-// https://www.youtube.com/watch?v=4JkIs37a2JE
--(void)solveIntegrityToken {
+-(BOOL)initJSEngine {
     // cleanup prev. session
     if (self->_jsCtx) {
         JS_FreeContext(self->_jsCtx);
@@ -132,12 +132,13 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
 
     JSRuntime *rt = JS_NewRuntime();
-    if (!rt) return;
+    if (!rt) return NO;
     JSContext *ctx = JS_NewContext(rt);
     if (!ctx) {
         JS_FreeRuntime(rt);
-        return;
+        return NO;
     }
+
 
     // i need console.log, its getting really annoying w/o
     JSValue globalObj = JS_GetGlobalObject(ctx);
@@ -145,49 +146,35 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     JS_SetPropertyStr(ctx, globalObj, "__nativeNSLog", logFunc);
     JS_FreeValue(ctx, globalObj);
     js_std_eval_binary(ctx, qjsc_botguard_js, qjsc_botguard_js_size, JS_EVAL_TYPE_GLOBAL);
+    self->_jsCtx = ctx;
+    self->_jsRuntime = rt;
+    return YES;
+}
 
+// https://www.youtube.com/watch?v=4JkIs37a2JE
+-(void)solveIntegrityToken {
+    NSDate *start = [NSDate date];
+    if (!self->_jsRuntime || !self->_jsCtx) {
+        BOOL didInitVM = [self initJSEngine];
+        if (!didInitVM) {
+            return;
+        }
+    }
+    JSContext *ctx = self->_jsCtx;
+    
     const char *challengeCode = [self->_safeScript UTF8String];
     size_t challengeCodeLen = strlen(challengeCode);
     JSValue challengeCodeResult = JS_Eval(ctx, challengeCode, challengeCodeLen, "<input>", JS_EVAL_TYPE_GLOBAL);
     JS_FreeValue(ctx, challengeCodeResult);
+    NSLog(@"challenge vm addded at %f", [start timeIntervalSinceNow]);
+
+
     NSString *checkForToken = [NSString stringWithFormat:
-        @"(async function(){\n"
-            "const globalObject = globalThis;\n"
-            // "globalThis.finalTokenOutput = JSON.stringify(Object.keys(globalObject)); return;"
-            "const vm = globalObject['%@'];\n"
+        @"globalThis.fetchIntegretyChallengeResp('%@','%@');", self->_globalName, self->_program]; 
 
-            "if (!vm) {globalThis.finalTokenOutput = 'error vm not found'; return;}\n"
-            "if (!vm.a) {globalThis.finalTokenOutput = 'error vm init not found'; return;}\n"
-
-            "const vmFunctions = {};\n"
-            "let syncSnapshotFunction = null;\n"
-            "const vmFunctionsCallback = (asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction) => {\n"
-            "  Object.assign(vmFunctions, { asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction });\n"
-            "};\n"
-
-            "try {\n"
-            "  const initResult = await vm.a(\"%@\", vmFunctionsCallback, true, undefined, () => { /** no-op */ }, [ [], [] ]);\n"
-            "  syncSnapshotFunction = initResult[0];\n"
-            "} catch (error) {\n"
-            "  globalThis.finalTokenOutput = 'error vm failed to init'; return;\n"
-            "}\n"
-
-            "async function snapshot(args) {\n"
-            "    return new Promise((resolve, reject) => {\n"
-            "if (!vmFunctions.asyncSnapshotFunction) {\n"
-                "return reject(new Error('[BotGuardClient]: Async snapshot function not found'));\n"
-            "}\n"
-            "vmFunctions.asyncSnapshotFunction((response) => resolve(response),[args.contentBinding, args.signedTimestamp, args.webPoSignalOutput, args.skipPrivacyBuffer]);});}\n"
-
-            "globalThis.webPoSignalOutput = [];\n"
-            "const botguardResponse = await snapshot({ globalThis.webPoSignalOutput });\n"
-            "globalThis.finalTokenOutput = JSON.stringify(botguardResponse);\n"
-        "})();", self->_globalName, self->_program]; 
-
-
-    const char *jsCode = [checkForToken UTF8String];
-    size_t jsCodeLen = strlen(jsCode);
-    JSValue tokenPromise = JS_Eval(ctx, jsCode, jsCodeLen, "<input>", JS_EVAL_TYPE_GLOBAL);
+    const char *checkForTokenStr = [checkForToken UTF8String];
+    size_t checkForTokenStrLen = strlen(checkForTokenStr);
+    JSValue tokenPromise = JS_Eval(ctx, checkForTokenStr, checkForTokenStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);
 
     // async BS
     JSContext *ctx1;
@@ -196,7 +183,7 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
         // wheeeee!
     }
 
-    globalObj = JS_GetGlobalObject(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
 
     JSValue tokenVal = JS_GetPropertyStr(ctx, globalObj, "finalTokenOutput");
 
@@ -211,7 +198,7 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
         JS_FreeValue(ctx, tokenVal);
         JS_FreeValue(ctx, globalObj);
         JS_FreeValue(ctx, tokenPromise);
-        goto fail;
+        return;
     }
 
     JS_FreeValue(ctx, tokenVal);
@@ -221,15 +208,32 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     if ([botguard_challenge_resp hasPrefix:@"error"]) {
         NSLog(@"An error occured with solving BotGuard! %@", botguard_challenge_resp);
     }
-    NSLog(@"botguard_challenge_resp -> %@", botguard_challenge_resp);
+    NSLog(@"base integrity solved at %f", [start timeIntervalSinceNow]);
+    self->_botguardResponse = botguard_challenge_resp;
+
+    // get the integrity token
     NSDictionary *solvedIntegrety = [self fetchChallengeWithMethod:@"GenerateIT" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo", @"botguard_response":botguard_challenge_resp}];
-    NSLog(@"solvedIntegrety -> %@", solvedIntegrety);
-    self->_integretyToken = solvedIntegrety[@"integretyToken"];
-    self->_integretyTokenExpiration = [NSDate dateWithTimeIntervalSinceNow:[solvedIntegrety[@"estimatedTtlSecs"] intValue]];
-    self->_integretyTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[solvedIntegrety[@"estimatedTtlSecs"] intValue]/12]; // in my test, it lasts 12h, means at 1h we renew;
-    
+    NSLog(@"solved integrity -> %@", solvedIntegrety);
+    NSLog(@"integrity token 1 -> %@", self->_integrityToken);
+    self->_integrityToken = solvedIntegrety[@"integrityToken"];
+    self->_integrityTokenExpiration = [NSDate dateWithTimeIntervalSinceNow:[solvedIntegrety[@"estimatedTtlSecs"] intValue]];
+    self->_integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[solvedIntegrety[@"estimatedTtlSecs"] intValue]/12]; // in my test, it lasts 12h, means at 1h we renew;
+    NSLog(@"integrity token 2 -> %@", self->_integrityToken);
+    NSString *createMinter = [NSString stringWithFormat:
+        @"globalThis.createMinter('%@');", self->_integrityToken]; 
 
+    const char *createMinterStr = [createMinter UTF8String];
+    size_t createMinterStrLen = strlen(createMinterStr);
+    JSValue createMinterPromise = JS_Eval(ctx, createMinterStr, createMinterStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);
+    NSLog(@"actual integrity obtained at %f", [start timeIntervalSinceNow]);
 
+    // async BS x2
+    JSContext *ctx2;
+    while ((err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx2)) > 0) {
+        // wheeeee! :3
+    }
+    JS_FreeValue(ctx, createMinterPromise);
+    NSLog(@"minter created at %f", [start timeIntervalSinceNow]);
 
     // NSString *objcResult = nil;
     // if (JS_IsException(result)) {
@@ -249,23 +253,81 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     // }
 
     // JS_FreeValue(ctx, result);
-    self->_jsCtx = ctx;
-    self->_jsRuntime = rt;
     return;
-
-    fail:
-        JS_FreeContext(self->_jsCtx);
-        JS_FreeRuntime(self->_jsRuntime);
 
     // NSLog(@"result -> %@", objcResult);
 }
 
--(void)obtainPOToken {
-    NSDictionary *rawChallenge = [self fetchChallengeWithMethod:@"Create" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo"}];
-    [self descrambleChallenge:rawChallenge[@"scrambledChallenge"]];
-    [self solveIntegrityToken];
+-(NSString*)mintPOToken:(NSString*)identifier {
+    if (!self->_jsCtx || !self->_jsRuntime) {
+        NSLog(@"JS engine is not running! Cannot mint a POToken!");
+    }
 
-    NSLog(@"integrety token -> %@", self->_integretyToken);
+    JSValue globalObj = JS_GetGlobalObject(self->_jsCtx);
+    JS_SetPropertyStr(self->_jsCtx, globalObj, "poTokenJobDone", JS_NewBool(self->_jsCtx, NO));
+
+    NSString *mintToken = [NSString stringWithFormat:
+        @"globalThis.mintPOToken('%@');", identifier]; 
+
+    const char *mintTokenStr = [mintToken UTF8String];
+    size_t mintTokenStrLen = strlen(mintTokenStr);
+    JSValue mintTokenPromise = JS_Eval(self->_jsCtx, mintTokenStr, mintTokenStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);
+
+    JSContext *ctx2;
+    BOOL isDone = NO;
+    
+    while (!isDone) {
+        while (JS_ExecutePendingJob(JS_GetRuntime(self->_jsCtx), &ctx2) > 0) {
+            // meow mrrp mewo
+        }
+        
+        JSValue doneVal = JS_GetPropertyStr(self->_jsCtx, globalObj, "poTokenJobDone");
+        isDone = JS_ToBool(self->_jsCtx, doneVal);
+        JS_FreeValue(self->_jsCtx, doneVal);
+        
+        if (!isDone) {
+            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+        }
+    }
+    
+
+    JSValue tokenVal = JS_GetPropertyStr(self->_jsCtx, globalObj, "poToken");
+
+    NSString *poToken = nil;
+    if (!JS_IsUndefined(tokenVal) && !JS_IsNull(tokenVal)) {
+        const char *tokenCStr = JS_ToCString(self->_jsCtx, tokenVal);
+        poToken = [[NSString stringWithFormat:@"%s", tokenCStr] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
+        JS_FreeCString(self->_jsCtx, tokenCStr);
+    } else {
+        NSLog(@"Error: nothing was returned!!!");
+        JS_FreeValue(self->_jsCtx, tokenVal);
+        JS_FreeValue(self->_jsCtx, globalObj);
+        JS_FreeValue(self->_jsCtx, mintTokenPromise);
+        return nil;
+    }
+
+    JS_FreeValue(self->_jsCtx, tokenVal);
+    JS_FreeValue(self->_jsCtx, globalObj);
+    JS_FreeValue(self->_jsCtx, mintTokenPromise);
+    
+    NSLog(@"Achievement get! POToken: %@", poToken);
+    return poToken;
+}
+
+-(void)obtainPOToken {
+    // NSDate *start = [NSDate date];
+    NSDictionary *rawChallenge = [self fetchChallengeWithMethod:@"Create" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo"}];
+    // NSLog(@"got challenge at %f", [start timeIntervalSinceNow]);
+    [self descrambleChallenge:rawChallenge[@"scrambledChallenge"]];
+    // NSLog(@"descrambled at %f", [start timeIntervalSinceNow]);
+    [self solveIntegrityToken];
+    // NSLog(@"solved integrity at %f", [start timeIntervalSinceNow])();
+    // [self mintPOToken:@"101414430328181110843"];
+    
+    // [self mintPOToken:@"TiXIIwNua9E"];
+    // NSLog(@"minted token at %f", [start timeIntervalSinceNow]);
+    NSLog(@"integrity token -> %@", self->_integrityToken);
+    NSLog(@"botguard response -> %@", self->_botguardResponse);
 
     // NSLog(@"message ID -> %@", self->_messageId);
     // NSLog(@"safe script -> %@", self->_safeScript);

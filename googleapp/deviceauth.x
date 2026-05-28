@@ -70,8 +70,11 @@
 }
 
 -(void)loadRegistrationFromStorage {
-    TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init]; // :4
-    [solver obtainPOToken];
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init]; // :4
+        [solver obtainPOToken];
+    });
+    
     return %orig;
 }
 
