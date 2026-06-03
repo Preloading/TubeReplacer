@@ -22,6 +22,6 @@
 #import "Delegates/TRSubscriptionTranslator.h"
 #import "Delegates/TRPlaylistTranslator.h"
 #import "TRRequestBuilder.h"
-#import "../../YoutubeClientType.h"
+#import "common/YoutubeClientType.h"
 
 #endif

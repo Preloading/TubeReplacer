@@ -4,9 +4,9 @@
 // Unified request builder implementation
 
 #import "TRRequestBuilder.h"
-#import "../../YoutubeClientType.h"
-#import "../../Protobuf.h"
-#import "../../base64/NSData+Base64.h"
+#import "common/YoutubeClientType.h"
+#import "common/Protobuf.h"
+#import "base64/NSData+Base64.h"
 
 @implementation TRRequestBuilder
 

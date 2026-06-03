@@ -1,6 +1,6 @@
 #include <Foundation/Foundation.h>
 #include "general.h"
-#include "potoken.h"
+#include "common-google/potoken-google.h"
 
 // youtube google app
 @interface YTDeviceAuth : NSObject
