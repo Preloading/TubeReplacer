@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "captureheaders.h"
+#include "common-google/potoken-google.h"
 
 // debug
 #import <execinfo.h>
@@ -10,6 +11,9 @@
 -(void)popNetworkActivity;
 -(void)setUploadFetcher:(id)fetcher;
 -(void)complete;
+
+// tubereplacer
+-(TRPOTokenSolver*)tokenSolver;
 @end
 
 @interface KUAsset : NSObject
@@ -29,6 +33,28 @@
 // saves to -[KUAsset loadFromNSUserDefaults]
 
 %hook KUNetworkManager
+
+%new
+-(TRPOTokenSolver*)tokenSolver {
+    return objc_getAssociatedObject(self, "tokenSolver");
+}
+
+-(instancetype)init {
+    id orig = %orig;
+    TRPOTokenSolver *tokenSolver = [[TRPOTokenSolver alloc] init];
+    objc_setAssociatedObject(orig, "tokenSolver", tokenSolver, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+    // get solvin
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        BOOL result = [tokenSolver fetchStudioIntegrityChallenge]; 
+        if (!result) {
+            NSLog(@"an error has occured in token fetching!");
+        }
+        [tokenSolver solveIntegrityToken];
+        NSLog(@"botguard response -> %@", [tokenSolver botguardResponse]);
+    });
+    return orig;
+}
 
 // based heavily on https://github.com/adasq/youtube-studio/blob/master/src/upload/index.js
 -(void)requestResumableURLForAsset:(KUAsset*)asset andContinueUpload:(BOOL)continueUpload {
@@ -183,9 +209,6 @@
                     },
                     @"externalChannelId": channelId
                 },
-                @"serviceIntegrityDimensions": @{
-                    @"poToken":@"MmPSdSAg-_ve6tI3Con4E0LmJLsYyYDO0vPTOWHyKW8p_38e6oYDR8gJoD_oVoxz85ARMW39qQtQvatnULL-QJCSRBuCue8LuOedtBXr3rtUdAwL3nqdMy1_tAXsuVpU9Hg1B_U"
-                }
             };
 
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://studio.youtube.com/youtubei/v1/upload/createvideo?alt=json"]];
@@ -222,6 +245,11 @@
     else {
         return %orig; // its just flat out faster to program. Has duplicate logic, but whatever.
     }
+}
+
+-(void)dealloc {
+    [[self tokenSolver] dealloc];
+    %orig;
 }
 
 %end
