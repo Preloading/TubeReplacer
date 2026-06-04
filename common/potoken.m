@@ -219,9 +219,17 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
     NSLog(@"base integrity solved at %f", [start timeIntervalSinceNow]);
     self->_botguardResponse = botguard_challenge_resp;
+    NSLog(@"botguard response -> %@", botguard_challenge_resp);
+}
+
+-(void)createPOTokenMinter {
+    if (!self->_jsRuntime || !self->_jsCtx) {
+        NSLog(@"CreatePOTokenMinter called before VM was initalized!");
+    }
+    JSContext *ctx = self->_jsCtx;
 
     // get the integrity token
-    NSDictionary *solvedIntegrety = [self fetchPOJNNChallengeWithMethod:@"GenerateIT" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo", @"botguard_response":botguard_challenge_resp}];
+    NSDictionary *solvedIntegrety = [self fetchPOJNNChallengeWithMethod:@"GenerateIT" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo", @"botguard_response":self->_botguardResponse}];
     NSLog(@"solved integrity -> %@", solvedIntegrety);
     NSLog(@"integrity token 1 -> %@", self->_integrityToken);
     self->_integrityToken = solvedIntegrety[@"integrityToken"];
@@ -238,15 +246,16 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     const char *createMinterStr = [createMinter UTF8String];
     size_t createMinterStrLen = strlen(createMinterStr);
     JSValue createMinterPromise = JS_Eval(ctx, createMinterStr, createMinterStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);
-    NSLog(@"actual integrity obtained at %f", [start timeIntervalSinceNow]);
+    // NSLog(@"actual integrity obtained at %f", [start timeIntervalSinceNow]);
 
     // async BS x2
+    int err = 0;
     JSContext *ctx2;
     while ((err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx2)) > 0) {
         // wheeeee! :3
     }
     JS_FreeValue(ctx, createMinterPromise);
-    NSLog(@"minter created at %f", [start timeIntervalSinceNow]);
+    // NSLog(@"minter created at %f", [start timeIntervalSinceNow]);
 
     // NSString *objcResult = nil;
     // if (JS_IsException(result)) {

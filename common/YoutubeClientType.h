@@ -21,6 +21,7 @@
 +(YoutubeClientType*)iosClient;
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;
++(YoutubeClientType*)webStudioClient;
 
 // android
 +(YoutubeClientType*)androidClient;
