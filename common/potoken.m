@@ -179,8 +179,7 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
 
 
     NSString *checkForToken = [NSString stringWithFormat:
-        @"globalThis.fetchIntegretyChallengeResp2('%@','%@');", self->_globalName, self->_program]; 
-
+        @"globalThis.fetchIntegretyChallengeResp('%@','%@');", self->_globalName, self->_program]; 
     const char *checkForTokenStr = [checkForToken UTF8String];
     size_t checkForTokenStrLen = strlen(checkForTokenStr);
     JSValue tokenPromise = JS_Eval(ctx, checkForTokenStr, checkForTokenStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);

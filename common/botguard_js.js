@@ -424,23 +424,38 @@ globalThis.process = { browser: true, version: '', env: {} };
 // Actual stuff to finally solve it. It's in here so it can be compiled for speeeeeeed!
 
 globalThis.fetchIntegretyChallengeResp = (async function(globalName,program){
-  const globalObject = globalThis;
-  const vm = globalObject[globalName];
+    const globalObject = globalThis;
+    const vm = globalObject[globalName];
 
-  if (!vm) {globalThis.finalTokenOutput = 'error vm not found'; return;}
-  if (!vm.a) {globalThis.finalTokenOutput = 'error vm init not found'; return;}
+    if (!vm) {globalThis.finalTokenOutput = 'error vm not found'; return;}
+    if (!vm.a) {globalThis.finalTokenOutput = 'error vm init not found'; return;}
 
-  const vmFunctions = {};
-  let syncSnapshotFunction = null
-  const vmFunctionsCallback = (asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction) => {
-    Object.assign(vmFunctions, { asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction });
-  }
+    const vmFunctions = {};
+    let syncSnapshotFunction = null
+    const vmFunctionsCallback = (asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction) => {
+      Object.assign(vmFunctions, { asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction });
+    }
+
+
+    // javascript is an enigma
+    const waitForVMReady = new Promise((resolve) => {
+        const originalCallback = (asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction) => {
+            Object.assign(vmFunctions, { asyncSnapshotFunction, shutdownFunction, passEventFunction, checkCameraFunction });
+            console.log("VM is ready!");
+            resolve();
+        };
+        
+        window.vmFunctionsCallback = originalCallback;
+    });
 
     try {
-      const initResult = await vm.a(program, vmFunctionsCallback, true, undefined, () => { /** no-op */ }, [ [], [] ]);
+      console.log("lets try!");
+      const initResult = await vm.a(program, window.vmFunctionsCallback, true, undefined, () => { /** no-op */ }, [ [], [] ]);
       syncSnapshotFunction = initResult[0];
-      console.log("init result ")
+      await waitForVMReady; 
+      console.log("init result ");
     } catch (error) {
+      console.error("fuick");
           console.error("error exception: " + error.toString());
     console.error("JS Exception caught: " + error.stack || error);
       globalThis.finalTokenOutput = 'error vm failed to init'; return;
