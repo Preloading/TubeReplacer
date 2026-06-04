@@ -71,7 +71,7 @@
                 },
                 @"client":isStudio ? [[YoutubeClientType webStudioClient] makeContext][@"client"] : [[YoutubeClientType webMobileClient] makeContext][@"client"],
             },
-            @"engagementType":@"ENGAGEMENT_TYPE_CREATOR_STUDIO_ACTION",
+            @"engagementType":@"ENGAGEMENT_TYPE_UNBOUND",
             @"ids":@[
                 @{
                     @"externalChannelId":[auth channelID],
@@ -110,12 +110,12 @@
         }
 
         self.botguardChallenge = json[@"challenge"];
-        self.program = json[@"botguardData"][@"program"];
-        self.interpreterHash = json[@"botguardData"][@"interpreterHash"];
-        self.globalName = json[@"botguardData"][@"globalName"];
-        self.clientExperimentsStateBlob = json[@"botguardData"][@"clientExperimentsStateBlob"];
+        self.program = json[@"bgChallenge"][@"program"];
+        self.interpreterHash = json[@"bgChallenge"][@"interpreterHash"];
+        self.globalName = json[@"bgChallenge"][@"globalName"];
+        self.clientExperimentsStateBlob = json[@"bgChallenge"][@"clientExperimentsStateBlob"];
 
-        NSString *vmURL = json[@"botguardData"][@"interpreterSafeUrl"][@"privateDoNotAccessOrElseTrustedResourceUrlWrappedValue"];
+        NSString *vmURL = json[@"bgChallenge"][@"interpreterUrl"][@"privateDoNotAccessOrElseTrustedResourceUrlWrappedValue"];
 
         NSMutableURLRequest *requestVM = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https:%@", vmURL]]];
 
