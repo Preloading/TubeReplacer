@@ -21,7 +21,8 @@ TubeReplacerCaptureApp_FILES = $(GOOGLE_APP_FILES)/signin.x \
 	$(COMMON)/botguard_js.c \
 	$(COMMON)/potoken.m \
 	$(COMMON_GOOGLE)/potoken-google.m \
-	$(COMMON)/Protobuf.m
+	$(COMMON)/Protobuf.m \
+	$(COMMON)/YoutubeClientType.m
 TubeReplacerCaptureApp_CFLAGS = -fno-objc-arc
 TubeReplacerCaptureApp_LDFLAGS = ../lib/libquickjs.a ../lib/libposixshim.a
 

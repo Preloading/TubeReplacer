@@ -45,14 +45,24 @@
     objc_setAssociatedObject(orig, "tokenSolver", tokenSolver, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
     // get solvin
-    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-        BOOL result = [tokenSolver fetchStudioIntegrityChallenge]; 
-        if (!result) {
-            NSLog(@"an error has occured in token fetching!");
+    // dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+    [tokenSolver fetchBotguardChallengeWithCallback:^(NSError *error) {
+        if (error) {
+            NSLog(@"an error has occured in token fetching! %@", error);
+            return;
         }
+
+        NSLog(@"got botguard challenge!");
+        // [tokenSolver initJSEngine];
         [tokenSolver solveIntegrityToken];
-        NSLog(@"botguard response -> %@", [tokenSolver botguardResponse]);
-    });
+        
+    } auth:[[%c(KUUserAuthenticator) sharedInstance] authentication] isStudio:YES]; 
+        // if (!result) {
+        //     NSLog(@"an error has occured in token fetching!");
+        // }
+        // [tokenSolver solveIntegrityToken];
+        // NSLog(@"botguard response -> %@", [tokenSolver botguardResponse]);
+    // });
     return orig;
 }
 

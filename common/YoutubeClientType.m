@@ -87,6 +87,14 @@
     return client;
 }
 
++(YoutubeClientType*)webStudioClient {
+    YoutubeClientType *client = [[YoutubeClientType alloc] init];
+    client.name      = @"62";// i dont actually know if this will cause a problem or not.
+    client.nameProto = @"62";
+    client.version   = @"1.20260518.01.00";
+    return client;
+}
+
 -(NSDictionary*)makeContext {
     NSMutableDictionary *clientContext = [[NSMutableDictionary alloc] init];
     [clientContext setObject:@"en" forKey:@"hl"]; //[[NSLocale preferredLanguages] objectAtIndex:0] forKey:@"hl"]; // so this also localizes a few other things, like time :)

@@ -9,7 +9,7 @@
                                 body:(NSDictionary *)body 
                                 callback:(void (^)(NSDictionary *response, NSError *error))callback 
                                  auth:(GTMOAuth2Authentication *)auth;
-- (void)fetchBotguardChallengeWithCallback:(void (^)(NSDictionary *response, NSError *error))callback 
+- (void)fetchBotguardChallengeWithCallback:(void (^)(NSError *error))callback 
                                  auth:(GTMOAuth2Authentication *)auth 
                                  isStudio:(BOOL)isStudio;
 @end

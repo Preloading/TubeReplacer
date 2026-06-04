@@ -1,5 +1,6 @@
 // this stuff has things for auth.
 #import "potoken-google.h"
+#import "common/YoutubeClientType.h"
 
 @implementation TRPOTokenSolver (Google)
 
@@ -46,7 +47,7 @@
     }];
 }
 
-- (void)fetchBotguardChallengeWithCallback:(void (^)(NSDictionary *response, NSError *error))callback 
+- (void)fetchBotguardChallengeWithCallback:(void (^)(NSError *error))callback 
                                  auth:(GTMOAuth2Authentication *)auth 
                                  isStudio:(BOOL)isStudio {
 
@@ -67,7 +68,8 @@
                             @"channelRoleType":@"CREATOR_CHANNEL_ROLE_TYPE_OWNER",
                         }
                     }
-                }
+                },
+                @"client":isStudio ? [[YoutubeClientType webStudioClient] makeContext][@"client"] : [[YoutubeClientType webMobileClient] makeContext][@"client"],
             },
             @"engagementType":@"ENGAGEMENT_TYPE_CREATOR_STUDIO_ACTION",
             @"ids":@[
@@ -86,28 +88,47 @@
     GTMHTTPFetcher *fetcher = [NSClassFromString(@"GTMHTTPFetcher") fetcherWithRequest:request];
     [fetcher setAuthorizer:auth];
     [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error){
-            if (error) {
-                NSLog(@"[TubeReplacer] Botguard challenge fetch failed!");
-                callback(nil, error);
-                return;
-            } 
-            NSDictionary *json = [NSJSONSerialization
-                        JSONObjectWithData:response
-                        options:0
-                        error:&error];
-            if (error) {
-                NSLog(@"[TubeReplacer] Botguard challenge json decode failed!");
-                callback(nil, error);
+        if (error) {
+            NSLog(@"[TubeReplacer] Botguard challenge fetch failed!");
+            callback(error);
+            return;
+        } 
+        NSDictionary *json = [NSJSONSerialization
+                    JSONObjectWithData:response
+                    options:0
+                    error:&error];
+        if (error) {
+            NSLog(@"[TubeReplacer] Botguard challenge json decode failed!");
+            callback(error);
+            return;
+        }
+
+        if (![json isKindOfClass:[NSDictionary class]]) {
+            NSLog(@"[TubeReplacer] Botguard challenge json not a dictionary");
+            callback([NSError errorWithDomain:@"dev.preloading.tubereplacer.botguard" code:1 userInfo:nil]);
+            return;
+        }
+
+        self.botguardChallenge = json[@"challenge"];
+        self.program = json[@"botguardData"][@"program"];
+        self.interpreterHash = json[@"botguardData"][@"interpreterHash"];
+        self.globalName = json[@"botguardData"][@"globalName"];
+        self.clientExperimentsStateBlob = json[@"botguardData"][@"clientExperimentsStateBlob"];
+
+        NSString *vmURL = json[@"botguardData"][@"interpreterSafeUrl"][@"privateDoNotAccessOrElseTrustedResourceUrlWrappedValue"];
+
+        NSMutableURLRequest *requestVM = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https:%@", vmURL]]];
+
+        GTMHTTPFetcher *fetcherVM = [NSClassFromString(@"GTMHTTPFetcher") fetcherWithRequest:requestVM];
+        [fetcherVM beginFetchWithCompletionHandler:^(NSData *response2, NSError *error2){
+            if (error2) {
+                NSLog(@"[TubeReplacer] Botguard challenge javascript fetch failed!");
+                callback(error2);
                 return;
             }
-
-            if (![json isKindOfClass:[NSDictionary class]]) {
-                NSLog(@"[TubeReplacer] Botguard challenge json not a dictionary");
-                callback(nil, [NSError errorWithDomain:@"dev.preloading.tubereplacer.botguard" code:1 userInfo:nil]);
-                return;
-            }
-
-            callback(json, nil);
+            self.safeScript = [[NSString alloc] initWithData:response2 encoding:NSUTF8StringEncoding];
+            callback(nil);
+        }];
     }];
 }
 
