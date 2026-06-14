@@ -1223,6 +1223,7 @@ typedef struct _TBXMLElement {
 - (NSString*)sapisid;
 - (NSString*)datasyncID;
 - (NSString*)channelID;
+- (BOOL)authorizeNSRequest:(NSMutableURLRequest **)request;
 @end
 
 @interface YTPlaylistParser : YTTBParser
