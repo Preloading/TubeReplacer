@@ -1,9 +1,36 @@
+// im really sorry to say, but a decent chunk of this is AI. I spent weeks just trying to get the PO stuff to work fully, and at some point I just gave up and used AI.
+
 #import "potoken.h"
 #import "../base64/NSData+Base64.h"
 #import "botguard_js.h"
 #import "../lib/quickjs.h"
 #import "../lib/quickjs-libc.h"
 
+
+// timers
+@interface QJSTimerTarget : NSObject
+@property (nonatomic, assign) JSContext *ctx;
+@property (nonatomic, assign) JSValue callback;
+@property (nonatomic, assign) BOOL isRepeating;
+@property (nonatomic, assign) int intervalId;
+@end
+
+@implementation QJSTimerTarget
+- (void)timerFired:(NSTimer *)timer {
+    // Safely execute the callback on the active thread pumping the RunLoop
+    JSValue res = JS_Call(self.ctx, self.callback, JS_UNDEFINED, 0, NULL);
+    JS_FreeValue(self.ctx, res);
+    NSLog(@"fire away!");
+    // If it's a timeout (not repeating), clean up the JSValue reference now
+    if (!self.isRepeating) {
+        JS_FreeValue(self.ctx, self.callback);
+        [timer invalidate];
+    }
+}
+@end
+static NSMutableDictionary<NSNumber *, NSTimer *> *activeIntervals = nil;
+static NSMutableDictionary<NSNumber *, QJSTimerTarget *> *activeTargets = nil; // Add this
+static int nextIntervalId = 3;
 
 @interface GTMHTTPFetcher : NSObject
 + (id)fetcherWithRequest:(id)fp8;
@@ -128,9 +155,206 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     }
     return JS_UNDEFINED;
 }
+// --- Helper C Functions for QuickJS to Call ---
 
+static JSValue native_setTimeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
+    if (argc < 1) return JS_UNDEFINED;
+    
+    double delayMs = 0;
+    if (argc > 1) {
+        JS_ToFloat64(ctx, &delayMs, argv[1]);
+    }
+    
+    JSValue callback = JS_DupValue(ctx, argv[0]);
+    
+    QJSTimerTarget *target = [[QJSTimerTarget alloc] init];
+    target.ctx = ctx;
+    target.callback = callback;
+    target.isRepeating = NO;
+
+    // Schedule directly on the CURRENT thread's runloop, removing dispatch_async
+    [NSTimer scheduledTimerWithTimeInterval:(delayMs / 1000.0)
+                                     target:target
+                                   selector:@selector(timerFired:)
+                                   userInfo:nil
+                                    repeats:NO];
+    
+    return JS_NewInt32(ctx, 1); 
+}
+
+static JSValue native_setInterval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
+    if (argc < 1) return JS_UNDEFINED;
+    
+    if (!activeIntervals) {
+        activeIntervals = [[NSMutableDictionary alloc] init];
+        activeTargets = [[NSMutableDictionary alloc] init]; // Initialize here
+    }
+    
+    double delayMs = 0;
+    if (argc > 1) {
+        JS_ToFloat64(ctx, &delayMs, argv[1]);
+    }
+    
+    JSValue callback = JS_DupValue(ctx, argv[0]);
+    int intervalId = nextIntervalId++;
+    
+    QJSTimerTarget *target = [[QJSTimerTarget alloc] init];
+    target.ctx = ctx;
+    target.callback = callback;
+    target.isRepeating = YES;
+    target.intervalId = intervalId;
+    
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:(delayMs / 1000.0)
+                                                      target:target
+                                                    selector:@selector(timerFired:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+    
+    activeIntervals[@(intervalId)] = timer;
+    activeTargets[@(intervalId)] = target; // Track the target explicitly
+    
+    return JS_NewInt32(ctx, intervalId);
+}
+
+static JSValue native_clearInterval(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) {
+    if (argc < 1 || !activeIntervals) return JS_UNDEFINED;
+    
+    int32_t intervalId;
+    if (JS_ToInt32(ctx, &intervalId, argv[0]) < 0) return JS_UNDEFINED;
+    
+    NSNumber *key = @(intervalId);
+    NSTimer *timer = activeIntervals[key];
+    QJSTimerTarget *target = activeTargets[key];
+    
+    if (target) {
+        // Safely free the JS callback reference
+        JS_FreeValue(ctx, target.callback);
+        [activeTargets removeObjectForKey:key];
+    }
+    
+    if (timer) {
+        [timer invalidate];
+        [activeIntervals removeObjectForKey:key];
+    }
+    
+    return JS_UNDEFINED;
+}
+static JSValue native_fetch(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    NSLog(@"fetch :D");
+    if (argc < 1) return JS_UNDEFINED;
+
+    // 1. Parse the URL
+    const char *urlCStr = JS_ToCString(ctx, argv[0]);
+    if (!urlCStr) return JS_UNDEFINED;
+    NSString *urlString = [NSString stringWithUTF8String:urlCStr];
+    JS_FreeCString(ctx, urlCStr);
+
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"GET"]; // Default fallback
+
+    // 2. Parse Options Object (Method, Headers, Body) if provided
+    if (argc > 1 && JS_IsObject(argv[1])) {
+        JSValue options = argv[1];
+
+        // Parse HTTP Method
+        JSValue methodVal = JS_GetPropertyStr(ctx, options, "method");
+        if (!JS_IsUndefined(methodVal) && !JS_IsNull(methodVal)) {
+            const char *methodCStr = JS_ToCString(ctx, methodVal);
+            if (methodCStr) {
+                [request setHTTPMethod:[NSString stringWithUTF8String:methodCStr]];
+                JS_FreeCString(ctx, methodCStr);
+            }
+        }
+        JS_FreeValue(ctx, methodVal);
+
+        // Parse HTTP Body
+        JSValue bodyVal = JS_GetPropertyStr(ctx, options, "body");
+        if (!JS_IsUndefined(bodyVal) && !JS_IsNull(bodyVal)) {
+            const char *bodyCStr = JS_ToCString(ctx, bodyVal);
+            if (bodyCStr) {
+                NSData *bodyData = [[NSString stringWithUTF8String:bodyCStr] dataUsingEncoding:NSUTF8StringEncoding];
+                [request setHTTPBody:bodyData];
+                JS_FreeCString(ctx, bodyCStr);
+            }
+        }
+        JS_FreeValue(ctx, bodyVal);
+
+        // Parse Headers (Basic support for flat JS objects)
+        JSValue headersVal = JS_GetPropertyStr(ctx, options, "headers");
+        if (JS_IsObject(headersVal)) {
+            // If it's a standard JS object, pass standard content types
+            // Botguard usually needs application/json or text/plain
+            [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        }
+        JS_FreeValue(ctx, headersVal);
+    }
+
+    // 3. Perform the Synchronous Network Request safely within the runtime loop
+    NSError *error = nil;
+    NSURLResponse *response = nil;
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+
+    if (error || !data) {
+        NSLog(@"[TubeReplacer] Native fetch network failed for: %@", urlString);
+        // Return a rejected promise if the network drops completely
+        JSValue globalObj = JS_GetGlobalObject(ctx);
+        JSValue promiseClass = JS_GetPropertyStr(ctx, globalObj, "Promise");
+        JSValue rejectFunc = JS_GetPropertyStr(ctx, promiseClass, "reject");
+        JSValue errorMsg = JS_NewString(ctx, "Network request failed");
+        JSValueConst args[1] = { errorMsg };
+        JSValue rejectedPromise = JS_Call(ctx, rejectFunc, promiseClass, 1, args);
+        
+        JS_FreeValue(ctx, globalObj);
+        JS_FreeValue(ctx, promiseClass);
+        JS_FreeValue(ctx, rejectFunc);
+        JS_FreeValue(ctx, errorMsg);
+        return rejectedPromise;
+    }
+
+    // 4. Construct the response string payload
+    NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if (!responseString) responseString = @"";
+    const char *resCStr = [responseString UTF8String];
+
+    // 5. Create a standard compliant Response shim mock
+    JSValue responseObj = JS_NewObject(ctx);
+    JSValue textData = JS_NewString(ctx, resCStr);
+    JS_SetPropertyStr(ctx, responseObj, "_textValue", textData);
+    
+    // Set typical status properties botguard might check
+    NSInteger statusCode = [response isKindOfClass:[NSHTTPURLResponse class]] ? [(NSHTTPURLResponse *)response statusCode] : 200;
+    JS_SetPropertyStr(ctx, responseObj, "status", JS_NewInt32(ctx, (int32_t)statusCode));
+    JS_SetPropertyStr(ctx, responseObj, "ok", JS_NewBool(ctx, statusCode >= 200 && statusCode < 300));
+
+    // .text() implementation returning a Promise
+    NSString *promiseShim = @"function() { return Promise.resolve(this._textValue); }";
+    JSValue textFunc = JS_Eval(ctx, [promiseShim UTF8String], strlen([promiseShim UTF8String]), "<input>", JS_EVAL_TYPE_GLOBAL);
+    JS_SetPropertyStr(ctx, responseObj, "text", textFunc);
+
+    // .json() implementation returning a parsed Promise
+    NSString *jsonShim = @"function() { return Promise.resolve(JSON.parse(this._textValue)); }";
+    JSValue jsonFunc = JS_Eval(ctx, [jsonShim UTF8String], strlen([jsonShim UTF8String]), "<input>", JS_EVAL_TYPE_GLOBAL);
+    JS_SetPropertyStr(ctx, responseObj, "json", jsonFunc);
+
+    // Wrap your response object wrapper back up into a resolved Promise
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue promiseClass = JS_GetPropertyStr(ctx, globalObj, "Promise");
+    JSValue resolveFunc = JS_GetPropertyStr(ctx, promiseClass, "resolve");
+    
+    JSValueConst args[1] = { responseObj };
+    JSValue promiseResult = JS_Call(ctx, resolveFunc, promiseClass, 1, args);
+    
+    // Clean up
+    JS_FreeValue(ctx, globalObj);
+    JS_FreeValue(ctx, promiseClass);
+    JS_FreeValue(ctx, resolveFunc);
+    JS_FreeValue(ctx, responseObj);
+    [responseString release];
+
+    return promiseResult;
+}
 -(BOOL)initJSEngine {
-    // cleanup prev. session
     if (self->_jsCtx) {
         JS_FreeContext(self->_jsCtx);
         self->_jsCtx = nil;
@@ -148,13 +372,26 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
         return NO;
     }
 
-
-    // i need console.log, its getting really annoying w/o
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue logFunc = JS_NewCFunction(ctx, native_nslog, "__nativeNSLog", 1);
     JS_SetPropertyStr(ctx, globalObj, "__nativeNSLog", logFunc);
-    JS_FreeValue(ctx, globalObj);
+    
+    JSValue setTimeoutFunc = JS_NewCFunction(ctx, (JSCFunction *)native_setTimeout, "setTimeout", 2);
+    JS_SetPropertyStr(ctx, globalObj, "setTimeout", setTimeoutFunc);
+    
+    JSValue setIntervalFunc = JS_NewCFunction(ctx, (JSCFunction *)native_setInterval, "setInterval", 2);
+    JS_SetPropertyStr(ctx, globalObj, "setInterval", setIntervalFunc);
+    
+    JSValue clearIntervalFunc = JS_NewCFunction(ctx, (JSCFunction *)native_clearInterval, "clearInterval", 1);
+    JS_SetPropertyStr(ctx, globalObj, "clearInterval", clearIntervalFunc);
+    JS_SetPropertyStr(ctx, globalObj, "clearTimeout", JS_DupValue(ctx, clearIntervalFunc));
+
+    JSValue fetchFunc = JS_NewCFunction(ctx, native_fetch, "__native_fetch", 1);
+    JS_SetPropertyStr(ctx, globalObj, "__native_fetch", fetchFunc);
+
     js_std_eval_binary(ctx, qjsc_botguard_js, qjsc_botguard_js_size, JS_EVAL_TYPE_GLOBAL);
+
+    JS_FreeValue(ctx, globalObj);
     self->_jsCtx = ctx;
     self->_jsRuntime = rt;
     return YES;
@@ -165,61 +402,60 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
     NSDate *start = [NSDate date];
     if (!self->_jsRuntime || !self->_jsCtx) {
         BOOL didInitVM = [self initJSEngine];
-        if (!didInitVM) {
-            return;
-        }
+        if (!didInitVM) return;
     }
     JSContext *ctx = self->_jsCtx;
+    JSRuntime *rt = JS_GetRuntime(ctx);
     
+    // Alias window to globalThis to prevent ReferenceErrors
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JS_SetPropertyStr(ctx, globalObj, "window", JS_DupValue(ctx, globalObj));
+
     const char *challengeCode = [self->_safeScript UTF8String];
-    size_t challengeCodeLen = strlen(challengeCode);
-    JSValue challengeCodeResult = JS_Eval(ctx, challengeCode, challengeCodeLen, "<input>", JS_EVAL_TYPE_GLOBAL);
+    JSValue challengeCodeResult = JS_Eval(ctx, challengeCode, strlen(challengeCode), "<input>", JS_EVAL_TYPE_GLOBAL);
     JS_FreeValue(ctx, challengeCodeResult);
-    NSLog(@"challenge vm addded at %f", [start timeIntervalSinceNow]);
 
+    NSString *checkForToken = [NSString stringWithFormat:@"globalThis.fetchIntegretyChallengeResp2('%@','%@');", self->_globalName, self->_program]; 
+    JSValue tokenPromise = JS_Eval(ctx, [checkForToken UTF8String], strlen([checkForToken UTF8String]), "<input>", JS_EVAL_TYPE_GLOBAL);
 
-    NSString *checkForToken = [NSString stringWithFormat:
-        @"globalThis.fetchIntegretyChallengeResp('%@','%@');", self->_globalName, self->_program]; 
-    const char *checkForTokenStr = [checkForToken UTF8String];
-    size_t checkForTokenStrLen = strlen(checkForTokenStr);
-    JSValue tokenPromise = JS_Eval(ctx, checkForTokenStr, checkForTokenStrLen, "<input>", JS_EVAL_TYPE_GLOBAL);
-
-    // async BS
+    // Keep pumping the job queue until token is found or timeout occurs (e.g., 5 seconds)
     JSContext *ctx1;
     int err;
-    while ((err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1)) > 0) {
-        // wheeeee!
-    }
+    BOOL tokenFound = NO;
+    NSDate *timeoutDate = [NSDate dateWithTimeIntervalSinceNow:80.0];
 
-    JSValue globalObj = JS_GetGlobalObject(ctx);
-
-    JSValue tokenVal = JS_GetPropertyStr(ctx, globalObj, "finalTokenOutput");
-
-    NSString *botguard_challenge_resp = nil;
-    if (!JS_IsUndefined(tokenVal) && !JS_IsNull(tokenVal)) {
-
-        const char *tokenCStr = JS_ToCString(ctx, tokenVal);
-        botguard_challenge_resp = [[NSString stringWithFormat:@"%s", tokenCStr] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
-        JS_FreeCString(ctx, tokenCStr);
-    } else {
-        NSLog(@"Error: nothing was returned!!!");
+    while ([timeoutDate timeIntervalSinceNow] > 0 && !tokenFound) {
+        
+        // 1. Run the native RunLoop briefly to allow NSTimers to fire on this thread
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+        
+        // 2. Run all pending JS Microtasks generated by timers or promises
+        while ((err = JS_ExecutePendingJob(rt, &ctx1)) > 0) {
+            // Processing...
+        }
+        
+        // 3. Check for token condition
+        JSValue tokenVal = JS_GetPropertyStr(ctx, globalObj, "finalTokenOutput");
+        if (!JS_IsUndefined(tokenVal) && !JS_IsNull(tokenVal)) {
+            // ... handle success ...
+            tokenFound = YES;
+        }
         JS_FreeValue(ctx, tokenVal);
-        JS_FreeValue(ctx, globalObj);
-        JS_FreeValue(ctx, tokenPromise);
-        return;
     }
 
-    JS_FreeValue(ctx, tokenVal);
+    if (!tokenFound) {
+        NSLog(@"Error: Execution timed out or no token returned.");
+    } else if ([self->_botguardResponse hasPrefix:@"error"]) {
+        NSLog(@"An error occurred inside JS VM: %@", self->_botguardResponse);
+    } else {
+        NSLog(@"Base integrity solved successfully at %f", [start timeIntervalSinceNow]);
+    }
+
+    // Clean up all references
     JS_FreeValue(ctx, globalObj);
     JS_FreeValue(ctx, tokenPromise);
-
-    if ([botguard_challenge_resp hasPrefix:@"error"]) {
-        NSLog(@"An error occured with solving BotGuard! %@", botguard_challenge_resp);
-    }
-    NSLog(@"base integrity solved at %f", [start timeIntervalSinceNow]);
-    self->_botguardResponse = botguard_challenge_resp;
-    NSLog(@"botguard response -> %@", botguard_challenge_resp);
 }
+
 
 -(void)createPOTokenMinter {
     if (!self->_jsRuntime || !self->_jsCtx) {
@@ -361,6 +597,20 @@ static JSValue native_nslog(JSContext *ctx, JSValueConst this_val, int argc, JSV
 }
 
 -(void)dealloc {
+    for (NSNumber *key in [activeTargets allKeys]) {
+        QJSTimerTarget *target = activeTargets[key];
+        if (target) {
+            JS_FreeValue(self->_jsCtx, target.callback);
+        }
+    }
+    for (NSNumber *key in [activeIntervals allKeys]) {
+        NSTimer *timer = activeIntervals[key];
+        [timer invalidate];
+    }
+
+        [activeIntervals removeAllObjects];
+        [activeTargets removeAllObjects];
+
     if (self->_jsCtx)
         JS_FreeContext(self->_jsCtx);
     if (self->_jsRuntime)

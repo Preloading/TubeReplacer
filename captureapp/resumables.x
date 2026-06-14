@@ -54,7 +54,9 @@
 
         NSLog(@"got botguard challenge!");
         // [tokenSolver initJSEngine];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [tokenSolver solveIntegrityToken];
+        });
         
     } auth:[[%c(KUUserAuthenticator) sharedInstance] authentication] isStudio:YES]; 
         // if (!result) {
