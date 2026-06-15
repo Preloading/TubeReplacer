@@ -91,6 +91,15 @@ static void compat_check() {
             }
         }
     }
+    if ([version() characterAtIndex:0] != '1') {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Compatibility Alert"
+                                                message:@"YouTube versions above 1.4.0 are not supported on this version of TubeReplacer. Either check for an update to TubeReplacer, or downgrade to an earlier version of YouTube. You can install compatible YouTube versions through the \"Install YouTube\" section in the Cydia description."
+                                            delegate:nil
+                                    cancelButtonTitle:@"OK"
+                                    otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }
 }
 
 %hook YTGDataService
