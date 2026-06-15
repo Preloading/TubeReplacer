@@ -121,17 +121,19 @@
                     double dur = [[textBlock valueOfAttributeNamed:@"d"] doubleValue];
                     double endDuration = start + dur;
 
-                    NSString *textContent = nil;
+                    NSString *textContent = [textBlock text];
 
-                    YTTBXMLElement *textElement = [textBlock childElementNamed:@"s"];
+                    if ([textContent isEqualToString:@""]) {
+                        YTTBXMLElement *wordElement = [textBlock childElementNamed:@"s"];
 
-                    while (textElement != nil) { 
-                        if (textContent) {
-                            textContent = [NSString stringWithFormat:@"%@ %@",textContent, [textElement text]];
-                        } else {
-                            textContent = [textElement text];
+                        while (wordElement != nil) { 
+                            if (textContent) {
+                                textContent = [NSString stringWithFormat:@"%@ %@",textContent, [wordElement text]];
+                            } else {
+                                textContent = [wordElement text];
+                            }
+                            wordElement = [wordElement nextSiblingNamed:@"s"];
                         }
-                        textElement = [textElement nextSiblingNamed:@"s"];
                     }
                     
                     NSError *error = nil;

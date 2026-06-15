@@ -591,7 +591,10 @@
     // Duration from lengthText
     NSString *durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"lengthText.runs[0].text"];
     if ([dataType isEqualToString:@"lockupViewModel"]) {
+        durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.overlays[0].thumbnailOverlayBadgeViewModel.thumbnailBadges[0].thumbnailBadgeViewModel.text"];
+        if (durationText == nil) {
             durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.overlays[0].thumbnailBottomOverlayViewModel.badges[0].thumbnailBadgeViewModel.text"];
+        }
     }
     long duration = [TRJSONUtils secondsFromDurationText:durationText];
     
@@ -971,15 +974,17 @@
         // Navigate to the like button data in /next response
         NSDictionary *resultContents = nextData[@"next"][@"contents"][@"singleColumnWatchNextResults"][@"results"][@"results"][@"contents"];
         
-
-        BOOL hasLikeDataAlready = false;
+        double dislikeRatio = 0;
         if (nextData[@"dislikes"]) {
+            long rawLikes = [nextData[@"dislikes"][@"rawLikes"] longLongValue];
+            long rawDislikes = [nextData[@"dislikes"][@"rawDislikes"] longLongValue];
+            dislikeRatio = rawDislikes/rawLikes;
+            NSLog(@"(raw) dislikes -> %ld, likes -> %ld, dislikeRatio -> %f", rawDislikes, rawLikes, dislikeRatio);
             [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:l(@"dislikesCount")];
             [video setValue:nextData[@"dislikes"][@"likes"] forKey:l(@"likesCount")];
             // NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"uploadedDate_"];
             // [video setValue:[TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]] forKey:@"publishedDate_"];
-            hasLikeDataAlready = true;
         }
 
         // like & upload date
@@ -1025,17 +1030,18 @@
                                 }
                             }
                         }
-                        
-                        if (!hasLikeDataAlready) {
-                            // Extract like count
-                            NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
+                    }
+                    
+                    // Extract like count
+                    NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
 
-                            if (accessibilityText) { 
-                                NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                                long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
-                                if (likes > 0) {
-                                    [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
-                                }
+                    if (accessibilityText) { 
+                        NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
+                        if (likes > 0) {
+                            [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
+                            if (dislikeRatio != 0) {
+                                [video setValue:[NSNumber numberWithLong:likes*dislikeRatio] forKey:l(@"dislikesCount")];
                             }
                         }
                         break;

@@ -29,8 +29,8 @@
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
-        client = [YoutubeClientType iosClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
     }
 
     return [self requestWithURL:fullURL 
@@ -50,8 +50,8 @@
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
-        client = [YoutubeClientType iosClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
     }
 
     return [self requestWithURL:fullURL 
@@ -67,8 +67,8 @@
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {
-        client = [YoutubeClientType iosClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
     }
 
     return [self requestWithURL:fullURL 
@@ -160,7 +160,8 @@
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setHTTPBody:[TRRequestBuilder nextBodyWithVideoId:videoId 
                                                         client:[YoutubeClientType webMobileClient]]];
-    
+    // TODO: figure out how to get authentication here
+    // [authentication authorizeNSRequest:&request];
     NSURLResponse *response = nil;
     NSError *reqError = nil;
     NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&reqError];

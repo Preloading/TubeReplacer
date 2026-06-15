@@ -388,6 +388,11 @@
     items = [TRJSONUtils arrayFromJSON:json 
         keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.contents"];
     if (items) return items;
+
+    // Playlists v2
+    items = [TRJSONUtils arrayFromJSON:json 
+        keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents"];
+    if (items) return items;
     
     // Standard browse section list
     items = [TRJSONUtils arrayFromJSON:json 
