@@ -709,7 +709,7 @@
 			<key>key</key>
 			<string>UseRTYDL</string>
 			<key>label</key>
-			<string>Use RTYDL</string>
+			<string>Use RYTDL</string>
 			<key>default</key>
 			<true/>
 		</dict>
