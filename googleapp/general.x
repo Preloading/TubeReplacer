@@ -73,10 +73,30 @@ static void analytics() {
         
     });
 }
+static void compat_check() {
+    // ipad ios 9+ check
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        if (([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"] || [version() isEqualToString:@"1.2.1"])) {
+            NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
+            if ([systemVersion floatValue] >= 9.0) {
+
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Compatibility Alert"
+                                                        message:@"iOS 9 and above on iPad have issues when on YouTube versions 1.2.1 and below. It is highly recommended to update to YouTube 1.3.0 or above for complete functionality. See \"Known Issues\" in TubeReplacer\'s cydia description for further info. You can install newer YouTube versions through the \"Install YouTube\" section in the Cydia description."
+                                                    delegate:nil
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:nil];
+                [alert show];
+                [alert release];
+            }
+        }
+    }
+}
 
 %hook YTGDataService
 -(YTGDataService*)initWithOperationQueue:(id)a3 HTTPFetcherService:(id)a4 deviceAuthorizer:(id)a5 userAuthenticator:(id)a6 {
     id orig = %orig();
+    compat_check();
     analytics();
     if (orig) {
         objc_setAssociatedObject(orig, @"channelCache_", [[%c(YTCache) alloc] initWithExpirationInterval:1086070784 countLimit:500], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -87,6 +107,7 @@ static void analytics() {
 // 1.1.0
 -(YTGDataService*)initWithOperationQueue:(id)a3 HTTPFetcherService:(id)a4 deviceAuthorizer:(id)a5 userAuth:(id)a6 requestFactory:(id)a7 {
     id orig = %orig();
+    compat_check();
     analytics();
     if (orig) {
         objc_setAssociatedObject(orig, @"channelCache_", [[%c(YTCache) alloc] initWithExpirationInterval:1086070784 countLimit:500], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -97,6 +118,7 @@ static void analytics() {
 // 1.2.1+
 -(YTGDataService*)initWithOperationQueue:(id)a3 HTTPFetcherService:(id)a4 deviceAuthorizer:(id)a5 requestFactory:(id)a7 {
     id orig = %orig();
+    compat_check();
     analytics();
     if (orig) {
         id channelCache = [[%c(YTCache) alloc] initWithExpirationInterval:1086070784 countLimit:500];
