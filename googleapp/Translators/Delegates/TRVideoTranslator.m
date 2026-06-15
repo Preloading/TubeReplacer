@@ -589,7 +589,7 @@
     // Duration from lengthText
     NSString *durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"lengthText.runs[0].text"];
     if ([dataType isEqualToString:@"lockupViewModel"]) {
-            durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.overlays[0].thumbnailBottomOverlayViewModel.badges[0].thumbnailBadgeViewModel.text"];
+            durationText = [TRJSONUtils stringFromJSON:videoData keyPath:@"contentImage.thumbnailViewModel.overlays[0].thumbnailOverlayBadgeViewModel.thumbnailBadges[0].thumbnailBadgeViewModel.text"];
     }
     long duration = [TRJSONUtils secondsFromDurationText:durationText];
     
