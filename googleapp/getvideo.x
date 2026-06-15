@@ -27,11 +27,11 @@
     GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
-    // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    // if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {  // adaptive is completely dead
-    //     client = [YoutubeClientType iosClient];
-    // }
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
+    }
 
     return [self requestWithURL:fullURL 
                  authentication:nil 
@@ -48,11 +48,11 @@
     GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
-    // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    // if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) {  // adaptive is completely dead
-    //     client = [YoutubeClientType iosClient];
-    // }
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
+    }
 
     return [self requestWithURL:fullURL 
                  authentication:nil 
@@ -65,11 +65,11 @@
     GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
     NSURL *fullURL = [urlBuilder URL];
 
-    // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *client = [YoutubeClientType androidClient];
-    // if ([preferences[@"StreamType"] isEqualToString:@"adaptive"]) { // adaptive is completely dead
-    //     client = [YoutubeClientType iosClient];
-    // }
+    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
+        client = [YoutubeClientType androidVrClient];
+    }
 
     return [self requestWithURL:fullURL 
                  authentication:authentication 

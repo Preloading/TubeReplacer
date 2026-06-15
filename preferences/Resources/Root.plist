@@ -668,7 +668,7 @@
 			<key>label</key>
 			<string>Video</string>
 			<key>footerText</key>
-			<string>Adaptive allows qualities higher &amp; lower qualities, however it can fail if your IP is untrustworthy.&#10;There is no known way to fix this. &#10;360p is more reliable, but is stuck at 360p.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1-1.3.0 for now.</string>
+			<string>Adaptive has broken recently, and has been removed from this list.&#10;360p is more reliable, but is stuck at 360p.&#10;360 VR impersonates a VR client, cannot play videos labeled for kids.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1-1.3.0 for now.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -685,15 +685,16 @@
 			<string>PSListItemsController</string>
 			<key>validValues</key>
 			<array>
-				<string>adaptive</string>
 				<string>360p</string>
+				<string>360pvr</string>
 				<string>tuberepair</string>
 				<string>custom</string>
 			</array>
 			<key>validTitles</key>
 			<array>
-				<string>Adaptive</string>
+				<!-- <string>Adaptive</string> -->
 				<string>360p</string>
+				<string>360p (VR)</string>
 				<string>kevinf100's tuberepair server</string>
 				<string>Custom</string>
 			</array>
@@ -726,7 +727,7 @@
 			<key>default</key>
 			<true/>
 		</dict>
-		<dict>
+		<!-- <dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>default</key>
@@ -739,7 +740,7 @@
 			<string>Use dubbed audio</string>
 			<key>default</key>
 			<true/>
-		</dict>
+		</dict> -->
 		<dict>
 			<key>cell</key>
 			<string>PSEditTextCell</string>

@@ -11,11 +11,9 @@
     if (!_specifiers) {
         NSMutableArray *specs = [[self loadSpecifiersFromPlistName:@"Root" target:self] mutableCopy];
         
-        // Check current preference value
         NSDictionary *prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        NSString *selectedValue = [prefs objectForKey:@"StreamType"] ?: @"adaptive";
+        NSString *selectedValue = [prefs objectForKey:@"StreamType"] ?: @"360p";
         
-        // Only show text field if "custom" is selected
         if (![selectedValue isEqualToString:@"custom"]) {
             NSInteger indexToRemove = NSNotFound;
             for (NSInteger i = 0; i < specs.count; i++) {
