@@ -151,6 +151,29 @@
     
     // Playlist items (find the "Playlists" tab)
     if ([parser isKindOfClass:[%c(YTPlaylistParser) class]]) {
+
+        NSMutableArray *searchPlaylist = [[TRJSONUtils arrayFromJSON:bodyDict 
+            keyPath:@"contents.sectionListRenderer.contents[0].itemSectionRenderer.contents"] mutableCopy];
+        if (!searchPlaylist) {
+            searchPlaylist = [[TRJSONUtils arrayFromJSON:bodyDict 
+                keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents"] mutableCopy];
+        }
+        if (searchPlaylist) {
+            NSDictionary *continueStuff = [TRJSONUtils dictFromJSON:bodyDict 
+                keyPath:@"contents.sectionListRenderer.contents[1]"];
+            if (!continueStuff) {
+                continueStuff = [TRJSONUtils dictFromJSON:bodyDict 
+                keyPath:@"onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1]"];
+            }
+            
+            if (continueStuff && continueStuff[@"continuationItemRenderer"]) {
+                [searchPlaylist addObject:continueStuff];
+            }
+            return [searchPlaylist copy];
+        } 
+
+
+
         NSArray *items = [TRJSONUtils arrayFromJSON:bodyDict 
             keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
         if (items) return items;

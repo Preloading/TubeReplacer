@@ -164,3 +164,75 @@ static void compat_check() {
 }
     
 %end
+
+
+%hook NSAssertionHandler
+    
+- (void) handleFailureInFunction:(NSString *) functionName 
+                            file:(NSString *) fileName 
+                      lineNumber:(NSInteger) line 
+                     description:(NSString *) format {
+    NSLog(@"Assert failed! Function %@ @ %@:%i, %@",functionName,fileName,(int)line,format);
+    return %orig;
+}
+
+- (void)handleFailureInMethod:(SEL)selector 
+                        object:(id)object 
+                          file:(NSString *)fileName 
+                    lineNumber:(NSInteger)line 
+                   description:(NSString *)format, ... {
+    
+    va_list args;
+    va_start(args, format);
+    NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
+    va_end(args);
+
+    NSLog(@"[GTM-Assert-Hook] Method: %@ | File: %@:%ld | Error: %@", 
+          NSStringFromSelector(selector), 
+          fileName.lastPathComponent, 
+          (long)line, 
+          description);
+
+    %orig;
+}
+
+%end
+
+// todo: so i don't forget this, i want to find a way of selectively blocking this.
+%hook YTItemListHeader 
+
+-(BOOL)itemCountHidden {
+    return YES;
+}
+
+%end
+
+
+%hook YTItemListHeader
+-(void)setItemCount:(unsigned int)count
+{
+    // NSLog(@"the count is %i",count);
+    if (count == 2147483647) return;
+    return %orig;
+}
+%end
+#import <execinfo.h>
+
+
+
+%hook YTPage 
+-(int)totalResults
+{
+//       void *callstack[128];
+//   int frames = backtrace(callstack, 128);
+//   char **symbols = backtrace_symbols(callstack, frames);
+//   NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+//   for (int i = 0; i < frames; i++) {
+//   [callstackString appendFormat:@"%s\n", symbols[i]];
+//   }
+    // NSLog(@"%@", callstackString);
+    int orig = %orig;
+    NSLog(@"total results 2 = %i", orig);
+    return orig;
+}
+%end

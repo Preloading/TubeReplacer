@@ -6,6 +6,8 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = TubeReplacerGoogle
 
+GOOGLE_APP = 1
+
 TubeReplacerGoogle_FILES = polyfill.x \
 	signin.x \
 	deviceauth.x \
@@ -42,6 +44,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
+
 
 before-all::
 	rm signinpolyfil.h || true

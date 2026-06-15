@@ -66,6 +66,7 @@
 @interface YTGuideFeedController: YTFeedController
 - (void)loadAccountThumbnail;
 - (void)handleEntries:(id)fp8;
+- (void)updateAccountCell:(id)fp8;
 
 @end 
 
@@ -1132,8 +1133,11 @@ typedef struct _TBXMLElement {
 
 // 1.1.0
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp12 age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
-// 1.2.1+
+// 1.2.1-1.4.0
 - (id)initWithDisplayName:(id)fp8 hasChannel:(BOOL)hasChannel channelID:(id)fp12 eligibleForChannel:(BOOL)eligibleForChannel googlePlusUserID:(id)googlePlusUserID age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
+// 2.0.0
+- (id)initWithDisplayName:(id)fp8 hasChannel:(BOOL)hasChannel channelID:(id)fp12 channelName:(NSString*)channelName eligibleForChannel:(BOOL)eligibleForChannel googlePlusUserID:(id)googlePlusUserID age:(unsigned int)fp16 thumbnailURL:(id)fp20 uploadsURL:(id)fp24 playlistsURL:(id)fp28 uploadedCount:(unsigned long long)fp32 favoritesCount:(unsigned long long)fp40 subscriptionsCount:(unsigned long long)fp48 uploadViewsCount:(unsigned long long)fp56 channelViewsCount:(unsigned long long)fp64 subscribersCount:(unsigned long long)fp72;
+
 @end
 
 @interface YTCache : NSObject
@@ -1224,6 +1228,7 @@ typedef struct _TBXMLElement {
 - (NSString*)datasyncID;
 - (NSString*)channelID;
 - (BOOL)authorizeNSRequest:(NSMutableURLRequest **)request;
+- (void)fillInTokenExtraDataWithParameters:(NSDictionary*)params;
 @end
 
 @interface YTPlaylistParser : YTTBParser
@@ -1465,4 +1470,13 @@ typedef struct _TBXMLElement {
 +(id)textForElement:(id)a3;
 
 
+@end
+
+
+@interface YTGuideTableView : NSObject
+-(id)cellForAccount;
+@end
+
+@interface YTGuideEntry : NSObject
+-(void)setAccessibilityLabel:(id)fp8;
 @end

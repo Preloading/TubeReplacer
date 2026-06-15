@@ -63,7 +63,7 @@
  * Build body for search endpoint
  */
 + (NSData *)searchBodyWithQuery:(NSString *)query
-                    channelOnly:(BOOL)channelOnly
+                    type:(int)type
                     sortBy:(int)sortBy  // 0 - relevance, 1 = rating, 2 = date, 3 = views
                     duration:(int)duration //duration 1 == under 4 minutes, 3 == 4-20 minutes, 2 == 20+ minutes
                     hasCC:(BOOL)hasCC

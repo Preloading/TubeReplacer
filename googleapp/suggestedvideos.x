@@ -30,6 +30,15 @@
                                                                client:[YoutubeClientType webMobileClient]]];
 }
 
+
+-(id)requestForRelatedVideosWithURL:(id)videoId safeSearch:(id)safeSearch count:(unsigned int)count {
+    // for now we are ignoring count
+    return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"] 
+                 authentication:nil 
+                           body:[TRRequestBuilder nextBodyWithVideoId:videoId 
+                                                               client:[YoutubeClientType webMobileClient]]];
+}
+
 %end
 
 #pragma mark - Request Dispatch

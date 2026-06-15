@@ -34,15 +34,14 @@
 // 1.2.1+
 -(void)loadSubtitlesTracksWithBlock:(void (^)(id))responseBlock
 {
-    YTSubtitlesService *service = nil; 
+    YTSubtitlesService *service = [self valueForKey:l(@"subtitlesService")];
 
-    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-        service = [(YTServices*)[self valueForKey:@"services_"] subtitlesService];
+    NSArray *trackURLs = nil;
+    if ([version() characterAtIndex:0] == '1') { // 1.X
+        trackURLs = [(YTVideo*)[self valueForKey:l(@"video")] subtitlesTracksURL];
     } else {
-        service = [self valueForKey:l(@"subtitlesService")];
+        trackURLs = [self valueForKey:@"_subtitlesTracksURL"];
     }
-    
-    NSArray *trackURLs = [(YTVideo*)[self valueForKey:l(@"video")] subtitlesTracksURL];
 
     [service performResponseBlock:^(id response)
     {

@@ -41,7 +41,7 @@
 
 -(void)makeCommentsRequest:(id)originalRequest responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     YTGDataRequest *request = nil;
-    
+    NSLog(@"requesting comments!!!!!!!!");
     if ([[originalRequest valueForKey:l(@"URL")] isKindOfClass:[TRContinuation class]]) {
         TRContinuation *continuation = [originalRequest valueForKey:l(@"URL")];
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
