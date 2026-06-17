@@ -9,10 +9,10 @@
 ###### it's like tuberepair but i replaced the whole backend of the app, instead of the server
 
 ## What is this?
-This is a cydia tweak that fixes the google youtube app, versions 1.0.0-1.3.0, in a form where it does not rely on a backend server. This allows for such luxuries as signin.
+This is a cydia tweak that fixes the google youtube app, versions 1.0.0-1.4.0, in a form where it does not rely on a backend server. This allows for such luxuries as signin.
 
 ## Versions
-Should work on iOS 5-iOS 9. Built with youtube versions 1.0.1, with that version being fully featured with minor execptions, however, it should work on 1.0.0-1.3.0, though some new features added in those versions may not work. If anything in this category is wrong, leave a github issue or contact me.
+Should work on iOS 5-iOS 10. Built with youtube versions 1.0.1, with that version being fully featured with minor execptions, however, it should work on 1.0.0-1.4.0, though some new features added in those versions may not work. If anything in this category is wrong, leave a github issue or contact me.
 
 ## What doesn't work
 - Purchases (bruh)
