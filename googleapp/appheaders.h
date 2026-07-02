@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 #include <UIKit/UIKit.h>
+#include <objc/NSObject.h>
 
 /// This is where we put headers that are used in more than one section/.x file
 
@@ -83,6 +84,10 @@
 + (id)appVersion;
 @end
 
+
+@interface YTUIUtils
++(NSString*)localizedCount:(uint64_t)count;
+@end
 
 @interface YTGDataRequest
 
@@ -413,6 +418,10 @@ typedef struct _TBXMLElement {
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 listed:(BOOL)listed categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
 // 1.4.0
 - (id)initWithID:(id)fp8 title:(id)fp12 description:(id)fp16 uploaderDisplayName:(id)fp20 uploaderChannelID:(id)fp24 uploadedDate:(id)fp28 publishedDate:(id)fp32 duration:(unsigned int)fp36 viewCount:(unsigned long long)fp40 likesCount:(unsigned long long)fp48 dislikesCount:(unsigned long long)fp56 ratingAllowed:(BOOL)ratingAllowed state:(id)fp64 streams:(id)fp68 thumbnailURLs:(id)fp72 subtitlesTracksURL:(id)fp76 commentsAllowed:(BOOL)fp80 commentsURL:(id)fp84 commentsCountHint:(unsigned long long)fp88 relatedURL:(id)fp96 claimed:(BOOL)fp100 monetized:(BOOL)fp104 monetizedCountries:(id)fp108 listed:(BOOL)listed categoryLabel:(id)fp120 categoryTerm:(id)fp124 adultContent:(BOOL)fp132 editURL:(id)editURL paidContent:(BOOL)paidContent privateContent:(BOOL)privateContent videoPro:(id)fp136 liveEventURL:(id)liveEventURL currentViewers:(int)currentViewers;
+
+// no clue
+- (BOOL)isLive;
+
 @end
 
 @interface YTVideoState : NSObject
@@ -1525,3 +1534,49 @@ typedef struct _TBXMLElement {
 @interface YTGuideEntry : NSObject
 -(void)setAccessibilityLabel:(id)fp8;
 @end
+
+@interface YTColor : NSObject
++ (id)XLightTextColor;
++ (id)lightTextColor;
++ (id)mediumTextColor;
++ (id)darkTextColor;
++ (id)XDarkTextColor;
+
+@end
+
+@interface UIFont (YouTube)
++(id)XSmallLightFont;
++(id)mediumLightFont;
++(id)smallLightFont;
++(id)linkColor;
+@end
+
+@interface UIColor (YouTube)
++(id)backgroundDarkColor;
++(UIColor*)colorWith8BitRed:(int)red green:(int)green blue:(int)blue;
+@end
+
+@interface YTAttributedTextLabel : NSObject
+{
+    struct __CFAttributedString *attributedString_;
+    struct CGSize cachedConstraintResult_;
+    struct CGSize cachedConstraint_;
+}
+
++ (id)attributesWithFont:(id)fp8 color:(id)fp12 paragraphSpacingBefore:(float)fp16 textAlignment:(unsigned char)fp20;
++ (id)attributesWithFont:(id)fp8 color:(id)fp12 paragraphSpacingBefore:(float)fp16;
+- (id)text;
+- (struct CGSize)sizeConstrainedToSize:(struct CGSize)fp8;
+- (void)appendTextWithFont:(id)fp8 color:(id)fp12 paragraphSpacingBefore:(float)fp16 format:(id)fp20;
+- (void)appendTextWithFont:(id)fp8 color:(id)fp12 format:(id)fp16;
+- (void)appendText:(id)fp8 withAttributes:(id)fp12;
+- (void)clearText;
+- (id)accessibilityLabel;
+- (void)drawRect:(struct CGRect)fp8;
+- (struct CGSize)sizeThatFits:(struct CGSize)fp8;
+- (void)dealloc;
+- (id)initWithFrame:(struct CGRect)fp8 shadowColor:(id)fp24 shadowOffset:(float)fp28;
+- (id)initWithFrame:(struct CGRect)fp8;
+
+@end
+

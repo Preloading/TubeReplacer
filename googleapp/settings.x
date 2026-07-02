@@ -43,10 +43,6 @@
 
 @end
 
-@interface UIColor (YouTube)
-+(id)backgroundDarkColor;
-@end
-
 @interface GIPWebViewController : NSObject
 + (BOOL)URLValidForSafari:(id)fp8;
 - (void)setClearHistoryOnLoad:(BOOL)fp8;
