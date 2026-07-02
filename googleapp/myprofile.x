@@ -35,7 +35,7 @@
 
 %hook YTGDataService 
 
--(void)makeMyUserProfileRequestWithAuth:(id)auth responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
+-(void)makeMyUserProfileRequestWithAuth:(GTMOAuth2Authentication*)auth responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id request;
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])  {
         request = [%c(YTGDataRequest) requestForMyUserProfileWithAuth:auth];
@@ -43,9 +43,120 @@
         request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForMyUserProfileWithAuth:auth];
 
     }
+
+    void (^originalResponseBlock)(id) = [responseBlock copy];
+    void (^newResponseBlock)(id) = ^(NSArray *accounts) {
+        if (!originalResponseBlock) return;
+        // kinda annoyed this has to exist, buh oh well.
+        NSDictionary *accountInfo = nil;
+        NSLog(@"[auth pageID] -> %@", [auth pageID]);
+        for (NSDictionary *account in accounts) {
+            // i hope this'll work
+            NSString *accountPageId = [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.serviceEndpoint.selectActiveIdentityEndpoint.supportedTokens[0].pageIdToken.pageId"];
+            if (![auth pageID] && !accountPageId) {
+                accountInfo = account[@"accountItem"];
+                break;
+            }
+            if ([accountPageId isEqualToString:[auth pageID]]) {
+                accountInfo = account[@"accountItem"];
+                break;
+            }
+        }
+
+        if (!accountInfo) {
+            NSLog(@"YTUserProfileParser: Could not find account info");
+            originalResponseBlock(nil);
+            return;
+        }
+        
+        NSString *displayName = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountName.simpleText"];
+        
+        NSString *channelHandle = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"channelHandle.simpleText"];
+        if ([channelHandle hasPrefix:@"@"]) {
+            channelHandle = [channelHandle substringFromIndex:1];
+        }
+        
+        NSString *bylineText = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountByline.simpleText"];
+        int subscribersCount = (int)[TRJSONUtils numberFromText:bylineText];
+        
+        NSString *thumbUrl = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountPhoto.thumbnails[0].url"];
+        NSURL *thumbnail = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
+        
+        YTUserProfile *profile = nil;
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+            profile = [[[%c(YTUserProfile) alloc] 
+                initWithUsername:channelHandle
+                displayName:displayName
+                age:0
+                thumbnailURL:thumbnail
+                uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+                playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+                uploadedCount:0
+                favoritesCount:0
+                subscriptionsCount:0
+                uploadViewsCount:0
+                channelViewsCount:0
+                subscribersCount:subscribersCount
+            ] autorelease];
+        } else if ([version() isEqualToString:@"1.1.0"])  {
+            profile = [[[%c(YTUserProfile) alloc] 
+                initWithDisplayName:displayName
+                channelID:channelHandle
+                age:0
+                thumbnailURL:thumbnail
+                uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+                playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+                uploadedCount:0
+                favoritesCount:0
+                subscriptionsCount:0
+                uploadViewsCount:0
+                channelViewsCount:0
+                subscribersCount:subscribersCount
+            ] autorelease];
+        } else if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.4.0"]) {
+            profile = [[[%c(YTUserProfile) alloc] 
+                initWithDisplayName:displayName
+                hasChannel:true // i mean probably lmao
+                channelID:channelHandle
+                eligibleForChannel:true // i mean i guess??????
+                googlePlusUserID:nil // google plus is colon three
+                age:0
+                thumbnailURL:thumbnail
+                uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+                playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+                uploadedCount:0
+                favoritesCount:0
+                subscriptionsCount:0
+                uploadViewsCount:0
+                channelViewsCount:0
+                subscribersCount:subscribersCount
+            ] autorelease];
+        } else { // 2.0.0
+            profile = [[[%c(YTUserProfile) alloc] 
+                initWithDisplayName:displayName
+                hasChannel:true // i mean probably lmao
+                channelID:channelHandle
+                channelName:displayName // I think channel name == display name?????
+                eligibleForChannel:true // i mean i guess??????
+                googlePlusUserID:nil // google plus is colon three
+                age:0
+                thumbnailURL:thumbnail
+                uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
+                playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
+                uploadedCount:0
+                favoritesCount:0
+                subscriptionsCount:0
+                uploadViewsCount:0
+                channelViewsCount:0
+                subscribersCount:subscribersCount
+            ] autorelease];
+        }
+        originalResponseBlock(profile);
+    };
+
     [self makeGETRequest:request 
               withParser:[self valueForKey:l(@"userProfileParser")] 
-           responseBlock:responseBlock 
+           responseBlock:newResponseBlock 
               errorBlock:errorBlock];
 }
 
@@ -92,98 +203,9 @@
     }
     
     NSDictionary *data = body;
-    // Extract account info from the multi-page menu structure
-    NSDictionary *accountInfo = [TRJSONUtils dictFromJSON:data 
-        keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem"];
-    
-    if (!accountInfo) {
-        NSLog(@"YTUserProfileParser: Could not find account info");
-        return nil;
-    }
-    
-    NSString *displayName = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountName.simpleText"];
-    
-    NSString *channelHandle = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"channelHandle.simpleText"];
-    if ([channelHandle hasPrefix:@"@"]) {
-        channelHandle = [channelHandle substringFromIndex:1];
-    }
-    
-    NSString *bylineText = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountByline.simpleText"];
-    int subscribersCount = (int)[TRJSONUtils numberFromText:bylineText];
-    
-    NSString *thumbUrl = [TRJSONUtils stringFromJSON:accountInfo keyPath:@"accountPhoto.thumbnails[0].url"];
-    NSURL *thumbnail = thumbUrl ? [NSURL URLWithString:thumbUrl] : nil;
-    
-    YTUserProfile *profile = nil;
-    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-        profile = [[[%c(YTUserProfile) alloc] 
-            initWithUsername:channelHandle
-            displayName:displayName
-            age:0
-            thumbnailURL:thumbnail
-            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
-            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
-            uploadedCount:0
-            favoritesCount:0
-            subscriptionsCount:0
-            uploadViewsCount:0
-            channelViewsCount:0
-            subscribersCount:subscribersCount
-        ] autorelease];
-    } else if ([version() isEqualToString:@"1.1.0"])  {
-        profile = [[[%c(YTUserProfile) alloc] 
-            initWithDisplayName:displayName
-            channelID:channelHandle
-            age:0
-            thumbnailURL:thumbnail
-            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
-            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
-            uploadedCount:0
-            favoritesCount:0
-            subscriptionsCount:0
-            uploadViewsCount:0
-            channelViewsCount:0
-            subscribersCount:subscribersCount
-        ] autorelease];
-    } else if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.4.0"]) {
-        profile = [[[%c(YTUserProfile) alloc] 
-            initWithDisplayName:displayName
-            hasChannel:true // i mean probably lmao
-            channelID:channelHandle
-            eligibleForChannel:true // i mean i guess??????
-            googlePlusUserID:nil // google plus is colon three
-            age:0
-            thumbnailURL:thumbnail
-            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
-            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
-            uploadedCount:0
-            favoritesCount:0
-            subscriptionsCount:0
-            uploadViewsCount:0
-            channelViewsCount:0
-            subscribersCount:subscribersCount
-        ] autorelease];
-    } else { // 2.0.0
-        profile = [[[%c(YTUserProfile) alloc] 
-            initWithDisplayName:displayName
-            hasChannel:true // i mean probably lmao
-            channelID:channelHandle
-            channelName:displayName // I think channel name == display name?????
-            eligibleForChannel:true // i mean i guess??????
-            googlePlusUserID:nil // google plus is colon three
-            age:0
-            thumbnailURL:thumbnail
-            uploadsURL:[NSURL URLWithString:@"https://youtube.com"]
-            playlistsURL:[NSURL URLWithString:@"https://youtube.com"]
-            uploadedCount:0
-            favoritesCount:0
-            subscriptionsCount:0
-            uploadViewsCount:0
-            channelViewsCount:0
-            subscribersCount:subscribersCount
-        ] autorelease];
-    }
-    return profile;
+    NSArray *accounts = [TRJSONUtils arrayFromJSON:data 
+        keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents"];
+    return accounts;
 }
 
 %end

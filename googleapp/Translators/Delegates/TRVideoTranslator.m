@@ -5,6 +5,7 @@
 // Handles both player responses and feed items
 
 #import "TRVideoTranslator.h"
+#include <Foundation/NSObjCRuntime.h>
 #import "TRJSONUtils.h"
 #import <objc/runtime.h>
 #import "../appheaders.h"
@@ -1030,22 +1031,24 @@
                                 }
                             }
                         }
+
+                        // Extract like count
+                        NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
+
+                        if (accessibilityText) { 
+                            NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                            long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
+                            if (likes > 0) {
+                                [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
+                                if (dislikeRatio != 0) {
+                                    [video setValue:[NSNumber numberWithLong:likes*dislikeRatio] forKey:l(@"dislikesCount")];
+                                }
+                            }
+                            break;
+                        }
                     }
                     
-                    // Extract like count
-                    NSString *accessibilityText = likeButtonVM[@"likeButtonViewModel"][@"toggleButtonViewModel"][@"toggleButtonViewModel"][@"defaultButtonViewModel"][@"buttonViewModel"][@"accessibilityText"];
-
-                    if (accessibilityText) { 
-                        NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                        long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
-                        if (likes > 0) {
-                            [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
-                            if (dislikeRatio != 0) {
-                                [video setValue:[NSNumber numberWithLong:likes*dislikeRatio] forKey:l(@"dislikesCount")];
-                            }
-                        }
-                        break;
-                    }
+                    
                 }
             }
         }

@@ -1218,6 +1218,46 @@ typedef struct _TBXMLElement {
 - (id)initWithDisplayName:(id)fp8 channelID:(id)fp16 type:(int)fp20 publishedDate:(id)fp24 updatedDate:(id)fp28 countHint:(unsigned long long)fp32 unreadCount:(unsigned long long)unreadCount editURL:(id)fp40 thumbnailURL:(id)fp44;
 @end
 
+
+
+@interface GTMOAuth2SignInInternal : GTMOAuth2SignIn
+{
+    NSString *authorizationEmail_;
+    NSString *authorizationTemplate_;
+    BOOL shouldUseLoginScope_;
+}
+
++ (id)defaultSourceString;
++ (id)tokenAuthURLWithAuthToken:(id)fp8 service:(id)fp12 source:(id)fp16 URLString:(id)fp20;
++ (id)dictionaryWithClientLoginResponseString:(id)fp8;
++ (void)fetchTokenAuthURLWithValues:(id)fp8 service:(id)fp12 source:(id)fp16 URLString:(id)fp20 completionHandler:(id)fp24;
++ (void)fetchAuthTokenWithValues:(id)fp8 service:(id)fp12 isSessionOnly:(BOOL)fp16 completionHandler:(id)fp24;
++ (void)fetchClientLoginValuesWithAuth:(id)fp8 service:(id)fp12 source:(id)fp16 completionHandler:(id)fp24;
++ (id)nativeClientRedirectURI;
++ (id)googleUserInfoURL;
++ (id)googleRevocationURL;
++ (id)googleTokenURL;
++ (id)googleAuthorizationURL;
++ (id)userInfoHost;
++ (void)setUserInfoHost:(id)fp8;
++ (id)authorizationHost;
++ (void)setAuthorizationHost:(id)fp8;
++ (id)accountsHost;
++ (void)setAccountsHost:(id)fp8;
+- (void)setShouldUseLoginScope:(BOOL)fp8;
+- (BOOL)shouldUseLoginScope;
+- (void)setAuthorizationTemplate:(id)fp8;
+- (id)authorizationTemplate;
+- (void)setAuthorizationEmail:(id)fp8;
+- (id)authorizationEmail;
+- (BOOL)cookiesChanged:(id)fp8;
+- (BOOL)titleChanged:(id)fp8;
+- (id)parametersForWebRequest;
+- (BOOL)startSigningIn;
+- (void)dealloc;
+
+@end
+
 /// EXTRA/MODIFIED HEADERS
 @interface GTMOAuth2Authentication (TubeReplacer)
 - (NSString*)sid;
@@ -1227,8 +1267,13 @@ typedef struct _TBXMLElement {
 - (NSString*)sapisid;
 - (NSString*)datasyncID;
 - (NSString*)channelID;
+- (NSString*)pageID;
 - (BOOL)authorizeNSRequest:(NSMutableURLRequest **)request;
 - (void)fillInTokenExtraDataWithParameters:(NSDictionary*)params;
+@end
+
+@interface GTMOAuth2SignInInternal (TubeReplacer)
+-(void)generateSelectAccountPageWithSID:(NSString*)sid hsid:(NSString*)hsid ssid:(NSString*)ssid sapisid:(NSString*)sapisid;
 @end
 
 @interface YTPlaylistParser : YTTBParser

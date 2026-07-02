@@ -141,7 +141,7 @@
 // @property (readonly, nonatomic) NSString *errorDescription; // ivar: _errorDescription
 // @property (readonly, nonatomic) NSURL *errorURI; // ivar: _errorURI
 
-    [authAdvice setValue:[NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"] forKey:l(@"URI")];
+    [authAdvice setValue:[NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/ytscframe&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"] forKey:l(@"URI")];
     [authAdvice setValue:@(2) forKey:l(@"adviceCode")]; // 2 = embeeded
     [authAdvice setValue:@"ChIiEAiDoPbg0jIQ-tua6twzGCESAzAuMQ" forKey:l(@"clientState")]; // i don't know what this does....
 
@@ -301,22 +301,74 @@
 %hook GTMOAuth2SignInInternal
 
 +(NSURL*)googleAuthorizationURL {
-    return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/supported_browsers&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
+    return [NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/ytscframe&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"];
 }
 
+%new
+-(void)generateSelectAccountPageWithSID:(NSString*)sid hsid:(NSString*)hsid ssid:(NSString*)ssid sapisid:(NSString*)sapisid {
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/getAccountSwitcherEndpoint"]]; // thanks for asking, yes, it is the same as the user in myprofile.x. it doesn't include channel id, so we can't use this outright, would make my life easier tho.
+
+  NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+  [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+
+  [NSURLConnection sendAsynchronousRequest:request 
+                                      queue:[NSOperationQueue mainQueue] 
+                          completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+      NSString *htmlString = @"";
+      if (error) {
+          htmlString = [NSString stringWithFormat:@"<html><body>Something went wrong. %@", error];
+          NSLog(@"Error: %@", error.localizedDescription);
+      } else {
+          NSData *cleanData = [NSData dataWithBytes:([data bytes] + 5) length:([data length]-5)];
+          NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:NSJSONReadingMutableContainers error:nil];
+
+          NSArray *accounts = [TRJSONUtils arrayFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents"];
+
+          // int index = -1;
+          
+          NSMutableString *allAccountsHTML = [[NSMutableString alloc] init];
+          for (NSDictionary *account in accounts) {
+              if (![TRJSONUtils stringFromJSON:account keyPath:@"accountItem.accountName.simpleText"]) continue;
+              NSLog(@"account -> %@", account);
+              // index++;
+
+              NSString *pageId = [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.serviceEndpoint.selectActiveIdentityEndpoint.supportedTokens[0].pageIdToken.pageId"];
+              if (!pageId) {
+                pageId = @"None";
+              }
+
+              NSString *accountElement = [NSString stringWithFormat:@"<li class=\"active-session-account\">"
+                                  "<button onclick=\"javascript:selectAccount('%@')\">"
+                                  "<img class=\"account-image\" alt=\"\" src=\"%@\">" // photo
+                                  "<span class=\"account-name\">%@</span>" // name
+                                  "<span class=\"account-email\">%@</span>" // handle
+                                  "</button>"
+                                  "</li>", 
+                                  pageId,
+                                  [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.accountPhoto.thumbnails[0].url"],
+                                  [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.accountName.simpleText"],
+                                  [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.channelHandle.simpleText"]
+              ];
+
+              [allAccountsHTML appendString:accountElement];
+          }
+          NSError *err = nil;
+          NSString *baseHTML = [NSString stringWithContentsOfFile:@"/Library/Application Support/TubeReplacer/account_selector.html" encoding:NSUTF8StringEncoding error:&err];
+          htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_ACCOUNTS_FIELD }}" withString:allAccountsHTML];
+        }
+
+        NSLog(@"html string -> %@", htmlString);
+        // render
+        UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self valueForKey:l(@"delegate")] webView];
+        [webView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]];
+  }];
+
+  
+
+
+}
 
 -(BOOL)cookiesChanged:(GTMCookieStorage*)cookieStorage {
-//   void *authCookie; // r6
-//   authorizationURL; // r0
-//   id cookieName; // r0
-//   unsigned __int8 isSecure; // r1
-//   char result; // r0
-//   unsigned __int8 isHTTPOnly; // r1
-//   id cookieData; // r0
-//   code; // r4
-//   auth; // r0
-//   id cookies; // [sp+10h] [bp-7Ch]
-
 //   authCookie = 0;
     // NSURL *authorizationURL = [self authorizationURL];
     NSURL *authorizationURL = [NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID"];
@@ -327,6 +379,7 @@
     NSHTTPCookie *hsid = nil;
     NSHTTPCookie *ssid = nil;
     NSHTTPCookie *sapisid = nil;
+    NSHTTPCookie *pageid = nil;
     for (NSHTTPCookie* cookie in cookies) {
         NSString *cookieName = [cookie name];
         if ([cookieName isEqual:@"SID"]) {
@@ -344,6 +397,9 @@
         if ([cookieName isEqual:@"__Secure-3PAPISID"]) { // same value as sapisid
             sapisid = cookie;
         }
+        if ([cookieName isEqual:@"tubereplacer_account_selected"]) {
+            pageid = cookie;
+        }
     }
 
     NSLog(@"things");
@@ -359,15 +415,20 @@
     if (sapisid) {
         NSLog(@"sapisid: %@", [sapisid value]);
     }
+    NSLog(@"selected account -> %@", [pageid value]);
 
     BOOL result = 0;
     if (sid && hsid && ssid && sapisid) {
-        NSLog(@"SID: %@", [sid value]);
+        NSLog(@"SID: %@", [sid value]); 
         NSLog(@"HSID: %@", [hsid value]);
         NSLog(@"SSID: %@", [hsid value]);
         NSLog(@"SAPISID: %@", [sapisid value]);
 
-        // if ([sid isSecure])
+        if (pageid) {
+            NSString *pageIdValue = [pageid value];
+            if ([pageIdValue isEqualToString:@"None"]) {
+              pageIdValue = nil;
+            }
         // {
         //     result = 0;
         //     if ([sid isHTTPOnly])
@@ -379,7 +440,9 @@
                 @"SID":[sid value],
                 @"HSID":[hsid value],
                 @"SSID":[ssid value],
-                @"SAPISID":[sapisid value]
+                @"SAPISID":[sapisid value],
+                @"PAGE_ID":pageIdValue
+
             };
             GTMOAuth2Authentication *auth = [self authentication];
             [auth setKeysForResponseDictionary:code];
@@ -395,7 +458,14 @@
             [cookieStorage deleteCookie:sid];
             return 1;
             // }
-        // }
+        } else {
+          UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self valueForKey:l(@"delegate")] webView];
+          NSLog(@"current url -> %@", [[[webView request] URL] absoluteString]);
+          if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]) {
+            // we haven't selected an account yet, lets go prompt the user for it
+            [self generateSelectAccountPageWithSID:[sid value] hsid:[hsid value] ssid:[ssid value] sapisid:[sapisid value]];
+          }
+        }
     }
     return result;
 }
@@ -495,6 +565,11 @@ done:
   return [[[self identity] auth] channelID]; // im lazy and dont wanna change shit
 }
 
+%new
+-(NSString*)pageID {
+  return [[[self identity] auth] pageID]; // im lazy and dont wanna change shit
+}
+
 %end
 
 // clears all keychain items on start
@@ -559,6 +634,12 @@ done:
     return [parameters objectForKey:@"CHANNEL_ID"];
 }
 
+%new
+-(NSString*)pageID {
+    NSDictionary *parameters = [self parameters];
+    return [parameters objectForKey:@"PAGE_ID"];
+}
+
 
 // -(NSString*)userAgent {
 //     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
@@ -580,7 +661,7 @@ done:
 {
 
   NSLog(@"persistance string called!");
-  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:17];
+  NSMutableDictionary *data = [NSMutableDictionary dictionaryWithCapacity:18];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
   [data setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"access_token"];
 
@@ -593,6 +674,7 @@ done:
   [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
   [data setValue:[self channelID] forKey:@"CHANNEL_ID"];
+  [data setValue:[self pageID] forKey:@"PAGE_ID"];
   [data setValue:[self datasyncID] forKey:@"userID"]; // idk
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
@@ -611,10 +693,16 @@ done:
   NSString *hsid = [self hsid];
   NSString *ssid = [self ssid];
   NSString *sapisid = [self sapisid];
+  NSString *pageId = [self pageID];
+
 
     NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
     [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
     [request setValue:@"https://accounts.google.com/" forHTTPHeaderField:@"Referer"];
+    if (pageId) {
+      [request setValue:@"0" forHTTPHeaderField:@"X-Goog-AuthUser"];
+      [request setValue:pageId forHTTPHeaderField:@"X-Goog-PageId"];
+    }
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"User-Agent"];
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"user-agent"];
     
@@ -655,6 +743,7 @@ done:
 }
 
 // purpose is to get extra data which isn't included in the other requests. Mainly email & full name
+// TODO: this can probably be integrated into the new thing
 %new
 -(void)fillInTokenExtraDataWithParameters:(NSDictionary*)params {
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/getAccountSwitcherEndpoint"]]; // thanks for asking, yes, it is the same as the user in myprofile.x. it doesn't include channel id, so we can't use this outright, would make my life easier tho.
@@ -663,6 +752,7 @@ done:
     NSString *hsid = [self hsid];
     NSString *ssid = [self ssid];
     NSString *sapisid = [self sapisid];
+    NSString *pageId = [self pageID];
 
     NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
     [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
@@ -710,7 +800,19 @@ done:
           [params setValue:name forKey:@"fullName"];
         }
 
-        [params setValue:[TRJSONUtils stringFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem.accountPhoto.thumbnails[0].url"] forKey:@"avatar"];
+        NSArray *accounts = [TRJSONUtils arrayFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents"];
+        for (NSDictionary *account in accounts) {
+          // i hope this'll work
+          NSString *accountPageId = [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.serviceEndpoint.selectActiveIdentityEndpoint.supportedTokens[0].pageIdToken"];
+            if (!accountPageId && !pageId) {
+                [params setValue:[TRJSONUtils stringFromJSON:account keyPath:@"accountItem.accountPhoto.thumbnails[0].url"] forKey:@"avatar"];
+                break;
+            }
+            if ([accountPageId isEqualToString:pageId]) {
+              [params setValue:[TRJSONUtils stringFromJSON:account keyPath:@"accountItem.accountPhoto.thumbnails[0].url"] forKey:@"avatar"];
+              break;
+            }
+        }
     }
 }
 
@@ -764,7 +866,7 @@ done:
             [params setValue:@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!" forKey:@"refresh_token"];
 
 
-            // BY FAR this is the most unreliable logic here, i change it like every update!
+            // BY FAR this is the most unreliable logic here, i change it like every update! this extractor was made with AI, soz.
             NSString *channelID = nil;
 
             // 1. Find the LAST occurrence of the end marker
@@ -850,6 +952,7 @@ done:
     NSString *sidcc = [self sidcc];
     NSString *sapisid = [self sapisid];
     NSString *datasyncID = [self datasyncID];
+    NSString *pageID = [self pageID];
     if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
       {
         if ( *request )
@@ -882,6 +985,10 @@ done:
             // NSLog(@"Hashed SAPISID: %@", output);
             [*request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
             [*request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+            if (pageID) {
+              [*request setValue:@"0" forHTTPHeaderField:@"X-Goog-AuthUser"];
+              [*request setValue:pageID forHTTPHeaderField:@"X-Goog-PageId"];
+            }
             return YES;
         } else {
           return NO;

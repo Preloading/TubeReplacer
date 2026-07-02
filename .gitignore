@@ -4,3 +4,4 @@ packages/
 compile_commands.json
 .cache
 googleapp/signinpolyfil.h
+.clangd
