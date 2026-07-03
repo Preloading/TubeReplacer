@@ -18,12 +18,11 @@ TubeReplacerCaptureApp_FILES = $(GOOGLE_APP_FILES)/signin.x \
 	$(GOOGLE_APP_FILES)/Translators/TRContiunation.m \
 	$(GOOGLE_APP_FILES)/Translators/TRRequestBuilder.m \
 	$(GOOGLE_APP_FILES)/general.m \
-	$(COMMON)/botguard_js.c \
 	$(COMMON)/potoken.m \
 	$(COMMON_GOOGLE)/potoken-google.m \
 	$(COMMON)/Protobuf.m \
 	$(COMMON)/YoutubeClientType.m
 TubeReplacerCaptureApp_CFLAGS = -fno-objc-arc
-TubeReplacerCaptureApp_LDFLAGS = ../lib/libquickjs.a ../lib/libposixshim.a
+# TubeReplacerCaptureApp_LDFLAGS = ../lib/libposixshim.a
 
 include $(THEOS_MAKE_PATH)/tweak.mk
