@@ -16,6 +16,12 @@ NSString* localizedStringForKey2(NSString *key, NSUInteger quantity) {
     return [bundle localizedQuantityStringForKey:key quantity:quantity table:@"Localizable"];
 }
 
+NSString* localizedStringForKey2UILib(NSString *key, NSUInteger quantity) {
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle localizedQuantityStringForKey:key quantity:quantity table:@"UILib"];
+}
+
+
 
 // youtube has a built in version checker... but they changed the version checker name between versions.... soooooooo
 NSString* version() {

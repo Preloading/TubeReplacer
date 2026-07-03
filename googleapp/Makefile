@@ -31,6 +31,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	settings.x \
 	subtitles.x \
 	crashreporter.x \
+	infooverflowfix.x \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \

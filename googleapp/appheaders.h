@@ -1556,6 +1556,11 @@ typedef struct _TBXMLElement {
 +(UIColor*)colorWith8BitRed:(int)red green:(int)green blue:(int)blue;
 @end
 
+// Nimbus
+@interface NIAttributedLabel : UILabel
+ - (void)setTextColor:(UIColor *)textColor range:(NSRange)range; 
+@end
+
 @interface YTAttributedTextLabel : NSObject
 {
     struct __CFAttributedString *attributedString_;
