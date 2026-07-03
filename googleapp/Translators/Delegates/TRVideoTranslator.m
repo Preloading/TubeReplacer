@@ -977,10 +977,10 @@
         
         double dislikeRatio = 0;
         if (nextData[@"dislikes"]) {
-            long rawLikes = [nextData[@"dislikes"][@"rawLikes"] longLongValue];
-            long rawDislikes = [nextData[@"dislikes"][@"rawDislikes"] longLongValue];
+            double rawLikes = [nextData[@"dislikes"][@"rawLikes"] doubleValue];
+            double rawDislikes = [nextData[@"dislikes"][@"rawDislikes"] doubleValue];
             dislikeRatio = rawDislikes/rawLikes;
-            NSLog(@"(raw) dislikes -> %ld, likes -> %ld, dislikeRatio -> %f", rawDislikes, rawLikes, dislikeRatio);
+            NSLog(@"(raw) dislikes -> %f, likes -> %f, dislikeRatio -> %f", rawDislikes, rawLikes, dislikeRatio);
             [video setValue:nextData[@"dislikes"][@"dislikes"] forKey:l(@"dislikesCount")];
             [video setValue:nextData[@"dislikes"][@"likes"] forKey:l(@"likesCount")];
             // NSLog(@"date -> %@", [TRJSONUtils dateFromISO8601:nextData[@"dislikes"][@"dateCreated"]]);
