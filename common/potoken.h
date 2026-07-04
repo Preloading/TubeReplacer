@@ -26,6 +26,7 @@
 @property (nonatomic, strong) NSString *botguardChallenge;
 @property (nonatomic, strong) NSString *botguardResponse;
 
+@property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
 
 // states
 @property (atomic, assign) BOOL isWebViewInitialized;
@@ -34,7 +35,6 @@
 
 -(NSDictionary*)fetchPOJNNChallengeWithMethod:(NSString*)method andBody:(NSDictionary*)body;
 // -(BOOL)fetchStudioIntegrityChallenge;
--(void)solveIntegrityToken;
 -(void)descrambleChallenge:(NSString*)scrambledChallenge;
--(void)obtainPOToken; // temp
+-(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback;
 @end

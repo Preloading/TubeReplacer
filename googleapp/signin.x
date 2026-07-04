@@ -525,10 +525,11 @@
         [request setHTTPShouldHandleCookies:NO];
         NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
         [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+        NSURL *requestedURL = [request URL];
 
         // SAPISIDHASH
         long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ https://www.youtube.com", datasyncID, unixTime, sapisid];
+        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
         // NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
 
         NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
@@ -544,7 +545,7 @@
         }
         // NSLog(@"Hashed SAPISID: %@", output);
         [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
-        [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+        [request setValue:[NSString stringWithFormat:@"%@://%@", [requestedURL scheme], [requestedURL host]] forHTTPHeaderField:@"Origin"];
     }
     goto done;
   }
@@ -965,11 +966,12 @@ done:
             [*request setHTTPShouldHandleCookies:NO];
             NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
             [*request setValue:cookieData forHTTPHeaderField:@"Cookie"];
+            NSURL *requestedURL = [*request URL];
 
             // SAPISIDHASH
             long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ https://www.youtube.com", datasyncID, unixTime, sapisid];
-            // NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
+            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
+            NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
 
             NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
             uint8_t digest[CC_SHA1_DIGEST_LENGTH];
@@ -984,7 +986,7 @@ done:
             }
             // NSLog(@"Hashed SAPISID: %@", output);
             [*request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
-            [*request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+            [*request setValue:[NSString stringWithFormat:@"%@://%@", [requestedURL scheme], [requestedURL host]] forHTTPHeaderField:@"Origin"];
             if (pageID) {
               [*request setValue:@"0" forHTTPHeaderField:@"X-Goog-AuthUser"];
               [*request setValue:pageID forHTTPHeaderField:@"X-Goog-PageId"];

@@ -173,8 +173,6 @@
                                                    encoding:NSUTF8StringEncoding
                                                       error:&error];
 
-        NSLog(@"html -> %@", html);
-
         if (!html || error) {
             NSLog(@"failed to load html: %@", error);
             return;
@@ -187,6 +185,11 @@
 
         NSLog(@"done!");
     });
+}
+
+-(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback {
+    self.botguardResponseCallback = callback;
+    [self initEngine];
 }
 
 -(void)webViewScriptsLoaded:(UIWebView*)webView {
@@ -205,7 +208,8 @@
 
 -(void)recievedBotguardResponse:(NSString*)result webView:(UIWebView*)webView {
     NSString *botguardResponse = [result stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSLog(@"botguard response -> %@", botguardResponse);
+    self.botguardResponse = botguardResponse;
+    self.botguardResponseCallback(botguardResponse);
 }
 
 - (BOOL)webView:(UIWebView *)webView
@@ -222,6 +226,8 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     if ([url hasPrefix:@"status://"]) {
         if ([url isEqualToString:@"status://scriptsLoaded"])
             [self webViewScriptsLoaded:webView];
+        if ([url isEqualToString:@"status://vmReady"])
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"createAttChallengeResponse(\"%@\")", self.botguardChallenge]];
         return NO;
     }
 
@@ -237,46 +243,8 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSLog(@"loaded successfully");
 }
 
-// https://www.youtube.com/watch?v=4JkIs37a2JE
--(void)solveIntegrityToken {
-    [self initEngine];
-}
-
-
--(void)createPOTokenMinter {
-    return;
-}
-
 -(NSString*)mintPOToken:(NSString*)identifier {
     return @"";
-}
-
--(void)obtainPOToken {
-    // NSDate *start = [NSDate date];
-    NSDictionary *rawChallenge = [self fetchPOJNNChallengeWithMethod:@"Create" andBody:@{@"request_key":@"O43z0dpjhgX20SCx4KAo"}];
-    // NSLog(@"got challenge at %f", [start timeIntervalSinceNow]);
-    [self descrambleChallenge:rawChallenge[@"scrambledChallenge"]];
-
-
-
-    // NSLog(@"descrambled at %f", [start timeIntervalSinceNow]);
-    // [self solveIntegrityToken];
-    // NSLog(@"solved integrity at %f", [start timeIntervalSinceNow])();
-    // [self mintPOToken:@"101414430328181110843"];
-    
-    // [self mintPOToken:@"TiXIIwNua9E"];
-    // NSLog(@"minted token at %f", [start timeIntervalSinceNow]);
-    // NSLog(@"integrity token -> %@", self->_integrityToken);
-    // NSLog(@"botguard response -> %@", self->_botguardResponse);
-
-    // NSLog(@"message ID -> %@", self->_messageId);
-    // NSLog(@"safe script -> %@", self->_safeScript);
-    // NSLog(@"resource url -> %@", self->_resourceURL);
-    // NSLog(@"program -> %@", self->_program);
-    
-    // NSLog(@"interpreter hash -> %@", self->_interpreterHash);
-    // NSLog(@"global name -> %@", self->_globalName);
-    // NSLog(@"client experiments state blob -> %@", self->_clientExperimentsStateBlob);
 }
 
 -(void)dealloc {
