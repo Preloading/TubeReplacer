@@ -41,6 +41,8 @@
 
 -(instancetype)init {
     id orig = %orig;
+    if (![[%c(KUUserAuthenticator) sharedInstance] authentication]) return orig;
+
     TRPOTokenSolver *tokenSolver = [[TRPOTokenSolver alloc] init];
     objc_setAssociatedObject(orig, "tokenSolver", tokenSolver, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
@@ -174,7 +176,7 @@
                 GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
                 [fetcher setAuthorizer:[[%c(KUUserAuthenticator) sharedInstance] authentication]];
                 [fetcher beginFetchWithCompletionHandler:^(NSData *response5, NSError *error5){
-                    NSLog(@"response -> %@, error -> %@", response2, error3);
+                    NSLog(@"response -> %@, error -> %@", response5, error5);
                 }];
             }];
         }];

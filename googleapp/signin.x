@@ -433,7 +433,7 @@
         //     result = 0;
         //     if ([sid isHTTPOnly])
         //     {
-            NSDictionary *code = @{
+            NSMutableDictionary *code = [@{
                 @"code":@"sixty nine", // just to avoid annoying rewrite things
                 @"accessToken":@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!",
                 @"refreshToken":@"this value shouldn't be seen. if you see this in a request, ping @Preloading with the request sent!",
@@ -441,9 +441,11 @@
                 @"HSID":[hsid value],
                 @"SSID":[ssid value],
                 @"SAPISID":[sapisid value],
-                @"PAGE_ID":pageIdValue
+            } mutableCopy];
 
-            };
+            if (pageIdValue)
+              [code setObject:pageIdValue forKey:@"PAGE_ID"];
+
             GTMOAuth2Authentication *auth = [self authentication];
             [auth setKeysForResponseDictionary:code];
             #if GOOGLE_APP == 1
@@ -675,7 +677,8 @@ done:
   [data setValue:[self sidcc] forKey:@"SIDCC"];
   [data setValue:[self datasyncID] forKey:@"DATASYNC_ID"];
   [data setValue:[self channelID] forKey:@"CHANNEL_ID"];
-  [data setValue:[self pageID] forKey:@"PAGE_ID"];
+  if ([self pageID])
+    [data setValue:[self pageID] forKey:@"PAGE_ID"];
   [data setValue:[self datasyncID] forKey:@"userID"]; // idk
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
