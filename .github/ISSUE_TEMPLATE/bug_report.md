@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+**I have read the FAQ and Known Issues inside of the cydia description**: [  ]
+**I have verified there is not a duplicate issue**: [  ]
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
