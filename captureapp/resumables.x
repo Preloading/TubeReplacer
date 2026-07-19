@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "captureheaders.h"
+#include "common-google/potoken-google.h"
 
 // debug
 #import <execinfo.h>
@@ -10,6 +11,9 @@
 -(void)popNetworkActivity;
 -(void)setUploadFetcher:(id)fetcher;
 -(void)complete;
+
+// tubereplacer
+-(TRPOTokenSolver*)tokenSolver;
 @end
 
 @interface KUAsset : NSObject
@@ -29,6 +33,163 @@
 // saves to -[KUAsset loadFromNSUserDefaults]
 
 %hook KUNetworkManager
+
+%new
+-(TRPOTokenSolver*)tokenSolver {
+    return objc_getAssociatedObject(self, "tokenSolver");
+}
+
+-(instancetype)init {
+    id orig = %orig;
+    if (![[%c(KUUserAuthenticator) sharedInstance] authentication]) return orig;
+
+    TRPOTokenSolver *tokenSolver = [[TRPOTokenSolver alloc] init];
+    objc_setAssociatedObject(orig, "tokenSolver", tokenSolver, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+    NSString *channelId = [[[%c(KUUserAuthenticator) sharedInstance] authentication] channelID];
+
+    // get solvin
+    // dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+    [tokenSolver fetchBotguardChallengeWithCallback:^(NSError *error) {
+        if (error) {
+            NSLog(@"an error has occured in token fetching! %@", error);
+            return;
+        }
+
+        NSLog(@"got botguard challenge!");
+        [tokenSolver startFetchingChallengeResponseWithCallback:^(NSString *botguardResponse) {
+            NSLog(@"botguard response");
+            NSError *error2 = nil;
+
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://studio.youtube.com/youtubei/v1/att/esr?alt=json"]];
+
+            NSDictionary *esrBody = @{
+                @"botguardResponse":botguardResponse,
+                @"challenge":[tokenSolver botguardChallenge],
+                @"xguardClientStatus":@0,
+                @"context": @{
+                    @"client": @{
+                        @"clientName": @62,
+                        @"clientVersion": @"1.20260518.01.00",
+                        // @"clientVersion": @"1.20201130.03.00",
+                        @"hl": @"en-US",
+                        @"gl": @"US",
+                        @"experimentsToken": @"",
+                        @"utcOffsetMinutes": @60
+                    },
+                    @"user": @{
+                        @"delegationContext": @{
+                            @"roleType": @{
+                                @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
+                            },
+                            @"externalChannelId": channelId
+                        },
+                        @"serializedDelegationContext": @""
+                    },
+                    @"clientScreenNonce": @""
+                },
+                @"delegationContext": @{
+                    @"roleType": @{
+                        @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
+                    },
+                    @"externalChannelId": channelId
+                },
+            };
+
+            [request setHTTPMethod:@"POST"];
+            [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:esrBody
+                        options:0
+                          error:&error2]];
+            if (error2) {
+                NSLog(@"error jsonencoding!");
+                return;
+            }
+            [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referer"];
+            [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Origin"];
+            [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+            GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
+            [fetcher setAuthorizer:[[%c(KUUserAuthenticator) sharedInstance] authentication]];
+            [fetcher beginFetchWithCompletionHandler:^(NSData *response3, NSError *error3){
+                if (error3) {
+                    NSLog(@"an error occured: %@", error3);
+                    return;
+                }
+
+                NSError *error4 = nil;
+                NSDictionary *esrResponse = [NSJSONSerialization JSONObjectWithData:response3 options:0 error:&error4];
+                if (error4) {
+                    NSLog(@"failed to json decode -> %@", error4);
+                    return;
+                }
+                NSString *ctx = esrResponse[@"ctx"];
+
+                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://studio.youtube.com/youtubei/v1/security/get_web_reauth_url?alt=json"]];
+
+                NSDictionary *reauthUrlBody = @{
+                    @"botguardResponse":botguardResponse,
+                    @"challenge":[tokenSolver botguardChallenge],
+                    @"continueUrl":@"https://studio.youtube.com/reauth",
+                    @"flow":@"REAUTH_FLOW_YT_STUDIO_COLD_LOAD",
+                    @"ivctx":ctx,
+                    @"context": @{
+                        @"client": @{
+                            @"clientName": @62,
+                            @"clientVersion": @"1.20260518.01.00",
+                            // @"clientVersion": @"1.20201130.03.00",
+                            @"hl": @"en-US",
+                            @"gl": @"US",
+                            @"experimentsToken": @"",
+                            @"utcOffsetMinutes": @60
+                        },
+                        @"user": @{
+                            @"delegationContext": @{
+                                @"roleType": @{
+                                    @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
+                                },
+                                @"externalChannelId": channelId
+                            },
+                            @"serializedDelegationContext": @""
+                        },
+                        @"clientScreenNonce": @""
+                    },
+                    @"delegationContext": @{
+                        @"roleType": @{
+                            @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
+                        },
+                        @"externalChannelId": channelId
+                    },
+                };
+
+                [request setHTTPMethod:@"POST"];
+                [request setHTTPBody:[NSJSONSerialization dataWithJSONObject:reauthUrlBody
+                            options:0
+                            error:&error4]];
+                if (error4) {
+                    NSLog(@"error jsonencoding!");
+                    return;
+                }
+                [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referer"];
+                [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Origin"];
+                [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+                GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
+                [fetcher setAuthorizer:[[%c(KUUserAuthenticator) sharedInstance] authentication]];
+                [fetcher beginFetchWithCompletionHandler:^(NSData *response5, NSError *error5){
+                    NSLog(@"response -> %@, error -> %@", response5, error5);
+                }];
+            }];
+        }];
+        
+    } auth:[[%c(KUUserAuthenticator) sharedInstance] authentication] isStudio:YES]; 
+        // if (!result) {
+        //     NSLog(@"an error has occured in token fetching!");
+        // }
+        // [tokenSolver solveIntegrityToken];
+        // NSLog(@"botguard response -> %@", [tokenSolver botguardResponse]);
+    // });
+    return orig;
+}
 
 // based heavily on https://github.com/adasq/youtube-studio/blob/master/src/upload/index.js
 -(void)requestResumableURLForAsset:(KUAsset*)asset andContinueUpload:(BOOL)continueUpload {
@@ -50,7 +211,7 @@
         [request setValue:(NSString*)uuidString forHTTPHeaderField:@"x-goog-upload-file-name"]; // there's probably something here saying "dont leak your thingy!!111!11!1", but tbh, idc
         [request setValue:@"resumable" forHTTPHeaderField:@"x-goog-upload-protocol"];
         [request setValue:@"application/x-www-form-urlencoded;charset=utf-8" forHTTPHeaderField:@"Content-Type"]; // great question! I don't know.
-        [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referrer"];
+        [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referer"];
 
 
         GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
@@ -159,8 +320,8 @@
                 @"context": @{
                     @"client": @{
                         @"clientName": @62,
-                        // @"clientVersion": @"1.20260518.01.00",
-                        @"clientVersion": @"1.20201130.03.00",
+                        @"clientVersion": @"1.20260518.01.00",
+                        // @"clientVersion": @"1.20201130.03.00",
                         @"hl": @"en-US",
                         @"gl": @"US",
                         @"experimentsToken": @"",
@@ -182,7 +343,7 @@
                         @"channelRoleType": @"CREATOR_CHANNEL_ROLE_TYPE_OWNER"
                     },
                     @"externalChannelId": channelId
-                }
+                },
             };
 
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://studio.youtube.com/youtubei/v1/upload/createvideo?alt=json"]];
@@ -198,8 +359,9 @@
                 return;
             }
             NSLog(@"pleas4");
-        [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referrer"];
+        [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referer"];
         [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Origin"];
+        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
             GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
             NSLog(@"pleas5");
@@ -219,6 +381,11 @@
     else {
         return %orig; // its just flat out faster to program. Has duplicate logic, but whatever.
     }
+}
+
+-(void)dealloc {
+    [[self tokenSolver] dealloc];
+    %orig;
 }
 
 %end
@@ -283,7 +450,7 @@
     }
     [request setValue:@"file" forHTTPHeaderField:@"x-goog-upload-file-name"]; // well
     [request setValue:[NSString stringWithFormat:@"%i", offset] forHTTPHeaderField:@"x-goog-upload-offset"];
-    [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referrer"];
+    [request setValue:@"https://studio.youtube.com/" forHTTPHeaderField:@"Referer"];
     
     GTMHTTPFetcher *chunkFetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
     [chunkFetcher setDelegateQueue:[self delegateQueue]];

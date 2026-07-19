@@ -8,6 +8,11 @@ TWEAK_NAME = TubeReplacerGoogle
 
 GOOGLE_APP = 1
 
+
+GOOGLE_APP_FILES = $(THEOS_PROJECT_DIR)/googleapp
+COMMON = $(THEOS_PROJECT_DIR)/common
+COMMON_GOOGLE = $(THEOS_PROJECT_DIR)/common-google
+
 TubeReplacerGoogle_FILES = polyfill.x \
 	signin.x \
 	deviceauth.x \
@@ -32,6 +37,8 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	subtitles.x \
 	crashreporter.x \
 	infooverflowfix.x \
+	$(COMMON)/potoken.m \
+	$(COMMON_GOOGLE)/potoken-google.m \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \
@@ -42,13 +49,17 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	Translators/Delegates/TRSubscriptionTranslator.m \
 	Translators/Delegates/TRPlaylistTranslator.m \
 	Translators/TRRequestBuilder.m \
-	../Protobuf.m ../YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
+	$(COMMON)/Protobuf.m $(COMMON)/YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
-
+# TubeReplacerGoogle_LDFLAGS = ../lib/libposixshim.a
 
 before-all::
 	rm signinpolyfil.h || true
 	xxd -i signinpolyfil.js > signinpolyfil.h
+
+ifeq (, $(shell which xxd))
+$(error "You are missing `xxd` from your system, which is required to build.")
+endif
 
 include $(THEOS_MAKE_PATH)/tweak.mk

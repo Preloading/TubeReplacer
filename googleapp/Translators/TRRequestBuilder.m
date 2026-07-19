@@ -4,9 +4,9 @@
 // Unified request builder implementation
 
 #import "TRRequestBuilder.h"
-#import "../../YoutubeClientType.h"
-#import "../../Protobuf.h"
-#import "../../base64/NSData+Base64.h"
+#import "common/YoutubeClientType.h"
+#import "common/Protobuf.h"
+#import "base64/NSData+Base64.h"
 
 @implementation TRRequestBuilder
 
@@ -28,6 +28,7 @@
     
     if (client) {
         [body setObject:[client makeContext] forKey:@"context"];
+        [body setObject:@{@"poToken":@"MmPSdSAg-_ve6tI3Con4E0LmJLsYyYDO0vPTOWHyKW8p_38e6oYDR8gJoD_oVoxz85ARMW39qQtQvatnULL-QJCSRBuCue8LuOedtBXr3rtUdAwL3nqdMy1_tAXsuVpU9Hg1B_U"} forKey:@"serviceIntegrityDimensions"];
     }
     
     return body;

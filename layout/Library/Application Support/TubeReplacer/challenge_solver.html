@@ -1,0 +1,240 @@
+<!-- used to solve both n/sig & potokens -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeReplacer Sillies!!!!!</title>
+</head>
+<body>
+    <p id="a">yt challenge solver</p>
+    <p id="b">yt challenge solver</p>
+    <p id="errors">errors will appear here</p>
+    <script>
+// polyfills
+
+// https://cdn.jsdelivr.net/npm/symbol-es6@0.1.2/dist/symbol-es6.min.js
+!function(global,factory){"use strict";"object"==typeof module&&"object"==typeof module.exports?module.exports=factory(global):factory(global)}("undefined"!=typeof window?window:global,function(global){"use strict";var defineProperty=Object.defineProperty,defineProperties=Object.defineProperties,symbolHiddenCounter=0,globalSymbolRegistry=[],slice=Array.prototype.slice,ES6="object"==typeof global.ES6?global.ES6:global.ES6={},isArray=Array.isArray,objectToString=Object.prototype.toString,push=Array.prototype.push,emptyFunction=function(){},simpleFunction=function(arg){return arg},isCallable=function(fn){return"function"==typeof fn},Iterator=function(){},ArrayIterator=function(array,flag){this._array=array,this._flag=flag,this._nextIndex=0},StringIterator=function(string,flag){this._string=string,this._flag=flag,this._nextIndex=0},isObject=function(value){return null!==value&&("object"==typeof value||"function"==typeof value)},setupSymbolInternals=function(symbol,desc){return defineProperties(symbol,{_description:{value:desc},_isSymbol:{value:!0},_id:{value:symbolHiddenCounter++}}),symbol},appendArray=function(array1,array2){if("number"==typeof array1.length&&array1.length>=0&&"number"==typeof array2.length&&array2.length>=0){var length1=Math.floor(array1.length),length2=Math.floor(array2.length),i=0;for(array1.length=length1+length2;i<length2;++i)array2.hasOwnProperty(i)&&(array1[length1+i]=array2[i])}},simpleInheritance=function(child,parent){if("function"!=typeof child||"function"!=typeof parent)throw new TypeError("Child and Parent must be function type");child.prototype=Object.create(parent.prototype),child.prototype.constructor=child},Symbol=function Symbol(desc){if(desc=void 0===desc?"":String(desc),this instanceof Symbol)throw new TypeError("Symbol is not a constructor");return setupSymbolInternals(Object.create(Symbol.prototype),desc)};defineProperties(Symbol,{for:{value:function(key){key=String(key);for(var record,registryLength=globalSymbolRegistry.length,i=0;i<registryLength;++i)if((record=globalSymbolRegistry[i]).key===key)return record.symbol;return record={key:key,symbol:Symbol(key)},globalSymbolRegistry.push(record),record.symbol},writable:!0,configurable:!0},keyFor:{value:function(symbol){if(!ES6.isSymbol(symbol))throw new TypeError(String(symbol)+" is not a symbol");for(var record,registryLength=globalSymbolRegistry.length,i=0;i<registryLength;++i)if((record=globalSymbolRegistry[i]).symbol===symbol)return record.key},writable:!0,configurable:!0},hasInstance:{value:Symbol("Symbol.hasInstance")},isConcatSpreadable:{value:Symbol("Symbol.isConcatSpreadable")},iterator:{value:Symbol("Symbol.iterator")},toStringTag:{value:Symbol("Symbol.toStringTag")}}),Symbol.prototype.toString=function(){return"@@_____"+this._id+"_____"},Symbol.prototype.valueOf=function(){return this},defineProperty(Iterator.prototype,Symbol.iterator.toString(),{value:function(){return this},writable:!0,configurable:!0}),simpleInheritance(ArrayIterator,Iterator),simpleInheritance(StringIterator,Iterator),defineProperty(ArrayIterator.prototype,Symbol.toStringTag.toString(),{value:"Array Iterator",configurable:!0}),defineProperty(StringIterator.prototype,Symbol.toStringTag.toString(),{value:"String Iterator",configurable:!0}),ArrayIterator.prototype.next=function(){if(!(this instanceof ArrayIterator))throw new TypeError("Method Array Iterator.prototype.next called on incompatible receiver "+String(this));var nextValue;return-1===this._nextIndex?{done:!0,value:void 0}:"number"==typeof this._array.length&&this._array.length>=0&&this._nextIndex<Math.floor(this._array.length)?(1===this._flag?nextValue=[this._nextIndex,this._array[this._nextIndex]]:2===this._flag?nextValue=this._array[this._nextIndex]:3===this._flag&&(nextValue=this._nextIndex),this._nextIndex++,{done:!1,value:nextValue}):(this._nextIndex=-1,{done:!0,value:void 0})},StringIterator.prototype.next=function(){if(!(this instanceof StringIterator))throw new TypeError("Method String Iterator.prototype.next called on incompatible receiver "+String(this));var nextValue,stringObject=new String(this._string);return-1===this._nextIndex?{done:!0,value:void 0}:this._nextIndex<stringObject.length?(nextValue=stringObject[this._nextIndex],this._nextIndex++,{done:!1,value:nextValue}):(this._nextIndex=-1,{done:!0,value:void 0})};var SpreadOperatorImpl=function(target,thisArg){this._target=target,this._values=[],this._thisArg=thisArg};SpreadOperatorImpl.prototype.spread=function(){var self=this;return slice.call(arguments).forEach(function(iterable){ES6.forOf(iterable,function(value){self._values.push(value)})}),self},SpreadOperatorImpl.prototype.add=function(){var self=this;return slice.call(arguments).forEach(function(value){self._values.push(value)}),self},SpreadOperatorImpl.prototype.call=function(thisArg){if("function"!=typeof this._target)throw new TypeError("Target is not a function");return thisArg=arguments.length<=0?this._thisArg:thisArg,this._target.apply(thisArg,this._values)},SpreadOperatorImpl.prototype.new=function(){if("function"!=typeof this._target)throw new TypeError("Target is not a constructor");var temp,returnValue;return temp=Object.create(this._target.prototype),returnValue=this._target.apply(temp,this._values),isObject(returnValue)?returnValue:temp},SpreadOperatorImpl.prototype.array=function(){if(!isArray(this._target))throw new TypeError("Target is not a array");return push.apply(this._target,this._values),this._target};return defineProperties(ES6,{isSymbol:{value:function(symbol){return symbol instanceof Symbol&&function(symbol){return!0===symbol._isSymbol&&"number"==typeof symbol._id&&"string"==typeof symbol._description}(symbol)},writable:!0,configurable:!0},instanceOf:{value:function(object,constructor){if(!isObject(constructor))throw new TypeError("Right-hand side of 'instanceof' is not an object");var hasInstanceSymbolProp=constructor[Symbol.hasInstance];if(void 0===hasInstanceSymbolProp)return object instanceof constructor;if("function"!=typeof hasInstanceSymbolProp)throw new TypeError(typeof hasInstanceSymbolProp+" is not a function");return hasInstanceSymbolProp.call(constructor,object)},writable:!0,configurable:!0},forOf:{value:function(iterable,callback,thisArg){if(callback="function"!=typeof callback?emptyFunction:callback,"function"!=typeof iterable[Symbol.iterator])throw new TypeError("Iterable[Symbol.iterator] is not a function");var iterationResult,iterator=iterable[Symbol.iterator]();if("function"!=typeof iterator.next)throw new TypeError(".iterator.next is not a function");for(;;){if(iterationResult=iterator.next(),!isObject(iterationResult))throw new TypeError("Iterator result "+iterationResult+" is not an object");if(iterationResult.done)break;callback.call(thisArg,iterationResult.value)}},writable:!0,configurable:!0},spreadOperator:{value:function(target,thisArg){if("function"!=typeof target&&!isArray(target))throw new TypeError("Spread operator only supports on array and function objects at this moment");return new SpreadOperatorImpl(target,thisArg)},writable:!0,configurable:!0}}),defineProperty(global,"Symbol",{value:Symbol,writable:!0,configurable:!0}),defineProperty(Function.prototype,Symbol.hasInstance.toString(),{value:function(instance){return"function"==typeof this&&instance instanceof this}}),defineProperty(Array.prototype,"concat",{value:function(){if(void 0===this||null===this)throw new TypeError("Array.prototype.concat called on null or undefined");var self=Object(this),targets=slice.call(arguments),outputs=[];return targets.unshift(self),targets.forEach(function(target){isObject(target)?void 0!==target[Symbol.isConcatSpreadable]?target[Symbol.isConcatSpreadable]?appendArray(outputs,target):outputs.push(target):isArray(target)?appendArray(outputs,target):outputs.push(target):outputs.push(target)}),outputs},writable:!0,configurable:!0}),defineProperty(Object.prototype,"toString",{value:function(){return void 0===this||null===this?objectToString.call(this):"string"==typeof this[Symbol.toStringTag]?"[object "+this[Symbol.toStringTag]+"]":objectToString.call(this)},writable:!0,configurable:!0}),defineProperty(Array.prototype,Symbol.iterator.toString(),{value:function(){if(void 0===this||null===this)throw new TypeError("Cannot convert undefined or null to object");var self=Object(this);return new ArrayIterator(self,2)},writable:!0,configurable:!0}),defineProperty(Array,"from",{value:function(arrayLike,mapFn,thisArg){var constructor,length,outputs,i=0;if(constructor=isCallable(this)?this:Array,void 0===arrayLike||null===arrayLike)throw new TypeError("Cannot convert undefined or null to object");if(arrayLike=Object(arrayLike),void 0===mapFn)mapFn=simpleFunction;else if(!isCallable(mapFn))throw new TypeError(mapFn+" is not a function");if(void 0===arrayLike[Symbol.iterator]){if(!("number"==typeof arrayLike.length&&arrayLike.length>=0))return(outputs=new constructor(0)).length=0,outputs;for(length=Math.floor(arrayLike.length),(outputs=new constructor(length)).length=length;i<length;++i)outputs[i]=mapFn.call(thisArg,arrayLike[i])}else(outputs=new constructor).length=0,ES6.forOf(arrayLike,function(value){outputs.length++,outputs[outputs.length-1]=mapFn.call(thisArg,value)});return outputs},writable:!0,configurable:!0}),defineProperty(Array.prototype,"entries",{value:function(){if(void 0===this||null===this)throw new TypeError("Cannot convert undefined or null to object");var self=Object(this);return new ArrayIterator(self,1)},writable:!0,configurable:!0}),defineProperty(Array.prototype,"keys",{value:function(){if(void 0===this||null===this)throw new TypeError("Cannot convert undefined or null to object");var self=Object(this);return new ArrayIterator(self,3)},writable:!0,configurable:!0}),defineProperty(String.prototype,Symbol.iterator.toString(),{value:function(){if(void 0===this||null===this)throw new TypeError("String.prototype[Symbol.iterator] called on null or undefined");return new StringIterator(String(this),0)},writable:!0,configurable:!0}),ES6});
+
+/*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
+ * @version   v4.2.8+1e68dce6
+ */
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.ES6Promise=e()}(this,function(){"use strict";function t(t){return"function"==typeof t}var e=Array.isArray?Array.isArray:function(t){return"[object Array]"===Object.prototype.toString.call(t)},n=0,r=void 0,o=void 0,i=function(t,e){h[n]=t,h[n+1]=e,2===(n+=2)&&(o?o(v):m())};var s="undefined"!=typeof window?window:void 0,u=s||{},c=u.MutationObserver||u.WebKitMutationObserver,a="undefined"==typeof self&&"undefined"!=typeof process&&"[object process]"==={}.toString.call(process),f="undefined"!=typeof Uint8ClampedArray&&"undefined"!=typeof importScripts&&"undefined"!=typeof MessageChannel;function l(){var t=setTimeout;return function(){return t(v,1)}}var h=new Array(1e3);function v(){for(var t=0;t<n;t+=2){(0,h[t])(h[t+1]),h[t]=void 0,h[t+1]=void 0}n=0}var p,d,_,y,m=void 0;function b(t,e){var n=this,r=new this.constructor(A);void 0===r[g]&&q(r);var o=n._state;if(o){var s=arguments[o-1];i(function(){return Y(o,r,s,n._result)})}else O(n,r,t,e);return r}function w(t){if(t&&"object"==typeof t&&t.constructor===this)return t;var e=new this(A);return M(e,t),e}a?m=function(){return process.nextTick(v)}:c?(d=0,_=new c(v),y=document.createTextNode(""),_.observe(y,{characterData:!0}),m=function(){y.data=d=++d%2}):f?((p=new MessageChannel).port1.onmessage=v,m=function(){return p.port2.postMessage(0)}):m=void 0===s&&"function"==typeof require?function(){try{var t=Function("return this")().require("vertx");return void 0!==(r=t.runOnLoop||t.runOnContext)?function(){r(v)}:l()}catch(t){return l()}}():l();var g=Math.random().toString(36).substring(2);function A(){}var j=void 0,S=1,E=2;function T(e,n,r){n.constructor===e.constructor&&r===b&&n.constructor.resolve===w?function(t,e){e._state===S?x(t,e._result):e._state===E?C(t,e._result):O(e,void 0,function(e){return M(t,e)},function(e){return C(t,e)})}(e,n):void 0===r?x(e,n):t(r)?function(t,e,n){i(function(t){var r=!1,o=function(t,e,n,r){try{t.call(e,n,r)}catch(t){return t}}(n,e,function(n){r||(r=!0,e!==n?M(t,n):x(t,n))},function(e){r||(r=!0,C(t,e))},t._label);!r&&o&&(r=!0,C(t,o))},t)}(e,n,r):x(e,n)}function M(t,e){if(t===e)C(t,new TypeError("You cannot resolve a promise with itself"));else if(o=typeof(r=e),null===r||"object"!==o&&"function"!==o)x(t,e);else{var n=void 0;try{n=e.then}catch(e){return void C(t,e)}T(t,e,n)}var r,o}function P(t){t._onerror&&t._onerror(t._result),F(t)}function x(t,e){t._state===j&&(t._result=e,t._state=S,0!==t._subscribers.length&&i(F,t))}function C(t,e){t._state===j&&(t._state=E,t._result=e,i(P,t))}function O(t,e,n,r){var o=t._subscribers,s=o.length;t._onerror=null,o[s]=e,o[s+S]=n,o[s+E]=r,0===s&&t._state&&i(F,t)}function F(t){var e=t._subscribers,n=t._state;if(0!==e.length){for(var r=void 0,o=void 0,i=t._result,s=0;s<e.length;s+=3)r=e[s],o=e[s+n],r?Y(n,r,o,i):o(i);t._subscribers.length=0}}function Y(e,n,r,o){var i=t(r),s=void 0,u=void 0,c=!0;if(i){try{s=r(o)}catch(t){c=!1,u=t}if(n===s)return void C(n,new TypeError("A promises callback cannot return that same promise."))}else s=o;n._state!==j||(i&&c?M(n,s):!1===c?C(n,u):e===S?x(n,s):e===E&&C(n,s))}var k=0;function q(t){t[g]=k++,t._state=void 0,t._result=void 0,t._subscribers=[]}var D=function(){function t(t,n){this._instanceConstructor=t,this.promise=new t(A),this.promise[g]||q(this.promise),e(n)?(this.length=n.length,this._remaining=n.length,this._result=new Array(this.length),0===this.length?x(this.promise,this._result):(this.length=this.length||0,this._enumerate(n),0===this._remaining&&x(this.promise,this._result))):C(this.promise,new Error("Array Methods must be provided an Array"))}return t.prototype._enumerate=function(t){for(var e=0;this._state===j&&e<t.length;e++)this._eachEntry(t[e],e)},t.prototype._eachEntry=function(t,e){var n=this._instanceConstructor,r=n.resolve;if(r===w){var o=void 0,i=void 0,s=!1;try{o=t.then}catch(t){s=!0,i=t}if(o===b&&t._state!==j)this._settledAt(t._state,e,t._result);else if("function"!=typeof o)this._remaining--,this._result[e]=t;else if(n===K){var u=new n(A);s?C(u,i):T(u,t,o),this._willSettleAt(u,e)}else this._willSettleAt(new n(function(e){return e(t)}),e)}else this._willSettleAt(r(t),e)},t.prototype._settledAt=function(t,e,n){var r=this.promise;r._state===j&&(this._remaining--,t===E?C(r,n):this._result[e]=n),0===this._remaining&&x(r,this._result)},t.prototype._willSettleAt=function(t,e){var n=this;O(t,void 0,function(t){return n._settledAt(S,e,t)},function(t){return n._settledAt(E,e,t)})},t}();var K=function(){function e(t){this[g]=k++,this._result=this._state=void 0,this._subscribers=[],A!==t&&("function"!=typeof t&&function(){throw new TypeError("You must pass a resolver function as the first argument to the promise constructor")}(),this instanceof e?function(t,e){try{e(function(e){M(t,e)},function(e){C(t,e)})}catch(e){C(t,e)}}(this,t):function(){throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.")}())}return e.prototype.catch=function(t){return this.then(null,t)},e.prototype.finally=function(e){var n=this,r=n.constructor;return t(e)?n.then(function(t){return r.resolve(e()).then(function(){return t})},function(t){return r.resolve(e()).then(function(){throw t})}):n.then(e,e)},e}();return K.prototype.then=b,K.all=function(t){return new D(this,t).promise},K.race=function(t){var n=this;return e(t)?new n(function(e,r){for(var o=t.length,i=0;i<o;i++)n.resolve(t[i]).then(e,r)}):new n(function(t,e){return e(new TypeError("You must pass an array to race."))})},K.resolve=w,K.reject=function(t){var e=new this(A);return C(e,t),e},K._setScheduler=function(t){o=t},K._setAsap=function(t){i=t},K._asap=i,K.polyfill=function(){var t=void 0;if("undefined"!=typeof global)t=global;else if("undefined"!=typeof self)t=self;else try{t=Function("return this")()}catch(t){throw new Error("polyfill failed because global object is unavailable in this environment")}var e=t.Promise;if(e){var n=null;try{n=Object.prototype.toString.call(e.resolve())}catch(t){}if("[object Promise]"===n&&!e.cast)return}t.Promise=K},K.Promise=K,K});
+
+var base64urlCharRegex = /[-_.]/g;
+
+var base64urlToBase64Map = {
+  '-': '+',
+  _: '/',
+  '.': '='
+};
+
+function u8ToBase64(u8, base64url) {
+  var chars = [];
+  for (var i = 0; i < u8.length; i++) {
+    chars.push(String.fromCharCode(u8[i]));
+  }
+  var result = btoa(chars.join(''));
+
+  if (base64url) {
+    return result
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  }
+
+  return result;
+}
+
+function base64ToU8(base64) {
+  var base64Mod;
+
+  if (/[-_.]/.test(base64)) {
+    base64Mod = base64.replace(base64urlCharRegex, function (match) {
+      return base64urlToBase64Map[match];
+    });
+  } else {
+    base64Mod = base64;
+  }
+
+  base64Mod = atob(base64Mod);
+
+  return new Uint8Array(
+    base64Mod.split('').map(function (char) {
+      return char.charCodeAt(0);
+    })
+  );
+}
+
+function stringToU8(str) {
+  var utf8 = unescape(encodeURIComponent(str));
+  var u8 = new Uint8Array(utf8.length);
+  for (var i = 0; i < utf8.length; i++) {
+    u8[i] = utf8.charCodeAt(i);
+  }
+  return u8;
+}
+
+    var vmFunctions = {};
+    const webPoSignalOutput = [];
+    var mintCallback;
+    var integrityToken = "";
+    var botguardResponse = "";
+    const debugText = document.getElementById("a");
+    const debugText2 = document.getElementById("b");
+    const errorDebugText = document.getElementById("errors");
+
+    console.log = function (msg) {
+        debugText.innerText = debugText.innerText + "\n" + msg;
+        //document.location = "jslog://" + encodeURIComponent(msg);
+    };
+
+    window.onerror = function(msg, src, line) {
+        errorDebugText.innerText = msg + " " + src + " " + line;
+    };
+
+    function status(msg) {
+        document.location = "status://" + encodeURIComponent(msg);
+    }
+
+
+    console.log("js is alive!");
+
+    function snapshot(args, callback) {
+        if (!vmFunctions.asyncSnapshotFunction) {
+            return;
+        }
+
+        vmFunctions.asyncSnapshotFunction(
+            function(response) {
+                callback(response);
+            },
+            [
+                args.contentBinding,
+                args.signedTimestamp,
+                args.webPoSignalOutput,
+                args.skipPrivacyBuffer
+            ]
+        );
+    }
+
+    function createPOSignalOutput() {
+        snapshot(
+            { webPoSignalOutput: webPoSignalOutput },
+            function(_botguardResponse) {
+                console.log("token received: " + _botguardResponse);
+                botguardResponse = _botguardResponse;
+                document.location = "botguard-response://" + encodeURIComponent(_botguardResponse);
+            }
+        );
+    }
+
+    function processIntegrityToken(integrityToken) {
+        var getMinter = webPoSignalOutput[0];
+
+        if (!getMinter) {
+            console.log("minter does not exist!");
+            return;
+        }
+
+        console.log("starting minter");
+
+        mintCallback = getMinter(base64ToU8(integrityToken));
+        console.log("minter is ready!");
+        status("poReady");
+    }
+
+    function mintPOToken(identifier, contentBinding) {
+        var result = mintCallback(stringToU8(contentBinding));
+
+        if (!result) {
+            console.log("result is undefined!")
+            return;
+        }
+
+        if (!(result instanceof Uint8Array)) {
+            console.log("result is invalid");
+            return;
+        }
+
+        
+        var poToken = u8ToBase64(result, true);
+        document.location = "potoken-response://" + identifier + ";" + encodeURIComponent(poToken);
+    }
+
+    function createAttChallengeResponse(botguardChallenge) {
+        snapshot(
+            { contentBinding: {"atr_challenge": botguardChallenge} },
+            function(botguardResponse) {
+                console.log("token received: " + botguardResponse);
+                document.location = "botguard-response://" + encodeURIComponent(botguardResponse);
+            }
+        );
+    }
+
+    function runBotguardChallenge(program, globalName) {
+        console.log("VM init start");
+
+        var globalObject = window;
+        var vm = globalObject[globalName];
+
+        if (!vm) {
+            console.log("vm not found");
+            return;
+        }
+
+        if (!vm.a) {
+            console.log("failed to load program");
+            return;
+        }
+
+        this.vm = vm;
+
+        console.log("VM init");
+
+        // This replaces: await vm.a(...)
+        vm.a(
+            program,
+
+            function (
+                asyncSnapshotFunction,
+                shutdownFunction,
+                passEventFunction,
+                checkCameraFunction
+            ) {
+                vmFunctions.asyncSnapshotFunction = asyncSnapshotFunction;
+                vmFunctions.shutdownFunction = shutdownFunction;
+                vmFunctions.passEventFunction = passEventFunction;
+                vmFunctions.checkCameraFunction = checkCameraFunction;
+
+                console.log("VM ready callback fired");
+                status("vmReady");
+
+                //var webPoSignalOutput = [];
+
+                //snapshot(
+                //    { webPoSignalOutput: webPoSignalOutput },
+                //    function(botguardResponse) {
+                //        console.log("token received: " + botguardResponse);
+                //        document.location = "botguard-response://" + encodeURIComponent(botguardResponse);
+                //    }
+                //);
+            },
+
+            true,
+            undefined,
+            function () {},
+            [[], []]
+        );
+    }
+    
+
+
+
+    status("scriptsLoaded");
+    </script>
+</body>
+</html>

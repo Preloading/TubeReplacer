@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 #include "general.h"
+#include "common-google/potoken-google.h"
 
 // youtube google app
 @interface YTDeviceAuth : NSObject
@@ -68,7 +69,28 @@
 	[self performRequestQueueWithError:0]; // a3 in codebase but who's counting
 }
 
+-(void)loadRegistrationFromStorage {
+    TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init];
+    [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+    
+    return %orig;
+}
+
 %end
+
+// %hook YTGDataService 
+
+// -(instancetype)init {
+//     NSLog(@"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+//         TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init];
+//         [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+//     });
+//     return %orig;
+// }
+
+
+// %end
 
 %hook KUDeviceAuthorizer
 

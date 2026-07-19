@@ -9,5 +9,5 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 SUBPROJECTS += googleapp
 SUBPROJECTS += preferences
 # SUBPROJECTS += classicapp
-SUBPROJECTS += captureapp
+# SUBPROJECTS += captureapp
 include $(THEOS_MAKE_PATH)/aggregate.mk

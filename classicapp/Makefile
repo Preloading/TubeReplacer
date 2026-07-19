@@ -1,4 +1,4 @@
-TARGET := iphone:clang:latest:5.0
+TARGET := iphone:clang:5.0:3.0
 ARCHS := armv6 armv7
 
 include $(THEOS)/makefiles/common.mk
@@ -6,8 +6,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = TubeReplacerClassic
 
 TubeReplacerClassic_FILES = deviceauth.x \
-	search.x \
-	signin.x
+	search.x
 
 TubeReplacerClassic_CFLAGS = -fno-objc-arc -ITranslators
 

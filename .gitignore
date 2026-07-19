@@ -5,3 +5,4 @@ compile_commands.json
 .cache
 googleapp/signinpolyfil.h
 .clangd
+googleapp/botguard_js.c
