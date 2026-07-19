@@ -34,7 +34,7 @@
 
 
 // states
-@property (atomic, assign) BOOL isWebViewInitialized;
+@property (atomic, assign) BOOL isWebViewReady;
 @property (atomic, assign) BOOL isVMInitalized;
 
 
@@ -45,6 +45,6 @@
 -(void)startFetchingIntegrityTokenForPOTokenWithCallback:(void (^)(NSString *))callback;
 -(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback;
 -(void)initEngineWithCallback:(void(^)())callback;
-
++(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState;
 -(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback;
 @end

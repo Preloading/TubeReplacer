@@ -246,6 +246,8 @@
 
 
 -(void)setupPOTokenGenerationWithAuth:(id)authentication {
+    NSLog(@"coldstart token -> %@", [TRPOTokenSolver generateColdStartTokenWithContent:@"hello world" clientState:1]);
+
     [self fetchBotguardChallengeWithCallback:^(NSError *error) {
         // if (error) {
         //     NSLog(@"an error has occured in token fetching! %@", error);
@@ -267,13 +269,11 @@
                         return;
                     }
 
-                    NSLog(@"integrity token -> %@", response[@"integrityToken"]);
                     if (response[@"integrityToken"]) {
                         self.integrityToken = response[@"integrityToken"];
                         self.integrityTokenExpiration = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]];
                         self.integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]*0.8];
                         [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{
-                            NSLog(@"POToken generation is ready!!!!!!!!!!!!!!!!!!!!");
                             [self mintPOTokenWithData:@"Hello World!" withCallback:^(NSString *poToken) {
                                 NSLog(@"We now have a token! POToken => %@", poToken);
                             }];

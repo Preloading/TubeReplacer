@@ -210,7 +210,7 @@
 }
 
 -(void)webViewScriptsLoaded:(UIWebView*)webView {
-    self.isWebViewInitialized = true;
+    self.isWebViewReady = true;
 
     // NSString *wrapped = [NSString stringWithFormat:
     //     @"try { %@ } catch(e) { console.log('script error: ' + e); }",
@@ -281,6 +281,34 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     [self.poTokenCallbacks setObject:callback forKey:randomIdentifier];
 
     [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\", \"%@\");", randomIdentifier, data]];
+}
+
+// direct port of https://github.com/LuanRT/BgUtils/blob/5c1c05e75c8c56b897191a8a799d94ee84b9df1c/src/core/WebPoMinter.ts#L69
+// client state defualts to 1
++(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState {
+    NSData *contentBindingBytes = [contentBinding dataUsingEncoding:NSUTF8StringEncoding];
+    uint64_t timestamp = [[NSDate date] timeIntervalSince1970];
+    uint8_t randomKeys[2] = {(uint8_t)arc4random_uniform(256), (uint8_t)arc4random_uniform(256)};
+
+    uint8_t header[8] = {randomKeys[0], randomKeys[1], 0, (uint8_t)clientState, (uint8_t)((timestamp >> 24) & 0xFF), (uint8_t)((timestamp >> 16) & 0xFF), (uint8_t)((timestamp >> 8) & 0xFF), (uint8_t)(timestamp & 0xFF) };
+
+    int packetLength = 2 + sizeof(header) + [contentBindingBytes length];
+    uint8_t packet[packetLength];
+    memset(packet, 0, packetLength*sizeof(uint8_t) );
+
+    packet[0] = 34;
+    packet[1] = sizeof(header) + [contentBindingBytes length];
+    memcpy(packet + 2, header, sizeof(header));
+    memcpy(packet + 2 + sizeof(header), [contentBindingBytes bytes], [contentBindingBytes length]);
+
+    int keyLength = 2;
+    for (int i = keyLength+2; i < packetLength; i++) {
+        packet[i] ^= packet[2 + (i % keyLength)];
+    }
+
+    NSData *coldStartTokenData = [NSData dataWithBytes:(const void *)packet length:packetLength];
+    NSLog(@"coldstart -> %@", [coldStartTokenData base64EncodedString]);
+    return [coldStartTokenData base64EncodedString];
 }
 
 // n/sig deciphering
