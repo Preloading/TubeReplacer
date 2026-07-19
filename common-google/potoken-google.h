@@ -12,4 +12,5 @@
 - (void)fetchBotguardChallengeWithCallback:(void (^)(NSError *error))callback 
                                  auth:(GTMOAuth2Authentication *)auth 
                                  isStudio:(BOOL)isStudio;
+-(void)setupPOTokenGenerationWithAuth:(id)authentication;
 @end

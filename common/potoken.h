@@ -26,7 +26,12 @@
 @property (nonatomic, strong) NSString *botguardChallenge;
 @property (nonatomic, strong) NSString *botguardResponse;
 
+// callbacks
+@property (nonatomic, copy) void (^vmReadyCallback)();
+@property (nonatomic, copy) void (^poGenReady)();
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
+@property (atomic, strong) NSMutableDictionary *poTokenCallbacks;
+
 
 // states
 @property (atomic, assign) BOOL isWebViewInitialized;
@@ -37,4 +42,9 @@
 // -(BOOL)fetchStudioIntegrityChallenge;
 -(void)descrambleChallenge:(NSString*)scrambledChallenge;
 -(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback;
+-(void)startFetchingIntegrityTokenForPOTokenWithCallback:(void (^)(NSString *))callback;
+-(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback;
+-(void)initEngineWithCallback:(void(^)())callback;
+
+-(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback;
 @end

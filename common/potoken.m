@@ -61,6 +61,12 @@
 
 @implementation TRPOTokenSolver
 
+-(instancetype)init {
+    [super init];
+    self.poTokenCallbacks = [[NSMutableDictionary alloc] init];
+    return self;
+}
+
 -(NSDictionary*)fetchPOJNNChallengeWithMethod:(NSString*)method andBody:(NSDictionary*)body {
     // https://www.youtube.com/api/jnn/v1/Create
 
@@ -152,7 +158,8 @@
 }
 
 
--(void)initEngine {
+-(void)initEngineWithCallback:(void(^)())callback {
+    self.vmReadyCallback = callback;
     dispatch_async(dispatch_get_main_queue(), ^{
         [NSURLProtocol registerClass:[TRURLProtocol class]];
 
@@ -189,7 +196,17 @@
 
 -(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback {
     self.botguardResponseCallback = callback;
-    [self initEngine];
+    [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"createAttChallengeResponse(\"%@\")", self.botguardChallenge]];
+}
+
+-(void)startFetchingIntegrityTokenForPOTokenWithCallback:(void (^)(NSString *))callback {
+    self.botguardResponseCallback = callback; // ehhhh maaybe should be different? on the other hand, requesting both botguard & this is ehhhh
+    [self.webView stringByEvaluatingJavaScriptFromString:@"createPOSignalOutput();"];
+}
+
+-(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback {
+    self.poGenReady = callback; 
+    [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"processIntegrityToken(\"%@\");", integrityToken]];
 }
 
 -(void)webViewScriptsLoaded:(UIWebView*)webView {
@@ -227,12 +244,25 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         if ([url isEqualToString:@"status://scriptsLoaded"])
             [self webViewScriptsLoaded:webView];
         if ([url isEqualToString:@"status://vmReady"])
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"createAttChallengeResponse(\"%@\")", self.botguardChallenge]];
+            self.vmReadyCallback();
+        if ([url isEqualToString:@"status://poReady"])
+            self.poGenReady();
         return NO;
     }
 
     if ([url hasPrefix:@"botguard-response://"]) {
         [self recievedBotguardResponse:[url substringFromIndex:20] webView:webView];
+        return NO;
+    }
+
+    if ([url hasPrefix:@"potoken-response://"]) {
+        NSString *retrievedData = [url substringFromIndex:19];
+        NSLog(@"retrieved-data -> %@", retrievedData);
+        NSArray *components = [retrievedData componentsSeparatedByString:@";"];
+        NSLog(@"callbacks -> %@", self.poTokenCallbacks);
+        void (^callback)(NSString *) = (void (^)(NSString *))[self.poTokenCallbacks objectForKey:components[0]];
+        callback(components[1]);
+        
         return NO;
     }
 
@@ -243,9 +273,20 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSLog(@"loaded successfully");
 }
 
--(NSString*)mintPOToken:(NSString*)identifier {
-    return @"";
+-(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback {
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    NSString *randomIdentifier = (NSString *)CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    
+    [self.poTokenCallbacks setObject:callback forKey:randomIdentifier];
+
+    [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\", \"%@\");", randomIdentifier, data]];
 }
+
+// n/sig deciphering
+
+// -(NSString*)getPlayerId
+
 
 -(void)dealloc {
     [super dealloc];

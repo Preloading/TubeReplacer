@@ -70,15 +70,27 @@
 }
 
 -(void)loadRegistrationFromStorage {
-    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-        // TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init]; // :4
-        /// uhh todo!
-    });
+    TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init];
+    [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
     
     return %orig;
 }
 
 %end
+
+// %hook YTGDataService 
+
+// -(instancetype)init {
+//     NSLog(@"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+//         TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init];
+//         [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+//     });
+//     return %orig;
+// }
+
+
+// %end
 
 %hook KUDeviceAuthorizer
 
