@@ -1,6 +1,7 @@
 #include <Foundation/Foundation.h>
 #include <UIKit/UIKit.h>
 #include <objc/NSObject.h>
+#include "common/potoken.h"
 
 /// This is where we put headers that are used in more than one section/.x file
 
@@ -17,6 +18,15 @@
 - (void)setNavigation:(id)fp8;
 - (id)init;
 
+@end
+
+@interface YTDeviceAuthorizer : NSObject
+- (void)saveRegistrationToStorage;
+- (void)performRequestQueueWithError:(id)fp8;
++ (id)decryptDeviceKey:(id)fp8 secret:(id)fp12;
+
+// new for tubereplacer
+-(TRPOTokenSolver*)challengeSolver;
 @end
 
 @interface YTFeedController : NSObject

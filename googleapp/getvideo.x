@@ -19,67 +19,6 @@
 -(void)enhanceVideo:(id)video withNextData:(NSDictionary *)nextData;
 @end
 
-#pragma mark - Request Building
-
-%hook YTGDataRequest
-
-+(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
-    NSURL *fullURL = [urlBuilder URL];
-
-    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
-        client = [YoutubeClientType androidVrClient];
-    }
-
-    return [self requestWithURL:fullURL 
-                 authentication:nil 
-                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:client]];
-}
-
-%end
-
-%hook YTGDataRequestFactory
-
-// 1.1.0
--(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
-    NSURL *fullURL = [urlBuilder URL];
-
-    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
-        client = [YoutubeClientType androidVrClient];
-    }
-
-    return [self requestWithURL:fullURL 
-                 authentication:nil 
-                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:client]];
-}
-
-// 1.2.1
--(YTGDataRequest*)requestForVideoWithVideoID:(NSString*)videoId authentication:(id)authentication {
-    GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?noauth=1&prettyPrint=false"];
-    NSURL *fullURL = [urlBuilder URL];
-
-    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    YoutubeClientType *client = [YoutubeClientType androidClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
-        client = [YoutubeClientType androidVrClient];
-    }
-
-    return [self requestWithURL:fullURL 
-                 authentication:authentication 
-                           body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                                                 client:client]];
-}
-
-
-%end
-
 #pragma mark - Request Dispatch
 
 %hook YTGDataService
@@ -87,24 +26,51 @@
 -(void)makeVideoRequestWithVideoID:(NSString*)videoId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
     id videoCache = [self valueForKey:l(@"videoCache")];
     id cachedVideo = [videoCache objectForKey:videoId];
-    
+   
+   
+
     if (cachedVideo) {
         [self performResponseBlock:responseBlock response:cachedVideo];
     } else {
-        YTGDataRequest *request = nil;
-        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-            request = [%c(YTGDataRequest) requestForVideoWithVideoID:videoId];
-        } else if ([version() isEqualToString:@"1.1.0"]) {
-            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForVideoWithVideoID:videoId];
-        } else {
-            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestForVideoWithVideoID:videoId authentication:nil]; // im fucking LAZY
-        }
+        id responseBlock2 = [responseBlock copy];
+        id errorBlock2 = [errorBlock copy];
+        TRPOTokenSolver *challengeSolver = [(YTDeviceAuthorizer*)[self valueForKey:l(@"deviceAuthorizer")] challengeSolver];
 
-        [self makePOSTRequest:request 
-                    withParser:[self valueForKey:l(@"videoParser")] 
-                    responseBlock:responseBlock 
-                    errorBlock:errorBlock];
+        NSLog(@"challenge solver -> %@", challengeSolver);
+        // todo: error handling and such, we need to make sure the challenge solver is actually ready...
+        [challengeSolver mintPOTokenWithData:videoId withCallback:^(NSString *poToken) {
+            NSLog(@"Video POToken => %@", poToken);
+                                
+            GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
+            NSURL *fullURL = [urlBuilder URL];
 
+            // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+            YoutubeClientType *client = [YoutubeClientType webMobileClient];
+            // if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) { // todo fix this
+            //     client = [YoutubeClientType androidVrClient];
+            // }
+
+            YTGDataRequest *request = nil;
+            if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+                request = [%c(YTGDataRequest) requestWithURL:fullURL 
+                                authentication:nil 
+                                body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                        poToken:poToken
+                                        client:client]
+                        ];
+            } else {
+                request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:fullURL 
+                                authentication:nil 
+                                body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                    poToken:poToken
+                                    client:client]
+                        ];
+            }
+            [self makePOSTRequest:request 
+                        withParser:[self valueForKey:l(@"videoParser")] 
+                        responseBlock:responseBlock2 
+                        errorBlock:errorBlock2];
+        }];
     }
 }
 

@@ -30,7 +30,7 @@
 @property (nonatomic, copy) void (^vmReadyCallback)();
 @property (nonatomic, copy) void (^poGenReady)();
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
-@property (atomic, strong) NSMutableDictionary *poTokenCallbacks;
+@property (nonatomic, strong) NSMutableDictionary *poTokenCallbacks;
 
 
 // states

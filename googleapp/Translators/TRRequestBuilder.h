@@ -46,6 +46,7 @@
  * Build body for player endpoint (video playback info)
  */
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 
+                           poToken:(NSString*)poToken
                            client:(YoutubeClientType *)client;
 
 /**

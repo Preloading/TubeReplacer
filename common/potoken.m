@@ -1,5 +1,7 @@
 #import "potoken.h"
 #import "../base64/NSData+Base64.h"
+#import <objc/runtime.h>
+
 
 @interface GTMHTTPFetcher : NSObject
 + (id)fetcherWithRequest:(id)fp8;
@@ -229,6 +231,7 @@
     self.botguardResponseCallback(botguardResponse);
 }
 
+
 - (BOOL)webView:(UIWebView *)webView
 shouldStartLoadWithRequest:(NSURLRequest *)request
  navigationType:(UIWebViewNavigationType)navigationType {
@@ -257,12 +260,13 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
     if ([url hasPrefix:@"potoken-response://"]) {
         NSString *retrievedData = [url substringFromIndex:19];
-        NSLog(@"retrieved-data -> %@", retrievedData);
         NSArray *components = [retrievedData componentsSeparatedByString:@";"];
-        NSLog(@"callbacks -> %@", self.poTokenCallbacks);
         void (^callback)(NSString *) = (void (^)(NSString *))[self.poTokenCallbacks objectForKey:components[0]];
-        callback(components[1]);
-        
+        [self.poTokenCallbacks removeObjectForKey:components[0]];
+        if (callback)
+            callback([components[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+        else
+            NSLog(@"something went critically wrong! no callback was found");
         return NO;
     }
 
@@ -278,7 +282,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSString *randomIdentifier = (NSString *)CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
     CFRelease(uuidRef);
     
-    [self.poTokenCallbacks setObject:callback forKey:randomIdentifier];
+    [self.poTokenCallbacks setObject:[callback copy] forKey:randomIdentifier];
 
     [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\", \"%@\");", randomIdentifier, data]];
 }

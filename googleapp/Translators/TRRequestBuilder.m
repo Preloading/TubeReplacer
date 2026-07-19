@@ -89,6 +89,7 @@
 #pragma mark - Player Requests
 
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 
+                           poToken:(NSString*)poToken
                            client:(YoutubeClientType *)client {
     
     NSMutableDictionary *body = [self baseBodyWithClient:client];
@@ -97,6 +98,10 @@
         [body setObject:videoId forKey:@"videoId"];
         [body setObject:@YES forKey:@"racyCheckOk"]; // https://github.com/iv-org/invidious-companion/issues/51#issuecomment-2780557907, makes Viewer Discresion, or CONTENT_CHECK_REQUIRED play
         [body setObject:@YES forKey:@"contentCheckOk"];
+    }
+
+    if (poToken) {
+        [body setObject:@{@"poToken":poToken} forKey:@"serviceIntegrityDimensions"];
     }
     
     return [self serializeBody:body];

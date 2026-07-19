@@ -274,9 +274,9 @@
                         self.integrityTokenExpiration = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]];
                         self.integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]*0.8];
                         [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{
-                            [self mintPOTokenWithData:@"Hello World!" withCallback:^(NSString *poToken) {
-                                NSLog(@"We now have a token! POToken => %@", poToken);
-                            }];
+                            // [self mintPOTokenWithData:@"Hello World!" withCallback:^(NSString *poToken) {
+                            //     NSLog(@"We now have a token! POToken => %@", poToken);
+                            // }];
                         }];
                     } else {
                         NSLog(@"missing integrity token!!!");
