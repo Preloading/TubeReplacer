@@ -1,6 +1,7 @@
 // this stuff has things for auth.
 #import "potoken-google.h"
 #import "common/YoutubeClientType.h"
+#import "common/jsanalyzer.h"
 
 @implementation TRPOTokenSolver (Google)
 
@@ -255,6 +256,14 @@
         // }
 
         [self initEngineWithCallback:^{
+            // [self getPlayerJSWithCallback:^{
+            //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //         NSLog(@"done getting player js");
+            //         // TRJSAnalyzer *jsAnalyzer = [[TRJSAnalyzer alloc] init];
+            //         // [jsAnalyzer parseScript:self.playerJS];
+            //     });
+            // }];
+
             [self startFetchingIntegrityTokenForPOTokenWithCallback:^(NSString *botguardResponse) {
                 // - (void)fetchJNNPOChallengeWithMethod:(NSString *)method 
                 //                 body:(NSDictionary *)body 

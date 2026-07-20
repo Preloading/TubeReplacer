@@ -52,6 +52,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	$(COMMON)/Protobuf.m $(COMMON)/YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
+# TubeReplacerGoogle_LDFLAGS = ../lib/libtree-sitter.a
 # TubeReplacerGoogle_LDFLAGS = ../lib/libposixshim.a
 
 before-all::

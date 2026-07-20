@@ -32,6 +32,9 @@
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
 @property (nonatomic, strong) NSMutableDictionary *poTokenCallbacks;
 
+// player
+@property (nonatomic, strong) NSString *playerId;
+@property (nonatomic, strong) NSData *playerJS;
 
 // states
 @property (atomic, assign) BOOL isWebViewReady;
@@ -47,4 +50,7 @@
 -(void)initEngineWithCallback:(void(^)())callback;
 +(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState;
 -(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback;
+
+// n/sig
+-(void)getPlayerJSWithCallback:(void(^)())callback;
 @end

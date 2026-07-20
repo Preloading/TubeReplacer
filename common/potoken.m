@@ -1,5 +1,6 @@
 #import "potoken.h"
 #import "../base64/NSData+Base64.h"
+#import "../base64/NSString+Base64.h"
 #import <objc/runtime.h>
 
 
@@ -317,8 +318,39 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
 // n/sig deciphering
 
-// -(NSString*)getPlayerId
+-(void)getPlayerJSWithCallback:(void(^)())callback {
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://www.youtube.com/iframe_api"]];
 
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+        NSString *responseString = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+        NSString *playerId = nil;
+        NSRange startRange = [responseString rangeOfString:@"player\\/"];
+        if (startRange.location != NSNotFound) {
+            NSRange targetRange;
+            targetRange.location = startRange.location + startRange.length;
+            targetRange.length = [responseString length] - targetRange.location;   
+            NSRange endRange = [responseString rangeOfString:@"\\/" options:0 range:targetRange];
+            if (endRange.location != NSNotFound) {
+                targetRange.length = endRange.location - targetRange.location;
+                playerId = [responseString substringWithRange:targetRange];
+            }
+        }
+
+        if (playerId) {
+            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://www.youtube.com/s/player/%@/player_es6.vflset/en_US/base.js", playerId]]];
+
+            [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+                // NSString *playerJS = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+                self.playerJS = response;
+                callback();
+            }];
+        } else {
+            NSLog(@"playerId was not found!");
+            return;
+        }
+
+    }];
+}
 
 -(void)dealloc {
     [super dealloc];
