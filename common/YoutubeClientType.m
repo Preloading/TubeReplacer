@@ -7,7 +7,7 @@
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"web";
     client.nameProto = @"1";
-    client.version   = @"2.20250222.10.00";
+    client.version   = @"2.20260623.01.00";
     client.screen    = @"WATCH_FULL_SCREEN";
     client.osName    = @"Windows";
     client.osVersion = @"10.0";
@@ -30,7 +30,7 @@
     YoutubeClientType *client = [[YoutubeClientType alloc] init];
     client.name      = @"mweb";
     client.nameProto = @"2";
-    client.version   = @"2.20251222.01.00";
+    client.version   = @"2.20260205.04.01";
     client.osName    = @"iOS";
     client.osVersion = @"18";
     client.platform  = @"MOBILE";

@@ -249,6 +249,8 @@
 -(void)setupPOTokenGenerationWithAuth:(id)authentication {
     NSLog(@"coldstart token -> %@", [TRPOTokenSolver generateColdStartTokenWithContent:@"hello world" clientState:1]);
 
+
+
     [self fetchBotguardChallengeWithCallback:^(NSError *error) {
         // if (error) {
         //     NSLog(@"an error has occured in token fetching! %@", error);
@@ -256,6 +258,10 @@
         // }
 
         [self initEngineWithCallback:^{
+                [self fetchNSigFromServerWithCallback:^{
+                    // NSLog(@"nsigJS -> %@", self.nsigJS);
+                    [self decipherUrl:@"https://rr2---sn-ni5f-txbk.googlevideo.com/videoplayback?expire=1784610013&ei=faheav3_De6csfIPgNq3uA0&ip=50.65.201.220&id=o-AMvoqvDMBeFccs0FvkLDQDBVXXyCYb5cychCTLalnmJ6&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=1123&met=1784588413%2C&mh=_z&mm=31%2C29&mn=sn-ni5f-txbk%2Csn-nx57ynsr&ms=au%2Crdu&mv=m&mvi=2&pl=22&rms=au%2Cau&initcwndbps=4160000&siu=1&bui=AZFlqhPmXAtRBcbKQ9lfjczTucKvlZ5n5RIvQLVyhtknbw6v7Sl1vyc2FUOa2YPmI8OxtiCpjQ&spc=SQ-umq0bsw9mme3T_A86PMiRgGEDH1AMKiffv9fmuLsJQKAi5MgD3FM&vprv=1&svpuc=1&mime=video%2Fmp4&ns=uCLBTZ5h82gEfIqzAXbg8t0W&rqh=1&gir=yes&clen=47439180&ratebypass=yes&dur=759.129&lmt=1783625173002873&mt=1784587758&fvip=5&fexp=51565116&c=MWEB&sefc=1&txp=4538534&n=cB8XoOdjA5uPFfD7&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&sig=AE0s2JYwRQIgZwSS5jWxCeUpqqXPJ-MlwGrZmEE6wEJzcWrA2jdZRPcCIQDzsIgCp3b1Q5jf5OSPr7Uk3JgxIU-S4ZkgotKrMgQyvQ%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIhALGFPygAWQ4vgqTSh4gKvgDiJZaxq8jFXu82_rAztUwOAiBE46ucJYwfJr26dXI_HhkyObA2iO4qopWoPeoaW0fA7Q%3D%3D"];
+                }];
             // [self getPlayerJSWithCallback:^{
             //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             //         NSLog(@"done getting player js");

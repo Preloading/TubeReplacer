@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.h>
+#include <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
 // This is a small POToken solver for YouTube, so that we can hopefully do some more things.
@@ -33,8 +33,11 @@
 @property (nonatomic, strong) NSMutableDictionary *poTokenCallbacks;
 
 // player
-@property (nonatomic, strong) NSString *playerId;
-@property (nonatomic, strong) NSData *playerJS;
+// @property (nonatomic, strong) NSString *playerId;
+// @property (nonatomic, strong) NSData *playerJS;
+
+// nsig
+@property (nonatomic, strong) NSString *nsigJS;
 
 // states
 @property (atomic, assign) BOOL isWebViewReady;
@@ -52,5 +55,7 @@
 -(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback;
 
 // n/sig
--(void)getPlayerJSWithCallback:(void(^)())callback;
+// -(void)getPlayerJSWithCallback:(void(^)())callback;
+-(void)fetchNSigFromServerWithCallback:(void(^)())callback;
+-(NSString*)decipherUrl:(NSString*)url;
 @end

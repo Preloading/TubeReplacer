@@ -1,8 +1,7 @@
 #import "potoken.h"
 #import "../base64/NSData+Base64.h"
 #import "../base64/NSString+Base64.h"
-#import <objc/runtime.h>
-
+#import <Foundation/Foundation.h>
 
 @interface GTMHTTPFetcher : NSObject
 + (id)fetcherWithRequest:(id)fp8;
@@ -12,7 +11,6 @@
 
 @end
 
-#import <Foundation/Foundation.h>
 
 @interface TRURLProtocol : NSURLProtocol
 @end
@@ -170,8 +168,8 @@
 
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
-        // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-        self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+        self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
+        // self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
         self.webView.hidden = NO;
         self.webView.alpha = 1.0;
         self.webView.delegate = self;
@@ -318,38 +316,82 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
 // n/sig deciphering
 
--(void)getPlayerJSWithCallback:(void(^)())callback {
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://www.youtube.com/iframe_api"]];
+// -(void)getPlayerJSWithCallback:(void(^)())callback {
+//     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://www.youtube.com/iframe_api"]];
+
+//     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+//         NSString *responseString = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+//         NSString *playerId = nil;
+//         NSRange startRange = [responseString rangeOfString:@"player\\/"];
+//         if (startRange.location != NSNotFound) {
+//             NSRange targetRange;
+//             targetRange.location = startRange.location + startRange.length;
+//             targetRange.length = [responseString length] - targetRange.location;   
+//             NSRange endRange = [responseString rangeOfString:@"\\/" options:0 range:targetRange];
+//             if (endRange.location != NSNotFound) {
+//                 targetRange.length = endRange.location - targetRange.location;
+//                 playerId = [responseString substringWithRange:targetRange];
+//             }
+//         }
+
+//         if (playerId) {
+//             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://www.youtube.com/s/player/%@/player_es6.vflset/en_US/base.js", playerId]]];
+
+//             [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+//                 // NSString *playerJS = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+//                 self.playerJS = response;
+//                 callback();
+//             }];
+//         } else {
+//             NSLog(@"playerId was not found!");
+//             return;
+//         }
+
+//     }];
+// }
+
+-(void)fetchNSigFromServerWithCallback:(void(^)())callback {
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://preloading.dev/tweaks/tubereplacer/nsig_function.php"]];
 
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
         NSString *responseString = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
-        NSString *playerId = nil;
-        NSRange startRange = [responseString rangeOfString:@"player\\/"];
-        if (startRange.location != NSNotFound) {
-            NSRange targetRange;
-            targetRange.location = startRange.location + startRange.length;
-            targetRange.length = [responseString length] - targetRange.location;   
-            NSRange endRange = [responseString rangeOfString:@"\\/" options:0 range:targetRange];
-            if (endRange.location != NSNotFound) {
-                targetRange.length = endRange.location - targetRange.location;
-                playerId = [responseString substringWithRange:targetRange];
-            }
+        if ([responseString hasPrefix:@"// tubereplacer n/sig"]) { 
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
+                                                     NSUserDomainMask,
+                                                     YES);
+            NSString *cacheFile = [[paths firstObject] stringByAppendingPathComponent:@"nsig_js.plist"];
+            NSLog(@"cache file -> %@", cacheFile);
+            // it's valid! yay!
+            self.nsigJS = responseString;
+            NSDictionary *nsigCacheData = @{
+                @"js":responseString,
+                @"date":[NSDate date],
+            };
+            [nsigCacheData writeToFile:cacheFile atomically:TRUE];
+            callback();
+
         }
-
-        if (playerId) {
-            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://www.youtube.com/s/player/%@/player_es6.vflset/en_US/base.js", playerId]]];
-
-            [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
-                // NSString *playerJS = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
-                self.playerJS = response;
-                callback();
-            }];
-        } else {
-            NSLog(@"playerId was not found!");
-            return;
-        }
-
     }];
+}
+
+// right now this only supports the full URL stuff :)
+-(NSString*)decipherUrl:(NSString*)url {
+    // split URL up by query parameters
+    
+    NSString *querySection = [url componentsSeparatedByString:@"?"][1];
+    NSArray *allQueriesCombined = [querySection componentsSeparatedByString:@"&"];
+    NSMutableDictionary *queries =  [[NSMutableDictionary alloc] init];
+
+    for (NSString *query in allQueriesCombined) {
+        NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
+        [queries setValue:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
+    }
+    NSLog(@"queries -> %@", queries);
+
+    NSString *n = queries[@"n"];
+    // NSString *s 
+    NSLog(@"js out -> %@", [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]]);
+    return @"Not Implemented";
 }
 
 -(void)dealloc {
