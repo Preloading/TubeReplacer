@@ -161,37 +161,39 @@
 
 -(void)initEngineWithCallback:(void(^)())callback {
     self.vmReadyCallback = callback;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [NSURLProtocol registerClass:[TRURLProtocol class]];
-
-        if (self.webView) return;
-
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-
-        // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-        self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
-        self.webView.hidden = NO;
-        self.webView.alpha = 1.0;
-        self.webView.delegate = self;
-
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSString *path = @"/Library/Application Support/TubeReplacer/challenge_solver.html";
         NSError *error = nil;
 
         NSString *html = [NSString stringWithContentsOfFile:path
-                                                   encoding:NSUTF8StringEncoding
-                                                      error:&error];
+                                                    encoding:NSUTF8StringEncoding
+                                                        error:&error];
 
-        if (!html || error) {
-            NSLog(@"failed to load html: %@", error);
-            return;
-        }
+        [NSURLProtocol registerClass:[TRURLProtocol class]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.webView) return;
 
-        [window addSubview:self.webView];
+            UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
-        [self.webView loadHTMLString:html
-                             baseURL:[NSURL URLWithString:@"https://www.youtube.com"]];
+            // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
+            self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+            self.webView.hidden = NO;
+            self.webView.alpha = 1.0;
+            self.webView.delegate = self;
 
-        NSLog(@"done!");
+
+            if (!html || error) {
+                NSLog(@"failed to load html: %@", error);
+                return;
+            }
+
+            [window addSubview:self.webView];
+
+            [self.webView loadHTMLString:html
+                                baseURL:[NSURL URLWithString:@"https://www.youtube.com"]];
+
+            NSLog(@"done!");
+        });
     });
 }
 
@@ -218,10 +220,14 @@
         
     // ];
 
+    CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
     [webView stringByEvaluatingJavaScriptFromString:self.safeScript];
-    NSLog(@"safeScript executed");
+    NSLog(@"safeScript: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
+    // NSLog(@"safeScript executed");
+    t = CFAbsoluteTimeGetCurrent();
     NSString *runVM = [NSString stringWithFormat:@"runBotguardChallenge(\"%@\", \"%@\", \"%@\")", self.program, self.globalName, self.botguardChallenge];
     [webView stringByEvaluatingJavaScriptFromString:runVM];
+    NSLog(@"runVM: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
 }
 
 -(void)recievedBotguardResponse:(NSString*)result webView:(UIWebView*)webView {
