@@ -175,8 +175,8 @@
 
             UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
-            // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-            self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+            self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
+            // self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
             self.webView.hidden = NO;
             self.webView.alpha = 1.0;
             self.webView.delegate = self;
