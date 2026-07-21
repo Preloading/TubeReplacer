@@ -23,9 +23,35 @@ static void analytics() {
             if ([currentVersion isEqualToString:@"disable"]) {
                 return; // used to prevent my own device from posting useless analytics to my server
             }
-            was_updated = YES;
+            if ([currentVersion isEqualToString:@"i_can_haz_write"]) {
+                was_updated = NO;
+            } else {
+                was_updated = YES;
+            }
         } else if (readError && readError.code != NSFileReadNoSuchFileError) {
             NSLog(@"Error reading version file: %@", readError.localizedDescription);
+        }
+
+        if (!was_updated) {
+            NSError *writeError = nil;
+            BOOL success = [@"i_can_haz_write" writeToFile:versionFilePath
+                                            atomically:NO
+                                            encoding:NSUTF8StringEncoding
+                                                error:&writeError];
+
+            if (!success) {
+                NSLog(@"Error testing writing to file: %@", writeError.localizedDescription);
+                return;
+            }
+
+            NSString *fileContent = [NSString stringWithContentsOfFile:versionFilePath
+                                                encoding:NSUTF8StringEncoding
+                                                    error:&readError];
+
+            if (![fileContent isEqualToString:@"i_can_haz_write"]) {
+                NSLog(@"Error reading analytics file: %@", readError.localizedDescription);
+                return;
+            }
         }
 
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://preloading.dev/tweaks/science/firstload.php"]];
@@ -61,7 +87,7 @@ static void analytics() {
         {
             NSError *writeError = nil;
             BOOL success = [currentVersion writeToFile:versionFilePath
-                                            atomically:YES
+                                            atomically:NO
                                             encoding:NSUTF8StringEncoding
                                                 error:&writeError];
 
