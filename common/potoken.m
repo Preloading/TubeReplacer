@@ -168,8 +168,8 @@
 
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
-        self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-        // self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+        // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
+        self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
         self.webView.hidden = NO;
         self.webView.alpha = 1.0;
         self.webView.delegate = self;
@@ -378,19 +378,62 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 -(NSString*)decipherUrl:(NSString*)url {
     // split URL up by query parameters
     
-    NSString *querySection = [url componentsSeparatedByString:@"?"][1];
+    NSArray *splitURL = [url componentsSeparatedByString:@"?"];
+    NSString *querySection = splitURL[1];
     NSArray *allQueriesCombined = [querySection componentsSeparatedByString:@"&"];
     NSMutableDictionary *queries =  [[NSMutableDictionary alloc] init];
 
     for (NSString *query in allQueriesCombined) {
         NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
-        [queries setValue:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
+        [queries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
     }
     NSLog(@"queries -> %@", queries);
 
     NSString *n = queries[@"n"];
     // NSString *s 
-    NSLog(@"js out -> %@", [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]]);
+    NSString *solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]];
+    NSError *error = nil;
+    NSDictionary *solvedNSig = [NSJSONSerialization JSONObjectWithData:[solvedNSigJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                    options:0
+                                                    error:&error];
+    if (error) {
+        NSLog(@"N/Sig solution did not succeed!");
+        return nil;
+    }
+
+    if (solvedNSig[@"n"]) {
+        [queries setObject:solvedNSig[@"n"] forKey:@"n"];
+    }
+
+    if (solvedNSig[@"sig"]) {
+        [queries setObject:solvedNSig[@"sig"] forKey:@"signature"];
+    }
+
+    // rebuild the query
+
+    NSMutableString *newURL = [[NSMutableString alloc] init];
+    [newURL appendString:splitURL[0]];
+    [newURL appendString:@"?"];
+    BOOL start = YES;
+    
+    for (NSString *queryKey in queries) {
+        if (start) {
+            start = NO;
+        } else {
+            [newURL appendString:@"&"];
+        }
+
+        NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+            NULL,
+        (CFStringRef)[queries objectForKey:queryKey],
+            NULL,
+            CFSTR("!*'();:@&=+$,/?%#[]\" "),
+            kCFStringEncodingUTF8);
+
+        [newURL appendString:[NSString stringWithFormat:@"%@=%@", queryKey, escapedString]];
+    }
+
+    NSLog(@"good url -> %@", newURL);
     return @"Not Implemented";
 }
 
