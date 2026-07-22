@@ -286,7 +286,7 @@ function stringToU8(str) {
         status("poReady");
     }
 
-    function mintPOToken(identifier, contentBinding) {
+    function mintPOToken(contentBinding) {
         var result = mintCallback(stringToU8(contentBinding));
 
         if (!result) {
@@ -300,8 +300,7 @@ function stringToU8(str) {
         }
 
         
-        var poToken = u8ToBase64(result, true);
-        document.location = "potoken-response://" + identifier + ";" + encodeURIComponent(poToken);
+        return u8ToBase64(result, true);
     }
 
     function createAttChallengeResponse(botguardChallenge) {

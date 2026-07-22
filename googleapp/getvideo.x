@@ -38,41 +38,40 @@
 
         NSLog(@"challenge solver -> %@", challengeSolver);
         // todo: error handling and such, we need to make sure the challenge solver is actually ready...
-        [challengeSolver mintPOTokenWithData:videoId withCallback:^(NSString *poToken) {
-            NSLog(@"Video POToken => %@", poToken);
-                                
-            GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
-            NSURL *fullURL = [urlBuilder URL];
+        NSString *poToken = [challengeSolver mintPOTokenOrColdStart:videoId];
+        NSLog(@"Video POToken => %@", poToken);
+                            
+        GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
+        NSURL *fullURL = [urlBuilder URL];
 
-            // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-            YoutubeClientType *client = [YoutubeClientType webMobileClient];
-            // if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) { // todo fix this
-            //     client = [YoutubeClientType androidVrClient];
-            // }
+        // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        YoutubeClientType *client = [YoutubeClientType webMobileClient];
+        // if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) { // todo fix this
+        //     client = [YoutubeClientType androidVrClient];
+        // }
 
-            YTGDataRequest *request = nil;
-            if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
-                request = [%c(YTGDataRequest) requestWithURL:fullURL 
-                                authentication:nil 
-                                body:[TRRequestBuilder playerBodyWithVideoId:videoId 
-                                        poToken:poToken
-                                        signatureTimestamp:@([challengeSolver nsigSignatureTimestamp])
-                                        client:client]
-                        ];
-            } else {
-                request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:fullURL 
-                                authentication:nil 
-                                body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+        YTGDataRequest *request = nil;
+        if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
+            request = [%c(YTGDataRequest) requestWithURL:fullURL 
+                            authentication:nil 
+                            body:[TRRequestBuilder playerBodyWithVideoId:videoId 
                                     poToken:poToken
                                     signatureTimestamp:@([challengeSolver nsigSignatureTimestamp])
                                     client:client]
-                        ];
-            }
-            [self makePOSTRequest:request 
-                        withParser:[self valueForKey:l(@"videoParser")] 
-                        responseBlock:responseBlock2 
-                        errorBlock:errorBlock2];
-        }];
+                    ];
+        } else {
+            request = [(YTGDataRequestFactory*)[self valueForKey:l(@"GDataRequestFactory")] requestWithURL:fullURL 
+                            authentication:nil 
+                            body:[TRRequestBuilder playerBodyWithVideoId:videoId 
+                                poToken:poToken
+                                signatureTimestamp:@([challengeSolver nsigSignatureTimestamp])
+                                client:client]
+                    ];
+        }
+        [self makePOSTRequest:request 
+                    withParser:[self valueForKey:l(@"videoParser")] 
+                    responseBlock:responseBlock2 
+                    errorBlock:errorBlock2];
     }
 }
 

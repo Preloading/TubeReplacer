@@ -61,25 +61,6 @@
 
 @end
 
-@implementation TRPOTokenOutput
-
--(instancetype)initWithPoToken:(NSString*)poToken coldStartToken:(NSString*)coldStart {
-    self = [super init];
-    if (self) {
-        self.poToken = poToken;
-        self.coldstartToken = coldStart;
-    }
-    return self;
-}
-
--(void)dealloc {
-    [_poToken release];
-    [_coldstartToken release];
-    [super dealloc];
-}
-@end
-
-
 @implementation TRPOTokenSolver
 
 static TRPOTokenSolver *_sharedInstance = nil;
@@ -95,7 +76,6 @@ static TRPOTokenSolver *_sharedInstance = nil;
 
 -(instancetype)init {
     [super init];
-    self.poTokenCallbacks = [[[NSMutableDictionary alloc] init] autorelease];
     return self;
 }
 
@@ -288,26 +268,15 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
             [self webViewScriptsLoaded:webView];
         if ([url isEqualToString:@"status://vmReady"])
             self.vmReadyCallback();
-        if ([url isEqualToString:@"status://poReady"])
+        if ([url isEqualToString:@"status://poReady"]) {
+            self.isReadyToMintTokens = YES; 
             self.poGenReady();
+        }
         return NO;
     }
 
     if ([url hasPrefix:@"botguard-response://"]) {
         [self recievedBotguardResponse:[url substringFromIndex:20] webView:webView];
-        return NO;
-    }
-
-    if ([url hasPrefix:@"potoken-response://"]) {
-        NSString *retrievedData = [url substringFromIndex:19];
-        NSArray *components = [retrievedData componentsSeparatedByString:@";"];
-        void (^callback)(NSString *) = [[self.poTokenCallbacks objectForKey:components[0]] retain];
-        [self.poTokenCallbacks removeObjectForKey:components[0]];
-        if (callback)
-            callback([components[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-        else
-            NSLog(@"something went critically wrong! no callback was found");
-        [callback release];
         return NO;
     }
 
@@ -318,15 +287,25 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSLog(@"loaded successfully");
 }
 
--(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback {
-    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
-    NSString *randomIdentifier = (NSString *)CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
-    CFRelease(uuidRef);
-    
-    [self.poTokenCallbacks setObject:[callback copy] forKey:randomIdentifier];
+-(NSString*)mintPOTokenWithData:(NSString*)data {
+    if (!self.isReadyToMintTokens) 
+        return nil;
 
-    [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\", \"%@\");", randomIdentifier, data]];
-    [randomIdentifier release];
+    __block NSString *poToken = nil;
+
+    if ([NSThread isMainThread])
+    {
+        poToken = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\");", data]]; // takes ~20ms
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            poToken = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\");", data]]; // takes ~20ms
+        });
+    }
+
+
+    return poToken;
 }
 
 // direct port of https://github.com/LuanRT/BgUtils/blob/5c1c05e75c8c56b897191a8a799d94ee84b9df1c/src/core/WebPoMinter.ts#L69
@@ -357,7 +336,18 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     return [coldStartTokenData base64EncodedString];
 }
 
-// -(void)mintPOTokenOrColdStart
+-(NSString*)mintPOTokenOrColdStart:(NSString*)contentBinding {
+    NSString *token = nil;
+    if (self.isReadyToMintTokens) {
+        // mint a POToken
+        token = [self mintPOTokenWithData:@"contentBinding"];
+    } else {
+        // mint a coldstart
+        token = [TRPOTokenSolver generateColdStartTokenWithContent:@"contentBinding" clientState:1];
+    }
+
+    return token;
+}
 
 // n/sig deciphering
 
@@ -521,7 +511,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
     if ([NSThread isMainThread])
     {
-        solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]];
+        solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"%@\",\"%@\")", self.nsigJS, (n ? n : @""), (sp ? sp : @""), (s ? s : @"")]];
     }
     else
     {
@@ -602,7 +592,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     if (_vmReadyCallback) [_vmReadyCallback release];
     if (_poGenReady) [_poGenReady release];    
     if (_botguardResponseCallback) [_botguardResponseCallback release];
-    if (_poTokenCallbacks) [_poTokenCallbacks release];
 
     if (_nsigJS) [_nsigJS release];
 

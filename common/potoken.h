@@ -28,7 +28,6 @@
 @property (nonatomic, copy) void (^vmReadyCallback)();
 @property (nonatomic, copy) void (^poGenReady)();
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
-@property (nonatomic, strong) NSMutableDictionary *poTokenCallbacks;
 
 // player
 // @property (nonatomic, strong) NSString *playerId;
@@ -41,6 +40,7 @@
 // states
 @property (atomic, assign) BOOL isWebViewReady;
 @property (atomic, assign) BOOL isVMInitalized;
+@property (atomic, assign) BOOL isReadyToMintTokens;
 @property (atomic, assign) BOOL isNSigReady;
 
 +(TRPOTokenSolver *)sharedInstance;
@@ -53,17 +53,12 @@
 -(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback;
 -(void)initEngineWithCallback:(void(^)())callback;
 +(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState;
--(void)mintPOTokenWithData:(NSString*)data withCallback:(void (^)(NSString *))callback;
+-(NSString*)mintPOTokenWithData:(NSString*)data;
+-(NSString*)mintPOTokenOrColdStart:(NSString*)contentBinding;
 
 // n/sig
 // -(void)getPlayerJSWithCallback:(void(^)())callback;
 -(void)setupNSig;
 -(void)fetchNSigFromServerWithCallback:(void(^)())callback;
 -(NSString*)decipherUrl:(NSString*)url signatureCipher:(NSString*)signatureCipher;
-@end
-
-@interface TRPOTokenOutput : NSObject
-@property (nonatomic, strong) NSString *poToken;
-@property (nonatomic, strong) NSString *coldstartToken;
--(instancetype)initWithPoToken:(NSString*)poToken coldStartToken:(NSString*)coldStart;
 @end
