@@ -51,6 +51,7 @@
 
     [self.client URLProtocol:self didReceiveResponse:response
           cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+    [response release];
 
     [self.client URLProtocol:self didLoadData:data];
     [self.client URLProtocolDidFinishLoading:self];
@@ -60,11 +61,41 @@
 
 @end
 
+@implementation TRPOTokenOutput
+
+-(instancetype)initWithPoToken:(NSString*)poToken coldStartToken:(NSString*)coldStart {
+    self = [super init];
+    if (self) {
+        self.poToken = poToken;
+        self.coldstartToken = coldStart;
+    }
+    return self;
+}
+
+-(void)dealloc {
+    [_poToken release];
+    [_coldstartToken release];
+    [super dealloc];
+}
+@end
+
+
 @implementation TRPOTokenSolver
+
+static TRPOTokenSolver *_sharedInstance = nil;
+
++(TRPOTokenSolver *)sharedInstance {
+    @synchronized([TRPOTokenSolver class]) {
+        if (!_sharedInstance)
+          _sharedInstance = [[self alloc] init];
+        return _sharedInstance;
+    }
+    return nil;
+}
 
 -(instancetype)init {
     [super init];
-    self.poTokenCallbacks = [[NSMutableDictionary alloc] init];
+    self.poTokenCallbacks = [[[NSMutableDictionary alloc] init] autorelease];
     return self;
 }
 
@@ -83,6 +114,7 @@
     NSError *error = nil;
     NSURLResponse *requestResponse = nil;
     NSData *result = [NSURLConnection sendSynchronousRequest:request returningResponse:&requestResponse error:&error];
+    [request release];
     if (error) {
         NSLog(@"[TubeReplacer] POToken challenge request failed!");
         return nil;
@@ -119,6 +151,7 @@
                             JSONObjectWithData:decipheredChallenge
                             options:0
                             error:&error];
+    [decipheredChallenge release];
 
     if (error) {
         NSLog(@"[TubeReplacer] POToken descrambled challenge json decode failed!");
@@ -130,11 +163,11 @@
         return;
     }
 
-    self->_messageId = json[0];
+    self.messageId = json[0];
     if ([json[1] isKindOfClass:[NSArray class]]) {
         for (NSString* safeScript in json[1]) {
             if ([safeScript isKindOfClass:[NSString class]]) {
-                self->_safeScript = safeScript;
+                self.safeScript = safeScript;
                 break;
             }
         }
@@ -142,16 +175,15 @@
     if ([json[2] isKindOfClass:[NSArray class]]) {
         for (NSString* resourceUrl in json[2]) {
             if ([resourceUrl isKindOfClass:[NSString class]]) {
-                self->_resourceURL = resourceUrl;
+                self.resourceURL = resourceUrl;
                 break;
             }
         }
     }
-    self->_interpreterHash = json[3];
-    self->_program = json[4];
-    self->_globalName = json[5];
-    self->_clientExperimentsStateBlob = json[7];
-
+    self.interpreterHash = json[3];
+    self.program = json[4];
+    self.globalName = json[5];
+    self.clientExperimentsStateBlob = json[7];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -175,8 +207,8 @@
 
             UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
-            self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-            // self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+            // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
+            self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
             self.webView.hidden = NO;
             self.webView.alpha = 1.0;
             self.webView.delegate = self;
@@ -222,10 +254,13 @@
 
     CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
     [webView stringByEvaluatingJavaScriptFromString:self.safeScript];
+    self.safeScript = nil;
     NSLog(@"safeScript: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
     // NSLog(@"safeScript executed");
     t = CFAbsoluteTimeGetCurrent();
     NSString *runVM = [NSString stringWithFormat:@"runBotguardChallenge(\"%@\", \"%@\", \"%@\")", self.program, self.globalName, self.botguardChallenge];
+    self.program = nil;
+
     [webView stringByEvaluatingJavaScriptFromString:runVM];
     NSLog(@"runVM: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
 }
@@ -266,12 +301,13 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     if ([url hasPrefix:@"potoken-response://"]) {
         NSString *retrievedData = [url substringFromIndex:19];
         NSArray *components = [retrievedData componentsSeparatedByString:@";"];
-        void (^callback)(NSString *) = (void (^)(NSString *))[self.poTokenCallbacks objectForKey:components[0]];
+        void (^callback)(NSString *) = [[self.poTokenCallbacks objectForKey:components[0]] retain];
         [self.poTokenCallbacks removeObjectForKey:components[0]];
         if (callback)
             callback([components[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
         else
             NSLog(@"something went critically wrong! no callback was found");
+        [callback release];
         return NO;
     }
 
@@ -290,6 +326,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     [self.poTokenCallbacks setObject:[callback copy] forKey:randomIdentifier];
 
     [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\", \"%@\");", randomIdentifier, data]];
+    [randomIdentifier release];
 }
 
 // direct port of https://github.com/LuanRT/BgUtils/blob/5c1c05e75c8c56b897191a8a799d94ee84b9df1c/src/core/WebPoMinter.ts#L69
@@ -319,6 +356,8 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSLog(@"coldstart -> %@", [coldStartTokenData base64EncodedString]);
     return [coldStartTokenData base64EncodedString];
 }
+
+// -(void)mintPOTokenOrColdStart
 
 // n/sig deciphering
 
@@ -362,67 +401,167 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
         NSString *responseString = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
         if ([responseString hasPrefix:@"// tubereplacer n/sig"]) { 
+            // it's valid! yay!
+
+            // there is 110% better way to do this, but ehhhh
+            int signatureTimestamp = 0;
+            NSRange startRange = [responseString rangeOfString:@"\"signatureTimestampVar\": \""];
+            if (startRange.location != NSNotFound) {
+                NSRange targetRange;
+                targetRange.location = startRange.location + startRange.length;
+                targetRange.length = [responseString length] - targetRange.location;   
+                NSRange endRange = [responseString rangeOfString:@"\"" options:0 range:targetRange];
+                if (endRange.location != NSNotFound) {
+                    targetRange.length = endRange.location - targetRange.location;
+                    signatureTimestamp = [[responseString substringWithRange:targetRange] intValue];
+                }
+            }
+
+            self.nsigSignatureTimestamp = signatureTimestamp;
+            self.nsigJS = responseString;
+
+            // cache to disk
             NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
                                                      NSUserDomainMask,
                                                      YES);
             NSString *cacheFile = [[paths firstObject] stringByAppendingPathComponent:@"nsig_js.plist"];
             NSLog(@"cache file -> %@", cacheFile);
-            // it's valid! yay!
-            self.nsigJS = responseString;
             NSDictionary *nsigCacheData = @{
                 @"js":responseString,
+                @"timestampSignature":@(signatureTimestamp),
                 @"date":[NSDate date],
             };
             [nsigCacheData writeToFile:cacheFile atomically:TRUE];
             callback();
 
         }
+        [responseString release];
     }];
+    [request release];
 }
 
-// right now this only supports the full URL stuff :)
--(NSString*)decipherUrl:(NSString*)url {
-    // split URL up by query parameters
+-(void)setupNSig {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
+                                                NSUserDomainMask,
+                                                YES);
+    NSString *cacheFile = [[paths firstObject] stringByAppendingPathComponent:@"nsig_js.plist"];
+
+    NSDictionary *nsigCacheData = [NSDictionary dictionaryWithContentsOfFile:cacheFile];
+
+    if (nsigCacheData) {
+        self.nsigJS = nsigCacheData[@"js"];
+        self.nsigSignatureTimestamp = [nsigCacheData[@"timestampSignature"] intValue];
+
+
+        if ([[NSDate date] compare:[nsigCacheData[@"date"] dateByAddingTimeInterval:604800]] == NSOrderedDescending) { // one week
+            // cache has expired
+            NSLog(@"[N/Sig] renewal called");
+            [self fetchNSigFromServerWithCallback:^{}];
+        }
+    } else {
+        NSLog(@"[N/Sig] cache not found, regenerating...");
+
+        [self fetchNSigFromServerWithCallback:^{}];
+    }
+}
+
+// Deciphers a URL using youtube's N/Sig systems.
+// You only need either URL or signature cipher, as youtube provides the URL in several ways.
+// Declare the one you are not using as nil
+-(NSString*)decipherUrl:(NSString*)url signatureCipher:(NSString*)signatureCipher {
+    // check if we actually can solve n/sig
+    if (!self.isWebViewReady) {
+        NSLog(@"[N/Sig] webview is not ready!");
+        return @"";
+    }
+
+
+
+    if (!self.nsigJS) {
+        NSLog(@"[N/Sig] JS code is not available!");
+        return @"";
+    }
     
+    NSString *n = nil;
+    NSString *s = nil;
+    NSString *sp = nil;
+
+    // deal with signatureCipher
+    if (signatureCipher) {
+        NSArray *allSigQueriesCombined = [signatureCipher componentsSeparatedByString:@"&"];
+        NSMutableDictionary *signatureQueries =  [[NSMutableDictionary alloc] init];
+
+        for (NSString *query in allSigQueriesCombined) {
+            NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
+            [signatureQueries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
+        }
+
+        url = signatureQueries[@"url"];
+        s = signatureQueries[@"s"];
+        sp = signatureQueries[@"sp"];
+    }
+    
+
+    // split URL up by query parameters
     NSArray *splitURL = [url componentsSeparatedByString:@"?"];
     NSString *querySection = splitURL[1];
+    
     NSArray *allQueriesCombined = [querySection componentsSeparatedByString:@"&"];
-    NSMutableDictionary *queries =  [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *urlQueries =  [[NSMutableDictionary alloc] init];
 
     for (NSString *query in allQueriesCombined) {
         NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
-        [queries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
+        [urlQueries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
     }
-    NSLog(@"queries -> %@", queries);
 
-    NSString *n = queries[@"n"];
-    // NSString *s 
-    NSString *solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]];
+    n = urlQueries[@"n"];
+
+
+    __block NSString *solvedNSigJSON = nil;
+
+    if ([NSThread isMainThread])
+    {
+        solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"\",\"\")", self.nsigJS, n]];
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"%@\",\"%@\")", self.nsigJS, (n ? n : @""), (sp ? sp : @""), (s ? s : @"")]];
+        });
+    }
+
+
     NSError *error = nil;
     NSDictionary *solvedNSig = [NSJSONSerialization JSONObjectWithData:[solvedNSigJSON dataUsingEncoding:NSUTF8StringEncoding]
                                                     options:0
                                                     error:&error];
     if (error) {
-        NSLog(@"N/Sig solution did not succeed!");
+        NSLog(@"[N/Sig] solution did not succeed!");
         return nil;
     }
 
+    NSLog(@"solvedNsig -> %@", solvedNSig);
+
     if (solvedNSig[@"n"]) {
-        [queries setObject:solvedNSig[@"n"] forKey:@"n"];
+        [urlQueries setObject:solvedNSig[@"n"] forKey:@"n"];
     }
 
     if (solvedNSig[@"sig"]) {
-        [queries setObject:solvedNSig[@"sig"] forKey:@"signature"];
+        if (sp) {
+            [urlQueries setObject:solvedNSig[@"sig"] forKey:sp];
+        } else {
+            [urlQueries setObject:solvedNSig[@"sig"] forKey:@"signature"];
+        }
     }
 
     // rebuild the query
 
-    NSMutableString *newURL = [[NSMutableString alloc] init];
+    NSMutableString *newURL = [[[NSMutableString alloc] init] autorelease];
     [newURL appendString:splitURL[0]];
     [newURL appendString:@"?"];
     BOOL start = YES;
     
-    for (NSString *queryKey in queries) {
+    for (NSString *queryKey in urlQueries) {
         if (start) {
             start = NO;
         } else {
@@ -431,19 +570,42 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
         NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(
             NULL,
-        (CFStringRef)[queries objectForKey:queryKey],
+        (CFStringRef)[urlQueries objectForKey:queryKey],
             NULL,
             CFSTR("!*'();:@&=+$,/?%#[]\" "),
             kCFStringEncodingUTF8);
 
         [newURL appendString:[NSString stringWithFormat:@"%@=%@", queryKey, escapedString]];
+        [escapedString release];
     }
 
-    NSLog(@"good url -> %@", newURL);
-    return @"Not Implemented";
+    [urlQueries release];
+
+    // NSLog(@"good url -> %@", newURL);
+    return newURL;
 }
 
 -(void)dealloc {
+    if (_webView) [_webView release];
+
+    if (_messageId) [_messageId release];
+    if (_safeScript) [_safeScript release];
+    if (_resourceURL) [_resourceURL release];
+    if (_interpreterHash) [_interpreterHash release];
+    if (_program) [_program release];
+    if (_globalName) [_globalName release];
+    if (_clientExperimentsStateBlob) [_clientExperimentsStateBlob release];
+
+    if (_botguardChallenge) [_botguardChallenge release];
+    if (_botguardResponse) [_botguardResponse release];
+
+    if (_vmReadyCallback) [_vmReadyCallback release];
+    if (_poGenReady) [_poGenReady release];    
+    if (_botguardResponseCallback) [_botguardResponseCallback release];
+    if (_poTokenCallbacks) [_poTokenCallbacks release];
+
+    if (_nsigJS) [_nsigJS release];
+
     [super dealloc];
 }
 

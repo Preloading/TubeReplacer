@@ -1,10 +1,11 @@
 #include <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-// This is a small POToken solver for YouTube, so that we can hopefully do some more things.
-// This will probably run blocking
+// This does both N/Sig & POToken solving.
 // Huge props to https://github.com/LuanRT/BgUtils as a reference to this :D
 @interface TRPOTokenSolver : NSObject <UIWebViewDelegate>
+@property (nonatomic, strong) UIWebView *webView;
+
 // for solving integrety token
 @property (nonatomic, strong) NSString *messageId;
 @property (nonatomic, strong) NSString *safeScript;
@@ -13,15 +14,12 @@
 @property (nonatomic, strong) NSString *program;
 @property (nonatomic, strong) NSString *globalName;
 @property (nonatomic, strong) NSString *clientExperimentsStateBlob;
-@property (nonatomic, strong) UIWebView *webView;
 
 // integrityToken
 @property (nonatomic, strong) NSString *integrityToken;
 @property (nonatomic, strong) NSDate *integrityTokenExpiration;
 @property (nonatomic, strong) NSDate *integrityTokenShouldProbablyRenew;
 
-// poToken
-@property (nonatomic, strong) NSString *cachedPOToken;
 // botguard
 @property (nonatomic, strong) NSString *botguardChallenge;
 @property (nonatomic, strong) NSString *botguardResponse;
@@ -37,12 +35,15 @@
 // @property (nonatomic, strong) NSData *playerJS;
 
 // nsig
-@property (nonatomic, strong) NSString *nsigJS;
+@property (atomic, strong) NSString *nsigJS;
+@property (atomic, assign) int nsigSignatureTimestamp;
 
 // states
 @property (atomic, assign) BOOL isWebViewReady;
 @property (atomic, assign) BOOL isVMInitalized;
+@property (atomic, assign) BOOL isNSigReady;
 
++(TRPOTokenSolver *)sharedInstance;
 
 -(NSDictionary*)fetchPOJNNChallengeWithMethod:(NSString*)method andBody:(NSDictionary*)body;
 // -(BOOL)fetchStudioIntegrityChallenge;
@@ -56,6 +57,13 @@
 
 // n/sig
 // -(void)getPlayerJSWithCallback:(void(^)())callback;
+-(void)setupNSig;
 -(void)fetchNSigFromServerWithCallback:(void(^)())callback;
--(NSString*)decipherUrl:(NSString*)url;
+-(NSString*)decipherUrl:(NSString*)url signatureCipher:(NSString*)signatureCipher;
+@end
+
+@interface TRPOTokenOutput : NSObject
+@property (nonatomic, strong) NSString *poToken;
+@property (nonatomic, strong) NSString *coldstartToken;
+-(instancetype)initWithPoToken:(NSString*)poToken coldStartToken:(NSString*)coldStart;
 @end

@@ -56,6 +56,7 @@
                                 authentication:nil 
                                 body:[TRRequestBuilder playerBodyWithVideoId:videoId 
                                         poToken:poToken
+                                        signatureTimestamp:@([challengeSolver nsigSignatureTimestamp])
                                         client:client]
                         ];
             } else {
@@ -63,6 +64,7 @@
                                 authentication:nil 
                                 body:[TRRequestBuilder playerBodyWithVideoId:videoId 
                                     poToken:poToken
+                                    signatureTimestamp:@([challengeSolver nsigSignatureTimestamp])
                                     client:client]
                         ];
             }

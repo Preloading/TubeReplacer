@@ -90,6 +90,7 @@
 
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 
                            poToken:(NSString*)poToken
+                           signatureTimestamp:(NSNumber*)signatureTimestamp
                            client:(YoutubeClientType *)client {
     
     NSMutableDictionary *body = [self baseBodyWithClient:client];
@@ -102,6 +103,10 @@
 
     if (poToken) {
         [body setObject:@{@"poToken":poToken} forKey:@"serviceIntegrityDimensions"];
+    }
+
+    if (signatureTimestamp) {
+        [body setObject:@{@"contentPlaybackContext":@{@"signatureTimestamp":signatureTimestamp}} forKey:@"playbackContext"];
     }
     
     return [self serializeBody:body];

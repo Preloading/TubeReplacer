@@ -249,8 +249,17 @@
             NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
             for (NSDictionary *format in formats) {
                 NSString *urlString = format[@"url"];
-                if (urlString) {
-                    NSURL *url = [NSURL URLWithString:urlString];
+                NSString *signatureCipher = format[@"signatureCipher"];
+                if (urlString || signatureCipher) {
+                    NSURL *url = nil;
+                    // todo: check if this is android before running this.
+                    NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
+                    if ([decipheredURL isEqualToString:@""]) {
+                        url = [NSURL URLWithString:urlString];
+                    } else {
+                        url = [NSURL URLWithString:decipheredURL];
+                    }
+
                     if (url) {
                         id stream = nil;
                         if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails

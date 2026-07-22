@@ -70,7 +70,7 @@
 }
 
 -(void)loadRegistrationFromStorage {
-    TRPOTokenSolver *solver = [[TRPOTokenSolver alloc] init];
+    TRPOTokenSolver *solver = [TRPOTokenSolver sharedInstance];
     objc_setAssociatedObject(self, "_challengeSolver", solver, OBJC_ASSOCIATION_RETAIN);
     [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
     

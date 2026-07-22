@@ -850,7 +850,7 @@ done:
 
             NSMutableDictionary *params = [[self parameters] mutableCopy];
             if (!params) {
-              params = [NSMutableDictionary dictionary];
+              params = [[NSMutableDictionary alloc] init];
             }
             [params setObject:datasyncID forKey:@"DATASYNC_ID"];
             [params setObject:datasyncID forKey:@"userID"];

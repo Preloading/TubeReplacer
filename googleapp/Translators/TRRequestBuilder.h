@@ -47,6 +47,7 @@
  */
 + (NSData *)playerBodyWithVideoId:(NSString *)videoId 
                            poToken:(NSString*)poToken
+                           signatureTimestamp:(NSNumber*)signatureTimestamp
                            client:(YoutubeClientType *)client;
 
 /**
