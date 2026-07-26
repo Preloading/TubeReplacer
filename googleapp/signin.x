@@ -359,7 +359,7 @@
 
         NSLog(@"html string -> %@", htmlString);
         // render
-        UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self valueForKey:l(@"delegate")] webView];
+        UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
         [webView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]];
   }];
 
@@ -461,7 +461,7 @@
             return 1;
             // }
         } else {
-          UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self valueForKey:l(@"delegate")] webView];
+          UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
           NSLog(@"current url -> %@", [[[webView request] URL] absoluteString]);
           if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]) {
             // we haven't selected an account yet, lets go prompt the user for it
