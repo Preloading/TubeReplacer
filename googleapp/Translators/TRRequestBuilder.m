@@ -106,7 +106,14 @@
     }
 
     if (signatureTimestamp) {
-        [body setObject:@{@"contentPlaybackContext":@{@"signatureTimestamp":signatureTimestamp}} forKey:@"playbackContext"];
+        [body setObject:@{
+            @"contentPlaybackContext":@{
+                @"signatureTimestamp":signatureTimestamp
+            },
+            @"devicePlaybackCapabilities": @{
+                @"supportsVp9Encoding":@NO
+            }
+        } forKey:@"playbackContext"];
     }
     
     return [self serializeBody:body];

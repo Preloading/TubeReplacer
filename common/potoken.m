@@ -300,7 +300,8 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     else
     {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            poToken = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\");", data]]; // takes ~20ms
+            NSString *result = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"mintPOToken(\"%@\");", data]];
+            poToken = [result copy];        
         });
     }
 
@@ -340,10 +341,10 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSString *token = nil;
     if (self.isReadyToMintTokens) {
         // mint a POToken
-        token = [self mintPOTokenWithData:@"contentBinding"];
+        token = [self mintPOTokenWithData:contentBinding];
     } else {
         // mint a coldstart
-        token = [TRPOTokenSolver generateColdStartTokenWithContent:@"contentBinding" clientState:1];
+        token = [TRPOTokenSolver generateColdStartTokenWithContent:contentBinding clientState:1];
     }
 
     return token;
@@ -462,14 +463,14 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     // check if we actually can solve n/sig
     if (!self.isWebViewReady) {
         NSLog(@"[N/Sig] webview is not ready!");
-        return @"";
+        return nil;
     }
 
 
 
     if (!self.nsigJS) {
         NSLog(@"[N/Sig] JS code is not available!");
-        return @"";
+        return nil;
     }
     
     NSString *n = nil;
@@ -516,7 +517,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     else
     {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            solvedNSigJSON = [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"%@\",\"%@\")", self.nsigJS, (n ? n : @""), (sp ? sp : @""), (s ? s : @"")]];
+            solvedNSigJSON = [[self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@\nprocess(\"%@\",\"%@\",\"%@\")", self.nsigJS, (n ? n : @""), (sp ? sp : @""), (s ? s : @"")]] copy];
         });
     }
 
@@ -531,6 +532,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     }
 
     NSLog(@"solvedNsig -> %@", solvedNSig);
+
+    if (!solvedNSig[@"n"] && !solvedNSig[@"sig"]) {
+        NSLog(@"n/sig failed to decipher!");
+        return nil;
+    }
 
     if (solvedNSig[@"n"]) {
         [urlQueries setObject:solvedNSig[@"n"] forKey:@"n"];

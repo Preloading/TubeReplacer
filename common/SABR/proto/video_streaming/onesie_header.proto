@@ -1,0 +1,27 @@
+syntax = "proto2";
+package video_streaming;
+
+import "video_streaming/crypto_params.proto";
+import "video_streaming/onesie_header_type.proto";
+
+message OnesieHeader {
+  message UnknownMessage1 {
+    optional string video_id = 2;
+  }
+
+  message UnknownMessage2 {
+    repeated string itag_denylist = 1;
+  }
+
+  optional OnesieHeaderType type = 1;
+  optional string video_id = 2;
+  optional string itag = 3;
+  optional CryptoParams crypto_params = 4;
+  optional uint64 last_modified = 5;
+  optional int64 expected_media_size_bytes = 7;
+  repeated string restricted_formats = 11;
+  optional string xtags = 15;
+  optional int64 sequence_number = 18;
+  optional UnknownMessage1 field23 = 23;
+  optional UnknownMessage2 field34 = 34;
+}

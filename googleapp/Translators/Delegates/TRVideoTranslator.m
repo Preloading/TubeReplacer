@@ -12,6 +12,8 @@
 #import "../../base64/NSString+Base64.h"
 #import "../../base64/NSData+Base64.h"
 #import "../general.h"
+#import "common/SABR/TRSabrStream.h"
+#import "common/SABR/TRAdaptiveFormat.h"
 
 @implementation TRVideoTranslator
 
@@ -246,6 +248,54 @@
             //     [ytStreams addObject:stream];
             // }
         } else {
+            NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
+            for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
+                if ([f[@"mimeType"] rangeOfString:@"codecs=\"vp9\""].location != NSNotFound)
+                    continue; // None of the devices can play VP9 (introduced in 2020)
+
+                if ([f[@"mimeType"] rangeOfString:@"codecs=\"av01"].location != NSNotFound)
+                    continue; // None of the devices can play AV1 (introduced in 2022)
+                
+                // NSString *urlString = f[@"url"];
+                // NSString *signatureCipher = f[@"signatureCipher"];
+                // if (urlString || signatureCipher) {
+                //     // todo: check if this is android before running this.
+                //     NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
+                //     if (decipheredURL) {
+                //         urlString = decipheredURL;
+                //     }
+                // }
+                TRAdaptiveFormat *format = [[TRAdaptiveFormat alloc] init];
+                format.itag = [f[@"itag"] unsignedIntValue];
+                format.url = f[@"url"]; // this does not include always include URL
+                // format.url = urlString;
+                format.mimeType = f[@"mimeType"];
+                format.bitrate = [f[@"bitrate"] unsignedIntValue];
+                format.width = [f[@"width"] intValue];
+                format.height = [f[@"height"] intValue];
+                format.lastModified = f[@"lastModified"];
+                format.contentLength = strtoul([f[@"contentLength"] UTF8String], NULL, 10);
+                format.quality = f[@"quality"];
+                format.qualityLabel = f[@"qualityLabel"];
+                format.fps = [f[@"fps"] intValue];
+                format.projectionType = f[@"projectionType"];
+                format.averageBitrate = [f[@"averageBitrate"] unsignedIntValue];
+                format.approxDurationMs = strtoul([f[@"approxDurationMs"] UTF8String], NULL, 10);
+                format.qualityOrdinal = f[@"qualityOrdinal"];
+
+                // audio
+                format.loudnessDb = [f[@"loudnessDb"] doubleValue];
+                format.trackAbsoluteLoudnessLkfs = [f[@"trackAbsoluteLoudnessLkfs"] doubleValue];
+                format.audioSampleRate = [f[@"audioSampleRate"] intValue];
+                format.audioQuality = f[@"audioQuality"];
+
+                [adaptiveFormats addObject:format];
+            }
+
+            // sabr testing
+            TRSabrStream *sabrStream = [[TRSabrStream alloc] initWithStreamUrl:[TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"] ustreamConfig:[TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"] formats:adaptiveFormats videoId:videoId];
+            NSLog(@"sabrStream -> %@", sabrStream);
+
             NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
             for (NSDictionary *format in formats) {
                 NSString *urlString = format[@"url"];
@@ -254,10 +304,10 @@
                     NSURL *url = nil;
                     // todo: check if this is android before running this.
                     NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
-                    if ([decipheredURL isEqualToString:@""]) {
-                        url = [NSURL URLWithString:urlString];
-                    } else {
+                    if (decipheredURL) {
                         url = [NSURL URLWithString:decipheredURL];
+                    } else {
+                        url = [NSURL URLWithString:urlString];
                     }
 
                     if (url) {

@@ -1,0 +1,60 @@
+syntax = "proto2";
+
+package video_streaming;
+
+enum UMPPartId {
+  UMP_PART_ID_UNKNOWN = 0;
+  UMP_PART_ID_ONESIE_HEADER = 10;
+  UMP_PART_ID_ONESIE_DATA = 11;
+  UMP_PART_ID_ONESIE_ENCRYPTED_MEDIA = 12;
+  // Header for a media segment; includes sequence and timing information.
+  UMP_PART_ID_MEDIA_HEADER = 20;
+  // Chunk of media segment data.
+  UMP_PART_ID_MEDIA = 21;
+  // Indicates end of media segment; finalizes segment processing.
+  UMP_PART_ID_MEDIA_END = 22;
+  UMP_PART_ID_CONFIG = 30;
+  UMP_PART_ID_LIVE_METADATA = 31;
+  UMP_PART_ID_HOSTNAME_CHANGE_HINT_DEPRECATED = 32;
+  UMP_PART_ID_LIVE_METADATA_PROMISE = 33;
+  UMP_PART_ID_LIVE_METADATA_PROMISE_CANCELLATION = 34;
+  // Server's policy for the next request; includes backoff time and playback cookie.
+  UMP_PART_ID_NEXT_REQUEST_POLICY = 35;
+  UMP_PART_ID_USTREAMER_VIDEO_AND_FORMAT_METADATA = 36;
+  UMP_PART_ID_FORMAT_SELECTION_CONFIG = 37;
+  UMP_PART_ID_USTREAMER_SELECTED_MEDIA_STREAM = 38;
+  // Metadata for format initialization; contains total number of segments, duration, etc.
+  UMP_PART_ID_FORMAT_INITIALIZATION_METADATA = 42;
+  // Indicates a redirect to a different streaming URL.
+  UMP_PART_ID_SABR_REDIRECT = 43;
+  // Indicates a SABR error; happens when the payload is invalid or the server cannot process the request.
+  UMP_PART_ID_SABR_ERROR = 44;
+  UMP_PART_ID_SABR_SEEK = 45;
+  // Directive to reload the player with new parameters.
+  UMP_PART_ID_RELOAD_PLAYER_RESPONSE = 46;
+  UMP_PART_ID_PLAYBACK_START_POLICY = 47;
+  UMP_PART_ID_ALLOWED_CACHED_FORMATS = 48;
+  UMP_PART_ID_START_BW_SAMPLING_HINT = 49;
+  UMP_PART_ID_PAUSE_BW_SAMPLING_HINT = 50;
+  UMP_PART_ID_SELECTABLE_FORMATS = 51;
+  UMP_PART_ID_REQUEST_IDENTIFIER = 52;
+  UMP_PART_ID_REQUEST_CANCELLATION_POLICY = 53;
+  UMP_PART_ID_ONESIE_PREFETCH_REJECTION = 54;
+  UMP_PART_ID_TIMELINE_CONTEXT = 55;
+  UMP_PART_ID_REQUEST_PIPELINING = 56;
+  // Updates SABR context data; usually used for ads.
+  UMP_PART_ID_SABR_CONTEXT_UPDATE = 57;
+  // Status of stream protection; indicates whether attestation is required.
+  UMP_PART_ID_STREAM_PROTECTION_STATUS = 58;
+  // Policy indicating which SABR contexts to send or discard in future requests.
+  UMP_PART_ID_SABR_CONTEXT_SENDING_POLICY = 59;
+  UMP_PART_ID_LAWNMOWER_POLICY = 60;
+  UMP_PART_ID_SABR_ACK = 61;
+  UMP_PART_ID_END_OF_TRACK = 62;
+  UMP_PART_ID_CACHE_LOAD_POLICY = 63;
+  UMP_PART_ID_LAWNMOWER_MESSAGING_POLICY = 64;
+  UMP_PART_ID_PREWARM_CONNECTION = 65;
+  UMP_PART_ID_PLAYBACK_DEBUG_INFO = 66;
+  // Directive to show the user a notification message.
+  UMP_PART_ID_SNACKBAR_MESSAGE = 67;
+}
