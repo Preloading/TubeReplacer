@@ -16,7 +16,7 @@
 @property (nonatomic, assign) int fps;
 @property (nonatomic, strong) NSString *qualityLabel;
 @property (nonatomic, strong) NSString *projectionType;
-
+@property (nonatomic, strong) NSString *xtags;
 @property (nonatomic, assign) uint averageBitrate;
 @property (nonatomic, assign) uint64_t approxDurationMs;
 

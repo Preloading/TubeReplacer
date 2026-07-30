@@ -1,26 +1,15 @@
+#import "TRUmpWriter.h"
 
+@implementation TRUMPWriter : NSObject
 
-@implementation UMPWriter : NSObject
-
--(UMPWriter*)init {
+-(instancetype)init {
     [super init];
     self.compositeBuffer = [[NSMutableData alloc] init];
+    return self;
 }
 
--(void)writeData:(NSData*)data withPartType:(uint)partType {
-    [self writeVarInt:partType];
-    [self writeVarInt:[data length]];
 
-
-    // const partSize = partData.length;
-    // this.writeVarInt(partType);
-    // this.writeVarInt(partSize);
-    // this.compositeBuffer.append(partData);
-    [self.compositeBuffer appendData:data];
-
-}
-
--(void)writeVarint:(uint)value {
+-(void)writeVarInt:(uint)value {
     uint8_t buffer[5];
     NSUInteger length;
 
@@ -55,8 +44,23 @@
     return [self.compositeBuffer appendBytes:buffer length:length];
 }
 
+-(void)writeData:(NSData*)data withPartType:(uint)partType {
+    [self writeVarInt:partType];
+    [self writeVarInt:[data length]];
+
+
+    // const partSize = partData.length;
+    // this.writeVarInt(partType);
+    // this.writeVarInt(partSize);
+    // this.compositeBuffer.append(partData);
+    [self.compositeBuffer appendData:data];
+
+}
+
+
 -(void)dealloc {
     [_compositeBuffer release];
+    [super dealloc];
 }
 
 @end

@@ -16,6 +16,19 @@
     self.formats = formats;
     self.videoId = videoId;
 
+    NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
+    NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
+    for (TRAdaptiveFormat *format in self.formats) {
+        if ([format.mimeType hasPrefix:@"audio"]) {
+            [audioFormatsWeHave addObject:format];
+        } else {
+            [videoFormatsWeHave addObject:format];
+        }
+    }
+
+    self.videoFormatsWeHave = videoFormatsWeHave;
+    self.audioFormatsWeHave = audioFormatsWeHave;
+
     NSLog(@"a");
 
     if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
@@ -35,6 +48,30 @@
         NSLog(@"response -> %@", response); 
     }];
     return self;
+}
+
+-(TRAdaptiveFormat*)pickVideoFormat:(NSArray*)videoFormatsWeHave {
+    // TODO: this is genuienly awful right now, i will fix this later. I just want to get *something* from sabr atm
+    for (TRAdaptiveFormat *format in videoFormatsWeHave) {
+        if ([format.quality isEqualToString:@"hd720"]) {
+            return format;
+        }
+    }
+    return nil;
+}
+
+-(TRAdaptiveFormat*)pickAudioFormat:(NSArray*)audioFormatsWeHave {
+    // TODO: this is genuienly awful right now, i will fix this later. I just want to get *something* from sabr atm
+    for (TRAdaptiveFormat *format in audioFormatsWeHave) {
+        if ([format.mimeType rangeOfString:@"mp4a"].location != NSNotFound) {
+            return format;
+        }
+    }
+    return nil;
+}
+
+-(void)test {
+
 }
 
 //   private async fetchAndProcessSegments(
@@ -108,7 +145,7 @@
 //     }).finish();
 //   }
 
--(ClientAbrState*)createClientABRState {
+-(ClientAbrState*)createClientABRStateWithVideo:(TRAdaptiveFormat*)video andAudio:(TRAdaptiveFormat*)audio {
     ClientAbrState *state = [[ClientAbrState alloc] init];
 
     // viewport, i *could* spend the time to bother figuring out what it actually is, but that sounds annoying, and chances are they'd be watching in landscape.
@@ -123,7 +160,46 @@
     }
     state.preferVp9 = false;
     state.playerTimeMs = 0;
+    state.playbackRate = 1.0;
+    state.drcEnabled = true; // think this is the stable volume stuff
+    state.visibility = 1;
+    state.clientViewportIsFlexible = false;
 
+    state.playerState = 0;
+
+    state.stickyResolution = 720;
+    state.lastManualSelectedResolution = 1;
+    state.timeSinceLastManualFormatSelectionMs = 970799435; // temp
+    state.bandwidthEstimate = 1228799;
+    state.timeSinceLastSeek = 3;
+    state.elapsedWallTimeMs = 9;
+    state.timeSinceLastActionMs = 1167;
+    state.av1QualityThreshold = 2160;
+    state.sabrForceMaxNetworkInterruptionDurationMs = 0;
+    state.enableVoiceBoost = false;
+
+
+    PlaybackAuthorization *playerAuth = [[PlaybackAuthorization alloc] init];
+
+    NSMutableArray *authFormats = [[NSMutableArray alloc] init];
+    AuthorizedFormat *authFormat1 = [[AuthorizedFormat alloc] init];
+
+    authFormat1.trackType = 1;
+    authFormat1.isHdr = false;
+
+    [authFormats addObject:authFormat1];
+
+    AuthorizedFormat *authFormat2 = [[AuthorizedFormat alloc] init];
+
+    authFormat2.trackType = 2;
+    authFormat2.isHdr = false;
+    
+
+    [authFormats addObject:authFormat2];
+
+    playerAuth.authorizedFormatsArray = authFormats;
+
+    state.playbackAuthorization = playerAuth;
 //       "clientAbrState": {
 //     "timeSinceLastManualFormatSelectionMs": "970799435",
 //     "lastManualDirection": 1,
@@ -205,8 +281,8 @@
     clientInfo.osName = clientType.osName;
     clientInfo.osVersion = clientType.osVersion;
 
-    clientInfo.acceptLanguage = [[NSLocale preferredLanguages] firstObject];
-    clientInfo.acceptRegion = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
+    // clientInfo.acceptLanguage = [[NSLocale preferredLanguages] firstObject];
+    // clientInfo.acceptRegion = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
 
     context.clientInfo = clientInfo;
 
@@ -237,8 +313,8 @@
     request.streamerContext = [self createStreamerContext];
     request.videoPlaybackUstreamerConfig = self.ustreamConfig;
 
-    NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
-    NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
+    NSMutableArray *videoFormatsIdsWeHave = [[NSMutableArray alloc] init];
+    NSMutableArray *audioFormatsIdsWeHave = [[NSMutableArray alloc] init];
     for (TRAdaptiveFormat *format in self.formats) {
         FormatId *formatId = [[FormatId alloc] init];
         formatId.itag = format.itag;
@@ -249,18 +325,26 @@
         [scanner scanLongLong:&convertedValue];
         formatId.lastModified = (unsigned long long)convertedValue;
         formatId.xtags = @"";
+        if (format.xtags) {
+            formatId.xtags = format.xtags;
+        }
 
         if ([format.mimeType hasPrefix:@"audio"]) {
-            [audioFormatsWeHave addObject:formatId];
+            [audioFormatsIdsWeHave addObject:formatId];
         } else {
-            [videoFormatsWeHave addObject:formatId];
+            [videoFormatsIdsWeHave addObject:formatId];
         }
     }
 
-    request.preferredVideoFormatIdsArray = videoFormatsWeHave;
-    request.preferredAudioFormatIdsArray = audioFormatsWeHave;
+    request.preferredVideoFormatIdsArray = videoFormatsIdsWeHave;
+    request.preferredAudioFormatIdsArray = audioFormatsIdsWeHave;
 
-    request.clientAbrState = [self createClientABRState];
+    TRAdaptiveFormat *chosenVideoFormat = [self pickVideoFormat:self.videoFormatsWeHave];
+    TRAdaptiveFormat *chosenAudioFormat = [self pickAudioFormat:self.audioFormatsWeHave];
+    NSLog(@"video format -> %@", chosenVideoFormat);
+    NSLog(@"audio format -> %@", chosenAudioFormat);
+
+    request.clientAbrState = [self createClientABRStateWithVideo:chosenVideoFormat andAudio:chosenAudioFormat];
 
     return [request data];
 }

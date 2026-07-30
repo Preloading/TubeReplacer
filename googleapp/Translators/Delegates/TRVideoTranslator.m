@@ -268,7 +268,7 @@
                 TRAdaptiveFormat *format = [[TRAdaptiveFormat alloc] init];
                 format.itag = [f[@"itag"] unsignedIntValue];
                 format.url = f[@"url"]; // this does not include always include URL
-                // format.url = urlString;
+                format.xtags = f[@"xtags"];
                 format.mimeType = f[@"mimeType"];
                 format.bitrate = [f[@"bitrate"] unsignedIntValue];
                 format.width = [f[@"width"] intValue];

@@ -8,6 +8,9 @@
 @property (nonatomic, strong) NSData *poToken;
 @property (nonatomic, strong) NSArray *formats;
 
+@property (nonatomic, strong) NSArray *videoFormatsWeHave;
+@property (nonatomic, strong) NSArray *audioFormatsWeHave;
+
 @property (nonatomic, assign) int requestNumber;
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId;

@@ -4,7 +4,7 @@
 
 @property (nonatomic, strong) NSMutableData *compositeBuffer;
 
--(void)writeData:(NSData*)data withPartType:(int)partType;
--(void)writeVarint:(uint)value;
+-(void)writeData:(NSData*)data withPartType:(uint)partType;
+-(void)writeVarInt:(uint)value;
 
 @end

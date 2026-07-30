@@ -974,8 +974,6 @@ done:
             // SAPISIDHASH
             long unixTime = (long)[[NSDate date] timeIntervalSince1970];
             NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
-            NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
-
             NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
             uint8_t digest[CC_SHA1_DIGEST_LENGTH];
 

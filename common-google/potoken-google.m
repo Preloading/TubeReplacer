@@ -247,7 +247,7 @@
 
 
 -(void)setupPOTokenGenerationWithAuth:(id)authentication {
-    NSLog(@"coldstart token -> %@", [TRPOTokenSolver generateColdStartTokenWithContent:@"hello world" clientState:1]);
+    NSLog(@"coldstart token -> %@", [TRPOTokenSolver generateColdStartTokenWithContent:@"xjHO_02jZco" clientState:1]);
 
     [self setupNSig];
 
@@ -285,9 +285,9 @@
                         self.integrityTokenExpiration = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]];
                         self.integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]*0.8];
                         [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{
-                            // [self mintPOTokenWithData:@"Hello World!" withCallback:^(NSString *poToken) {
-                            //     NSLog(@"We now have a token! POToken => %@", poToken);
-                            // }];
+                            NSString *testPOToken = [self mintPOTokenWithData:@"xjHO_02jZco"];
+
+                            NSLog(@"test POToken => %@", testPOToken);
                         }];
                     } else {
                         NSLog(@"missing integrity token!!!");
