@@ -108,7 +108,10 @@
     if (signatureTimestamp) {
         [body setObject:@{
             @"contentPlaybackContext":@{
-                @"signatureTimestamp":signatureTimestamp
+                @"signatureTimestamp":signatureTimestamp,
+                @"vis":@0,
+                @"splay": @NO,
+                @"lactMilliseconds": @"-1",
             },
             @"devicePlaybackCapabilities": @{
                 @"supportsVp9Encoding":@NO

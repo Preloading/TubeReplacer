@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSArray.h>
 #import "TRAdaptiveFormat.h"
 #import "proto/generated/video_streaming/VideoPlaybackAbrRequest.pbobjc.h"
 #import "common/potoken.h"
@@ -12,7 +13,7 @@
 
     NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
     self.decipheredStreamURL = decipheredStreamURL;
-    self.ustreamConfig = [NSData dataWithBase64EncodedString:ustreamConfig];
+    self.ustreamConfig = [NSData dataWithBase64EncodedString:[[ustreamConfig stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
     self.formats = formats;
     self.videoId = videoId;
 
@@ -34,7 +35,7 @@
     if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
         NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:videoId];
         if (poTokenString) {
-            self.poToken = [NSData dataWithBase64EncodedString:poTokenString];
+            self.poToken = [NSData dataWithBase64EncodedString:[[poTokenString stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
         } else {
             self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:videoId clientState:1]];
         }
@@ -45,7 +46,7 @@
     NSData *testReq = [self buildRequestBody];
     NSLog(@"buildRequestBody -> %@", testReq);
     [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
-        NSLog(@"response -> %@", response); 
+        // NSLog(@"response -> %@", response); 
     }];
     return self;
 }
@@ -164,30 +165,23 @@
     state.drcEnabled = true; // think this is the stable volume stuff
     state.visibility = 1;
     state.clientViewportIsFlexible = false;
+    state.enabledTrackTypesBitfield = 0;
 
     state.playerState = 0;
 
     state.stickyResolution = 720;
-    state.lastManualSelectedResolution = 1;
-    state.timeSinceLastManualFormatSelectionMs = 970799435; // temp
-    state.bandwidthEstimate = 1228799;
-    state.timeSinceLastSeek = 3;
-    state.elapsedWallTimeMs = 9;
-    state.timeSinceLastActionMs = 1167;
-    state.av1QualityThreshold = 2160;
-    state.sabrForceMaxNetworkInterruptionDurationMs = 0;
     state.enableVoiceBoost = false;
 
 
-    PlaybackAuthorization *playerAuth = [[PlaybackAuthorization alloc] init];
+    // PlaybackAuthorization *playerAuth = [[PlaybackAuthorization alloc] init];
 
-    NSMutableArray *authFormats = [[NSMutableArray alloc] init];
-    AuthorizedFormat *authFormat1 = [[AuthorizedFormat alloc] init];
+    // NSMutableArray *authFormats = [[NSMutableArray alloc] init];
+    // AuthorizedFormat *authFormat1 = [[AuthorizedFormat alloc] init];
 
-    authFormat1.trackType = 1;
-    authFormat1.isHdr = false;
+    // authFormat1.trackType = 1;
+    // authFormat1.isHdr = false;
 
-    [authFormats addObject:authFormat1];
+    // [authFormats addObject:authFormat1];
 
     AuthorizedFormat *authFormat2 = [[AuthorizedFormat alloc] init];
 
@@ -195,11 +189,11 @@
     authFormat2.isHdr = false;
     
 
-    [authFormats addObject:authFormat2];
+    // [authFormats addObject:authFormat2];
 
-    playerAuth.authorizedFormatsArray = authFormats;
+    // playerAuth.authorizedFormatsArray = authFormats;
 
-    state.playbackAuthorization = playerAuth;
+    // state.playbackAuthorization = playerAuth;
 //       "clientAbrState": {
 //     "timeSinceLastManualFormatSelectionMs": "970799435",
 //     "lastManualDirection": 1,
@@ -292,7 +286,7 @@
         if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
             NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:self.videoId];
             if (poTokenString) {
-                self.poToken = [NSData dataWithBase64EncodedString:poTokenString];
+                self.poToken = [NSData dataWithBase64EncodedString:[[poTokenString stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
                 context.poToken = self.poToken;
             } else {
                 context.poToken = self.coldstart;
@@ -338,6 +332,7 @@
 
     request.preferredVideoFormatIdsArray = videoFormatsIdsWeHave;
     request.preferredAudioFormatIdsArray = audioFormatsIdsWeHave;
+    request.preferredSubtitleFormatIdsArray = [[NSMutableArray alloc] init];
 
     TRAdaptiveFormat *chosenVideoFormat = [self pickVideoFormat:self.videoFormatsWeHave];
     TRAdaptiveFormat *chosenAudioFormat = [self pickAudioFormat:self.audioFormatsWeHave];
@@ -345,6 +340,8 @@
     NSLog(@"audio format -> %@", chosenAudioFormat);
 
     request.clientAbrState = [self createClientABRStateWithVideo:chosenVideoFormat andAudio:chosenAudioFormat];
+    request.field1000Array = [[NSMutableArray alloc] init];
+    request.bufferedRangesArray = [[NSMutableArray alloc] init];
 
     return [request data];
 }
