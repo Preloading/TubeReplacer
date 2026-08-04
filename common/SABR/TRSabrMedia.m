@@ -11,7 +11,7 @@
 @implementation TRSabrMedia
 
 -(void)parseMP4Header:(NSData*)header {
-    NSLog(@"header to parse -> %@", header);
+    // NSLog(@"header to parse -> %@", header);
 
     // find sidx
     int boxOffset = 0;
@@ -22,14 +22,11 @@
         boxLength = CFSwapInt32BigToHost(boxLength);
         boxOffset += 4;
 
-        NSLog(@"box length -> %i", boxLength);
-
         NSString *boxType = [[NSString alloc] initWithData:[header subdataWithRange:NSMakeRange(boxOffset, 4)] encoding:NSUTF8StringEncoding];
         boxOffset += 4;
 
-        NSLog(@"found box type of %@", boxType);
+        // NSLog(@"found box type of %@", boxType);
         if ([boxType isEqualToString:@"sidx"]) {
-            NSLog(@"found sidx!!");
             int offset = boxOffset;
 
             uint8_t version;

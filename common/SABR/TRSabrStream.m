@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include "TRSabrHTTPConnection.h"
 #include <Foundation/NSString.h>
 #include <Foundation/NSDictionary.h>
 #include <Foundation/NSData.h>
@@ -13,6 +14,7 @@
 @implementation TRSabrStream : NSObject
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
+    [self startWebServerThreaded];
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
 
     // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
@@ -217,16 +219,53 @@
 
 -(NSString*)createHLSRootManifest {
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
-    [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-INDEPENDENT-SEGMENTS:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
+    [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-INDEPENDENT-SEGMENTS\n"];
 
 
-    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\nvideo.ts\n"];
-    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\naudio.ts\n"];
+    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\nvideo.m3u8\n"];
+    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\naudio.m3u8\n"];
 
     // finish
     NSString *final = [hlsManifest copy];
     [hlsManifest release];
     return final;
+}
+
+-(void)startWebServer {
+    self.httpServer = [[TRSabrHTTPServer alloc] init];
+	
+    self.httpServer.stream = self;
+	[self.httpServer setConnectionClass:[TRSabrHTTPConnection class]];
+    
+
+	NSError *error;
+	BOOL success = [self.httpServer start:&error];
+	
+	if(!success)
+	{
+		NSLog(@"Error starting HTTP Server: %@", error);
+	}
+
+    
+
+    // NSLog(@"http server at -> http://%@:%hu/", [self.httpServer [self.httpServer port]);
+}
+
+- (void)webServerThreadMain {
+    @autoreleasepool {
+        [self startWebServer]; // TODO: If the device goes to sleep, the HTTP server does not come back online. Also an issue for background playback
+
+        while (self.httpServer) {
+            @autoreleasepool {
+                [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                          beforeDate:[NSDate distantFuture]];
+            }
+        }
+    }
+}
+
+- (void)startWebServerThreaded {
+    [NSThread detachNewThreadSelector:@selector(webServerThreadMain) toTarget:self withObject:nil];
 }
 
 @end

@@ -46,6 +46,8 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	$(COMMON)/SABR/TRAdaptiveFormat.m \
 	$(COMMON)/SABR/TRUmpReader.m \
 	$(COMMON)/SABR/TRUmpPart.m \
+	$(COMMON)/SABR/TRSabrHTTPConnection.m \
+	$(COMMON)/SABR/TRSabrHTTPServer.m \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \
