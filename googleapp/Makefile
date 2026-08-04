@@ -41,7 +41,11 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	$(COMMON)/potoken.m \
 	$(COMMON_GOOGLE)/potoken-google.m \
 	$(COMMON)/SABR/TRSabrStream.m \
+	$(COMMON)/SABR/TRSabrStream+PartHandler.m \
+	$(COMMON)/SABR/TRSabrMedia.m \
 	$(COMMON)/SABR/TRAdaptiveFormat.m \
+	$(COMMON)/SABR/TRUmpReader.m \
+	$(COMMON)/SABR/TRUmpPart.m \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \

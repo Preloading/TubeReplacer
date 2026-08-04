@@ -1,3 +1,6 @@
+#include "video_streaming/PlaybackCookie.pbobjc.h"
+#include "video_streaming/MediaHeader.pbobjc.h"
+#include "TRSabrMedia.h"
 #import <Foundation/Foundation.h>
 
 @interface TRSabrStream : NSObject
@@ -10,6 +13,13 @@
 
 @property (nonatomic, strong) NSArray *videoFormatsWeHave;
 @property (nonatomic, strong) NSArray *audioFormatsWeHave;
+
+@property (nonatomic, strong) PlaybackCookie *playbackCookie;
+
+@property (nonatomic, strong) TRSabrMedia *videoStream;
+@property (nonatomic, strong) TRSabrMedia *audioStream;
+
+@property (nonatomic, assign) int streamProtectionStatus;
 
 @property (nonatomic, assign) int requestNumber;
 

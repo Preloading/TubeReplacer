@@ -5,6 +5,7 @@
 // Handles both player responses and feed items
 
 #import "TRVideoTranslator.h"
+#include <Foundation/NSDictionary.h>
 #include <Foundation/NSObjCRuntime.h>
 #import "TRJSONUtils.h"
 #import <objc/runtime.h>
@@ -255,7 +256,10 @@
 
                 if ([f[@"mimeType"] rangeOfString:@"codecs=\"av01"].location != NSNotFound)
                     continue; // None of the devices can play AV1 (introduced in 2022)
-                
+
+                if ([f[@"mimeType"] rangeOfString:@"codecs=\"opus"].location != NSNotFound)
+                    continue; // None of the devices can play Opus out of the box, it would need another library to deal
+
                 // NSString *urlString = f[@"url"];
                 // NSString *signatureCipher = f[@"signatureCipher"];
                 // if (urlString || signatureCipher) {
@@ -1064,7 +1068,7 @@
                         NSDictionary *smbr = [buttonItem objectForKey:@"slimMetadataButtonRenderer"];
                         if (!smbr) continue;
                         
-                        NSDictionary *sldbvm = [[smbr objectForKey:@"button"] objectForKey:@"segmentedLikeDislikeButtonViewModel"];
+                        NSDictionary *sldbvm = [(NSDictionary*)[smbr objectForKey:@"button"] objectForKey:@"segmentedLikeDislikeButtonViewModel"];
                         if (!sldbvm) continue;
                         
                         // Extract like status

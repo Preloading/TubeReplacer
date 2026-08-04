@@ -1,4 +1,8 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSString.h>
+#include <Foundation/NSDictionary.h>
+#include <Foundation/NSData.h>
+#import "TRSabrStream+PartHandler.h"
 #include <Foundation/NSArray.h>
 #import "TRAdaptiveFormat.h"
 #import "proto/generated/video_streaming/VideoPlaybackAbrRequest.pbobjc.h"
@@ -11,7 +15,7 @@
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
 
-    NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
+    // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
     self.decipheredStreamURL = decipheredStreamURL;
     self.ustreamConfig = [NSData dataWithBase64EncodedString:[[ustreamConfig stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
     self.formats = formats;
@@ -30,8 +34,6 @@
     self.videoFormatsWeHave = videoFormatsWeHave;
     self.audioFormatsWeHave = audioFormatsWeHave;
 
-    NSLog(@"a");
-
     if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
         NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:videoId];
         if (poTokenString) {
@@ -44,107 +46,21 @@
     }
 
     NSData *testReq = [self buildRequestBody];
-    NSLog(@"buildRequestBody -> %@", testReq);
     [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
+        __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
+        __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
+        [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
+            [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
+            [part release];
+        }];
         // NSLog(@"response -> %@", response); 
     }];
     return self;
 }
 
--(TRAdaptiveFormat*)pickVideoFormat:(NSArray*)videoFormatsWeHave {
-    // TODO: this is genuienly awful right now, i will fix this later. I just want to get *something* from sabr atm
-    for (TRAdaptiveFormat *format in videoFormatsWeHave) {
-        if ([format.quality isEqualToString:@"hd720"]) {
-            return format;
-        }
-    }
-    return nil;
-}
-
--(TRAdaptiveFormat*)pickAudioFormat:(NSArray*)audioFormatsWeHave {
-    // TODO: this is genuienly awful right now, i will fix this later. I just want to get *something* from sabr atm
-    for (TRAdaptiveFormat *format in audioFormatsWeHave) {
-        if ([format.mimeType rangeOfString:@"mp4a"].location != NSNotFound) {
-            return format;
-        }
-    }
-    return nil;
-}
-
 -(void)test {
 
 }
-
-//   private async fetchAndProcessSegments(
-//     abrState: ClientAbrState,
-//     selectedAudioFormat: SabrFormat,
-//     selectedVideoFormat: SabrFormat
-//   ): Promise<void> {
-//     const initializedVideoFormat = this.initializedFormatsMap.get(FormatKeyUtils.fromFormat(selectedVideoFormat) || '');
-//     const initializedAudioFormat = this.initializedFormatsMap.get(FormatKeyUtils.fromFormat(selectedAudioFormat) || '');
-
-//     // Cache buffered ranges in case the request fails, allowing retries to use the same values.
-//     if (!this.cachedBufferedRanges?.length) {
-//       this.cachedBufferedRanges = this.buildBufferedRanges(initializedVideoFormat, initializedAudioFormat);
-//     }
-
-//     const requestBody = this.buildRequestBody(abrState, selectedAudioFormat, selectedVideoFormat);
-
-//     this.mediaHeadersProcessed = false;
-//     const response = await this.makeStreamingRequest(requestBody);
-//     const processedParts = await this.processStreamingResponse(response);
-
-//     if (!processedParts.length) {
-//       throw new Error('No valid parts received from server.');
-//     } else if ((this.streamProtectionStatus?.status || 0) >= 2 && !processedParts.includes(UMPPartId.MEDIA)) {
-//       throw new Error('No media parts or protocol updates received from server.');
-//     }
-
-//     if (
-//       processedParts.includes(UMPPartId.MEDIA_HEADER) &&
-//       (initializedVideoFormat?.lastMediaHeaders?.length && initializedAudioFormat?.lastMediaHeaders?.length) ||
-//       (abrState.enabledTrackTypesBitfield !== 0 && this.mainFormat?.lastMediaHeaders?.length)
-//     ) {
-//       this.mediaHeadersProcessed = true;
-//     }
-//   }
-
-//   private buildRequestBody(
-//     abrState: ClientAbrState,
-//     selectedAudioFormat: SabrFormat,
-//     selectedVideoFormat: SabrFormat
-//   ): Uint8Array {
-//     if (!this.videoPlaybackUstreamerConfig)
-//       throw new Error('Video playback ustreamer config must be set before starting.');
-//     if (!this.clientInfo)
-//       throw new Error('Client info must be set before starting.');
-
-//     const bufferedRanges = this.cachedBufferedRanges || [];
-//     const { sabrContexts, unsentSabrContexts } = this.prepareSabrContexts();
-
-//     const { selectedFormatIds, updatedBufferedRanges } = this.prepareFormatSelections(
-//       [ selectedVideoFormat, selectedAudioFormat ],
-//       bufferedRanges
-//     );
-
-//     return VideoPlaybackAbrRequest.encode({
-//       clientAbrState: abrState,
-//       preferredAudioFormatIds: [ selectedAudioFormat ],
-//       preferredVideoFormatIds: [ selectedVideoFormat ],
-//       preferredSubtitleFormatIds: [],
-//       selectedFormatIds,
-//       videoPlaybackUstreamerConfig: base64ToU8(this.videoPlaybackUstreamerConfig),
-//       streamerContext: {
-//         sabrContexts,
-//         unsentSabrContexts,
-//         poToken: this.poToken ? base64ToU8(this.poToken) : undefined,
-//         playbackCookie: this.nextRequestPolicy?.playbackCookie ? PlaybackCookie.encode(this.nextRequestPolicy.playbackCookie).finish() : undefined,
-//         clientInfo: this.clientInfo
-//       },
-//       bufferedRanges: updatedBufferedRanges,
-//       field1000: []
-//     }).finish();
-//   }
 
 -(ClientAbrState*)createClientABRStateWithVideo:(TRAdaptiveFormat*)video andAudio:(TRAdaptiveFormat*)audio {
     ClientAbrState *state = [[ClientAbrState alloc] init];
@@ -194,72 +110,6 @@
     // playerAuth.authorizedFormatsArray = authFormats;
 
     // state.playbackAuthorization = playerAuth;
-//       "clientAbrState": {
-//     "timeSinceLastManualFormatSelectionMs": "970799435",
-//     "lastManualDirection": 1,
-//     "lastManualSelectedResolution": 1080,
-//     "detailedNetworkType": 0,
-//     "clientViewportWidth": 640,
-//     "clientViewportHeight": 360,
-//     "clientBitrateCapBytesPerSec": "0",
-//     "stickyResolution": 0,
-//     "clientViewportIsFlexible": false,
-//     "bandwidthEstimate": "21649875",
-//     "minAudioQuality": 0,
-//     "maxAudioQuality": 0,
-//     "videoQualitySetting": 0,
-//     "audioRoute": 0,
-//     "playerTimeMs": "0",
-//     "timeSinceLastSeek": "781",
-//     "dataSaverMode": false,
-//     "networkMeteredState": 0,
-//     "visibility": 5,
-//     "playbackRate": 0,
-//     "elapsedWallTimeMs": "799",
-//     "timeSinceLastActionMs": "277",
-//     "enabledTrackTypesBitfield": 0,
-//     "maxPacingRate": 0,
-//     "playerState": "0",
-//     "drcEnabled": true,
-//     "field48": 0,
-//     "field50": 0,
-//     "field51": 0,
-//     "sabrReportRequestCancellationInfo": 0,
-//     "disableStreamingXhr": false,
-//     "field57": "48",
-//     "preferVp9": false,
-//     "av1QualityThreshold": 8192,
-//     "field60": 0,
-//     "isPrefetch": false,
-//     "sabrSupportQualityConstraints": false,
-//     "sabrLicenseConstraint": "",
-//     "allowProximaLiveLatency": 0,
-//     "sabrForceProxima": 0,
-//     "field67": 0,
-//     "sabrForceMaxNetworkInterruptionDurationMs": "0",
-//     "audioTrackId": "",
-//     "enableVoiceBoost": false,
-//     "playbackAuthorization": {
-//       "authorizedFormats": [
-//         {
-//           "trackType": 1,
-//           "isHdr": false
-//         },
-//         {
-//           "trackType": 2,
-//           "isHdr": false
-//         },
-//         {
-//           "trackType": 2,
-//           "isHdr": true
-//         }
-//       ],
-//       "sabrLicenseConstraint": ""
-//     }
-//   },
-
-    NSLog(@"screenBounds.size.width -> %i", state.clientViewportWidth);
-
 
     return state;
 }
@@ -297,6 +147,9 @@
         }
     }
 
+    if (self.playbackCookie)
+        context.playbackCookie = [self.playbackCookie data];
+
     
     return context;
 }
@@ -313,7 +166,6 @@
         FormatId *formatId = [[FormatId alloc] init];
         formatId.itag = format.itag;
 
-        NSLog(@"last modified -> %@", format.lastModified);
         long long convertedValue = 0;
         NSScanner *scanner = [NSScanner scannerWithString:format.lastModified];
         [scanner scanLongLong:&convertedValue];
@@ -334,12 +186,6 @@
     request.preferredAudioFormatIdsArray = audioFormatsIdsWeHave;
     request.preferredSubtitleFormatIdsArray = [[NSMutableArray alloc] init];
 
-    TRAdaptiveFormat *chosenVideoFormat = [self pickVideoFormat:self.videoFormatsWeHave];
-    TRAdaptiveFormat *chosenAudioFormat = [self pickAudioFormat:self.audioFormatsWeHave];
-    NSLog(@"video format -> %@", chosenVideoFormat);
-    NSLog(@"audio format -> %@", chosenAudioFormat);
-
-    request.clientAbrState = [self createClientABRStateWithVideo:chosenVideoFormat andAudio:chosenAudioFormat];
     request.field1000Array = [[NSMutableArray alloc] init];
     request.bufferedRangesArray = [[NSMutableArray alloc] init];
 
@@ -367,6 +213,20 @@
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
         callback(response, error);
     }];
+}
+
+-(NSString*)createHLSRootManifest {
+    NSMutableString *hlsManifest = [[NSMutableString alloc] init];
+    [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-INDEPENDENT-SEGMENTS:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
+
+
+    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\nvideo.ts\n"];
+    [hlsManifest appendString:@"#EXT-X-STREAM-INF:\naudio.ts\n"];
+
+    // finish
+    NSString *final = [hlsManifest copy];
+    [hlsManifest release];
+    return final;
 }
 
 @end
