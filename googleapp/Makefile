@@ -58,6 +58,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	Translators/TRRequestBuilder.m \
 	$(LIB_DIR)/protobuf/GPBProtocolBuffers.m \
 	$(shell find $(COMMON)/SABR/proto/generated -type f -name '*.m') \
+	$(shell find $(LIB_DIR)/cocoahttpserver -type f -name '*.m') \
 	$(COMMON)/Protobuf.m $(COMMON)/YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
 TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
