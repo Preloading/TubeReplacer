@@ -8,6 +8,7 @@
 #include <objc/NSObjCRuntime.h>
 #include <stdint.h>
 #include "TRMP4Box.h"
+#include "TRMP4FragmentInfo.h"
 
 @implementation TRSabrMedia
 
@@ -135,22 +136,29 @@
     }
 }
 
+-(void)handleFMP4FragmentBox:(TRMP4Box*)box out:(TRMP4FragmentInfo**)fragmentOut {
+    NSLog(@"found box type of %@", box.type);
+    if ([box.type isEqualToString:@"moof"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
+    if ([box.type isEqualToString:@"traf"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
+    else if ([box.type isEqualToString:@"mdat"]) { 
+        (*fragmentOut).data = box.data; 
+    }
+}
 
-// -(void)parseFMP4Fragment:(NSData*)fragment dataOut:(NSData**)dataOut  {
-//     // NSLog(@"header to parse -> %@", header);
+-(void)parseFMP4Fragment:(NSData*)fragment out:(TRMP4FragmentInfo**)fragmentOut  {
 
-//     // find sidx
-//     int boxOffset = 0;
+    // find sidx
+    int boxOffset = 0;
 
-//     while (boxOffset < [fragment length]) {
-//         TRMP4Box *box = [[TRMP4Box alloc] parseMP4Box:fragment atOffset:&boxOffset];
+    while (boxOffset < [fragment length]) {
+        TRMP4Box *box = [[TRMP4Box alloc] parseMP4Box:fragment atOffset:&boxOffset];
         
-        
-//         [self handleParsedHeaderBox:box];
 
-//         boxOffset += [box length];
-//     }
-// }
+        [self handleFMP4FragmentBox:box out:fragmentOut];
+
+        boxOffset += [box length];
+    }
+}
  
 -(NSString*)generateHLSManifest {
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
@@ -175,9 +183,13 @@
 }
 
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index {
-    // NSData *source = self.segmentData[@(index)];
+    NSData *source = self.segmentData[@(index)];
 
-    // NSLog(@"keys -> %@", [self.segmentData allKeys]);
+    TRMP4FragmentInfo *fragmentInfo = [[TRMP4FragmentInfo alloc] init];
+    [self parseFMP4Fragment:source out:&fragmentInfo];
+
+    NSLog(@"keys -> %@", [self.segmentData allKeys]);
+    
     
 
     return nil; /// temp
