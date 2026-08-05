@@ -171,8 +171,8 @@ static TRPOTokenSolver *_sharedInstance = nil;
 }
 
 
--(void)initEngineWithCallback:(void(^)())callback {
-    self.vmReadyCallback = callback;
+-(void)initWebViewWithCallback:(void(^)())callback {
+    self.webviewReadyCallback = callback;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSString *path = @"/Library/Application Support/TubeReplacer/challenge_solver.html";
         NSError *error = nil;
@@ -203,8 +203,6 @@ static TRPOTokenSolver *_sharedInstance = nil;
 
             [self.webView loadHTMLString:html
                                 baseURL:[NSURL URLWithString:@"https://www.youtube.com"]];
-
-            NSLog(@"done!");
         });
     });
 }
@@ -226,23 +224,36 @@ static TRPOTokenSolver *_sharedInstance = nil;
 
 -(void)webViewScriptsLoaded:(UIWebView*)webView {
     self.isWebViewReady = true;
+    self.webviewReadyCallback();
+}
 
-    // NSString *wrapped = [NSString stringWithFormat:
-    //     @"try { %@ } catch(e) { console.log('script error: ' + e); }",
-        
-    // ];
-
-    CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
-    [webView stringByEvaluatingJavaScriptFromString:self.safeScript];
-    self.safeScript = nil;
-    NSLog(@"safeScript: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
-    // NSLog(@"safeScript executed");
-    t = CFAbsoluteTimeGetCurrent();
-    NSString *runVM = [NSString stringWithFormat:@"runBotguardChallenge(\"%@\", \"%@\", \"%@\")", self.program, self.globalName, self.botguardChallenge];
-    self.program = nil;
-
-    [webView stringByEvaluatingJavaScriptFromString:runVM];
-    NSLog(@"runVM: %.1f ms", (CFAbsoluteTimeGetCurrent()-t)*1000);
+-(void)startBotguardVM:(void(^)())callback {
+    self.vmReadyCallback = callback;
+    if ([NSThread isMainThread])
+    {
+        if (self.ytCfg) {
+            [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"window.yt = { config_: %@ };", self.ytCfg]];
+        }
+        [self.webView stringByEvaluatingJavaScriptFromString:self.safeScript];
+        self.safeScript = nil;
+        NSString *runVM = [NSString stringWithFormat:@"runBotguardChallenge(\"%@\", \"%@\", \"%@\")", self.program, self.globalName, self.botguardChallenge];
+        self.program = nil;
+        [self.webView stringByEvaluatingJavaScriptFromString:runVM];
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            if (self.ytCfg) {
+                [self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"window.yt = { config_: %@ };", self.ytCfg]];
+            }
+            [self.webView stringByEvaluatingJavaScriptFromString:self.safeScript];
+            self.safeScript = nil;
+            NSString *runVM = [NSString stringWithFormat:@"runBotguardChallenge(\"%@\", \"%@\", \"%@\")", self.program, self.globalName, self.botguardChallenge];
+            self.program = nil;
+            [self.webView stringByEvaluatingJavaScriptFromString:runVM];
+        });
+    }
+    
 }
 
 -(void)recievedBotguardResponse:(NSString*)result webView:(UIWebView*)webView {

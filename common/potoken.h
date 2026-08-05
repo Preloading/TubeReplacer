@@ -20,6 +20,8 @@
 @property (nonatomic, strong) NSDate *integrityTokenExpiration;
 @property (nonatomic, strong) NSDate *integrityTokenShouldProbablyRenew;
 
+@property (nonatomic, strong) NSString *ytCfg;
+
 // botguard
 @property (nonatomic, strong) NSString *botguardChallenge;
 @property (nonatomic, strong) NSString *botguardResponse;
@@ -28,6 +30,7 @@
 @property (nonatomic, copy) void (^vmReadyCallback)();
 @property (nonatomic, copy) void (^poGenReady)();
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
+@property (nonatomic, copy) void (^webviewReadyCallback)();
 
 // player
 // @property (nonatomic, strong) NSString *playerId;
@@ -51,7 +54,8 @@
 -(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback;
 -(void)startFetchingIntegrityTokenForPOTokenWithCallback:(void (^)(NSString *))callback;
 -(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback;
--(void)initEngineWithCallback:(void(^)())callback;
+-(void)initWebViewWithCallback:(void(^)())callback;
+-(void)startBotguardVM:(void(^)())callback;
 +(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState;
 -(NSString*)mintPOTokenWithData:(NSString*)data;
 -(NSString*)mintPOTokenOrColdStart:(NSString*)contentBinding;

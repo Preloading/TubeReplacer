@@ -3,6 +3,28 @@
 #import "sys/utsname.h"
 #import <objc/runtime.h>
 
+@interface NSURLConnection(YouTube)
+
++(NSString*)userAgent;
+
+@end
+
+%hook NSURLConnection 
+
+// so youtube is uhhhh
++(NSMutableURLRequest*)requestWithRequest:(NSURLRequest*)request
+{
+    NSMutableURLRequest *copy = [request mutableCopyWithZone:0];
+    if ([copy valueForHTTPHeaderField:@"OV-User-Agent"]) {
+        [copy setValue:[copy valueForHTTPHeaderField:@"OV-User-Agent"] forHTTPHeaderField:@"User-Agent"];
+        return copy;
+    } else {
+        [copy setValue:[NSURLConnection userAgent] forHTTPHeaderField:@"User-Agent"];
+        return copy;
+    }
+}
+%end
+
 static void analytics() {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0UL);
     dispatch_async(queue,^{
