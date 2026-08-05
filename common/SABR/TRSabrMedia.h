@@ -14,6 +14,13 @@
 // how many ticks per second.
 @property (nonatomic, assign) uint32_t timescale;
 
+/// VIDEO SPECIFIC
+
+@property (nonatomic, strong) NSData *sps;
+@property (nonatomic, strong) NSData *pps;
+@property (nonatomic, assign) int lengthScaleMinusOne;
+
 -(void)parseMP4Header:(NSData*)header;
 -(NSString*)generateHLSManifest;
+-(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index;
 @end

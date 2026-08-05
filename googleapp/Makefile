@@ -40,14 +40,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	infooverflowfix.x \
 	$(COMMON)/potoken.m \
 	$(COMMON_GOOGLE)/potoken-google.m \
-	$(COMMON)/SABR/TRSabrStream.m \
-	$(COMMON)/SABR/TRSabrStream+PartHandler.m \
-	$(COMMON)/SABR/TRSabrMedia.m \
-	$(COMMON)/SABR/TRAdaptiveFormat.m \
-	$(COMMON)/SABR/TRUmpReader.m \
-	$(COMMON)/SABR/TRUmpPart.m \
-	$(COMMON)/SABR/TRSabrHTTPConnection.m \
-	$(COMMON)/SABR/TRSabrHTTPServer.m \
+	$(shell find $(COMMON)/SABR -type f -name '*.m') \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \

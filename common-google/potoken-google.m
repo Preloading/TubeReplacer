@@ -386,7 +386,6 @@
 
             NSDictionary *attestationData = [NSJSONSerialization JSONObjectWithData:[parseStep3 dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:[attestationData[@"R"] dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-            NSLog(@"json -> %@", json);
 
             self.botguardChallenge = json[@"challenge"];
             self.program = json[@"bgChallenge"][@"program"];

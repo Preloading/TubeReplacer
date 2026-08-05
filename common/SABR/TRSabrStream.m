@@ -55,6 +55,7 @@
             [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
             [part release];
         }];
+        [self.videoStream convertFMP4ToMPEGTSWithIndex:1]; // index starts at one... for whatever reason
         // NSLog(@"response -> %@", response); 
     }];
     return self;
