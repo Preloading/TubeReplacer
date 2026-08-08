@@ -36,10 +36,12 @@
             if (self.videoStream == nil) {
                 self.videoStream = [[TRSabrMedia alloc] init];
                 self.videoStream.itag = self.playbackCookie.videoFmt.itag;
+                self.videoStream.mediaType = TRSabrMediaTypeVideo;
             }
             if (self.audioStream == nil) {
                 self.audioStream = [[TRSabrMedia alloc] init];
                 self.audioStream.itag = self.playbackCookie.audioFmt.itag;
+                self.audioStream.mediaType = TRSabrMediaTypeAudio;
             }
         }
 

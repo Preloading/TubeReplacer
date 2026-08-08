@@ -129,7 +129,6 @@
     while (boxOffset < [header length]) {
         TRMP4Box *box = [[TRMP4Box alloc] parseMP4Box:header atOffset:&boxOffset];
         
-        
         [self handleParsedHeaderBox:box];
 
         boxOffset += [box length];
@@ -139,7 +138,161 @@
 -(void)handleFMP4FragmentBox:(TRMP4Box*)box out:(TRMP4FragmentInfo**)fragmentOut {
     NSLog(@"found box type of %@", box.type);
     if ([box.type isEqualToString:@"moof"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
-    if ([box.type isEqualToString:@"traf"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
+    else if ([box.type isEqualToString:@"traf"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
+    else if ([box.type isEqualToString:@"tfdt"]) { 
+        int offset = 0;
+        uint8_t version;
+        [box.data getBytes:&version range:NSMakeRange(offset, 1)];
+        offset += 4; // includes flags
+
+        if (version == 1) {
+            uint64_t baseDecodeTime;
+            [box.data getBytes:&baseDecodeTime range:NSMakeRange(offset, 8)];
+            baseDecodeTime = CFSwapInt64BigToHost(baseDecodeTime);
+            (*fragmentOut).baseMediaDecodeTime = baseDecodeTime;
+        } else {
+            uint32_t baseDecodeTime;
+            [box.data getBytes:&baseDecodeTime range:NSMakeRange(offset, 4)];
+            baseDecodeTime = CFSwapInt32BigToHost(baseDecodeTime);
+            (*fragmentOut).baseMediaDecodeTime = baseDecodeTime;
+        }
+        
+    } else if ([box.type isEqualToString:@"tfhd"]) { 
+        int offset = 0;
+
+        uint32_t flags; // upper 8 bits are version
+        [box.data getBytes:&flags range:NSMakeRange(offset, 4)];
+        flags = CFSwapInt32BigToHost(flags);
+        offset += 4;
+
+        uint32_t trackId; // will also contain version
+        [box.data getBytes:&trackId range:NSMakeRange(offset, 4)];
+        trackId = CFSwapInt32BigToHost(trackId);
+        offset += 4;
+        (*fragmentOut).trackId = trackId;
+
+        (*fragmentOut).hasDefaultSampleDuration = NO;
+        (*fragmentOut).hasDefaultSampleSize = NO;
+        (*fragmentOut).hasDefaultSampleFlags = NO;
+
+        // base data offset
+        if (flags & 0x000001) { 
+            offset += 8;
+        }
+        // sample description index
+        if (flags & 0x000002) {
+            offset += 4;
+        }
+        // default sample duration
+        if (flags & 0x000008) {
+            (*fragmentOut).hasDefaultSampleDuration = YES;
+
+            uint32_t defaultSampleDuration; // will also contain version
+            [box.data getBytes:&defaultSampleDuration range:NSMakeRange(offset, 4)];
+            defaultSampleDuration = CFSwapInt32BigToHost(defaultSampleDuration);
+            offset += 4;
+            (*fragmentOut).defaultSampleDuration = defaultSampleDuration;
+        }
+        // default sample size
+        if (flags & 0x000010) {
+            (*fragmentOut).hasDefaultSampleSize = YES;
+
+            uint32_t defaultSampleSize; // will also contain version
+            [box.data getBytes:&defaultSampleSize range:NSMakeRange(offset, 4)];
+            defaultSampleSize = CFSwapInt32BigToHost(defaultSampleSize);
+            offset += 4;
+            (*fragmentOut).defaultSampleSize = defaultSampleSize;
+        }
+        // default sample flags
+        if (flags & 0x000020) {
+            (*fragmentOut).hasDefaultSampleFlags = YES;
+
+            uint32_t defaultSampleFlags; // will also contain version
+            [box.data getBytes:&defaultSampleFlags range:NSMakeRange(offset, 4)];
+            defaultSampleFlags = CFSwapInt32BigToHost(defaultSampleFlags);
+            offset += 4;
+            (*fragmentOut).defaultSampleFlags = defaultSampleFlags;
+        }
+    } else if ([box.type isEqualToString:@"trun"]) { 
+        int offset = 0;
+
+        uint32_t flags; // upper 8 bits are version
+        [box.data getBytes:&flags range:NSMakeRange(offset, 4)];
+        flags = CFSwapInt32BigToHost(flags);
+        offset += 4;
+
+        uint32_t sampleCount;
+        [box.data getBytes:&sampleCount range:NSMakeRange(offset, 4)];
+        sampleCount = CFSwapInt32BigToHost(sampleCount);
+        offset += 4;
+
+        // data offset
+        if (flags & 0x000001) {
+            offset += 4;
+        }
+
+        // first sample flags
+        if (flags & 0x000004) {
+            offset += 4;
+        }
+
+        NSMutableArray<NSNumber*> *sampleDurationArray = [[NSMutableArray alloc] init];
+        NSMutableArray<NSNumber*> *sampleSizeArray = [[NSMutableArray alloc] init];
+        NSMutableArray<NSNumber*> *sampleCompositionOffsetsArray = [[NSMutableArray alloc] init];
+        NSMutableArray<NSNumber*> *sampleFlagsArray = [[NSMutableArray alloc] init];
+
+        for (uint32_t i = 0; i < sampleCount; i++) {
+            if (flags & 0x000100) {
+                uint32_t sampleDuration;
+                [box.data getBytes:&sampleDuration range:NSMakeRange(offset, 4)];
+                sampleDuration = CFSwapInt32BigToHost(sampleDuration);
+                [sampleDurationArray addObject:@(sampleDuration)];
+                offset += 4;
+            }
+
+            if (flags & 0x000200) {
+                uint32_t sampleSize;
+                [box.data getBytes:&sampleSize range:NSMakeRange(offset, 4)];
+                sampleSize = CFSwapInt32BigToHost(sampleSize);
+                [sampleSizeArray addObject:@(sampleSize)];
+                offset += 4;
+            }
+
+            if (flags & 0x000400) {
+                uint32_t sampleFlags;
+                [box.data getBytes:&sampleFlags range:NSMakeRange(offset, 4)];
+                sampleFlags = CFSwapInt32BigToHost(sampleFlags);
+                [sampleFlagsArray addObject:@(sampleFlags)];
+                offset += 4;
+            }
+
+            if (flags & 0x000800) {
+                if (flags & 0b00000001000000000000000000000000) { // version 1
+                    int32_t sampleCompositionOffset;
+                    [box.data getBytes:&sampleCompositionOffset range:NSMakeRange(offset, 4)];
+                    sampleCompositionOffset = CFSwapInt32BigToHost(sampleCompositionOffset);
+                    [sampleCompositionOffsetsArray addObject:@(sampleCompositionOffset)];
+                    offset += 4;
+                } else {
+                    uint32_t sampleCompositionOffset;
+                    [box.data getBytes:&sampleCompositionOffset range:NSMakeRange(offset, 4)];
+                    sampleCompositionOffset = CFSwapInt32BigToHost(sampleCompositionOffset);
+                    [sampleCompositionOffsetsArray addObject:@(sampleCompositionOffset)];
+                    offset += 4;
+                }
+            }
+        }
+
+        (*fragmentOut).sampleDuration = [sampleDurationArray copy];
+        (*fragmentOut).sampleSize = [sampleSizeArray copy];
+        (*fragmentOut).sampleCompositionOffsets = [sampleCompositionOffsetsArray copy];
+        (*fragmentOut).sampleFlags = [sampleFlagsArray copy];
+
+        [sampleDurationArray release];
+        [sampleSizeArray release];
+        [sampleCompositionOffsetsArray release];
+        [sampleFlagsArray release];
+    }
     else if ([box.type isEqualToString:@"mdat"]) { 
         (*fragmentOut).data = box.data; 
     }
