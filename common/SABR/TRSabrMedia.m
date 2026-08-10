@@ -225,6 +225,7 @@
         [box.data getBytes:&sampleCount range:NSMakeRange(offset, 4)];
         sampleCount = CFSwapInt32BigToHost(sampleCount);
         offset += 4;
+        (*fragmentOut).sampleCount = sampleCount;
 
         // data offset
         if (flags & 0x000001) {
@@ -312,7 +313,84 @@
         boxOffset += [box length];
     }
 }
+
+-(NSArray<NSData*>*)extractSamplesFromFragment:(TRMP4FragmentInfo*)fragment {
+    NSMutableArray<NSData*> *samples = [[NSMutableArray alloc] initWithCapacity:fragment.sampleCount];
+    uint32_t offset = 0;
+    
+    for (uint32_t i = 0; i < fragment.sampleCount; i++) {
+        // technically I don't think your suppost to do this, but that can't stop me from doing it anyways... unlessss it fails
+
+        uint32_t sampleSize = 0;
+        NSNumber *sampleSizeNSNumber = fragment.sampleSize[i];
+        if (!sampleSizeNSNumber) {
+            // revert to default, even though this wouldn't work if there are gaps in sample size for the default.
+            if (fragment.hasDefaultSampleSize) {
+                sampleSize = fragment.defaultSampleSize;
+            } else {
+                return nil; // bad
+            }
+        } else {
+            sampleSize = [sampleSizeNSNumber unsignedIntValue];
+        }
+
+        NSData *sample = [fragment.data subdataWithRange:NSMakeRange(offset, sampleSize)];
+        offset += sampleSize;
+        samples[i] = sample;
+    }
+
+    NSArray *copy = [samples copy];
+    [samples release];
+    return copy;
+}
  
++(NSData*)annexBStartCodeNAL:(NSData*)nal {
+    static const uint8_t startCode[4] = {0x00, 0x00, 0x00, 0x01};
+
+    NSMutableData *out = [NSMutableData dataWithBytes:startCode length:4];
+    [out appendData:nal];
+    return out;
+}
+
+-(NSArray<NSData*>*)convertSamplesToAnnexB:(NSArray<NSData*>*)samples fragmentInfo:(TRMP4FragmentInfo*)fragment {
+    NSMutableArray<NSData*> *annexBOut = [NSMutableArray arrayWithCapacity:samples.count];
+    for (uint32_t i = 0; i < fragment.sampleCount; i++) {
+        NSMutableData *annexB = [[NSMutableData alloc] init];
+        
+        // get our flags
+        uint32_t flags = 0;
+        if (fragment.sampleFlags.count == 0) {
+            flags = fragment.defaultSampleFlags;
+        } else {
+            flags = [fragment.sampleFlags[i] unsignedIntValue];
+        }
+
+        if ((flags & 0x00010000) == 0) {
+            // keyframe
+            [annexB appendData:[TRSabrMedia annexBStartCodeNAL:self.sps]];
+            [annexB appendData:[TRSabrMedia annexBStartCodeNAL:self.pps]];
+        }
+
+        uint32_t offset = 0;
+        while (offset < samples[i].length) {
+            int naluLengthSize = self.lengthScaleMinusOne+1; // a length to your length!
+            uint64_t naluLength = 0;
+            
+            for (int j = 0; j < naluLengthSize; j++) {
+                uint8_t newBytes;
+                [samples[i] getBytes:&newBytes range:NSMakeRange(offset, 1)];
+                naluLength = (naluLength << 8) | newBytes;
+                offset++;
+            }
+
+            [annexB appendData:[TRSabrMedia annexBStartCodeNAL:[samples[i] subdataWithRange:NSMakeRange(offset, naluLength)]]];
+            offset += naluLength;
+        }
+        [annexBOut addObject:annexB];
+    }
+    return annexBOut;
+}
+
 -(NSString*)generateHLSManifest {
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
@@ -338,12 +416,27 @@
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index {
     NSData *source = self.segmentData[@(index)];
 
+    if (!source) {
+        NSLog(@"[TubeReplacer] segment is not found");
+        return nil;
+    }
+
     TRMP4FragmentInfo *fragmentInfo = [[TRMP4FragmentInfo alloc] init];
     [self parseFMP4Fragment:source out:&fragmentInfo];
 
-    NSLog(@"keys -> %@", [self.segmentData allKeys]);
+    if (!fragmentInfo.data || fragmentInfo.sampleSize.count == 0) {
+        NSLog(@"[TubeReplacer] required format data is missing");
+        return nil;
+    }
+
+    NSArray<NSData*> *samples = [self extractSamplesFromFragment:fragmentInfo];
+    NSArray<NSData*> *annexB = [self convertSamplesToAnnexB:samples fragmentInfo:fragmentInfo];
+    NSLog(@"annex b samples -> %@", annexB);
     
+
+    // bunch of todo stuff
     
+
 
     return nil; /// temp
 }

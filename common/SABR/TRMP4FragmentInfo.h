@@ -22,4 +22,5 @@
 @property (nonatomic, strong) NSArray<NSNumber*> *sampleSize;
 @property (nonatomic, strong) NSArray<NSNumber*> *sampleCompositionOffsets;
 @property (nonatomic, strong) NSArray<NSNumber*> *sampleFlags;
+@property (nonatomic, assign) uint32_t sampleCount;
 @end
