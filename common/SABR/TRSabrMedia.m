@@ -5,8 +5,10 @@
 #include <Foundation/NSRange.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSValue.h>
+#include <math.h>
 #include <objc/NSObjCRuntime.h>
 #include <stdint.h>
+#include <sys/types.h>
 #include "TRMP4Box.h"
 #include "TRMP4FragmentInfo.h"
 
@@ -391,6 +393,72 @@
     return annexBOut;
 }
 
+// ok this function is AI. sowwy. this just breaks my dam head.
+// Encodes a 33-bit timestamp (PTS or DTS) into 5 bytes per the spec.
+// prefix: 0x2 for PTS-only, 0x3 for PTS-with-DTS(PTS), 0x1 for DTS
+static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
+    uint8_t bytes[5];
+    bytes[0] = (prefix << 4) | (((ts >> 30) & 0x07) << 1) | 0x01;
+    bytes[1] = (ts >> 22) & 0xFF;
+    bytes[2] = (((ts >> 15) & 0x7F) << 1) | 0x01;
+    bytes[3] = (ts >> 7) & 0xFF;
+    bytes[4] = ((ts & 0x7F) << 1) | 0x01;
+    [data appendBytes:bytes length:5];
+}
+
+
+-(NSData*)createPESPacketFromData:(NSData*)data pts:(uint64_t)pts dts:(uint64_t)dts {
+    NSMutableData *pesPacket = [[NSMutableData alloc] init];
+    
+    uint8_t stream_id = 0;
+    if (self.mediaType == TRSabrMediaTypeVideo) {
+        stream_id = 0xE0;
+    } else {
+        stream_id = 0xC0;
+    }
+    uint8_t startCode[4] = {0x00, 0x00, 0x01, stream_id};
+    [pesPacket appendBytes:startCode length:4];
+
+    // optional header
+    NSMutableData *optional = [[NSMutableData alloc] init];
+
+    uint8_t flags1 = 0x80;
+    uint8_t flags2 = 0x00;
+    NSMutableData *tsData = [[NSMutableData alloc] init];
+    if (pts == dts) {
+        flags2 |= 0xC0;
+        EncodeTimestamp(tsData, 0x3, pts);
+        EncodeTimestamp(tsData, 0x3, dts);
+    } else {
+        flags2 |= 0x80;
+        EncodeTimestamp(tsData, 0x2, pts);
+    }
+
+    uint8_t tsDataLen = tsData.length;
+    [optional appendBytes:&flags1 length:1];
+    [optional appendBytes:&flags2 length:1];
+    [optional appendBytes:&tsDataLen length:1];
+    [optional appendData:tsData];
+
+    // packet length
+    uint32_t packetLengthFull = [optional length] + [data length];
+    uint16_t packetLength = 0;
+
+    if (packetLengthFull <= 0xFFFF) {
+        packetLength = packetLengthFull;
+    }
+
+    packetLength = CFSwapInt16HostToBig(packetLength);
+    uint8_t lengthBytes[2] = {(uint8_t)(packetLength << 8), (uint8_t)packetLength};
+    [pesPacket appendBytes:lengthBytes length:2];
+
+    // merge em all together and send it!
+    [pesPacket appendData:optional];
+    [pesPacket appendData:data];
+    return pesPacket;
+
+}
+
 -(NSString*)generateHLSManifest {
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
@@ -431,9 +499,24 @@
 
     NSArray<NSData*> *samples = [self extractSamplesFromFragment:fragmentInfo];
     NSArray<NSData*> *annexB = [self convertSamplesToAnnexB:samples fragmentInfo:fragmentInfo];
-    NSLog(@"annex b samples -> %@", annexB);
+    [samples release];
     
+    double ticksTo90k = (90000.0 / (double)self.timescale);
+    NSMutableData *pesPackets = [[NSMutableData alloc] init];
+    uint64_t baseMediaDecodeTimeRunning = fragmentInfo.baseMediaDecodeTime;
+    for (uint32_t i = 0; i < fragmentInfo.sampleCount; i++) {
+        uint64_t dts = (uint64_t)llround(baseMediaDecodeTimeRunning * ticksTo90k);
+        uint64_t pts = (uint64_t)llround(baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue] * ticksTo90k);
 
+        [pesPackets appendData:[self createPESPacketFromData:annexB[i] pts:pts dts:dts]];
+
+        if (fragmentInfo.sampleDuration.count == 0)
+            baseMediaDecodeTimeRunning += fragmentInfo.defaultSampleDuration;
+        else
+            baseMediaDecodeTimeRunning += [fragmentInfo.sampleDuration[i] unsignedLongLongValue];
+    }
+
+    NSLog(@"pes packets -> %@", pesPackets);
     // bunch of todo stuff
     
 
