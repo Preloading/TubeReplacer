@@ -2,12 +2,14 @@
 #include <CoreFoundation/CFByteOrder.h>
 #include <Foundation/Foundation.h>
 #include <Foundation/NSArray.h>
+#include <Foundation/NSData.h>
 #include <Foundation/NSRange.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSValue.h>
 #include <math.h>
 #include <objc/NSObjCRuntime.h>
 #include <stdint.h>
+#include <sys/_types/_off_t.h>
 #include <sys/types.h>
 #include "TRMP4Box.h"
 #include "TRMP4FragmentInfo.h"
@@ -406,7 +408,6 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
     [data appendBytes:bytes length:5];
 }
 
-
 -(NSData*)createPESPacketFromData:(NSData*)data pts:(uint64_t)pts dts:(uint64_t)dts {
     NSMutableData *pesPacket = [[NSMutableData alloc] init];
     
@@ -425,10 +426,10 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
     uint8_t flags1 = 0x80;
     uint8_t flags2 = 0x00;
     NSMutableData *tsData = [[NSMutableData alloc] init];
-    if (pts == dts) {
+    if (pts != dts) {
         flags2 |= 0xC0;
         EncodeTimestamp(tsData, 0x3, pts);
-        EncodeTimestamp(tsData, 0x3, dts);
+        EncodeTimestamp(tsData, 0x1, dts);
     } else {
         flags2 |= 0x80;
         EncodeTimestamp(tsData, 0x2, pts);
@@ -448,15 +449,218 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
         packetLength = packetLengthFull;
     }
 
-    packetLength = CFSwapInt16HostToBig(packetLength);
-    uint8_t lengthBytes[2] = {(uint8_t)(packetLength << 8), (uint8_t)packetLength};
+    uint8_t lengthBytes[2] = {(uint8_t)(packetLength >> 8), (uint8_t)packetLength};
     [pesPacket appendBytes:lengthBytes length:2];
 
     // merge em all together and send it!
     [pesPacket appendData:optional];
     [pesPacket appendData:data];
     return pesPacket;
+}
 
+// Source - https://stackoverflow.com/a/54351365
+// Posted by rcgldr, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-08-10, License - CC BY-SA 4.0
+
+unsigned int crc32b(unsigned char *message, size_t l)
+{
+   size_t i, j;
+   unsigned int crc, msb;
+
+   crc = 0xFFFFFFFF;
+   for(i = 0; i < l; i++) {
+      // xor next byte to upper bits of crc
+      crc ^= (((unsigned int)message[i])<<24);
+      for (j = 0; j < 8; j++) {    // Do eight times.
+            msb = crc>>31;
+            crc <<= 1;
+            crc ^= (0 - msb) & 0x04C11DB7;
+      }
+   }
+   return crc;         // don't complement crc on output
+}
+
+-(NSData*)buildPATSection {
+    NSMutableData *patSection = [NSMutableData data];
+
+    uint8_t patSectionStart[12] = {0x00, // table id
+        0xB0, 0x0D, // length, since this is basically hardcoded, as news flash tells me I am not putting 250 channels in one TS stream lmao
+        0x00, 0x01, // transport_stream_id
+        0b11000001, // first two are reserverd, 5 bits for version, current next indecator is last
+        0x00, // section number
+        0x00, // last section number
+        // program loop
+        0x00, 0x01, // program name
+        0xE0, 0x23 // PMT ID + reserved stuff. PMT ID is 0x23 maybe
+    };
+
+    unsigned int crcResult = crc32b(patSectionStart, sizeof(patSectionStart));
+    uint8_t crcBytes[4] = {(uint8_t)(crcResult >> 24), (uint8_t)(crcResult >> 16), (uint8_t)(crcResult >> 8), (uint8_t)crcResult};
+
+    uint8_t pointerField = 0x00;
+    [patSection appendBytes:&pointerField length:1];
+    [patSection appendBytes:patSectionStart length:12];
+    [patSection appendBytes:crcBytes length:4];
+    return patSection;
+}
+
+-(NSData*)buildPMTSection:(uint16_t)pid {
+    NSMutableData *pmtSection = [NSMutableData data];
+
+    uint8_t streamType = 0;
+    if (self.mediaType == TRSabrMediaTypeVideo) {
+        streamType = 0x1B;
+    } else {
+        streamType = 0x0F;
+    }
+
+    uint8_t pmtSectionStart[17] = {
+        0x02,                          // table_id
+        0xB0, 0x12,                    // section_length: flags + length
+        0x00, 0x01,                    // program_number
+        0b11000001,                    // reserved(2) + version(5) + current_next(1)
+        0x00,                          // section_number
+        0x00,                          // last_section_number
+        (uint8_t)(0xE0 | (pid >> 8)),  // reserved(3) + PCR_PID high bits
+        (uint8_t)(pid & 0xFF),         // PCR_PID low byte
+        0xF0, 0x00,                    // reserved(4) + program_info_length(12)
+        streamType,                    // stream_type
+        (uint8_t)(0xE0 | (pid >> 8)),  // reserved(3) + elementary_PID high bits
+        (uint8_t)(pid & 0xFF),         // elementary_PID low byte
+        0xF0, 0x00                     // reserved(4) + ES_info_length(12) = 0
+    };
+
+    unsigned int crcResult = crc32b(pmtSectionStart, sizeof(pmtSectionStart));
+    uint8_t crcBytes[4] = {(uint8_t)(crcResult >> 24), (uint8_t)(crcResult >> 16), (uint8_t)(crcResult >> 8), (uint8_t)crcResult};
+
+    uint8_t pointerField = 0x00;
+    [pmtSection appendBytes:&pointerField length:1];
+    [pmtSection appendBytes:pmtSectionStart length:17];
+    [pmtSection appendBytes:crcBytes length:4];
+    return pmtSection;
+}
+
+-(NSMutableData*)buildTSPackets:(NSData*)pesPacket pid:(uint16_t)pid packetCounter:(uint8_t*)packetCounter pcr:(NSNumber*)pcr {
+    int offset = 0;
+    NSMutableData *finishedPackets = [NSMutableData data];
+
+    while (offset < [pesPacket length]) {
+        NSMutableData *tsPacket = [NSMutableData data];
+        BOOL containsPayload = YES;
+        BOOL containsAdaption = NO;
+        BOOL containsPCR = NO;
+
+        uint8_t byte1 = 0x00;
+        uint8_t byte2 = 0x00;
+
+        if (offset == 0) { // packet start
+            byte1 |= 0b01000000;   
+            if (pcr) {
+                // must add PCR
+                containsAdaption = YES;
+                containsPCR = YES;
+            }
+        }
+
+        // length calculations
+        int dataNeeded = 4;
+        if (containsPCR)
+            dataNeeded+=8; // Adaption header + PCR
+
+        int payloadToWrite = 188-dataNeeded;
+
+        if ([pesPacket length] < offset + payloadToWrite) {
+            payloadToWrite = [pesPacket length] - offset;
+            containsAdaption = YES;
+        }
+    
+
+        byte1 |= ((pid >> 8) & 0b00011111);
+        byte2 = (pid & 0xFF);
+
+        
+        uint8_t byte3 = *packetCounter;
+        byte3 &= 0x0F; // value is 4 bits at the end
+
+        if (containsAdaption)
+            byte3 |= 0b00100000;
+        if (containsPayload) {
+            byte3 |= 0b00010000;
+            *packetCounter += 1;
+        }
+
+        uint8_t tsHeader[4] = { 0x47, byte1, byte2, byte3 };
+        [tsPacket appendBytes:tsHeader length:4];
+        if (containsAdaption) {
+            if (payloadToWrite == 183 && !containsPCR) {
+                const uint8_t blankPCR = {0x00}; // handle the one byte of padding case 
+                [tsPacket appendBytes:&blankPCR length:1];
+            } else {
+                // figure out how much we need to pad
+                int16_t lengthToPad = 184 - ([pesPacket length] - offset); // 184 is total packet size - ts header
+                lengthToPad-=2; //adaption header length
+                if (containsPCR)
+                    lengthToPad-=6;
+
+                if (lengthToPad < 0)
+                    lengthToPad = 0;
+
+
+                uint8_t adaptionLength = lengthToPad+1; // length
+                uint8_t adaptionFlags = 0b00000000; // bunch of metadata bout the container
+
+                if (containsPCR) {
+                    adaptionFlags |= 0b00010000; // enable PCR
+                    adaptionLength += 6;
+                }
+
+                uint8_t adaption[2] = {adaptionLength, adaptionFlags };
+                [tsPacket appendBytes:adaption length:2];
+
+                if (containsPCR) {
+                    uint64_t base = [pcr unsignedLongLongValue] / 300;
+                    uint16_t extension = (uint16_t)([pcr unsignedLongLongValue] % 300);
+                    base &= 0x1FFFFFFFFULL;
+                    extension &= 0x1FF;
+
+                    // 33 bits base, 6 bits reserved, 9 bits extension
+                    uint8_t byte7 = (uint8_t)((base & 0x1) << 7); // last bit of base + 6 reserved + first bit of extension
+                    byte7 |= (uint8_t)((extension >> 8) & 0x1); 
+                    byte7 |= 0b01111110;
+
+                    uint8_t adaptionPCR[6] = {
+                        (uint8_t)((base >> 25) & 0xFF), 
+                        (uint8_t)((base >> 17) & 0xFF), 
+                        (uint8_t)((base >> 9) & 0xFF), 
+                        (uint8_t)((base >> 1) & 0xFF), 
+                        byte7,
+                        (uint8_t)(extension & 0xFF)
+                    };
+
+                    [tsPacket appendBytes:adaptionPCR length:6];
+                }
+
+                // write filler bytes
+                if (lengthToPad > 0) {
+                    const uint8_t fillerBytes = {0xFF};
+                    for (int i = 0; i<lengthToPad; i++) {
+                        [tsPacket appendBytes:&fillerBytes length:1];
+                    }
+                }
+            }
+        }
+        
+        if (containsPayload) {
+            [tsPacket appendData:[pesPacket subdataWithRange:NSMakeRange(offset,payloadToWrite)]];
+            offset+=payloadToWrite;
+        }
+        
+        [finishedPackets appendData:tsPacket];
+    }
+    
+    
+
+    return finishedPackets;
 }
 
 -(NSString*)generateHLSManifest {
@@ -502,26 +706,46 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
     [samples release];
     
     double ticksTo90k = (90000.0 / (double)self.timescale);
-    NSMutableData *pesPackets = [[NSMutableData alloc] init];
+    // NSMutableArray<NSData*> *pesPackets = [[NSMutableArray alloc] init];
+    NSMutableData *finalTSData = [NSMutableData data];
+
+    uint8_t streamId = 0;
+    if (self.mediaType == TRSabrMediaTypeVideo) {
+        streamId = 0xE0;
+    } else {
+        streamId = 0xC0;
+    }
+
+    uint8_t packetCounter = 0;
+    uint8_t metadataPacketCounter = 0;
+
     uint64_t baseMediaDecodeTimeRunning = fragmentInfo.baseMediaDecodeTime;
     for (uint32_t i = 0; i < fragmentInfo.sampleCount; i++) {
         uint64_t dts = (uint64_t)llround(baseMediaDecodeTimeRunning * ticksTo90k);
-        uint64_t pts = (uint64_t)llround(baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue] * ticksTo90k);
+        uint64_t pts = (uint64_t)llround((baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue]) * ticksTo90k);
 
-        [pesPackets appendData:[self createPESPacketFromData:annexB[i] pts:pts dts:dts]];
+        if (i == 0) {
+            // add PAT & PMT
+            NSData *pat = [self buildPATSection];
+            NSData *pmt = [self buildPMTSection:streamId];
+            [finalTSData appendData:[self buildTSPackets:pat pid:0 packetCounter:&metadataPacketCounter pcr:nil]];
+            metadataPacketCounter--; // hack
+            [finalTSData appendData:[self buildTSPackets:pmt pid:0x23 packetCounter:&metadataPacketCounter pcr:nil]];
+        }
 
+        NSData *pesPacket = [self createPESPacketFromData:annexB[i] pts:pts dts:dts];
+        [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300]]];
         if (fragmentInfo.sampleDuration.count == 0)
             baseMediaDecodeTimeRunning += fragmentInfo.defaultSampleDuration;
         else
             baseMediaDecodeTimeRunning += [fragmentInfo.sampleDuration[i] unsignedLongLongValue];
+
+        
     }
 
-    NSLog(@"pes packets -> %@", pesPackets);
-    // bunch of todo stuff
-    
+    NSLog(@"final ts data -> %@", finalTSData);
 
-
-    return nil; /// temp
+    return finalTSData;
 }
 
 @end

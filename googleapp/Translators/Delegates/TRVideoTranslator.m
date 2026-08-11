@@ -309,9 +309,9 @@
                     // todo: check if this is android before running this.
                     NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
                     if (decipheredURL) {
-                        url = [NSURL URLWithString:decipheredURL];
+                        url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
                     } else {
-                        url = [NSURL URLWithString:urlString];
+                        url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
                     }
 
                     if (url) {
