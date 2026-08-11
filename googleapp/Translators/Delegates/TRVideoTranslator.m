@@ -299,36 +299,49 @@
             // sabr testing
             TRSabrStream *sabrStream = [[TRSabrStream alloc] initWithStreamUrl:[TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"] ustreamConfig:[TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"] formats:adaptiveFormats videoId:videoId];
             NSLog(@"sabrStream -> %@", sabrStream);
-
-            NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
-            for (NSDictionary *format in formats) {
-                NSString *urlString = format[@"url"];
-                NSString *signatureCipher = format[@"signatureCipher"];
-                if (urlString || signatureCipher) {
-                    NSURL *url = nil;
-                    // todo: check if this is android before running this.
-                    NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
-                    if (decipheredURL) {
-                        url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
-                    } else {
-                        url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
-                    }
-
-                    if (url) {
-                        id stream = nil;
-                        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
-                        } else if ([version() isEqualToString:@"2.0.0"]) {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"video/mp4" format:2];
-                        } else {
-                            stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO];
-                        }
-                        if (stream) {
-                            [ytStreams addObject:stream];
-                        }
-                    }
-                }
+            NSURL *sabrURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%i/master.m3u8", sabrStream.httpServer.port]];
+            id stream = nil;
+            if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrURL format:2 encrypted:NO precached:NO];
+            } else if ([version() isEqualToString:@"2.0.0"]) {
+                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrURL MIMEType:@"video/mp4" format:2];
+            } else {
+                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrURL format:2 encrypted:NO];
             }
+            if (stream) {
+                [ytStreams addObject:stream];
+            }
+            
+
+            // NSArray *formats = [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.formats"];
+            // for (NSDictionary *format in formats) {
+            //     NSString *urlString = format[@"url"];
+            //     NSString *signatureCipher = format[@"signatureCipher"];
+            //     if (urlString || signatureCipher) {
+            //         NSURL *url = nil;
+            //         // todo: check if this is android before running this.
+            //         NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
+            //         if (decipheredURL) {
+            //             url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
+            //         } else {
+            //             url = [NSURL URLWithString:@"http://10.0.0.75:5500/hls_test.m3u8"];
+            //         }
+
+            //         if (url) {
+            //             id stream = nil;
+            //             if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+            //                 stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
+            //             } else if ([version() isEqualToString:@"2.0.0"]) {
+            //                 stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"video/mp4" format:2];
+            //             } else {
+            //                 stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO];
+            //             }
+            //             if (stream) {
+            //                 [ytStreams addObject:stream];
+            //             }
+            //         }
+            //     }
+            // }
         }
     } else {
         // they wanna use a custom url for playback.

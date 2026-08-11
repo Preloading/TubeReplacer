@@ -23,7 +23,7 @@
 }
 
 -(void)handleParsedHeaderBox:(TRMP4Box*)box {
-    NSLog(@"found box type of %@", box.type);
+    // NSLog(@"found box type of %@", box.type);
     if ([box.type isEqualToString:@"moov"]) { [self parseMP4Header:box.data]; } 
     else if ([box.type isEqualToString:@"trak"]) { [self parseMP4Header:box.data]; } 
     else if ([box.type isEqualToString:@"mdia"]) { [self parseMP4Header:box.data]; } 
@@ -140,7 +140,7 @@
 }
 
 -(void)handleFMP4FragmentBox:(TRMP4Box*)box out:(TRMP4FragmentInfo**)fragmentOut {
-    NSLog(@"found box type of %@", box.type);
+    // NSLog(@"found box type of %@", box.type);
     if ([box.type isEqualToString:@"moof"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
     else if ([box.type isEqualToString:@"traf"]) { [self parseFMP4Fragment:box.data out:fragmentOut]; }
     else if ([box.type isEqualToString:@"tfdt"]) { 
@@ -491,7 +491,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
         0x00, // last section number
         // program loop
         0x00, 0x01, // program name
-        0xE0, 0x23 // PMT ID + reserved stuff. PMT ID is 0x23 maybe
+        0xF0, 0x00 // PMT ID + reserved stuff. PMT ID is 0x23 maybe
     };
 
     unsigned int crcResult = crc32b(patSectionStart, sizeof(patSectionStart));
@@ -540,7 +540,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
     return pmtSection;
 }
 
--(NSMutableData*)buildTSPackets:(NSData*)pesPacket pid:(uint16_t)pid packetCounter:(uint8_t*)packetCounter pcr:(NSNumber*)pcr {
+-(NSMutableData*)buildTSPackets:(NSData*)pesPacket pid:(uint16_t)pid packetCounter:(uint8_t*)packetCounter pcr:(NSNumber*)pcr useSectionPadding:(BOOL)useSectionPadding {
     int offset = 0;
     NSMutableData *finishedPackets = [NSMutableData data];
 
@@ -571,7 +571,8 @@ unsigned int crc32b(unsigned char *message, size_t l)
 
         if ([pesPacket length] < offset + payloadToWrite) {
             payloadToWrite = [pesPacket length] - offset;
-            containsAdaption = YES;
+            if (!useSectionPadding)
+                containsAdaption = YES;
         }
     
 
@@ -652,8 +653,22 @@ unsigned int crc32b(unsigned char *message, size_t l)
         
         if (containsPayload) {
             [tsPacket appendData:[pesPacket subdataWithRange:NSMakeRange(offset,payloadToWrite)]];
-            offset+=payloadToWrite;
         }
+
+        if (useSectionPadding) {
+            int16_t lengthToPad = 184 - ([pesPacket length] - offset);
+            if (containsAdaption)
+                lengthToPad-=2; //adaption header length
+            if (containsAdaption && containsPCR)
+                lengthToPad-=6;
+            const uint8_t fillerBytes = {0xFF};
+            for (int i = 0; i<lengthToPad; i++) {
+                [tsPacket appendBytes:&fillerBytes length:1];
+            }
+        }
+
+        if (containsPayload)
+            offset+=payloadToWrite;
         
         [finishedPackets appendData:tsPacket];
     }
@@ -669,7 +684,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
 
     int maxDurationTicks = [[self.segmentIndexes valueForKeyPath:@"@max.intValue"] intValue];
     NSLog(@"max duration -> %i", maxDurationTicks);
-    [hlsManifest appendFormat:@"#EXT-X-TARGETDURATION:%f\n", (double)maxDurationTicks/(double)self.timescale];
+    [hlsManifest appendFormat:@"#EXT-X-TARGETDURATION:%i\n", (uint8_t)(ceil((double)maxDurationTicks/(double)self.timescale))];
 
     int segmentIndex = 0;
     for (NSNumber *durationTicks in self.segmentIndexes) {
@@ -677,7 +692,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
         segmentIndex++;
     }
 
-    [hlsManifest appendString:@"#EXT-X-ENDLIST"];
+    [hlsManifest appendString:@"#EXT-X-ENDLIST\n"];
 
     // finish
     NSString *final = [hlsManifest copy];
@@ -717,24 +732,26 @@ unsigned int crc32b(unsigned char *message, size_t l)
     }
 
     uint8_t packetCounter = 0;
-    uint8_t metadataPacketCounter = 0;
+    uint8_t patPacketCounter = 0;
+    uint8_t pmtPacketCounter = 0;
+    uint8_t lastMetadataInsertion = 0;
 
     uint64_t baseMediaDecodeTimeRunning = fragmentInfo.baseMediaDecodeTime;
     for (uint32_t i = 0; i < fragmentInfo.sampleCount; i++) {
         uint64_t dts = (uint64_t)llround(baseMediaDecodeTimeRunning * ticksTo90k);
         uint64_t pts = (uint64_t)llround((baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue]) * ticksTo90k);
 
-        if (i == 0) {
+        if (i == 0 || dts >= lastMetadataInsertion + 45000) {
             // add PAT & PMT
             NSData *pat = [self buildPATSection];
             NSData *pmt = [self buildPMTSection:streamId];
-            [finalTSData appendData:[self buildTSPackets:pat pid:0 packetCounter:&metadataPacketCounter pcr:nil]];
-            metadataPacketCounter--; // hack
-            [finalTSData appendData:[self buildTSPackets:pmt pid:0x23 packetCounter:&metadataPacketCounter pcr:nil]];
+            [finalTSData appendData:[self buildTSPackets:pat pid:0 packetCounter:&patPacketCounter pcr:nil useSectionPadding:YES]];
+            [finalTSData appendData:[self buildTSPackets:pmt pid:0x1000 packetCounter:&pmtPacketCounter pcr:nil useSectionPadding:YES]];
+            lastMetadataInsertion = dts;
         }
 
         NSData *pesPacket = [self createPESPacketFromData:annexB[i] pts:pts dts:dts];
-        [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300]]];
+        [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300] useSectionPadding:NO]];
         if (fragmentInfo.sampleDuration.count == 0)
             baseMediaDecodeTimeRunning += fragmentInfo.defaultSampleDuration;
         else
@@ -743,7 +760,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
         
     }
 
-    NSLog(@"final ts data -> %@", finalTSData);
+    // NSLog(@"final ts data -> %@", finalTSData);
 
     return finalTSData;
 }
