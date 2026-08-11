@@ -358,8 +358,16 @@
 
 -(NSArray<NSData*>*)convertSamplesToAnnexB:(NSArray<NSData*>*)samples fragmentInfo:(TRMP4FragmentInfo*)fragment {
     NSMutableArray<NSData*> *annexBOut = [NSMutableArray arrayWithCapacity:samples.count];
+
+    static const uint8_t audNALBytes[1] = { 0xF0 };
+    NSData *audNAL = [NSData dataWithBytes:audNALBytes length:1];
+
     for (uint32_t i = 0; i < fragment.sampleCount; i++) {
         NSMutableData *annexB = [[NSMutableData alloc] init];
+        
+        NSMutableData *audFull = [NSMutableData dataWithBytes:"\x09" length:1];
+        [audFull appendData:audNAL];
+        [annexB appendData:[TRSabrMedia annexBStartCodeNAL:audFull]];
         
         // get our flags
         uint32_t flags = 0;
