@@ -71,8 +71,6 @@
             continue;
         }
         
-        NSLog(@"translateJSONAsEvent!");
-
         // Skip continuation items
         if ([item objectForKey:@"continuationItemRenderer"]) {
             continuationToken = item[@"continuationItemRenderer"][@"continuationEndpoint"][@"continuationCommand"][@"token"];
@@ -81,11 +79,8 @@
         
         NSError *itemError = nil;
         YTVideo *entry = [videoTranslator translateFeedItem:item withContext:json error:&itemError];
-
-        NSLog(@"video -> %@", entry);
         
         // NSLog(@"actions -> %@", [self valueForKey:@"actionsLookup_"]);
-        NSLog(@"uploader display name -> %@", [entry uploaderDisplayName]);
         if (entry) {
             if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
                 [entries addObject:[[NSClassFromString(@"YTEvent") alloc] initWithAuthorDisplayName:[entry uploaderDisplayName]
@@ -113,8 +108,6 @@
             // [entries addObject:entry];
         }
     }
-
-    NSLog(@"continuation token -> %@", continuationToken);
     
     id contiunationData = nil;
     if (continuationToken) {
@@ -147,7 +140,6 @@
         }
         return nil;
     }
-    NSLog(@"json -> %@", json);
     
     NSArray *items = [self extractItemsFromFeed:json];
     NSMutableArray *entries = [NSMutableArray array];
@@ -185,8 +177,6 @@
         }
     }
 
-    NSLog(@"continuation token -> %@", continuationToken);
-    
     // Create YTPage
     id page = [[[NSClassFromString(@"YTPage") alloc] 
         initWithEntries:entries 
@@ -316,8 +306,6 @@
         }
     }
 
-    NSLog(@"continuation token -> %@", continuationToken);
-
     unsigned long long totalResults = 2147483647UL;
     if (json[@"estimatedResults"] != nil) {
         totalResults = [json[@"estimatedResults"] intValue];
@@ -372,7 +360,6 @@
             keyPath:@"onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems"];
         for (NSDictionary *section in sections) {
             if (section[@"continuationItemRenderer"]) { // seems to break for some reason that i can't figure out.
-                NSLog(@"history contiunue!");
                 [allItems addObject:section];
                 continue;
             }

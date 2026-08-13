@@ -7,7 +7,7 @@
 @implementation TRSabrStream(PartHandler)
 
 -(void)handlePart:(TRUmpPart*)part currentlyParsingDatas:(NSMutableDictionary**)currentlyParsingDatas currentlyParsingHeaders:(NSMutableDictionary**)currentlyParsingHeaders {
-    // NSLog(@"data type -> %i", part.type);
+    NSLog(@"data type -> %i", part.type);
     NSError *error = nil;
     switch (part.type) {
     case UMPPartId_UmpPartIdStreamProtectionStatus: {
@@ -16,7 +16,7 @@
             NSLog(@"an error occured while decoding stream protection status. error -> %@", error);
             break;
         }
-        NSLog(@"current protection status -> %i", protectionStatus.status);
+        // NSLog(@"current protection status -> %i", protectionStatus.status);
         self.streamProtectionStatus = protectionStatus.status;
         break;
     }
@@ -26,7 +26,7 @@
             NSLog(@"an error occured while decoding next request policy. error -> %@", error);
             break;
         }
-        NSLog(@"next request policy -> %@", nextRequestPolicy);
+        // NSLog(@"next request policy -> %@", nextRequestPolicy);
 
         if (nextRequestPolicy.playbackCookie) {
             self.playbackCookie = nextRequestPolicy.playbackCookie;
@@ -72,7 +72,7 @@
         uint8_t mediaHeaderId = *(const uint8_t *)[part.data bytes];
         MediaHeader *mediaHeader = (MediaHeader*)((*currentlyParsingHeaders)[@(mediaHeaderId)]);
         // i really love Address of property expression requested
-
+        NSLog(@"itag -> %i, segment -> %i", mediaHeader.itag, mediaHeader.sequenceNumber);
         if (mediaHeader.itag == self.videoStream.itag) {
             if (mediaHeader.isInitSeg) {
                 [self.videoStream parseMP4Header:(*currentlyParsingDatas)[@(mediaHeaderId)]];
@@ -80,7 +80,8 @@
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
-                self.videoStream.segmentData[@(mediaHeader.sequenceNumber)] = (*currentlyParsingDatas)[@(mediaHeaderId)];
+                NSLog(@"mediaHeader.sequenceNumber -> %i", mediaHeader.sequenceNumber);
+                [self.videoStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             }
@@ -91,7 +92,7 @@
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
-                self.audioStream.segmentData[@(mediaHeader.sequenceNumber)] = (*currentlyParsingDatas)[@(mediaHeaderId)];
+                [self.audioStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             }
@@ -102,7 +103,7 @@
         break;
     }
     default:
-        NSLog(@"unparsed UMP data! data -> %@", part.data);
+        // NSLog(@"unparsed UMP data! data -> %@", part.data);
         break;
     }
 }

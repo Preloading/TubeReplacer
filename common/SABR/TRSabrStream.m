@@ -1,4 +1,7 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSLock.h>
+#include "video_streaming/BufferedRange.pbobjc.h"
+#include <math.h>
 #include "TRSabrHTTPConnection.h"
 #include <Foundation/NSString.h>
 #include <Foundation/NSDictionary.h>
@@ -16,16 +19,24 @@
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
     [self startWebServerThreaded];
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
+    
+    self.currentlyRequesting = NO;
+    self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
+    self.networkQueue.maxConcurrentOperationCount = 1;
 
     // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
     self.decipheredStreamURL = decipheredStreamURL;
     self.ustreamConfig = [NSData dataWithBase64EncodedString:[[ustreamConfig stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
-    self.formats = formats;
+    NSMutableDictionary *formatsDict = [NSMutableDictionary dictionary];
+    for (TRAdaptiveFormat *format in formats) {
+        formatsDict[@(format.itag)] = format;
+    }
+    self.formats = formatsDict;
     self.videoId = videoId;
 
     NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
     NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
-    for (TRAdaptiveFormat *format in self.formats) {
+    for (TRAdaptiveFormat *format in [self.formats allValues]) {
         if ([format.mimeType hasPrefix:@"audio"]) {
             [audioFormatsWeHave addObject:format];
         } else {
@@ -47,27 +58,39 @@
         self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:videoId clientState:1]];
     }
 
-    NSData *testReq = [self buildRequestBody];
-    [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
-        __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
-        __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
-        [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
-            [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
-            [part release];
-        }];
-        [self.videoStream convertFMP4ToMPEGTSWithIndex:1]; // index starts at one... for whatever reason
-        // NSLog(@"response -> %@", response); 
-    }];
+    [self requestAdditionalData:0];
     return self;
 }
 
--(void)test {
+-(void)requestAdditionalData:(int)currentStreamTimeMS {
+    NSLog(@"current stream ts -> %i", currentStreamTimeMS);
+    if (!self.currentlyRequesting) {
+        self.currentlyRequesting = YES;
+
+        NSData *testReq = [self buildRequestBody:currentStreamTimeMS];
+
+        [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
+            __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
+            __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
+            [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
+                [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
+                [part release];
+            }];
+
+            self.currentlyRequesting = NO;
+
+            if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.requestNumber < 10) {
+                NSLog(@"not enough data to start stream! trying again...");
+                [self requestAdditionalData:currentStreamTimeMS];
+            }
+            // NSLog(@"response -> %@", response); 
+        }];
+    }
 
 }
 
--(ClientAbrState*)createClientABRStateWithVideo:(TRAdaptiveFormat*)video andAudio:(TRAdaptiveFormat*)audio {
+-(ClientAbrState*)createClientABRState:(int)currentStreamTimeMS { //WithVideo:(TRAdaptiveFormat*)video andAudio:(TRAdaptiveFormat*)audio {
     ClientAbrState *state = [[ClientAbrState alloc] init];
-
     // viewport, i *could* spend the time to bother figuring out what it actually is, but that sounds annoying, and chances are they'd be watching in landscape.
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
     CGFloat scale = [[UIScreen mainScreen] scale];
@@ -79,7 +102,8 @@
         state.clientViewportHeight = (int)screenBounds.size.width * scale;
     }
     state.preferVp9 = false;
-    state.playerTimeMs = 0;
+    state.playerTimeMs = currentStreamTimeMS;
+
     state.playbackRate = 1.0;
     state.drcEnabled = true; // think this is the stable volume stuff
     state.visibility = 1;
@@ -157,15 +181,17 @@
     return context;
 }
 
--(NSData*)buildRequestBody {
+-(NSData*)buildRequestBody:(int)currentStreamTimeMS {
     VideoPlaybackAbrRequest *request = [[VideoPlaybackAbrRequest alloc] init];
 
     request.streamerContext = [self createStreamerContext];
     request.videoPlaybackUstreamerConfig = self.ustreamConfig;
 
-    NSMutableArray *videoFormatsIdsWeHave = [[NSMutableArray alloc] init];
-    NSMutableArray *audioFormatsIdsWeHave = [[NSMutableArray alloc] init];
-    for (TRAdaptiveFormat *format in self.formats) {
+    NSMutableDictionary *videoFormatsIdsWeHave = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *audioFormatsIdsWeHave = [[NSMutableDictionary alloc] init];
+    NSMutableArray *bufferedRanges = [[NSMutableArray alloc] init];
+
+    for (TRAdaptiveFormat *format in self.formats.allValues) {
         FormatId *formatId = [[FormatId alloc] init];
         formatId.itag = format.itag;
 
@@ -179,18 +205,36 @@
         }
 
         if ([format.mimeType hasPrefix:@"audio"]) {
-            [audioFormatsIdsWeHave addObject:formatId];
+            audioFormatsIdsWeHave[@(format.itag)] = formatId;
         } else {
-            [videoFormatsIdsWeHave addObject:formatId];
+            videoFormatsIdsWeHave[@(format.itag)] = formatId;
         }
     }
 
-    request.preferredVideoFormatIdsArray = videoFormatsIdsWeHave;
-    request.preferredAudioFormatIdsArray = audioFormatsIdsWeHave;
+    if (self.videoStream != nil) {
+        BufferedRange *bufferedRange = [[BufferedRange alloc] init];
+        bufferedRange.formatId = videoFormatsIdsWeHave[@(self.videoStream.itag)];
+        [self.videoStream updateBufferTime];
+        bufferedRange.startTimeMs = llround(self.videoStream.earliestTimestampBuffered*1000);
+        bufferedRange.startSegmentIndex = self.videoStream.earliestSegmentIndexBuffered;
+        bufferedRange.durationMs = llround(self.videoStream.latestTimestampBuffered*1000) - llround(self.videoStream.earliestTimestampBuffered*1000);
+        bufferedRange.endSegmentIndex = self.videoStream.latestSegmentIndexBuffered;
+        [bufferedRanges addObject:bufferedRange];
+    }
+
+    request.preferredVideoFormatIdsArray = [[videoFormatsIdsWeHave allValues] mutableCopy];
+    request.preferredAudioFormatIdsArray = [[audioFormatsIdsWeHave allValues] mutableCopy];
     request.preferredSubtitleFormatIdsArray = [[NSMutableArray alloc] init];
 
     request.field1000Array = [[NSMutableArray alloc] init];
-    request.bufferedRangesArray = [[NSMutableArray alloc] init];
+    request.bufferedRangesArray = bufferedRanges;
+
+    // if (self.currentPlayerTimeFunction != nil)
+    //     state.playerTimeMs = llround(self.currentPlayerTimeFunction()*1000);
+    // else
+    //     state.playerTimeMs = 0;
+
+    request.clientAbrState = [self createClientABRState:currentStreamTimeMS];
 
     return [request data];
 }
@@ -213,7 +257,7 @@
     //     [fetcher setAuthorizer:auth];
 
     // [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error){
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+    [NSURLConnection sendAsynchronousRequest:request queue:self.networkQueue completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
         callback(response, error);
     }];
 }
@@ -252,21 +296,33 @@
     // NSLog(@"http server at -> http://%@:%hu/", [self.httpServer [self.httpServer port]);
 }
 
-- (void)webServerThreadMain {
-    @autoreleasepool {
+- (void)startWebServerThreaded {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0), ^{
         [self startWebServer]; // TODO: If the device goes to sleep, the HTTP server does not come back online. Also an issue for background playback
 
         while (self.httpServer) {
-            @autoreleasepool {
-                [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-                                          beforeDate:[NSDate distantFuture]];
-            }
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                        beforeDate:[NSDate distantFuture]];
         }
-    }
+    });
 }
 
-- (void)startWebServerThreaded {
-    [NSThread detachNewThreadSelector:@selector(webServerThreadMain) toTarget:self withObject:nil];
-}
+-(void)dealloc {
+    NSLog(@"deallocating!!!");
+    [_httpServer stop];
+    [_httpServer release];
+    [_videoStream release];
+    [_audioStream release];
+    [_playbackCookie release];
+    [_videoFormatsWeHave release];
+    [_audioFormatsWeHave release];
+    [_formats release];
+    [_poToken release];
+    [_coldstart release];
+    [_videoId release];
+    [_ustreamConfig release];
+    [_decipheredStreamURL release];
 
+    [super dealloc];
+}
 @end

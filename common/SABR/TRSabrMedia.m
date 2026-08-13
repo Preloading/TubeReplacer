@@ -19,6 +19,9 @@
 -(instancetype)init {
     self = [super init];
     _segmentData = [[NSMutableDictionary alloc] init];
+    self.isReadyForPlayback = false;
+    self.manifestReady = [[NSCondition alloc] init];
+    self.segmentCondition = [[NSCondition alloc] init];
     return self;
 }
 
@@ -106,6 +109,9 @@
         offset+=2;
 
         NSMutableArray *segmentIndexes = [[NSMutableArray alloc] initWithCapacity:referenceCount];
+        NSMutableArray *segmentIndexesCombined = [[NSMutableArray alloc] initWithCapacity:referenceCount];
+
+        uint32_t lastSegmentDuration = 0;
 
         for (uint16_t i = 0; i < referenceCount; i++) {
             offset += 4; // contains type & size of segment, irrelevent to us using sabr
@@ -115,12 +121,13 @@
             segment_duration = CFSwapInt32BigToHost(segment_duration);
             offset+=8;
             segmentIndexes[i] = @(segment_duration);
+            segmentIndexesCombined[i] = @(lastSegmentDuration);
+            lastSegmentDuration += segment_duration;
             // NSLog(@"segment duration (in ticks) -> %i", segment_duration);
             // NSLog(@"segment duration (in seconds) -> %f", (double)segment_duration/(double)timescale);
         }
-        self.segmentIndexes = [segmentIndexes copy];
-        [segmentIndexes release];
-        
+        self.segmentIndexes = segmentIndexes;
+        self.segmentIndexesCombined = segmentIndexesCombined;
     }
 }
 
@@ -137,6 +144,18 @@
 
         boxOffset += [box length];
     }
+
+    [self.manifestReady lock];
+    self.isReadyForPlayback = YES;
+    [self.manifestReady signal];
+    [self.manifestReady unlock];
+}
+
+-(void)addNewFMP4FragmentWithID:(int)fragmentId data:(NSData*)data {
+    [self.segmentCondition lock];
+    self.segmentData[@(fragmentId)] = data;
+    [self.segmentCondition broadcast];
+    [self.segmentCondition unlock];
 }
 
 -(void)handleFMP4FragmentBox:(TRMP4Box*)box out:(TRMP4FragmentInfo**)fragmentOut {
@@ -687,6 +706,14 @@ unsigned int crc32b(unsigned char *message, size_t l)
 }
 
 -(NSString*)generateHLSManifest {
+    [self.manifestReady lock];
+
+    while (!self.isReadyForPlayback) {
+        [self.manifestReady wait];
+    }
+
+    [self.manifestReady unlock];
+
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
 
@@ -709,18 +736,25 @@ unsigned int crc32b(unsigned char *message, size_t l)
 }
 
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index {
-    NSData *source = self.segmentData[@(index)];
+    [self.segmentCondition lock];
 
-    if (!source) {
-        NSLog(@"[TubeReplacer] segment is not found");
-        return nil;
+    NSLog(@"lock");
+    while (self.segmentData[@(index)] == nil) {
+        [self.segmentCondition wait];
     }
+    NSLog(@"unlock");
+
+    NSData *source = self.segmentData[@(index)];
+    NSLog(@"twolock");
+
+    [self.segmentCondition unlock];
 
     TRMP4FragmentInfo *fragmentInfo = [[TRMP4FragmentInfo alloc] init];
     [self parseFMP4Fragment:source out:&fragmentInfo];
 
     if (!fragmentInfo.data || fragmentInfo.sampleSize.count == 0) {
         NSLog(@"[TubeReplacer] required format data is missing");
+        [fragmentInfo release];
         return nil;
     }
 
@@ -760,6 +794,7 @@ unsigned int crc32b(unsigned char *message, size_t l)
 
         NSData *pesPacket = [self createPESPacketFromData:annexB[i] pts:pts dts:dts];
         [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300] useSectionPadding:NO]];
+        [pesPacket release];
         if (fragmentInfo.sampleDuration.count == 0)
             baseMediaDecodeTimeRunning += fragmentInfo.defaultSampleDuration;
         else
@@ -769,8 +804,52 @@ unsigned int crc32b(unsigned char *message, size_t l)
     }
 
     // NSLog(@"final ts data -> %@", finalTSData);
-
+    [fragmentInfo release];
     return finalTSData;
 }
 
+-(void)updateBufferTime {
+    // kinda awful
+    int segmentNumber = 1;
+    uint64_t segmentTimestamp = 0;
+    double earliestTime = -1;
+    int32_t earliestSegment = -1;
+    int64_t latestTimeInScale = -1;
+    int32_t latestSegment = -1;
+    uint32_t observedSegments = 0;
+
+    for (NSNumber *timestamp in self.segmentIndexes) {
+        if (self.segmentData[@(segmentNumber)] != nil) {
+            // we have that segment
+            if (earliestTime == -1) {
+                earliestTime = (double)segmentTimestamp/(double)self.timescale;
+                earliestSegment = segmentNumber;
+            }
+        }
+        segmentTimestamp += [timestamp unsignedLongLongValue];
+        if (self.segmentData[@(segmentNumber)] != nil) {
+            latestTimeInScale = segmentTimestamp;
+            latestSegment = segmentNumber;
+            observedSegments++;
+        }
+
+        if (observedSegments >= self.segmentData.count)
+            break;
+
+        segmentNumber++;
+
+    }
+    self.earliestTimestampBuffered = earliestTime;
+    self.earliestSegmentIndexBuffered = earliestSegment;
+    self.latestTimestampBuffered = (double)latestTimeInScale/(double)self.timescale;
+    self.latestSegmentIndexBuffered = latestSegment;
+}
+
+-(void)dealloc {
+    [_segmentIndexes release];
+    [_segmentData release];
+    [_sps release];
+    [_pps release];
+    [super dealloc];
+}
 @end

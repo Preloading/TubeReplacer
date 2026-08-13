@@ -21,6 +21,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	parsing.x \
 	categories.x \
 	getvideo.x \
+	handlevideo.x \
 	channels.x \
 	channelfeed.x \
 	search.x \
