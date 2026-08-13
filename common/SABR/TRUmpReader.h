@@ -3,6 +3,6 @@
 
 @interface TRUmpReader : NSObject
 
-+(uint64_t)readVarint:(NSData *)data offset:(int*)offset;
++(uint64_t)readVarint:(NSData *)data offset:(NSUInteger*)offset;
 +(void)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler;
 @end

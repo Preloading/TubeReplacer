@@ -9,7 +9,7 @@
 @implementation TRUmpReader
 
 // was initally translated to objc by AI (because it chose to just spat it out for some reason), modified by me to support offsets
-+(uint64_t)readVarint:(NSData *)data offset:(int*)offset {
++(uint64_t)readVarint:(NSData *)data offset:(NSUInteger*)offset {
     const uint8_t *bytes = (const uint8_t *)data.bytes;
     NSUInteger available = data.length;
 
@@ -71,15 +71,18 @@ insufficientData:
 }
 
 +(void)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler {
-    int offset = 0;
+    NSUInteger offset = 0;
 
     while (offset < [data length]) {
-        uint64_t partType = [self readVarint:data offset:&offset];
-        uint64_t partSize = [self readVarint:data offset:&offset];
+        NSUInteger partType = [self readVarint:data offset:&offset];
+        NSUInteger partSize = [self readVarint:data offset:&offset];
         if (offset > [data length]) {
             break;
         }
         NSData *partData = [data subdataWithRange:NSMakeRange(offset, partSize)];
+        if (partData == nil) {
+            NSLog(@"part data is nil! offset -> %lu, size -> %lu, data length -> %lu", (unsigned long)offset, (unsigned long)partSize, (unsigned long)[data length]);
+        }
         offset += partSize;
         TRUmpPart *part = [[TRUmpPart alloc] initWithType:partType data:partData];
         partHandler(part);

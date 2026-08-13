@@ -63,6 +63,9 @@
         break;
     }
     case UMPPartId_UmpPartIdMedia: {
+        if (part.data == nil) {
+            NSLog(@"media part is bad!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
         uint8_t headerId = *(const uint8_t *)[[part.data subdataWithRange:NSMakeRange(0,1)] bytes];
 
         [(*currentlyParsingDatas)[@(headerId)] appendData:[part.data subdataWithRange:NSMakeRange(1, [part.data length]-1)]];

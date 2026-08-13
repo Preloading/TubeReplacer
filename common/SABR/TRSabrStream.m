@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSObjCRuntime.h>
 #include <Foundation/NSLock.h>
 #include "video_streaming/BufferedRange.pbobjc.h"
 #include <math.h>
@@ -76,6 +77,9 @@
                 [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
                 [part release];
             }];
+            [response release];
+            [currentlyParsingDatas release];
+            [currentlyParsingHeaders release];
 
             self.currentlyRequesting = NO;
 
@@ -258,7 +262,7 @@
 
     // [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error){
     [NSURLConnection sendAsynchronousRequest:request queue:self.networkQueue completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
-        callback(response, error);
+        callback([response copy], error);
     }];
 }
 

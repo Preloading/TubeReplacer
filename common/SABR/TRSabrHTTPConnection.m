@@ -37,14 +37,18 @@
 
 		int itag = [videoComponents[0] unsignedIntValue];
 		int fragmentIndex = [videoComponents[1] unsignedIntValue];
-		NSLog(@"fragment index -> %i", fragmentIndex);
+		// NSLog(@"fragment index -> %i", fragmentIndex);
 
 		
 		if (stream.videoStream.itag == itag) {
-			[stream requestAdditionalData:llround(([stream.videoStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.videoStream.timescale) * 1000)];
-			return [[[HTTPDataResponse alloc] initWithData:[stream.videoStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1]] autorelease];
+			if (stream.videoStream.segmentIndexesCombined.count-1 > fragmentIndex)
+				[stream requestAdditionalData:llround(([stream.videoStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.videoStream.timescale) * 1000)];
+			NSData *streamData = [stream.videoStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1];
+			// [stream.videoStream.segmentData removeObjectForKey:@(fragmentIndex+1)];
+			return [[[HTTPDataResponse alloc] initWithData:streamData] autorelease];
 		} else if (stream.audioStream.itag == itag) {
-			[stream requestAdditionalData:llround(([stream.audioStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.audioStream.timescale) * 1000)];
+			if (stream.audioStream.segmentIndexesCombined.count >= fragmentIndex+1)
+				[stream requestAdditionalData:llround(([stream.audioStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.audioStream.timescale) * 1000)];
 			return [[[HTTPDataResponse alloc] initWithData:[stream.audioStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1]] autorelease];
 		}
 		

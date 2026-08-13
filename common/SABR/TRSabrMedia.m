@@ -41,8 +41,6 @@
         entryCount = CFSwapInt32BigToHost(entryCount);
         offset+=4;
 
-        NSLog(@"entry count -> %i", entryCount);
-
         for (int i = 0; i < entryCount; i++) {
             TRMP4Box *newBox = [[TRMP4Box alloc] parseMP4Box:box.data atOffset:&offset];
             [self handleParsedHeaderBox:newBox];
@@ -60,7 +58,6 @@
         uint8_t lengthScaleMinusOne;
         [box.data getBytes:&lengthScaleMinusOne range:NSMakeRange(offset,1)];
         self.lengthScaleMinusOne = lengthScaleMinusOne & 0x03;
-        NSLog(@"length scale minus one -> %i", self.lengthScaleMinusOne);
         offset += 2;
 
         uint16_t spsLen;
@@ -77,8 +74,6 @@
         offset+=2;
 
         self.pps = [box.data subdataWithRange:NSMakeRange(offset,ppsLen)];
-
-        NSLog(@"sps -> %@\npps -> %@", self.sps, self.pps);
     } 
     else if ([box.type isEqualToString:@"sidx"]) {
         int offset = 0;
@@ -616,7 +611,6 @@ unsigned int crc32b(unsigned char *message, size_t l)
             byte3 |= 0b00010000;
             *packetCounter += 1;
         }
-
         uint8_t tsHeader[4] = { 0x47, byte1, byte2, byte3 };
         [tsPacket appendBytes:tsHeader length:4];
         if (containsAdaption) {
@@ -625,14 +619,14 @@ unsigned int crc32b(unsigned char *message, size_t l)
                 [tsPacket appendBytes:&blankPCR length:1];
             } else {
                 // figure out how much we need to pad
-                int16_t lengthToPad = 184 - ([pesPacket length] - offset); // 184 is total packet size - ts header
+                int32_t lengthToPad = 184 - ([pesPacket length] - offset); // 184 is total packet size - ts header
+
                 lengthToPad-=2; //adaption header length
                 if (containsPCR)
                     lengthToPad-=6;
 
                 if (lengthToPad < 0)
                     lengthToPad = 0;
-
 
                 uint8_t adaptionLength = lengthToPad+1; // length
                 uint8_t adaptionFlags = 0b00000000; // bunch of metadata bout the container
@@ -718,7 +712,6 @@ unsigned int crc32b(unsigned char *message, size_t l)
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
 
     int maxDurationTicks = [[self.segmentIndexes valueForKeyPath:@"@max.intValue"] intValue];
-    NSLog(@"max duration -> %i", maxDurationTicks);
     [hlsManifest appendFormat:@"#EXT-X-TARGETDURATION:%i\n", (uint8_t)(ceil((double)maxDurationTicks/(double)self.timescale))];
 
     int segmentIndex = 0;
@@ -738,14 +731,11 @@ unsigned int crc32b(unsigned char *message, size_t l)
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index {
     [self.segmentCondition lock];
 
-    NSLog(@"lock");
     while (self.segmentData[@(index)] == nil) {
         [self.segmentCondition wait];
     }
-    NSLog(@"unlock");
 
     NSData *source = self.segmentData[@(index)];
-    NSLog(@"twolock");
 
     [self.segmentCondition unlock];
 
