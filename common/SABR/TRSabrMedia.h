@@ -16,12 +16,12 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 @property (nonatomic, assign) BOOL isReadyForPlayback;
 @property (nonatomic, strong) NSCondition *manifestReady;
 
-// contains the time duration of each segment, in ticks, including the segments we do not have downloaded yet 
+// contains the time duration of each segment, in ticks, including the segments we do not have downloaded yet, starting from 0 
 @property (nonatomic, strong) NSArray *segmentIndexes;
-// contains the time durations all combined together
+// contains the time durations all combined together, starting from 0
 @property (nonatomic, strong) NSArray *segmentIndexesCombined;
 
-// the full NSData of each segment (excl. the header), indexed by the sequence number provided by SABR
+// the full NSData of each segment (excl. the header), indexed by the sequence number provided by SABR. This starts at 1.
 @property (nonatomic, strong) NSMutableDictionary *segmentData;
 @property (nonatomic, strong) NSCondition *segmentCondition;
 
@@ -38,7 +38,6 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 @property (nonatomic, assign) uint32_t earliestSegmentIndexBuffered;
 @property (nonatomic, assign) double latestTimestampBuffered;
 @property (nonatomic, assign) uint32_t latestSegmentIndexBuffered;
-
 
 -(void)parseMP4Header:(NSData*)header;
 -(void)addNewFMP4FragmentWithID:(int)fragmentId data:(NSData*)data;

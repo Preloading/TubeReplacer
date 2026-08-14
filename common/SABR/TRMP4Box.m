@@ -13,12 +13,18 @@
     _type = [[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(*boxOffset, 4)] encoding:NSUTF8StringEncoding];
     *boxOffset += 4;
 
-    _data = [data subdataWithRange:NSMakeRange(*boxOffset, boxLength-8)];
+    _data = [[data subdataWithRange:NSMakeRange(*boxOffset, boxLength-8)] retain];
     return self;
 }
 
 -(int)length {
     return [_data length];
+}
+
+-(void)dealloc {
+    [_data release];
+    [_type release];
+    [super dealloc];
 }
 
 @end

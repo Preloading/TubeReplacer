@@ -18,6 +18,7 @@
         }
         // NSLog(@"current protection status -> %i", protectionStatus.status);
         self.streamProtectionStatus = protectionStatus.status;
+        [protectionStatus release];
         break;
     }
     case UMPPartId_UmpPartIdNextRequestPolicy: {
@@ -34,17 +35,18 @@
             // initalize the video streams
             // i really hope that this exists **always** when a request is made. if it doesn't I should be able to use the list of all video streams I have.
             if (self.videoStream == nil) {
-                self.videoStream = [[TRSabrMedia alloc] init];
+                self.videoStream = [[[TRSabrMedia alloc] init] autorelease];
                 self.videoStream.itag = self.playbackCookie.videoFmt.itag;
                 self.videoStream.mediaType = TRSabrMediaTypeVideo;
             }
             if (self.audioStream == nil) {
-                self.audioStream = [[TRSabrMedia alloc] init];
+                self.audioStream = [[[TRSabrMedia alloc] init] autorelease];
                 self.audioStream.itag = self.playbackCookie.audioFmt.itag;
                 self.audioStream.mediaType = TRSabrMediaTypeAudio;
             }
         }
 
+        [nextRequestPolicy release];
         break;
     }
     case UMPPartId_UmpPartIdMediaHeader: {
@@ -54,8 +56,20 @@
             break;
         }
 
+        if (mediaHeader.isInitSeg) {
+            if (mediaHeader.itag == self.videoStream.itag && self.videoStream.isReadyForPlayback) {
+                [mediaHeader release];
+                break;
+            }
+
+            if (mediaHeader.itag == self.audioStream.itag && self.audioStream.isReadyForPlayback) {
+                [mediaHeader release];
+                break;
+            }
+        }
         
         (*currentlyParsingHeaders)[@(mediaHeader.headerId)] = mediaHeader;
+        [mediaHeader release];
         (*currentlyParsingDatas)[@(mediaHeader.headerId)] = [[NSMutableData alloc] init];
         
         // NSLog(@"media header -> %@", mediaHeader);
@@ -66,14 +80,19 @@
         if (part.data == nil) {
             NSLog(@"media part is bad!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
+
         uint8_t headerId = *(const uint8_t *)[[part.data subdataWithRange:NSMakeRange(0,1)] bytes];
 
-        [(*currentlyParsingDatas)[@(headerId)] appendData:[part.data subdataWithRange:NSMakeRange(1, [part.data length]-1)]];
+        if ((*currentlyParsingDatas)[@(headerId)] != nil)
+            [(*currentlyParsingDatas)[@(headerId)] appendData:[part.data subdataWithRange:NSMakeRange(1, [part.data length]-1)]];
         break;
     }
     case UMPPartId_UmpPartIdMediaEnd: {
         uint8_t mediaHeaderId = *(const uint8_t *)[part.data bytes];
         MediaHeader *mediaHeader = (MediaHeader*)((*currentlyParsingHeaders)[@(mediaHeaderId)]);
+        if (mediaHeader == nil)
+            break;
+
         // i really love Address of property expression requested
         NSLog(@"itag -> %i, segment -> %i", mediaHeader.itag, mediaHeader.sequenceNumber);
         if (mediaHeader.itag == self.videoStream.itag) {
@@ -85,6 +104,7 @@
             } else {
                 NSLog(@"mediaHeader.sequenceNumber -> %i", mediaHeader.sequenceNumber);
                 [self.videoStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             }
@@ -96,6 +116,7 @@
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
                 [self.audioStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             }

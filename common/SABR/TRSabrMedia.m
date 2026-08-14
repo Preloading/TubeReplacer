@@ -20,8 +20,8 @@
     self = [super init];
     _segmentData = [[NSMutableDictionary alloc] init];
     self.isReadyForPlayback = false;
-    self.manifestReady = [[NSCondition alloc] init];
-    self.segmentCondition = [[NSCondition alloc] init];
+    self.manifestReady = [[[NSCondition alloc] init] autorelease];
+    self.segmentCondition = [[[NSCondition alloc] init] autorelease];
     return self;
 }
 
@@ -45,12 +45,14 @@
             TRMP4Box *newBox = [[TRMP4Box alloc] parseMP4Box:box.data atOffset:&offset];
             [self handleParsedHeaderBox:newBox];
             offset += [newBox length];
+            [newBox release];
         }
     } 
     else if ([box.type isEqualToString:@"avc1"]) { 
         int offset = 78;
         TRMP4Box *newBox = [[TRMP4Box alloc] parseMP4Box:box.data atOffset:&offset];
         [self handleParsedHeaderBox:newBox];
+        [newBox release];
     } 
     else if ([box.type isEqualToString:@"avcC"]) { 
         int offset = 4;
@@ -123,6 +125,8 @@
         }
         self.segmentIndexes = segmentIndexes;
         self.segmentIndexesCombined = segmentIndexesCombined;
+        [segmentIndexes release];
+        [segmentIndexesCombined release];
     }
 }
 
@@ -138,6 +142,7 @@
         [self handleParsedHeaderBox:box];
 
         boxOffset += [box length];
+        [box release];
     }
 
     [self.manifestReady lock];
@@ -313,7 +318,7 @@
         [sampleFlagsArray release];
     }
     else if ([box.type isEqualToString:@"mdat"]) { 
-        (*fragmentOut).data = box.data; 
+        (*fragmentOut).data = [[box.data copy] autorelease];
     }
 }
 
@@ -329,6 +334,7 @@
         [self handleFMP4FragmentBox:box out:fragmentOut];
 
         boxOffset += [box length];
+        [box release];
     }
 }
 
@@ -413,6 +419,7 @@
             offset += naluLength;
         }
         [annexBOut addObject:annexB];
+        [annexB release];
     }
     return annexBOut;
 }
@@ -462,6 +469,7 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
     [optional appendBytes:&flags2 length:1];
     [optional appendBytes:&tsDataLen length:1];
     [optional appendData:tsData];
+    [tsData release];
 
     // packet length
     uint32_t packetLengthFull = [optional length] + [data length];
@@ -477,6 +485,8 @@ static void EncodeTimestamp(NSMutableData *data, uint8_t prefix, uint64_t ts) {
     // merge em all together and send it!
     [pesPacket appendData:optional];
     [pesPacket appendData:data];
+
+    [optional release];
     return pesPacket;
 }
 
@@ -837,6 +847,9 @@ unsigned int crc32b(unsigned char *message, size_t l)
 
 -(void)dealloc {
     [_segmentIndexes release];
+    [_segmentIndexesCombined release];
+    [_segmentCondition release];
+    [_manifestReady release];
     [_segmentData release];
     [_sps release];
     [_pps release];

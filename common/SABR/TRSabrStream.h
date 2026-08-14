@@ -5,6 +5,11 @@
 #include "TRSabrMedia.h"
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
+    TRSabrBufferingNormal = 0,
+    TRSabrBufferingFastTrack,
+};
+
 @interface TRSabrStream : NSObject
 @property (nonatomic, strong) NSString *decipheredStreamURL; // this URL is deciphered
 @property (nonatomic, strong) NSData *ustreamConfig;
@@ -13,11 +18,13 @@
 @property (nonatomic, strong) NSData *poToken;
 @property (nonatomic, strong) NSDictionary<NSNumber*, TRAdaptiveFormat*> *formats;
 
-@property (nonatomic, assign) BOOL currentlyRequesting;
+// used for normal filling of the buffer, where playback isn't at ris
+@property (nonatomic, assign) BOOL currentlyRequestingInNormal;
+// used in case a seek occurs, or something is actively inhibiting playback
+@property (nonatomic, assign) BOOL currentlyRequestingInFastTrack;
 
-
-@property (nonatomic, strong) NSArray *videoFormatsWeHave;
-@property (nonatomic, strong) NSArray *audioFormatsWeHave;
+@property (nonatomic, strong) NSArray<TRAdaptiveFormat*> *videoFormatsWeHave;
+@property (nonatomic, strong) NSArray<TRAdaptiveFormat*> *audioFormatsWeHave;
 
 @property (nonatomic, strong) PlaybackCookie *playbackCookie;
 
@@ -32,12 +39,13 @@
 @property (nonatomic, assign) int requestNumber;
 
 // player callbacks
-@property (nonatomic, strong) double (^currentPlayerTimeFunction)();
+@property (nonatomic, copy) double (^currentPlayerTimeFunction)();
 
 @property(nonatomic, retain) NSOperationQueue *networkQueue;
 
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId;
 -(NSString*)createHLSRootManifest;
--(void)requestAdditionalData:(int)currentStreamTimeMS;
+-(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState;
+-(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType;
 @end

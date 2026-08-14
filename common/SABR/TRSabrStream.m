@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSValue.h>
 #include <Foundation/NSObjCRuntime.h>
 #include <Foundation/NSLock.h>
 #include "video_streaming/BufferedRange.pbobjc.h"
@@ -18,12 +19,16 @@
 @implementation TRSabrStream : NSObject
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
+    self = [super init];
+    if (!self) return nil;
+
     [self startWebServerThreaded];
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
     
-    self.currentlyRequesting = NO;
+    self.currentlyRequestingInNormal = NO;
+    self.currentlyRequestingInFastTrack = NO;
     self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
-    self.networkQueue.maxConcurrentOperationCount = 1;
+    self.networkQueue.maxConcurrentOperationCount = 2;
 
     // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
     self.decipheredStreamURL = decipheredStreamURL;
@@ -47,6 +52,8 @@
 
     self.videoFormatsWeHave = videoFormatsWeHave;
     self.audioFormatsWeHave = audioFormatsWeHave;
+    [videoFormatsWeHave release];
+    [audioFormatsWeHave release];
 
     if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
         NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:videoId];
@@ -59,37 +66,49 @@
         self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:videoId clientState:1]];
     }
 
-    [self requestAdditionalData:0];
+    [self requestAdditionalData:0 state:TRSabrBufferingFastTrack];
     return self;
 }
 
--(void)requestAdditionalData:(int)currentStreamTimeMS {
+-(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState {
     NSLog(@"current stream ts -> %i", currentStreamTimeMS);
-    if (!self.currentlyRequesting) {
-        self.currentlyRequesting = YES;
-
-        NSData *testReq = [self buildRequestBody:currentStreamTimeMS];
-
-        [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
-            __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
-            __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
-            [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
-                [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
-                [part release];
-            }];
-            [response release];
-            [currentlyParsingDatas release];
-            [currentlyParsingHeaders release];
-
-            self.currentlyRequesting = NO;
-
-            if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.requestNumber < 10) {
-                NSLog(@"not enough data to start stream! trying again...");
-                [self requestAdditionalData:currentStreamTimeMS];
-            }
-            // NSLog(@"response -> %@", response); 
-        }];
+    if (self.currentlyRequestingInNormal && bufferingState == TRSabrBufferingNormal) {
+        return;
+    } else if (bufferingState == TRSabrBufferingNormal) {
+        self.currentlyRequestingInNormal = YES;
     }
+
+    if (self.currentlyRequestingInFastTrack && bufferingState == TRSabrBufferingFastTrack) {
+        return;
+    } else if (bufferingState == TRSabrBufferingFastTrack) {
+        self.currentlyRequestingInFastTrack = YES;
+    }
+
+    NSData *testReq = [self buildRequestBody:currentStreamTimeMS];
+
+    [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
+        __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
+        __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
+        [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
+            [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
+        }];
+        [response release];
+        [currentlyParsingDatas release];
+        [currentlyParsingHeaders release];
+
+        NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
+
+        if (bufferingState == TRSabrBufferingFastTrack)
+            self.currentlyRequestingInFastTrack = NO;
+        else
+            self.currentlyRequestingInNormal = NO;
+
+        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.requestNumber < 10) {
+            NSLog(@"not enough data to start stream! trying again...");
+            [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+        }
+        // NSLog(@"response -> %@", response); 
+    }];
 
 }
 
@@ -130,10 +149,10 @@
 
     // [authFormats addObject:authFormat1];
 
-    AuthorizedFormat *authFormat2 = [[AuthorizedFormat alloc] init];
+    // AuthorizedFormat *authFormat2 = [[AuthorizedFormat alloc] init];
 
-    authFormat2.trackType = 2;
-    authFormat2.isHdr = false;
+    // authFormat2.trackType = 2;
+    // authFormat2.isHdr = false;
     
 
     // [authFormats addObject:authFormat2];
@@ -160,6 +179,7 @@
     // clientInfo.acceptRegion = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
 
     context.clientInfo = clientInfo;
+    [clientInfo release];
 
     if (self.poToken) {
         context.poToken = self.poToken;
@@ -186,9 +206,9 @@
 }
 
 -(NSData*)buildRequestBody:(int)currentStreamTimeMS {
-    VideoPlaybackAbrRequest *request = [[VideoPlaybackAbrRequest alloc] init];
+    VideoPlaybackAbrRequest *request = [[[VideoPlaybackAbrRequest alloc] init] autorelease];
 
-    request.streamerContext = [self createStreamerContext];
+    request.streamerContext = [[self createStreamerContext] autorelease];
     request.videoPlaybackUstreamerConfig = self.ustreamConfig;
 
     NSMutableDictionary *videoFormatsIdsWeHave = [[NSMutableDictionary alloc] init];
@@ -213,6 +233,7 @@
         } else {
             videoFormatsIdsWeHave[@(format.itag)] = formatId;
         }
+        [formatId release];
     }
 
     if (self.videoStream != nil) {
@@ -224,21 +245,26 @@
         bufferedRange.durationMs = llround(self.videoStream.latestTimestampBuffered*1000) - llround(self.videoStream.earliestTimestampBuffered*1000);
         bufferedRange.endSegmentIndex = self.videoStream.latestSegmentIndexBuffered;
         [bufferedRanges addObject:bufferedRange];
+        [bufferedRange release];
     }
 
-    request.preferredVideoFormatIdsArray = [[videoFormatsIdsWeHave allValues] mutableCopy];
-    request.preferredAudioFormatIdsArray = [[audioFormatsIdsWeHave allValues] mutableCopy];
-    request.preferredSubtitleFormatIdsArray = [[NSMutableArray alloc] init];
+    request.preferredVideoFormatIdsArray = [[[videoFormatsIdsWeHave allValues] mutableCopy] autorelease];
+    request.preferredAudioFormatIdsArray = [[[audioFormatsIdsWeHave allValues] mutableCopy] autorelease];
+    request.preferredSubtitleFormatIdsArray = [[[NSMutableArray alloc] init] autorelease];
 
-    request.field1000Array = [[NSMutableArray alloc] init];
+    [videoFormatsIdsWeHave release];
+    [audioFormatsIdsWeHave release];
+
+    request.field1000Array = [[[NSMutableArray alloc] init] autorelease];
     request.bufferedRangesArray = bufferedRanges;
+    [bufferedRanges release];
 
     // if (self.currentPlayerTimeFunction != nil)
     //     state.playerTimeMs = llround(self.currentPlayerTimeFunction()*1000);
     // else
     //     state.playerTimeMs = 0;
 
-    request.clientAbrState = [self createClientABRState:currentStreamTimeMS];
+    request.clientAbrState = [[self createClientABRState:currentStreamTimeMS] autorelease];
 
     return [request data];
 }
@@ -246,7 +272,7 @@
 -(void)makeStreamingRequestWithBody:(NSData*)body andCallback:(void (^)(NSData *, NSError *))callback {
     NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@&rn=%i", self.decipheredStreamURL, self.requestNumber]];
 
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:requestURL];
+    NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
 
     [request setHTTPMethod:@"POST"];
     [request setHTTPBody:body];
@@ -281,7 +307,7 @@
 }
 
 -(void)startWebServer {
-    self.httpServer = [[TRSabrHTTPServer alloc] init];
+    self.httpServer = [[[TRSabrHTTPServer alloc] init] autorelease];
 	
     self.httpServer.stream = self;
 	[self.httpServer setConnectionClass:[TRSabrHTTPConnection class]];
@@ -311,6 +337,50 @@
     });
 }
 
+// segment idx starts at 0
+-(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType {
+    double requestedVideoSegmentStart = 0;
+    double requestedVideoSegmentEnd = 0;
+
+    if (mediaType == TRSabrMediaTypeVideo) {
+        requestedVideoSegmentStart = [self.videoStream.segmentIndexesCombined[segmentIdx] doubleValue]/(double)self.videoStream.timescale;
+        requestedVideoSegmentEnd = requestedVideoSegmentStart + ([self.videoStream.segmentIndexes[segmentIdx] doubleValue]/(double)self.videoStream.timescale);
+
+
+        for (NSNumber *curSegmentIdx in self.videoStream.segmentData.allKeys) {
+            double startIdx = [self.videoStream.segmentIndexesCombined[[curSegmentIdx intValue]-1] doubleValue]/(double)self.videoStream.timescale;
+            double endIdx = startIdx + ([self.videoStream.segmentIndexes[[curSegmentIdx intValue]-1] doubleValue]/(double)self.videoStream.timescale);
+
+
+            if ([curSegmentIdx intValue]-1 == segmentIdx || [curSegmentIdx intValue] == segmentIdx || [curSegmentIdx intValue] == segmentIdx+1 || [curSegmentIdx intValue] == segmentIdx+2 || [curSegmentIdx intValue] == segmentIdx+3 || [curSegmentIdx intValue] == segmentIdx+4) {}
+            else if (endIdx+10 < requestedVideoSegmentStart) {
+                // 10 second cache in the past expired
+                [self.videoStream.segmentData removeObjectForKey:curSegmentIdx];
+            }
+            else if (startIdx > requestedVideoSegmentStart + 120) {
+                // it's 50 seconds into the future, cached too fars
+                [self.videoStream.segmentData removeObjectForKey:curSegmentIdx];
+            }
+        }
+
+
+        NSLog(@"requestedVideoSegmentStart -> %f, requestedVideoSegmentEnd -> %f", requestedVideoSegmentStart, requestedVideoSegmentEnd);
+
+        if (self.videoStream.segmentData[@(segmentIdx)] == nil) { // idk why this actually works the best, from what i can tell this should be +1 since data is based on sabr's stuff, with the header being 0, and segment idx's 0 is the first segment
+            // we are in the middle of the currently requested segment, we need to get the video right now as we are likely buffering
+            NSLog(@"potential buffering may happen!");
+            [self requestAdditionalData:requestedVideoSegmentStart*1000 state:TRSabrBufferingFastTrack]; // providing the acurate time should be fine here
+            return;
+        }
+        if ((self.videoStream.segmentData[@(segmentIdx+1)] == nil && self.videoStream.segmentIndexes.count > segmentIdx) || (self.videoStream.segmentData[@(segmentIdx+2)] == nil && self.videoStream.segmentIndexes.count > segmentIdx+1)) {
+            NSLog(@"standard buffering occuring");
+            [self requestAdditionalData:requestedVideoSegmentEnd*1000  state:TRSabrBufferingNormal];
+        }
+
+
+    }
+}
+
 -(void)dealloc {
     NSLog(@"deallocating!!!");
     [_httpServer stop];
@@ -326,6 +396,7 @@
     [_videoId release];
     [_ustreamConfig release];
     [_decipheredStreamURL release];
+    [_networkQueue release];
 
     [super dealloc];
 }
