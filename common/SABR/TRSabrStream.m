@@ -95,11 +95,9 @@
         [response release];
         [currentlyParsingDatas release];
         [currentlyParsingHeaders release];
-        
-        // NSLog(@"audio first segment -> %@", self.audioStream.segmentData[@(1)]);
-        [self.audioStream convertFMP4ToMPEGTSWithIndex:1];
 
         NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
+        NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
 
         if (bufferingState == TRSabrBufferingFastTrack)
             self.currentlyRequestingInFastTrack = NO;
@@ -342,12 +340,9 @@
 
 // segment idx starts at 0
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType {
-    double requestedVideoSegmentStart = 0;
-    double requestedVideoSegmentEnd = 0;
-
     if (mediaType == TRSabrMediaTypeVideo) {
-        requestedVideoSegmentStart = [self.videoStream.segmentIndexesCombined[segmentIdx] doubleValue]/(double)self.videoStream.timescale;
-        requestedVideoSegmentEnd = requestedVideoSegmentStart + ([self.videoStream.segmentIndexes[segmentIdx] doubleValue]/(double)self.videoStream.timescale);
+        double requestedVideoSegmentStart = [self.videoStream.segmentIndexesCombined[segmentIdx] doubleValue]/(double)self.videoStream.timescale;
+        double requestedVideoSegmentEnd = requestedVideoSegmentStart + ([self.videoStream.segmentIndexes[segmentIdx] doubleValue]/(double)self.videoStream.timescale);
 
 
         for (NSNumber *curSegmentIdx in self.videoStream.segmentData.allKeys) {
@@ -366,9 +361,6 @@
             }
         }
 
-
-        NSLog(@"requestedVideoSegmentStart -> %f, requestedVideoSegmentEnd -> %f", requestedVideoSegmentStart, requestedVideoSegmentEnd);
-
         if (self.videoStream.segmentData[@(segmentIdx)] == nil) { // idk why this actually works the best, from what i can tell this should be +1 since data is based on sabr's stuff, with the header being 0, and segment idx's 0 is the first segment
             // we are in the middle of the currently requested segment, we need to get the video right now as we are likely buffering
             NSLog(@"potential buffering may happen!");
@@ -379,8 +371,37 @@
             NSLog(@"standard buffering occuring");
             [self requestAdditionalData:requestedVideoSegmentEnd*1000  state:TRSabrBufferingNormal];
         }
+    } else if (mediaType == TRSabrMediaTypeAudio) {
+        double requestedAudioSegmentStart = [self.audioStream.segmentIndexesCombined[segmentIdx] doubleValue]/(double)self.audioStream.timescale;
+        double requestedAudioSegmentEnd = requestedAudioSegmentStart + ([self.audioStream.segmentIndexes[segmentIdx] doubleValue]/(double)self.audioStream.timescale);
 
 
+        for (NSNumber *curSegmentIdx in self.audioStream.segmentData.allKeys) {
+            double startIdx = [self.audioStream.segmentIndexesCombined[[curSegmentIdx intValue]-1] doubleValue]/(double)self.audioStream.timescale;
+            double endIdx = startIdx + ([self.audioStream.segmentIndexes[[curSegmentIdx intValue]-1] doubleValue]/(double)self.audioStream.timescale);
+
+
+            if ([curSegmentIdx intValue]-1 == segmentIdx || [curSegmentIdx intValue] == segmentIdx || [curSegmentIdx intValue] == segmentIdx+1 || [curSegmentIdx intValue] == segmentIdx+2 || [curSegmentIdx intValue] == segmentIdx+3 || [curSegmentIdx intValue] == segmentIdx+4) {}
+            else if (endIdx+10 < requestedAudioSegmentStart) {
+                // 10 second cache in the past expired
+                [self.audioStream.segmentData removeObjectForKey:curSegmentIdx];
+            }
+            else if (startIdx > requestedAudioSegmentStart + 120) {
+                // it's 50 seconds into the future, cached too fars
+                [self.audioStream.segmentData removeObjectForKey:curSegmentIdx];
+            }
+        }
+
+        if (self.audioStream.segmentData[@(segmentIdx)] == nil) { // idk why this actually works the best, from what i can tell this should be +1 since data is based on sabr's stuff, with the header being 0, and segment idx's 0 is the first segment
+            // we are in the middle of the currently requested segment, we need to get the video right now as we are likely buffering
+            NSLog(@"potential buffering may happen!");
+            [self requestAdditionalData:requestedAudioSegmentStart*1000 state:TRSabrBufferingFastTrack]; // providing the acurate time should be fine here
+            return;
+        }
+        if ((self.audioStream.segmentData[@(segmentIdx+1)] == nil && self.audioStream.segmentIndexes.count > segmentIdx) || (self.audioStream.segmentData[@(segmentIdx+2)] == nil && self.audioStream.segmentIndexes.count > segmentIdx+1)) {
+            NSLog(@"standard buffering occuring");
+            [self requestAdditionalData:requestedAudioSegmentEnd*1000  state:TRSabrBufferingNormal];
+        }
     }
 }
 

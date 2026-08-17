@@ -47,6 +47,7 @@
 		} else if (stream.audioStream.itag == itag) {
 			// if (stream.audioStream.segmentIndexesCombined.count >= fragmentIndex+1)
 			// 	[stream requestAdditionalData:llround(([stream.audioStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.audioStream.timescale) * 1000)];
+			[stream handleBufferingWithCurrentSegment:fragmentIndex mediaType:TRSabrMediaTypeAudio];
 			return [[[HTTPDataResponse alloc] initWithData:[stream.audioStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1]] autorelease];
 		}
 		
