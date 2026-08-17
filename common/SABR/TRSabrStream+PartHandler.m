@@ -1,5 +1,6 @@
 #include "TRSabrStream+PartHandler.h"
 #include "video_streaming/NextRequestPolicy.pbobjc.h"
+#include "video_streaming/SabrRedirect.pbobjc.h"
 #include "video_streaming/StreamProtectionStatus.pbobjc.h"
 #include <Foundation/NSData.h>
 #include <Foundation/NSRange.h>
@@ -47,6 +48,20 @@
         }
 
         [nextRequestPolicy release];
+        break;
+    }
+    case UMPPartId_UmpPartIdSabrRedirect: {
+        SabrRedirect *redirect = [[SabrRedirect alloc] initWithData:part.data error:&error];
+        if (error) {
+            NSLog(@"an error occured while decoding sabr redirect. error -> %@", error);
+            break;
+        }
+
+        if (redirect.hasURL) {
+            self.decipheredStreamURL = redirect.URL;
+        }
+
+        [redirect release];
         break;
     }
     case UMPPartId_UmpPartIdMediaHeader: {

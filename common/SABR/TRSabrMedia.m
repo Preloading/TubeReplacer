@@ -132,12 +132,11 @@
         // if (objectType == 31) {
         //     objectType = ((ascByte1 & 0x11111000) << 3) + (ascByte2 >> 5) + 32;  // 3 bits + 3 bits
         // }
-        uint8_t frequencyIndex = ((ascByte1 & 0x11111000) << 1) + (ascByte2 >> 7);
+        uint8_t frequencyIndex = ((ascByte1 & 0x07) << 1) + (ascByte2 >> 7);
 
-        // so is this one!
-        // if (frequencyIndex == 15) {
-
-        // }
+        if (frequencyIndex == 15) {
+            NSLog(@"ALERT! frequencyIndex == 15. This is not allowed and WILL cause problems");
+        }
 
         self.channelConfig = (ascByte2 & 0b01111000) >> 3;
         self.audioObjectType = objectType;
@@ -492,6 +491,31 @@
     return annexBOut;
 }
 
+// https://wiki.multimedia.cx/index.php/ADTS
+-(NSData*)adtsStartCode:(NSData*)segment {
+    uint16_t segmentLength = [segment length]+7;
+
+    uint8_t byte3 = 0x00;
+    byte3 |= ((self.audioObjectType-1 & 0x3) << 6);
+    byte3 |= ((self.samplingFrequencyIndex & 0xF) << 2);
+    byte3 |= ((self.channelConfig & 0b0100) >> 2);
+    uint8_t byte4 = 0x00;
+    byte4 |= self.channelConfig << 6;
+    byte4 |= (segmentLength & 0b0001100000000000) >> 11; 
+    uint8_t byte6 = 0b00011111;
+    byte6 |= (segmentLength & 0b111) << 5; 
+
+    uint8_t startCode[7] = {0xFF, 0xF1, 
+        byte3,
+        byte4, 
+        (segmentLength & 0b0000011111111000) >> 3, byte6, 0b11111100  
+    };
+
+    NSMutableData *out = [NSMutableData dataWithBytes:startCode length:7];
+    [out appendData:segment];
+    return out;
+}
+
 // ok this function is AI. sowwy. this just breaks my dam head.
 // Encodes a 33-bit timestamp (PTS or DTS) into 5 bytes per the spec.
 // prefix: 0x2 for PTS-only, 0x3 for PTS-with-DTS(PTS), 0x1 for DTS
@@ -827,8 +851,12 @@ unsigned int crc32b(unsigned char *message, size_t l)
     }
 
     NSArray<NSData*> *samples = [self extractSamplesFromFragment:fragmentInfo];
-    NSArray<NSData*> *annexB = [self convertSamplesToAnnexB:samples fragmentInfo:fragmentInfo];
-    [samples release];
+    NSArray<NSData*> *annexB = nil;
+    if (self.mediaType == TRSabrMediaTypeVideo) {
+        annexB = [self convertSamplesToAnnexB:samples fragmentInfo:fragmentInfo];
+        [samples release];
+    }
+
     
     double ticksTo90k = (90000.0 / (double)self.timescale);
     // NSMutableArray<NSData*> *pesPackets = [[NSMutableArray alloc] init];
@@ -849,8 +877,11 @@ unsigned int crc32b(unsigned char *message, size_t l)
     uint64_t baseMediaDecodeTimeRunning = fragmentInfo.baseMediaDecodeTime;
     for (uint32_t i = 0; i < fragmentInfo.sampleCount; i++) {
         uint64_t dts = (uint64_t)llround(baseMediaDecodeTimeRunning * ticksTo90k);
-        uint64_t pts = (uint64_t)llround((baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue]) * ticksTo90k);
-
+        uint64_t pts;
+        if (self.mediaType == TRSabrMediaTypeVideo)
+            pts = (uint64_t)llround((baseMediaDecodeTimeRunning + [fragmentInfo.sampleCompositionOffsets[i] doubleValue]) * ticksTo90k);
+        else
+            pts = dts;
         if (i == 0 || dts >= lastMetadataInsertion + 45000) {
             // add PAT & PMT
             NSData *pat = [self buildPATSection];
@@ -860,9 +891,16 @@ unsigned int crc32b(unsigned char *message, size_t l)
             lastMetadataInsertion = dts;
         }
 
-        NSData *pesPacket = [self createPESPacketFromData:annexB[i] pts:pts dts:dts];
-        [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300] useSectionPadding:NO]];
-        [pesPacket release];
+        if (self.mediaType == TRSabrMediaTypeVideo) {
+            NSData *pesPacket = [self createPESPacketFromData:annexB[i] pts:pts dts:dts];
+            [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300] useSectionPadding:NO]];
+            [pesPacket release];
+        } else {
+            NSData *pesPacket = [self createPESPacketFromData:[self adtsStartCode:samples[i]] pts:dts dts:dts];
+            [finalTSData appendData:[self buildTSPackets:pesPacket pid:streamId packetCounter:&packetCounter pcr:[NSNumber numberWithUnsignedLongLong:dts * 300] useSectionPadding:NO]];
+            [pesPacket release];
+        }
+        
         if (fragmentInfo.sampleDuration.count == 0)
             baseMediaDecodeTimeRunning += fragmentInfo.defaultSampleDuration;
         else
@@ -872,6 +910,8 @@ unsigned int crc32b(unsigned char *message, size_t l)
     }
 
     // NSLog(@"final ts data -> %@", finalTSData);
+    if (self.mediaType != TRSabrMediaTypeVideo)
+        [samples release];
     [fragmentInfo release];
     return finalTSData;
 }

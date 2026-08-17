@@ -95,6 +95,9 @@
         [response release];
         [currentlyParsingDatas release];
         [currentlyParsingHeaders release];
+        
+        // NSLog(@"audio first segment -> %@", self.audioStream.segmentData[@(1)]);
+        [self.audioStream convertFMP4ToMPEGTSWithIndex:1];
 
         NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
 
@@ -297,8 +300,8 @@
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-INDEPENDENT-SEGMENTS\n"];
 
 
-    [hlsManifest appendString:@"#EXT-X-STREAM-INF:BANDWIDTH=1000000\nvideo.m3u8\n"];
-    // [hlsManifest appendString:@"#EXT-X-STREAM-INF:\naudio.m3u8\n"]; // todo: no audio for now
+    [hlsManifest appendString:@"#EXT-X-MEDIA:GROUP-ID=\"audio\",NAME=\"Audio Track\",TYPE=AUDIO,DEFAULT=YES,AUTOSELECT=YES,URI=\"audio.m3u8\"\n"];
+    [hlsManifest appendString:@"#EXT-X-STREAM-INF:BANDWIDTH=1000000,AUDIO=\"audio\"\nvideo.m3u8\n"];
 
     // finish
     NSString *final = [hlsManifest copy];
