@@ -27,12 +27,12 @@
 
 -(void)handleParsedHeaderBox:(TRMP4Box*)box {
     // NSLog(@"found box type of %@", box.type);
-    if ([box.type isEqualToString:@"moov"]) { [self parseMP4Header:box.data]; } 
-    else if ([box.type isEqualToString:@"trak"]) { [self parseMP4Header:box.data]; } 
-    else if ([box.type isEqualToString:@"mdia"]) { [self parseMP4Header:box.data]; } 
-    else if ([box.type isEqualToString:@"trak"]) { [self parseMP4Header:box.data]; } 
-    else if ([box.type isEqualToString:@"minf"]) { [self parseMP4Header:box.data]; } 
-    else if ([box.type isEqualToString:@"stbl"]) { [self parseMP4Header:box.data]; } 
+    if ([box.type isEqualToString:@"moov"]) { [self parseSubMP4Header:box.data]; } 
+    else if ([box.type isEqualToString:@"trak"]) { [self parseSubMP4Header:box.data]; } 
+    else if ([box.type isEqualToString:@"mdia"]) { [self parseSubMP4Header:box.data]; } 
+    else if ([box.type isEqualToString:@"trak"]) { [self parseSubMP4Header:box.data]; } 
+    else if ([box.type isEqualToString:@"minf"]) { [self parseSubMP4Header:box.data]; } 
+    else if ([box.type isEqualToString:@"stbl"]) { [self parseSubMP4Header:box.data]; } 
     else if ([box.type isEqualToString:@"stsd"]) {
         int offset = 4; // version & flags
 
@@ -76,6 +76,72 @@
         offset+=2;
 
         self.pps = [box.data subdataWithRange:NSMakeRange(offset,ppsLen)];
+    } 
+    else if ([box.type isEqualToString:@"mp4a"]) { 
+        int offset = 41;
+
+        // uint32_t esdsLength = 0;
+        while (true) {
+            uint8_t lengthSegment;
+            [box.data getBytes:&lengthSegment range:NSMakeRange(offset,1)];
+            offset+=1;
+            // esdsLength = (lengthSegment << 7) | (lengthSegment & 0x7F);
+            if ((lengthSegment & 0x80) == 0)
+                break;
+        }
+
+        offset+=3; // i ignore stuff that ig could be important, but it's not like this has to work with every video format lol
+
+        // tag 0x04
+        offset+=1;
+
+            // uint32_t esdsLength = 0;
+        while (true) {
+            uint8_t lengthSegment;
+            [box.data getBytes:&lengthSegment range:NSMakeRange(offset,1)];
+            offset+=1;
+            // esdsLength = (lengthSegment << 7) | (lengthSegment & 0x7F);
+            if ((lengthSegment & 0x80) == 0)
+                break;
+        }
+
+        offset+=13;
+
+        // tag 0x05
+        offset+=1;
+        while (true) {
+            uint8_t lengthSegment;
+            [box.data getBytes:&lengthSegment range:NSMakeRange(offset,1)];
+            offset+=1;
+            // esdsLength = (lengthSegment << 7) | (lengthSegment & 0x7F);
+            if ((lengthSegment & 0x80) == 0)
+                break;
+        }
+
+        // https://wiki.multimedia.cx/index.php/MPEG-4_Audio
+        uint8_t ascByte1;
+        [box.data getBytes:&ascByte1 range:NSMakeRange(offset,1)];
+        offset+=1;
+        uint8_t ascByte2;
+        [box.data getBytes:&ascByte2 range:NSMakeRange(offset,1)];
+        offset+=1;
+
+        uint8_t objectType = ascByte1>>3; // 5 bits
+
+        // i mean this case is really annyoing
+        // if (objectType == 31) {
+        //     objectType = ((ascByte1 & 0x11111000) << 3) + (ascByte2 >> 5) + 32;  // 3 bits + 3 bits
+        // }
+        uint8_t frequencyIndex = ((ascByte1 & 0x11111000) << 1) + (ascByte2 >> 7);
+
+        // so is this one!
+        // if (frequencyIndex == 15) {
+
+        // }
+
+        self.channelConfig = (ascByte2 & 0b01111000) >> 3;
+        self.audioObjectType = objectType;
+        self.samplingFrequencyIndex = frequencyIndex;
     } 
     else if ([box.type isEqualToString:@"sidx"]) {
         int offset = 0;
@@ -130,9 +196,7 @@
     }
 }
 
--(void)parseMP4Header:(NSData*)header {
-    // NSLog(@"header to parse -> %@", header);
-
+-(void)parseSubMP4Header:(NSData*)header {
     // find sidx
     int boxOffset = 0;
 
@@ -144,6 +208,10 @@
         boxOffset += [box length];
         [box release];
     }
+}
+
+-(void)parseMP4Header:(NSData*)header {
+    [self parseSubMP4Header:header];
 
     [self.manifestReady lock];
     self.isReadyForPlayback = YES;

@@ -97,12 +97,12 @@
         NSLog(@"itag -> %i, segment -> %i", mediaHeader.itag, mediaHeader.sequenceNumber);
         if (mediaHeader.itag == self.videoStream.itag) {
             if (mediaHeader.isInitSeg) {
-                [self.videoStream parseMP4Header:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                if (!self.videoStream.isReadyForPlayback)
+                    [self.videoStream parseMP4Header:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
-                NSLog(@"mediaHeader.sequenceNumber -> %i", mediaHeader.sequenceNumber);
                 [self.videoStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
@@ -110,7 +110,8 @@
             }
         } else if (mediaHeader.itag == self.audioStream.itag) {
             if (mediaHeader.isInitSeg) {
-                [self.audioStream parseMP4Header:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                if (!self.audioStream.isReadyForPlayback)
+                    [self.audioStream parseMP4Header:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];

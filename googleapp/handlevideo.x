@@ -70,7 +70,6 @@
     }
 }
 
-// todo: THIS IS NEVER CALLED!!! this is maybe an app bug
 -(void)dealloc {
     NSLog(@"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
@@ -103,6 +102,8 @@
 
 // %hook YTVideoViewController_iPhone 
 
+%hook YTWatchViewController_iPhone
+ 
 
 // - (id)retain {
 //     id result = %orig;
@@ -122,19 +123,54 @@
 //     %orig;
 // }
 
+// -(void)viewDidUnload {
+//     NSLog(@"dealloc aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+// }
+
+
+// - (id)alloc {
+//     NSLog(@"[DEBUG] alloc %@", [NSThread callStackSymbols]);
+//     return %orig;
+// }
+
+
 // - (void)dealloc {
 //     NSLog(@"[DEBUG] DEALLOC %@", self);
 //     %orig;
 // }
+// - (void)viewWillDisappear:(BOOL)animated {
+//     %orig;
+//     [%c(YTNotificationCenter) removeRequestPortraitUIObserver:self];
+//     [%c(YTNotificationCenter) removeReleasePortraitUIObserver:self];
+// }
 
-// %end
+// - (void)viewWillAppear:(BOOL)animated {
+//     %orig;
+//     [%c(YTNotificationCenter) addRequestPortraitUIObserver:self selector:@selector(requestPortraitOrientation:)];
+//     [%c(YTNotificationCenter) addReleasePortraitUIObserver:self selector:@selector(releasePortraitOrientation:)];
+
+// }
+
+-(id)initWithVideoID:(id)videoId source:(int)source services:(id)services navigation:(id)navigation
+{
+  return %orig;
+}
+
+%end
 
 // %hook YTNavigation_iPhone
   
 // -(void)back
 // {
-//   NSLog(@"nav controller -> %@", [self valueForKey:l(@"navigationController")]);
+//     UINavigationController *navigationController = [self valueForKey:l(@"navigationController")];
+//   NSLog(@"nav controller -> %@", navigationController);
+//     NSLog(@"nav controllers -> %@", [navigationController viewControllers]);
 //   return %orig;
+// }
+
+// - (void)pushViewController:(id)vc fromView:(id)view {
+//     NSLog(@"[DEBUG] pushViewController:fromView: vc=%p view=%p stack=%@", vc, view, [NSThread callStackSymbols]);
+//     %orig;
 // }
 
 // %end

@@ -33,6 +33,13 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 @property (nonatomic, strong) NSData *pps;
 @property (nonatomic, assign) int lengthScaleMinusOne;
 
+// AUDIO SPECIFIC
+@property (nonatomic, assign) uint8_t samplingFrequencyIndex;
+@property (nonatomic, assign) uint8_t channelConfig;
+@property (nonatomic, assign) uint8_t audioObjectType;
+// @property (nonatomic, assign) int lengthScaleMinusOne;
+
+
 /// buffer info
 @property (nonatomic, assign) double earliestTimestampBuffered;
 @property (nonatomic, assign) uint32_t earliestSegmentIndexBuffered;
