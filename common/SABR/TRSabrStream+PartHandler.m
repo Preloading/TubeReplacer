@@ -118,7 +118,8 @@
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
-                [self.videoStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                if (self.videoStream.segmentData[@(mediaHeader.sequenceNumber)] == nil)
+                    [self.videoStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
@@ -131,7 +132,8 @@
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             } else {
-                [self.audioStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
+                if (self.audioStream.segmentData[@(mediaHeader.sequenceNumber)] == nil)
+                    [self.audioStream addNewFMP4FragmentWithID:mediaHeader.sequenceNumber data:(*currentlyParsingDatas)[@(mediaHeaderId)]];
                 [(*currentlyParsingDatas)[@(mediaHeaderId)] release];
                 [(*currentlyParsingDatas) removeObjectForKey:@(mediaHeaderId)];
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];

@@ -241,17 +241,29 @@
         [formatId release];
     }
 
-    if (self.videoStream != nil) {
-        BufferedRange *bufferedRange = [[BufferedRange alloc] init];
-        bufferedRange.formatId = videoFormatsIdsWeHave[@(self.videoStream.itag)];
-        [self.videoStream updateBufferTime];
-        bufferedRange.startTimeMs = llround(self.videoStream.earliestTimestampBuffered*1000);
-        bufferedRange.startSegmentIndex = self.videoStream.earliestSegmentIndexBuffered;
-        bufferedRange.durationMs = llround(self.videoStream.latestTimestampBuffered*1000) - llround(self.videoStream.earliestTimestampBuffered*1000);
-        bufferedRange.endSegmentIndex = self.videoStream.latestSegmentIndexBuffered;
-        [bufferedRanges addObject:bufferedRange];
-        [bufferedRange release];
-    }
+    // if (self.videoStream != nil) {
+    //     BufferedRange *bufferedRange = [[BufferedRange alloc] init];
+    //     bufferedRange.formatId = videoFormatsIdsWeHave[@(self.videoStream.itag)];
+    //     [self.videoStream updateBufferTime];
+    //     bufferedRange.startTimeMs = llround(self.videoStream.earliestTimestampBuffered*1000);
+    //     bufferedRange.startSegmentIndex = self.videoStream.earliestSegmentIndexBuffered;
+    //     bufferedRange.durationMs = llround(self.videoStream.latestTimestampBuffered*1000) - llround(self.videoStream.earliestTimestampBuffered*1000);
+    //     bufferedRange.endSegmentIndex = self.videoStream.latestSegmentIndexBuffered;
+    //     [bufferedRanges addObject:bufferedRange];
+    //     [bufferedRange release];
+    // }
+
+    // if (self.audioStream != nil) {
+    //     BufferedRange *bufferedRange = [[BufferedRange alloc] init];
+    //     bufferedRange.formatId = audioFormatsIdsWeHave[@(self.audioStream.itag)];
+    //     [self.audioStream updateBufferTime];
+    //     bufferedRange.startTimeMs = llround(self.audioStream.earliestTimestampBuffered*1000);
+    //     bufferedRange.startSegmentIndex = self.audioStream.earliestSegmentIndexBuffered;
+    //     bufferedRange.durationMs = llround(self.audioStream.latestTimestampBuffered*1000) - llround(self.audioStream.earliestTimestampBuffered*1000);
+    //     bufferedRange.endSegmentIndex = self.audioStream.latestSegmentIndexBuffered;
+    //     [bufferedRanges addObject:bufferedRange];
+    //     [bufferedRange release];
+    // }
 
     request.preferredVideoFormatIdsArray = [[[videoFormatsIdsWeHave allValues] mutableCopy] autorelease];
     request.preferredAudioFormatIdsArray = [[[audioFormatsIdsWeHave allValues] mutableCopy] autorelease];
@@ -359,19 +371,36 @@
                 // 10 second cache in the past expired
                 [self.videoStream.segmentData removeObjectForKey:curSegmentIdx];
             }
-            else if (startIdx > requestedVideoSegmentStart + 120) {
+            else if (startIdx > requestedVideoSegmentStart + 45) {
                 // it's 50 seconds into the future, cached too fars
                 [self.videoStream.segmentData removeObjectForKey:curSegmentIdx];
             }
         }
 
-        if (self.videoStream.segmentData[@(segmentIdx)] == nil) { // idk why this actually works the best, from what i can tell this should be +1 since data is based on sabr's stuff, with the header being 0, and segment idx's 0 is the first segment
+        // clean out segments not connected to the currently requested
+
+
+        // find segment borders
+        // int leftEdge = segmentIdx-1;
+        // int rightEdge = segmentIdx+1;
+
+        // // left
+        // while (self.videoStream.segmentData[@(leftEdge)] != nil) {
+        //     leftEdge--;
+        // }
+
+        // // right
+        // while (self.videoStream.segmentData[@(rightEdge)] != nil) {
+        //     leftEdge++;
+        // }
+
+        if (self.videoStream.segmentData[@(segmentIdx+1)] == nil) {
             // we are in the middle of the currently requested segment, we need to get the video right now as we are likely buffering
             NSLog(@"potential buffering may happen!");
             [self requestAdditionalData:requestedVideoSegmentStart*1000 state:TRSabrBufferingFastTrack]; // providing the acurate time should be fine here
             return;
         }
-        if ((self.videoStream.segmentData[@(segmentIdx+1)] == nil && self.videoStream.segmentIndexes.count > segmentIdx) || (self.videoStream.segmentData[@(segmentIdx+2)] == nil && self.videoStream.segmentIndexes.count > segmentIdx+1)) {
+        if ((self.videoStream.segmentIndexes.count > segmentIdx) || (self.videoStream.segmentData[@(segmentIdx+2)] == nil && self.videoStream.segmentIndexes.count > segmentIdx+1)) {
             NSLog(@"standard buffering occuring");
             [self requestAdditionalData:requestedVideoSegmentEnd*1000  state:TRSabrBufferingNormal];
         }
@@ -390,7 +419,7 @@
                 // 10 second cache in the past expired
                 [self.audioStream.segmentData removeObjectForKey:curSegmentIdx];
             }
-            else if (startIdx > requestedAudioSegmentStart + 120) {
+            else if (startIdx > requestedAudioSegmentStart + 50) {
                 // it's 50 seconds into the future, cached too fars
                 [self.audioStream.segmentData removeObjectForKey:curSegmentIdx];
             }

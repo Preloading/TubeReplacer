@@ -86,6 +86,7 @@ insufficientData:
         offset += partSize;
         TRUmpPart *part = [[TRUmpPart alloc] initWithType:partType data:partData];
         partHandler(part);
+        [part release];
     }
 }
 

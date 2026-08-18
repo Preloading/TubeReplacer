@@ -20,18 +20,29 @@
 		return [[[HTTPDataResponse alloc] initWithData:[[stream createHLSRootManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 	} else if ([cmpPath isEqualToString:@"/video.m3u8"])
 	{
-		if (!stream.videoStream.isReadyForPlayback)
+		if (!stream.videoStream.isReadyForPlayback) {
+			NSThread *currentThread = [NSThread currentThread];
 			[stream.videoStream registerCallback:^{
-				[self responseHasAvailableData];
+				[self performSelector:@selector(responseHasAvailableData)
+					onThread:currentThread
+					withObject:nil
+				waitUntilDone:NO];
 			} forLoadedSegment:0];
-		return [[[HTTPDataResponse alloc] initWithData:[[stream.videoStream generateHLSManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+		}
+		return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.videoStream andSegment:0] autorelease];
 	} else if ([cmpPath isEqualToString:@"/audio.m3u8"])
 	{
-		if (!stream.audioStream.isReadyForPlayback)
+		if (!stream.audioStream.isReadyForPlayback) {
+			NSThread *currentThread = [NSThread currentThread];
 			[stream.audioStream registerCallback:^{
-				[self responseHasAvailableData];
+				[self performSelector:@selector(responseHasAvailableData)
+					onThread:currentThread
+					withObject:nil
+				waitUntilDone:NO];
 			} forLoadedSegment:0];
-		return [[[HTTPDataResponse alloc] initWithData:[[stream.audioStream generateHLSManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+		}
+
+		return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.audioStream andSegment:0] autorelease];
 	}
 	
 	// videos
@@ -62,10 +73,15 @@
 
 			return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.videoStream andSegment:fragmentIndex+1] autorelease];
 		} else if (stream.audioStream.itag == itag) {
-			if (stream.audioStream.segmentData[@(fragmentIndex+1)] == nil)
+			if (stream.audioStream.segmentData[@(fragmentIndex+1)] == nil) {
+				NSThread *currentThread = [NSThread currentThread];
 				[stream.audioStream registerCallback:^{
-					[self responseHasAvailableData];
+					[self performSelector:@selector(responseHasAvailableData)
+						onThread:currentThread
+						withObject:nil
+					waitUntilDone:NO];
 				} forLoadedSegment:fragmentIndex+1];
+			}
 
 			[stream handleBufferingWithCurrentSegment:fragmentIndex mediaType:TRSabrMediaTypeAudio];
 			return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.audioStream andSegment:fragmentIndex+1] autorelease];

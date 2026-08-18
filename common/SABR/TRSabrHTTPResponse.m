@@ -8,7 +8,7 @@
 	{
 		offset = 0;
         done = NO;
-		media = mediaIn;
+		media = [mediaIn retain];
         segment = segmentIn;
 	}
 	return self;
@@ -16,6 +16,8 @@
 
 - (void)dealloc
 {
+    [bufferedOut release];
+    [media release];
 	[super dealloc];
 }
 
@@ -42,7 +44,6 @@
 
 - (NSData *)readDataOfLength:(NSUInteger)lengthParameter
 {
-    NSLog(@"read called!");
     if (segment == 0) {
         if (!media.isReadyForPlayback && bufferedOut == nil)
             return nil;
@@ -55,27 +56,16 @@
             return nil;
 
         if (bufferedOut == nil) {
-                bufferedOut = [media convertFMP4ToMPEGTSWithIndex:segment];
+            bufferedOut = [media convertFMP4ToMPEGTSWithIndex:segment];
         }
     }
 
     done = YES;
-        NSLog(@"read done!");
     return [bufferedOut retain];
-    
-    // NSUInteger remaining = [bufferedOut length] - offset;
-	// NSUInteger length = lengthParameter < remaining ? lengthParameter : remaining;
-	
-	// void *bytes = (void *)([bufferedOut bytes] + offset);
-	
-	// offset += length;
-	
-	// return [NSData dataWithBytesNoCopy:bytes length:length freeWhenDone:NO];
 }
 
 - (BOOL)isDone
 {
-    NSLog(@"done check!");
 	return done;
 }
 
