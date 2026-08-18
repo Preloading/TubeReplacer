@@ -16,13 +16,30 @@
 
 @implementation TRSabrMedia
 
+
 -(instancetype)init {
     self = [super init];
     _segmentData = [[NSMutableDictionary alloc] init];
     self.isReadyForPlayback = false;
-    self.manifestReady = [[[NSCondition alloc] init] autorelease];
-    self.segmentCondition = [[[NSCondition alloc] init] autorelease];
+    self.pendingResponses = [[NSMutableDictionary alloc] init];
     return self;
+}
+
+
+// if waiting for the manifest, use segment 0
+-(void)registerCallback:(void(^)())callback forLoadedSegment:(int)segment {
+    if (self.pendingResponses[@(segment)] == nil)
+        self.pendingResponses[@(segment)] = [NSMutableArray array];
+    [self.pendingResponses[@(segment)] addObject:[[callback copy] autorelease]];
+}
+
+-(void)notifySegmentHasLoaded:(int)segment {
+    if (self.pendingResponses[@(segment)] != nil) {
+        for (void(^callback)(void) in self.pendingResponses[@(segment)]) {
+            callback();
+        }
+        [self.pendingResponses removeObjectForKey:@(segment)];
+    }
 }
 
 -(void)handleParsedHeaderBox:(TRMP4Box*)box {
@@ -212,17 +229,14 @@
 -(void)parseMP4Header:(NSData*)header {
     [self parseSubMP4Header:header];
 
-    [self.manifestReady lock];
     self.isReadyForPlayback = YES;
-    [self.manifestReady signal];
-    [self.manifestReady unlock];
+    
+    [self notifySegmentHasLoaded:0];
 }
 
 -(void)addNewFMP4FragmentWithID:(int)fragmentId data:(NSData*)data {
-    [self.segmentCondition lock];
     self.segmentData[@(fragmentId)] = data;
-    [self.segmentCondition broadcast];
-    [self.segmentCondition unlock];
+    [self notifySegmentHasLoaded:fragmentId];
 }
 
 -(void)handleFMP4FragmentBox:(TRMP4Box*)box out:(TRMP4FragmentInfo**)fragmentOut {
@@ -802,13 +816,9 @@ unsigned int crc32b(unsigned char *message, size_t l)
 }
 
 -(NSString*)generateHLSManifest {
-    [self.manifestReady lock];
-
-    while (!self.isReadyForPlayback) {
-        [self.manifestReady wait];
+    if (!self.isReadyForPlayback) {
+        return nil;
     }
-
-    [self.manifestReady unlock];
 
     NSMutableString *hlsManifest = [[NSMutableString alloc] init];
     [hlsManifest appendString:@"#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-MEDIA-SEQUENCE:0\n"];
@@ -831,15 +841,11 @@ unsigned int crc32b(unsigned char *message, size_t l)
 }
 
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index {
-    [self.segmentCondition lock];
-
-    while (self.segmentData[@(index)] == nil) {
-        [self.segmentCondition wait];
+    if (self.segmentData[@(index)] == nil) {
+        return nil;
     }
 
     NSData *source = self.segmentData[@(index)];
-
-    [self.segmentCondition unlock];
 
     TRMP4FragmentInfo *fragmentInfo = [[TRMP4FragmentInfo alloc] init];
     [self parseFMP4Fragment:source out:&fragmentInfo];
@@ -956,8 +962,6 @@ unsigned int crc32b(unsigned char *message, size_t l)
 -(void)dealloc {
     [_segmentIndexes release];
     [_segmentIndexesCombined release];
-    [_segmentCondition release];
-    [_manifestReady release];
     [_segmentData release];
     [_sps release];
     [_pps release];

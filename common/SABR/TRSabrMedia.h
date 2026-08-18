@@ -14,7 +14,6 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 @property (nonatomic, assign) TRSabrMediaType mediaType;
 
 @property (nonatomic, assign) BOOL isReadyForPlayback;
-@property (nonatomic, strong) NSCondition *manifestReady;
 
 // contains the time duration of each segment, in ticks, including the segments we do not have downloaded yet, starting from 0 
 @property (nonatomic, strong) NSArray *segmentIndexes;
@@ -23,7 +22,9 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 
 // the full NSData of each segment (excl. the header), indexed by the sequence number provided by SABR. This starts at 1.
 @property (nonatomic, strong) NSMutableDictionary *segmentData;
-@property (nonatomic, strong) NSCondition *segmentCondition;
+
+// all pending requests for segments (0 is manifest)
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSMutableArray *> *pendingResponses;
 
 // how many ticks per second.
 @property (nonatomic, assign) uint32_t timescale;
@@ -51,4 +52,5 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 -(NSString*)generateHLSManifest;
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index;
 -(void)updateBufferTime;
+-(void)registerCallback:(void(^)())callback forLoadedSegment:(int)segment;
 @end

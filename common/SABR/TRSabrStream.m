@@ -108,6 +108,10 @@
             NSLog(@"not enough data to start stream! trying again...");
             [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
         }
+
+        if (self.httpServer) {
+            
+        }
         // NSLog(@"response -> %@", response); 
     }];
 

@@ -2,6 +2,7 @@
 #include <Foundation/NSRange.h>
 #import "TRSabrHTTPServer.h"
 #import "TRSabrStream.h"
+#import "TRSabrHTTPResponse.h"
 #import "lib/cocoahttpserver/HTTPMessage.h"
 #import "lib/cocoahttpserver/HTTPResponse.h"
 #import "lib/cocoahttpserver/DDNumber.h"
@@ -19,9 +20,17 @@
 		return [[[HTTPDataResponse alloc] initWithData:[[stream createHLSRootManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 	} else if ([cmpPath isEqualToString:@"/video.m3u8"])
 	{
+		if (!stream.videoStream.isReadyForPlayback)
+			[stream.videoStream registerCallback:^{
+				[self responseHasAvailableData];
+			} forLoadedSegment:0];
 		return [[[HTTPDataResponse alloc] initWithData:[[stream.videoStream generateHLSManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 	} else if ([cmpPath isEqualToString:@"/audio.m3u8"])
 	{
+		if (!stream.audioStream.isReadyForPlayback)
+			[stream.audioStream registerCallback:^{
+				[self responseHasAvailableData];
+			} forLoadedSegment:0];
 		return [[[HTTPDataResponse alloc] initWithData:[[stream.audioStream generateHLSManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 	}
 	
@@ -38,17 +47,28 @@
 
 		
 		if (stream.videoStream.itag == itag) {
-			// if (stream.videoStream.segmentIndexesCombined.count-1 > fragmentIndex)
-			// 	[stream requestAdditionalData:llround(([stream.videoStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.videoStream.timescale) * 1000)];
+			if (stream.videoStream.segmentData[@(fragmentIndex+1)] == nil) {
+				NSThread *currentThread = [NSThread currentThread];
+				[stream.videoStream registerCallback:^{
+					[self performSelector:@selector(responseHasAvailableData)
+						onThread:currentThread
+						withObject:nil
+					waitUntilDone:NO];
+				} forLoadedSegment:fragmentIndex+1];
+			}
+
+
 			[stream handleBufferingWithCurrentSegment:fragmentIndex mediaType:TRSabrMediaTypeVideo];
-			NSData *streamData = [stream.videoStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1];
-			// [stream.videoStream.segmentData removeObjectForKey:@(fragmentIndex+1)];
-			return [[[HTTPDataResponse alloc] initWithData:streamData] autorelease];
+
+			return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.videoStream andSegment:fragmentIndex+1] autorelease];
 		} else if (stream.audioStream.itag == itag) {
-			// if (stream.audioStream.segmentIndexesCombined.count >= fragmentIndex+1)
-			// 	[stream requestAdditionalData:llround(([stream.audioStream.segmentIndexesCombined[fragmentIndex+1] doubleValue]/(double)stream.audioStream.timescale) * 1000)];
+			if (stream.audioStream.segmentData[@(fragmentIndex+1)] == nil)
+				[stream.audioStream registerCallback:^{
+					[self responseHasAvailableData];
+				} forLoadedSegment:fragmentIndex+1];
+
 			[stream handleBufferingWithCurrentSegment:fragmentIndex mediaType:TRSabrMediaTypeAudio];
-			return [[[HTTPDataResponse alloc] initWithData:[stream.audioStream convertFMP4ToMPEGTSWithIndex:fragmentIndex+1]] autorelease];
+			return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.audioStream andSegment:fragmentIndex+1] autorelease];
 		}
 		
 	}
