@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include <CoreFoundation/CFRunLoop.h>
 #include <Foundation/NSOperation.h>
 #include <Foundation/NSValue.h>
 #include <Foundation/NSObjCRuntime.h>
@@ -333,17 +334,37 @@
     NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u", self.httpServer.port]];
 
     NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
-    [request setTimeoutInterval:0.25];
+    [request setTimeoutInterval:0.5];
 
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
        if (error) {
             NSLog(@"reloading player...");
+            [self stopWebServer];
             [self startWebServerThreaded];
             self.reloadPlayerFunction();
        }
     }];
 }
 
+-(void)stopHTTPServerOnThread {
+    self.httpServer.stream = nil;
+    [self.httpServer stop];
+    self.httpServer = nil;
+
+    CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+-(void)stopWebServer {
+    if (!self.httpServer || !self.httpServerThread) return;
+
+    [self performSelector:@selector(stopHTTPServerOnThread)
+            onThread:self.httpServerThread 
+            withObject:nil 
+            waitUntilDone:YES];
+
+    // [self.httpServerThread release];
+    self.httpServerThread = nil;
+}
 
 -(void)startWebServer {
     self.httpServer = [[[TRSabrHTTPServer alloc] init] autorelease];
@@ -364,20 +385,19 @@
 		NSLog(@"Error starting HTTP Server: %@", error);
 	}
 
-    
+    while (self.httpServer) {
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                        beforeDate:[NSDate distantFuture]];
+        }
+    }
 
     // NSLog(@"http server at -> http://%@:%hu/", [self.httpServer [self.httpServer port]);
 }
 
 - (void)startWebServerThreaded {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0), ^{
-        [self startWebServer]; // TODO: If the device goes to sleep, the HTTP server does not come back online. Also an issue for background playback
-
-        while (self.httpServer) {
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-                                        beforeDate:[NSDate distantFuture]];
-        }
-    });
+    self.httpServerThread = [[NSThread alloc] initWithTarget:self selector:@selector(startWebServer) object:nil];
+    [self.httpServerThread start];
 }
 
 // segment idx starts at 0
@@ -391,8 +411,8 @@
             double startIdx = [self.videoStream.segmentIndexesCombined[[curSegmentIdx intValue]-1] doubleValue]/(double)self.videoStream.timescale;
             double endIdx = startIdx + ([self.videoStream.segmentIndexes[[curSegmentIdx intValue]-1] doubleValue]/(double)self.videoStream.timescale);
 
-
-            if ([curSegmentIdx intValue]-1 == segmentIdx || [curSegmentIdx intValue] == segmentIdx || [curSegmentIdx intValue] == segmentIdx+1 || [curSegmentIdx intValue] == segmentIdx+2 || [curSegmentIdx intValue] == segmentIdx+3 || [curSegmentIdx intValue] == segmentIdx+4) {}
+            // the first segment is needed for immediete resume if we lock the phone.
+            if ([curSegmentIdx intValue] == 1 || [curSegmentIdx intValue]-1 == segmentIdx || [curSegmentIdx intValue] == segmentIdx || [curSegmentIdx intValue] == segmentIdx+1 || [curSegmentIdx intValue] == segmentIdx+2 || [curSegmentIdx intValue] == segmentIdx+3 || [curSegmentIdx intValue] == segmentIdx+4) {}
             else if (endIdx+10 < requestedVideoSegmentStart) {
                 // 10 second cache in the past expired
                 [self.videoStream.segmentData removeObjectForKey:curSegmentIdx];
@@ -467,7 +487,6 @@
 -(void)dealloc {
     NSLog(@"deallocating!!!");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_httpServer stop];
     [_httpServer release];
     [_videoStream release];
     [_audioStream release];

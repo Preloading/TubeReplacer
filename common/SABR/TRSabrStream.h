@@ -33,13 +33,12 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 
 // HTTP server used for serving HLS content
 @property (nonatomic, strong) TRSabrHTTPServer *httpServer;
+@property (nonatomic, assign) uint16_t port;
+@property (nonatomic, strong) NSThread *httpServerThread;
 
 // SABR data
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
-
-// port for webserver in case the webserver dies
-@property (nonatomic, assign) uint16_t port;
 
 // player callbacks
 @property (nonatomic, copy) double (^currentPlayerTimeFunction)();
