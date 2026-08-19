@@ -12,6 +12,41 @@
 #include "common/SABR/TRSabrStream.h"
 
 %hook YTStream
+
+
++(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi {
+    NSArray<YTStream*> *streams = [video streams];
+    
+    // return the stream with the highest number lol
+    YTStream *selectedStream = nil;
+    
+    for (YTStream *stream in streams) {
+        if ([stream format] == 2)
+            return stream; // if they are using custom, **we use custom**
+        if ([stream format] > [selectedStream format])
+            selectedStream = stream;
+    }
+    return selectedStream;
+
+}
+
++(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges {
+    NSArray<YTStream*> *streams = [video streams];
+    
+    // return the stream with the highest number lol
+    YTStream *selectedStream = nil;
+    
+    for (YTStream *stream in streams) {
+        if ([stream format] == 2)
+            return stream; // if they are using custom, **we use custom**
+        if ([stream format] > [selectedStream format])
+            selectedStream = stream;
+    }
+    return selectedStream;
+
+}
+
+// 1.2.1 - 1.3.0
 +(YTStream*)selectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn {
     NSArray<YTStream*> *streams = [video streams];
     
@@ -29,29 +64,40 @@
 }
 
 %end
-%hook YTPlayerController
 
--(void)initializePlayback {
-    NSLog(@"playback");
-    return %orig;
-}
+%hook YTPlayerController
 
 -(void)setAndPlayVideoStream:(YTStream *)stream
 {
-    if ([[self valueForKey:l(@"hasFocus")] intValue] == 0)
-    {
-        [self setValue:@0 forKey:l(@"startPlayback")];
-        return;
+    NSLog(@"a");
+    BOOL version10 = ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]);
+
+    if (!version10) {
+        if ([[self valueForKey:l(@"hasFocus")] intValue] == 0)
+        {
+            [self setValue:@0 forKey:l(@"startPlayback")];
+            return;
+        }
     }
-
+    
+    NSLog(@"b");
     [(YTPlayerView *)[self valueForKey:l(@"playerView")] setAirPlayAllowed:1];
-
     YTPlayer *player = [self valueForKey:l(@"player")];
+    
+
+    double currentPostion = 0;
+    if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
+        currentPostion = [[self valueForKey:l(@"savedMediaTime")] doubleValue];
+    else if (!version10)
+        currentPostion = [[self valueForKey:l(@"savedSeekTime")] doubleValue];
+
+
+    NSLog(@"c");
 
     // deal with SABR
     if ([stream format] == 5) {
       TRSabrStream *sabrStream = (TRSabrStream*)[stream URL];
-
+        NSLog(@"d");
       sabrStream.currentPlayerTimeFunction = ^double{
         return [player currentMediaTime];
       };
@@ -60,25 +106,45 @@
         [self reloadPlayerStream];
       };
       
-      double currentPostion = [[self valueForKey:l(@"savedMediaTime")] doubleValue];
-      [player seekToTime:currentPostion];
+          NSLog(@"e");
+
+      if (version10) {
+          [player setContentURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]];
+      } else {
+          if (currentPostion != 0)
+              [player seekToTime:currentPostion];
+    
+          [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
+              initialMediaTime:currentPostion
+              airPlayAllowed:1];
+      }
       
-      [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
-          initialMediaTime:currentPostion
-          airPlayAllowed:1];
+          NSLog(@"f");
+
     } else {
-        [player setStreamURL:[stream URL]
-          initialMediaTime:[[self valueForKey:l(@"savedMediaTime")] doubleValue]
-          airPlayAllowed:1];
+        if (version10) {
+            [player setContentURL:[stream URL]];
+        } else {
+            [player setStreamURL:[stream URL]
+                      initialMediaTime:currentPostion
+                      airPlayAllowed:1];
+        }
     }
     
-    
-    [self setValue:@0.0 forKey:l(@"savedMediaTime")];
-
-    if ([[self valueForKey:l(@"startPlayback")] intValue] != 0)
-    {
-        [self setValue:@0 forKey:l(@"startPlayback")];
+    NSLog(@"d");
+    if (version10) {
         [self playIfPermitted];
+    } else {
+      if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
+            [self setValue:@0.0 forKey:l(@"savedMediaTime")];
+        else
+            [self setValue:@0.0 forKey:l(@"savedSeekTime")];
+
+        if ([[self valueForKey:l(@"startPlayback")] intValue] != 0)
+        {
+            [self setValue:@0 forKey:l(@"startPlayback")];
+            [self playIfPermitted];
+        }
     }
 }
 
@@ -94,19 +160,31 @@
 %new
 -(void)reloadPlayerStream
 {
-    [self saveMediaTime];
-    YTStream *selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")] maxQualityStreamFormat:9999 devicePrivileges:[self valueForKey:l(@"privileges")] CPN:[self valueForKey:l(@"videoCPN")]];
+    BOOL version10 = [version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"];
+    if (!version10)
+      [self saveMediaTime];
+    YTStream *selectedStream = nil;
+    if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
+        selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")] maxQualityStreamFormat:9999 devicePrivileges:[self valueForKey:l(@"privileges")] CPN:[self valueForKey:l(@"videoCPN")]];
+    else if ([version() isEqualToString:@"1.1.0"])
+        selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")] devicePrivileges:nil];
+    else
+        selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")]];
 
-    if ( selectedStream != nil )
-    {
-        if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
-        {
-            [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
-            [self setValue:[selectedStream retain] forKey:l(@"videoStream")];
-        }
-    }
     // [self setValue:@(1) forKey:l(@"startPlayback")];
-    [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
+    if (version10) {
+        [self setAndPlayVideoStream:selectedStream];
+    } else {
+        if ( selectedStream != nil)
+        {
+            if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
+            {
+                [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
+                [self setValue:[selectedStream retain] forKey:l(@"videoStream")];
+            }
+        }
+        [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
+    }
 }
 
 // -(void)appDidBecomeActive {
