@@ -1660,6 +1660,12 @@ typedef struct _TBXMLElement {
 - (id)init;
 - (id)initWithServices:(id)fp8 navigation:(id)fp12 playerView:(id)fp16 player:(id)fp20 video:(id)fp24 source:(int)fp28;
 
+
+-(void)saveMediaTime;
+-(YTStream*)selectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn;
+
+// FOR TUBEREPLACER
+-(void)reloadPlayerStream;
 @end
 
 

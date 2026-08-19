@@ -38,8 +38,12 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
 
+// port for webserver in case the webserver dies
+@property (nonatomic, assign) uint16_t port;
+
 // player callbacks
 @property (nonatomic, copy) double (^currentPlayerTimeFunction)();
+@property (nonatomic, copy) void (^reloadPlayerFunction)();
 
 @property(nonatomic, retain) NSOperationQueue *networkQueue;
 

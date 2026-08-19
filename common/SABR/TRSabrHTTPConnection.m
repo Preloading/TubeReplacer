@@ -93,4 +93,10 @@
 	return [[[HTTPDataResponse alloc] initWithData:[@"tubereplacer sabr player" dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
+-(NSDictionary*)httpResponseHeaders {
+	return @{
+		@"Connection":@"close",
+	};
+}
+
 @end

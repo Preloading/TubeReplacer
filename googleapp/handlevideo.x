@@ -31,6 +31,11 @@
 %end
 %hook YTPlayerController
 
+-(void)initializePlayback {
+    NSLog(@"playback");
+    return %orig;
+}
+
 -(void)setAndPlayVideoStream:(YTStream *)stream
 {
     if ([[self valueForKey:l(@"hasFocus")] intValue] == 0)
@@ -50,9 +55,16 @@
       sabrStream.currentPlayerTimeFunction = ^double{
         return [player currentMediaTime];
       };
+
+      sabrStream.reloadPlayerFunction = ^{
+        [self reloadPlayerStream];
+      };
+      
+      double currentPostion = [[self valueForKey:l(@"savedMediaTime")] doubleValue];
+      [player seekToTime:currentPostion];
       
       [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
-          initialMediaTime:[[self valueForKey:l(@"savedMediaTime")] doubleValue]
+          initialMediaTime:currentPostion
           airPlayAllowed:1];
     } else {
         [player setStreamURL:[stream URL]
@@ -60,7 +72,7 @@
           airPlayAllowed:1];
     }
     
-
+    
     [self setValue:@0.0 forKey:l(@"savedMediaTime")];
 
     if ([[self valueForKey:l(@"startPlayback")] intValue] != 0)
@@ -72,12 +84,36 @@
 
 -(void)dealloc {
     NSLog(@"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-  if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
-    // sabr
-    [[[self valueForKey:l(@"videoStream")] URL] release];
-  }
-  return %orig;
+    if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
+      // sabr
+        [[[self valueForKey:l(@"videoStream")] URL] release];
+    }
+    return %orig;
 }
+
+%new
+-(void)reloadPlayerStream
+{
+    [self saveMediaTime];
+    YTStream *selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")] maxQualityStreamFormat:9999 devicePrivileges:[self valueForKey:l(@"privileges")] CPN:[self valueForKey:l(@"videoCPN")]];
+
+    if ( selectedStream != nil )
+    {
+        if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
+        {
+            [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
+            [self setValue:[selectedStream retain] forKey:l(@"videoStream")];
+        }
+    }
+    // [self setValue:@(1) forKey:l(@"startPlayback")];
+    [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
+}
+
+// -(void)appDidBecomeActive {
+//   NSLog(@"We have awaken from a slumber, reloading things......");
+//     [self reloadPlayerStream];
+//     %orig;
+// }
 
 %end
 
@@ -153,7 +189,7 @@
 
 -(id)initWithVideoID:(id)videoId source:(int)source services:(id)services navigation:(id)navigation
 {
-  return %orig;
+    return %orig;
 }
 
 %end

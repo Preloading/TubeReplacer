@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSOperation.h>
 #include <Foundation/NSValue.h>
 #include <Foundation/NSObjCRuntime.h>
 #include <Foundation/NSLock.h>
@@ -23,6 +24,11 @@
     if (!self) return nil;
 
     [self startWebServerThreaded];
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+        selector:@selector(applicationDidBecomeActive:)
+        name:UIApplicationDidBecomeActiveNotification
+        object:nil];
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
     
     self.currentlyRequestingInNormal = NO;
@@ -323,16 +329,36 @@
     return final;
 }
 
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u", self.httpServer.port]];
+
+    NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
+    [request setTimeoutInterval:0.25];
+
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+       if (error) {
+            NSLog(@"reloading player...");
+            [self startWebServerThreaded];
+            self.reloadPlayerFunction();
+       }
+    }];
+}
+
+
 -(void)startWebServer {
     self.httpServer = [[[TRSabrHTTPServer alloc] init] autorelease];
 	
     self.httpServer.stream = self;
 	[self.httpServer setConnectionClass:[TRSabrHTTPConnection class]];
     
+    if (self.port != 0) {
+        [self.httpServer setPort:self.port];
+    }
 
 	NSError *error;
 	BOOL success = [self.httpServer start:&error];
-	
+	self.port = self.httpServer.port;
+
 	if(!success)
 	{
 		NSLog(@"Error starting HTTP Server: %@", error);
@@ -440,6 +466,7 @@
 
 -(void)dealloc {
     NSLog(@"deallocating!!!");
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_httpServer stop];
     [_httpServer release];
     [_videoStream release];
