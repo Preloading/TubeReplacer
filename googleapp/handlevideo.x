@@ -123,6 +123,8 @@
       sabrStream.reloadPlayerFunction = ^{
         [self reloadPlayerStream];
       };
+
+      [sabrStream start];
       
           NSLog(@"e");
 

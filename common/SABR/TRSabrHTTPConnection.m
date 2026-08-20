@@ -23,11 +23,13 @@
 		if (!stream.videoStream.isReadyForPlayback) {
 			NSThread *currentThread = [NSThread currentThread];
 			[stream.videoStream registerCallback:^{
+				NSLog(@"playback is ready!");
 				[self performSelector:@selector(responseHasAvailableData)
 					onThread:currentThread
 					withObject:nil
 				waitUntilDone:NO];
 			} forLoadedSegment:0];
+			NSLog(@"not ready for playback!");
 		}
 		return [[[TRSabrHTTPResponse alloc] initWithMedia:stream.videoStream andSegment:0] autorelease];
 	} else if ([cmpPath isEqualToString:@"/audio.m3u8"])

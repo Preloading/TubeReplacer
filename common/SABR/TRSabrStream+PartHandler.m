@@ -35,13 +35,11 @@
 
             // initalize the video streams
             // i really hope that this exists **always** when a request is made. if it doesn't I should be able to use the list of all video streams I have.
-            if (self.videoStream == nil) {
-                self.videoStream = [[[TRSabrMedia alloc] init] autorelease];
+            if (self.videoStream.itag == 0) {
                 self.videoStream.itag = self.playbackCookie.videoFmt.itag;
                 self.videoStream.mediaType = TRSabrMediaTypeVideo;
             }
-            if (self.audioStream == nil) {
-                self.audioStream = [[[TRSabrMedia alloc] init] autorelease];
+            if (self.audioStream.itag == 0) {
                 self.audioStream.itag = self.playbackCookie.audioFmt.itag;
                 self.audioStream.mediaType = TRSabrMediaTypeAudio;
             }

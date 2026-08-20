@@ -34,11 +34,13 @@
 }
 
 -(void)notifySegmentHasLoaded:(int)segment {
-    if (self.pendingResponses[@(segment)] != nil) {
-        for (void(^callback)(void) in self.pendingResponses[@(segment)]) {
-            callback();
+    @synchronized (self.pendingResponses) {
+        if (self.pendingResponses[@(segment)] != nil) {
+            for (void(^callback)(void) in self.pendingResponses[@(segment)]) {
+                callback();
+            }
+            [self.pendingResponses removeObjectForKey:@(segment)];
         }
-        [self.pendingResponses removeObjectForKey:@(segment)];
     }
 }
 

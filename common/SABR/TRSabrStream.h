@@ -53,4 +53,5 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 -(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState;
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType;
 -(void)declareStreamBad;
+-(void)start;
 @end

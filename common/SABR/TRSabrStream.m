@@ -25,12 +25,6 @@
     if (!self) return nil;
     self.isStreamBad = NO;
 
-    [self startWebServerThreaded];
-    [[NSNotificationCenter defaultCenter]
-        addObserver:self
-        selector:@selector(applicationDidBecomeActive:)
-        name:UIApplicationDidBecomeActiveNotification
-        object:nil];
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
     
     self.currentlyRequestingInNormal = NO;
@@ -66,19 +60,32 @@
     [videoFormatsWeHave release];
     [audioFormatsWeHave release];
 
+    return self;
+}
+
+-(void)start {
+    self.videoStream = [[[TRSabrMedia alloc] init] autorelease];
+    self.audioStream = [[[TRSabrMedia alloc] init] autorelease];
+
+    [self startWebServerThreaded];
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+        selector:@selector(applicationDidBecomeActive:)
+        name:UIApplicationDidBecomeActiveNotification
+        object:nil];
+
     if ([[TRPOTokenSolver sharedInstance] isReadyToMintTokens]) {
-        NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:videoId];
+        NSString *poTokenString = [[TRPOTokenSolver sharedInstance] mintPOTokenWithData:self.videoId];
         if (poTokenString) {
             self.poToken = [NSData dataWithBase64EncodedString:[[poTokenString stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
         } else {
-            self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:videoId clientState:1]];
+            self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:self.videoId clientState:1]];
         }
     } else {
-        self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:videoId clientState:1]];
+        self.coldstart = [NSData dataWithBase64EncodedString:[TRPOTokenSolver generateColdStartTokenWithContent:self.videoId clientState:1]];
     }
 
     [self requestAdditionalData:0 state:TRSabrBufferingFastTrack];
-    return self;
 }
 
 -(void)declareStreamBad {
