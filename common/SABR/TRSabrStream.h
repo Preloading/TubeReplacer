@@ -46,9 +46,11 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 
 @property(nonatomic, retain) NSOperationQueue *networkQueue;
 
+@property (nonatomic, assign) BOOL isStreamBad;
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId;
 -(NSString*)createHLSRootManifest;
 -(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState;
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType;
+-(void)declareStreamBad;
 @end

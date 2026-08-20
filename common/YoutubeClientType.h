@@ -15,10 +15,10 @@
 // web
 +(YoutubeClientType*)webClient;
 // +(YoutubeRequestClient*)webEmbeddedPlayer;
-+(YoutubeClientType*)webSafariClient;
 +(YoutubeClientType*)tvEmbeddedClient;
 +(YoutubeClientType*)webMobileClient;
 +(YoutubeClientType*)iosClient;
++(YoutubeClientType*)visionOSClient;
 // +(YoutubeRequestClient*)webScreenEmbed;
 // +(YoutubeRequestClient*)webCreator;
 +(YoutubeClientType*)webStudioClient;

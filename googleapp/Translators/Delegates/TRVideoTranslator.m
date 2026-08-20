@@ -409,10 +409,14 @@
     NSArray *subtitleTracksUnparsed = [TRJSONUtils arrayFromJSON:json keyPath:@"captions.playerCaptionsTracklistRenderer.captionTracks"];
     if (subtitleTracksUnparsed) {
         for (NSDictionary *track in subtitleTracksUnparsed) {
+            NSString *subtitleURL = track[@"baseUrl"];
+            if ([subtitleURL hasPrefix:@"/"]) {
+                subtitleURL = [NSString stringWithFormat:@"https://www.youtube.com%@", subtitleURL];
+            }
             if ([version() isEqualToString:@"2.0.0"]) {
-                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]] format:@"ass"]];
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:subtitleURL] format:@"ass"]];
             } else {
-                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:track[@"baseUrl"]]]];
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:subtitleURL]]];
             }
         }
     }

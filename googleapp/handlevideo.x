@@ -21,6 +21,12 @@
     YTStream *selectedStream = nil;
     
     for (YTStream *stream in streams) {
+        if ([stream format] == 5) {
+            // sabr case
+            TRSabrStream *sabrStream = [stream URL];
+            if ([sabrStream isStreamBad])
+                continue;
+        }
         if ([stream format] == 2)
             return stream; // if they are using custom, **we use custom**
         if ([stream format] > [selectedStream format])
@@ -37,6 +43,12 @@
     YTStream *selectedStream = nil;
     
     for (YTStream *stream in streams) {
+        if ([stream format] == 5) {
+            // sabr case
+            TRSabrStream *sabrStream = [stream URL];
+            if ([sabrStream isStreamBad])
+                continue;
+        }
         if ([stream format] == 2)
             return stream; // if they are using custom, **we use custom**
         if ([stream format] > [selectedStream format])
@@ -54,6 +66,12 @@
     YTStream *selectedStream = nil;
     
     for (YTStream *stream in streams) {
+        if ([stream format] == 5) {
+            // sabr case
+            TRSabrStream *sabrStream = [stream URL];
+            if ([sabrStream isStreamBad])
+                continue;
+        }
         if ([stream format] == 2)
             return stream; // if they are using custom, **we use custom**
         if ([stream format] > [selectedStream format])

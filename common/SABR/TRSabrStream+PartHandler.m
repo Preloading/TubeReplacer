@@ -64,6 +64,12 @@
         [redirect release];
         break;
     }
+    case UMPPartId_UmpPartIdSabrError: {
+        [(*currentlyParsingDatas) removeAllObjects];
+        [(*currentlyParsingHeaders) removeAllObjects];
+        [self declareStreamBad];
+        return;
+    }
     case UMPPartId_UmpPartIdMediaHeader: {
         MediaHeader *mediaHeader = [[MediaHeader alloc] initWithData:part.data error:&error];
         if (error) {

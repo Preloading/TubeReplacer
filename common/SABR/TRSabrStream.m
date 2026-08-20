@@ -23,6 +23,7 @@
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
     self = [super init];
     if (!self) return nil;
+    self.isStreamBad = NO;
 
     [self startWebServerThreaded];
     [[NSNotificationCenter defaultCenter]
@@ -38,7 +39,10 @@
     self.networkQueue.maxConcurrentOperationCount = 2;
 
     // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
-    self.decipheredStreamURL = decipheredStreamURL;
+    if (decipheredStreamURL != nil)
+        self.decipheredStreamURL = decipheredStreamURL;
+    else
+        self.decipheredStreamURL = streamURL;
     self.ustreamConfig = [NSData dataWithBase64EncodedString:[[ustreamConfig stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
     NSMutableDictionary *formatsDict = [NSMutableDictionary dictionary];
     for (TRAdaptiveFormat *format in formats) {
@@ -77,6 +81,13 @@
     return self;
 }
 
+-(void)declareStreamBad {
+    self.isStreamBad = YES;
+    NSLog(@"SABR stream is unhealty! Switching streams...");
+    // [self cleanup];
+    self.reloadPlayerFunction();
+}
+
 -(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState {
     NSLog(@"current stream ts -> %i", currentStreamTimeMS);
     if (self.currentlyRequestingInNormal && bufferingState == TRSabrBufferingNormal) {
@@ -111,13 +122,13 @@
         else
             self.currentlyRequestingInNormal = NO;
 
-        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.requestNumber < 10) {
-            NSLog(@"not enough data to start stream! trying again...");
-            [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
-        }
-
-        if (self.httpServer) {
-            
+        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback))) {
+            if (self.requestNumber > 10) {
+                [self declareStreamBad];
+            } else {
+                NSLog(@"not enough data to start stream! trying again...");
+                [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+            }
         }
         // NSLog(@"response -> %@", response); 
     }];
@@ -178,7 +189,18 @@
 
 -(StreamerContext*)createStreamerContext {
     StreamerContext *context = [[StreamerContext alloc] init];
-    YoutubeClientType *clientType = [YoutubeClientType webMobileClient];
+
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    YoutubeClientType *clientType = [YoutubeClientType webClient];
+    if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+        clientType = [YoutubeClientType webMobileClient];
+    } else if ([preferences[@"StreamType"] isEqualToString:@"visionos"]) {
+        clientType = [YoutubeClientType visionOSClient];
+    } else if ([preferences[@"StreamType"] isEqualToString:@"android"]) {
+        clientType = [YoutubeClientType androidClient];
+    } else if ([preferences[@"StreamType"] isEqualToString:@"androidvr"]) {
+        clientType = [YoutubeClientType androidVrClient];
+    }
 
     StreamerContext_ClientInfo *clientInfo = [[StreamerContext_ClientInfo alloc] init];
 
@@ -484,8 +506,7 @@
     }
 }
 
--(void)dealloc {
-    NSLog(@"deallocating!!!");
+-(void)cleanup {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_httpServer release];
     [_videoStream release];
@@ -500,6 +521,11 @@
     [_ustreamConfig release];
     [_decipheredStreamURL release];
     [_networkQueue release];
+}
+
+-(void)dealloc {
+    NSLog(@"deallocating!!!");
+    [self cleanup];
 
     [super dealloc];
 }

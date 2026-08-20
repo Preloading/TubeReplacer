@@ -54,6 +54,17 @@ static void analytics() {
             NSLog(@"Error reading version file: %@", readError.localizedDescription);
         }
 
+        // timebomb code, used for small beta builds released publically
+        // NSDateComponents *comps = [[NSDateComponents alloc] init];
+        // [comps setDay:21];
+        // [comps setMonth:8];
+        // [comps setYear:2026];
+        // NSDate *tbDate = [[NSCalendar currentCalendar] dateFromComponents:comps];
+        // if ([[NSDate date] compare:tbDate] == NSOrderedDescending) {
+        //     @throw NSInternalInconsistencyException;
+        //     return;
+        // }
+
         if (!was_updated) {
             NSError *writeError = nil;
             BOOL success = [@"i_can_haz_write" writeToFile:versionFilePath

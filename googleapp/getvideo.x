@@ -40,16 +40,27 @@
         // todo: error handling and such, we need to make sure the challenge solver is actually ready...
         NSString *poToken = [challengeSolver mintPOTokenOrColdStart:videoId];
         NSLog(@"Video POToken => %@", poToken);
-                            
-        GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:@"https://www.youtube.com/youtubei/v1/player?prettyPrint=false"];
+
+        NSString *requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false";     
+
+        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        YoutubeClientType *client = [YoutubeClientType webClient];
+        if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+            client = [YoutubeClientType webMobileClient];
+        } else if ([preferences[@"StreamType"] isEqualToString:@"visionos"]) {
+            client = [YoutubeClientType visionOSClient];
+            requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
+        } else if ([preferences[@"StreamType"] isEqualToString:@"android"]) {
+            client = [YoutubeClientType androidClient];
+            requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
+        } else if ([preferences[@"StreamType"] isEqualToString:@"androidvr"]) {
+            client = [YoutubeClientType androidVrClient];
+            requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
+        }
+
+        GTMURLBuilder *urlBuilder = [%c(GTMURLBuilder) builderWithString:requestURL];
         NSURL *fullURL = [urlBuilder URL];
-
-        // NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        YoutubeClientType *client = [YoutubeClientType webMobileClient];
-        // if ([preferences[@"StreamType"] isEqualToString:@"360pvr"]) { // todo fix this
-        //     client = [YoutubeClientType androidVrClient];
-        // }
-
+        
         YTGDataRequest *request = nil;
         if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]) {
             request = [%c(YTGDataRequest) requestWithURL:fullURL 
@@ -117,31 +128,34 @@
 -(NSDictionary *)fetchNextDataForVideoId:(NSString *)videoId {
     // Synchronous request to /next endpoint
     // Consider making this async for better UX BUT im lazy
-
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     NSMutableDictionary *allData = [NSMutableDictionary dictionary];
 
-    NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"];
+    if (!(preferences[@"StreamType"] == nil || [preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
+        NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"];
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:[TRRequestBuilder nextBodyWithVideoId:videoId 
-                                                        client:[YoutubeClientType webMobileClient]]];
-    // TODO: figure out how to get authentication here
-    // [authentication authorizeNSRequest:&request];
-    NSURLResponse *response = nil;
-    NSError *reqError = nil;
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&reqError];
-    
-    if (!reqError && data) {
-        NSError *jsonError = nil;
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        [request setHTTPMethod:@"POST"];
+        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        
 
-        allData[@"next"] = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+        [request setHTTPBody:[TRRequestBuilder nextBodyWithVideoId:videoId 
+                                                            client:[YoutubeClientType webMobileClient]]];
+        // TODO: figure out how to get authentication here
+        // [authentication authorizeNSRequest:&request];
+        NSURLResponse *response = nil;
+        NSError *reqError = nil;
+        NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&reqError];
+        
+        if (!reqError && data) {
+            NSError *jsonError = nil;
+
+            allData[@"next"] = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+        }
     }
-    
+
     
     // TODO: this should be running at the same time as the next request
-    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     id rawUseRTYDL = preferences[@"UseRTYDL"];
     BOOL useRTYDL = rawUseRTYDL ? [rawUseRTYDL boolValue] : YES; // default YES when unset
 
