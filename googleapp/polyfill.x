@@ -47,6 +47,15 @@
 
 %end
 
+%hook __NSArrayI
+
+%new
+- (id)objectAtIndexedSubscript:(NSUInteger)idx {
+    return [self objectAtIndex:idx];
+}
+
+%end
+
 %hook __NSCFDictionary
 
 %new

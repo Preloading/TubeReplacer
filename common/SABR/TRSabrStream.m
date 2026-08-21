@@ -111,31 +111,39 @@
 
     NSData *testReq = [self buildRequestBody:currentStreamTimeMS];
 
-    [self makeStreamingRequestWithBody:testReq andCallback:^(NSData *response, NSError *error) {
-        __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
-        __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
-        [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
-            [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
-        }];
-        [response release];
-        [currentlyParsingDatas release];
-        [currentlyParsingHeaders release];
+    [self makeStreamingRequestWithBody:testReq andCallback:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)urlResponse;
 
-        NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
-        NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
+        if (httpResponse.statusCode <= 200 && httpResponse.statusCode < 300) {
+            __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
+            __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
+            [TRUmpReader read:response handlePartWith:^(TRUmpPart *part) {
+                [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
+            }];
 
-        if (bufferingState == TRSabrBufferingFastTrack)
-            self.currentlyRequestingInFastTrack = NO;
-        else
-            self.currentlyRequestingInNormal = NO;
+            [currentlyParsingDatas release];
+            [currentlyParsingHeaders release];
 
-        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback))) {
-            if (self.requestNumber > 10) {
-                [self declareStreamBad];
-            } else {
-                NSLog(@"not enough data to start stream! trying again...");
-                [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+            [response release];
+
+            NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
+            NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
+
+            if (bufferingState == TRSabrBufferingFastTrack)
+                self.currentlyRequestingInFastTrack = NO;
+            else
+                self.currentlyRequestingInNormal = NO;
+
+            if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && !self.isStreamBad) {
+                if (self.requestNumber > 10) {
+                    [self declareStreamBad];
+                } else {
+                    NSLog(@"not enough data to start stream! requesting again...");
+                    [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+                }
             }
+        } else {
+            [self declareStreamBad];
         }
         // NSLog(@"response -> %@", response); 
     }];
@@ -165,7 +173,7 @@
 
     state.playerState = 0;
 
-    state.stickyResolution = 720;
+    // state.stickyResolution = 720;
     state.enableVoiceBoost = false;
 
 
@@ -322,7 +330,7 @@
     return [request data];
 }
 
--(void)makeStreamingRequestWithBody:(NSData*)body andCallback:(void (^)(NSData *, NSError *))callback {
+-(void)makeStreamingRequestWithBody:(NSData*)body andCallback:(void (^)(NSURLResponse *, NSData *, NSError *))callback {
     NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@&rn=%i", self.decipheredStreamURL, self.requestNumber]];
 
     NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
@@ -341,7 +349,7 @@
 
     // [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error){
     [NSURLConnection sendAsynchronousRequest:request queue:self.networkQueue completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
-        callback([response copy], error);
+        callback(urlResponse, [response copy], error);
     }];
 }
 

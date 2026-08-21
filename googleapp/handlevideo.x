@@ -32,6 +32,7 @@
         if ([stream format] > [selectedStream format])
             selectedStream = stream;
     }
+
     return selectedStream;
 
 }
@@ -54,6 +55,8 @@
         if ([stream format] > [selectedStream format])
             selectedStream = stream;
     }
+
+    NSLog(@"selected new stream -> %@", selectedStream);
     return selectedStream;
 
 }
@@ -77,6 +80,8 @@
         if ([stream format] > [selectedStream format])
             selectedStream = stream;
     }
+
+    NSLog(@"selected new stream -> %@", selectedStream);
     return selectedStream;
 
 }
@@ -114,30 +119,30 @@
 
     // deal with SABR
     if ([stream format] == 5) {
-      TRSabrStream *sabrStream = (TRSabrStream*)[stream URL];
+        TRSabrStream *sabrStream = (TRSabrStream*)[stream URL];
         NSLog(@"d");
-      sabrStream.currentPlayerTimeFunction = ^double{
-        return [player currentMediaTime];
-      };
+        sabrStream.currentPlayerTimeFunction = ^double{
+            return [player currentMediaTime];
+        };
 
-      sabrStream.reloadPlayerFunction = ^{
-        [self reloadPlayerStream];
-      };
+        sabrStream.reloadPlayerFunction = ^{
+            [self reloadPlayerStream];
+        };
 
-      [sabrStream start];
-      
-          NSLog(@"e");
+        [sabrStream start];
+        
+        NSLog(@"e");
 
-      if (version10) {
-          [player setContentURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]];
-      } else {
-          if (currentPostion != 0)
-              [player seekToTime:currentPostion];
-    
-          [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
-              initialMediaTime:currentPostion
-              airPlayAllowed:1];
-      }
+        if (version10) {
+            [player setContentURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]];
+        } else {
+            if (currentPostion != 0)
+                [player seekToTime:currentPostion];
+        
+            [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
+                initialMediaTime:currentPostion
+                airPlayAllowed:1];
+        }
       
           NSLog(@"f");
 
@@ -199,10 +204,12 @@
         {
             if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
             {
+                NSLog(@"switching streams to -> %@", selectedStream);
                 [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
                 [self setValue:[selectedStream retain] forKey:l(@"videoStream")];
             }
         }
+        NSLog(@"video stream -> %@", [self valueForKey:l(@"videoStream")]);
         [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
     }
 }

@@ -19,6 +19,11 @@
         }
         // NSLog(@"current protection status -> %i", protectionStatus.status);
         self.streamProtectionStatus = protectionStatus.status;
+        
+        if (protectionStatus.status == 3) {
+            // stream is RIP
+            [self declareStreamBad];
+        }
         [protectionStatus release];
         break;
     }
@@ -63,10 +68,8 @@
         break;
     }
     case UMPPartId_UmpPartIdSabrError: {
-        [(*currentlyParsingDatas) removeAllObjects];
-        [(*currentlyParsingHeaders) removeAllObjects];
         [self declareStreamBad];
-        return;
+        break;
     }
     case UMPPartId_UmpPartIdMediaHeader: {
         MediaHeader *mediaHeader = [[MediaHeader alloc] initWithData:part.data error:&error];

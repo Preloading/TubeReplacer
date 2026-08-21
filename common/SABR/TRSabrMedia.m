@@ -192,6 +192,7 @@
         NSMutableArray *segmentIndexes = [[NSMutableArray alloc] initWithCapacity:referenceCount];
         NSMutableArray *segmentIndexesCombined = [[NSMutableArray alloc] initWithCapacity:referenceCount];
 
+        NSLog(@"ref count -> %i", referenceCount);
         uint32_t lastSegmentDuration = 0;
 
         for (uint16_t i = 0; i < referenceCount; i++) {
@@ -201,8 +202,8 @@
             [box.data getBytes:&segment_duration range:NSMakeRange(offset, 4)];
             segment_duration = CFSwapInt32BigToHost(segment_duration);
             offset+=8;
-            segmentIndexes[i] = @(segment_duration);
-            segmentIndexesCombined[i] = @(lastSegmentDuration);
+            [segmentIndexes addObject:@(segment_duration)];
+            [segmentIndexesCombined addObject:@(lastSegmentDuration)];
             lastSegmentDuration += segment_duration;
             // NSLog(@"segment duration (in ticks) -> %i", segment_duration);
             // NSLog(@"segment duration (in seconds) -> %f", (double)segment_duration/(double)timescale);
@@ -443,7 +444,7 @@
 
         NSData *sample = [fragment.data subdataWithRange:NSMakeRange(offset, sampleSize)];
         offset += sampleSize;
-        samples[i] = sample;
+        [samples addObject:sample];
     }
 
     NSArray *copy = [samples copy];
