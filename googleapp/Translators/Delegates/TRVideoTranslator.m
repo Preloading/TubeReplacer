@@ -395,6 +395,22 @@
     NSString *publishDateStr = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.publishDate"];
     NSDate *uploadDate = [TRJSONUtils dateFromRFC3339:uploadDateStr];
     NSDate *publishDate = [TRJSONUtils dateFromRFC3339:publishDateStr];
+
+    BOOL isPrivate = NO;
+    BOOL isListed = YES;
+    BOOL ratingAllowed = YES;
+
+    if ([TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.isUnlisted"]) {
+        isListed = ![TRJSONUtils boolFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.isUnlisted"];
+    }
+
+    if ([TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.isPrivate"]) {
+        isPrivate = [TRJSONUtils boolFromJSON:json keyPath:@"videoDetails.isPrivate"];
+    }
+
+    if ([TRJSONUtils stringFromJSON:json keyPath:@"videoDetails.allowRatings"]) {
+        ratingAllowed = [TRJSONUtils boolFromJSON:json keyPath:@"videoDetails.allowRatings"];
+    }
     
     uint64_t duration = [TRJSONUtils intFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.lengthSeconds"];
     uint64_t viewCount = [TRJSONUtils intFromJSON:json keyPath:@"videoDetails.viewCount"];
@@ -468,7 +484,7 @@
             viewCount:viewCount
             likesCount:likesCount
             dislikesCount:0
-            ratingAllowed:YES
+            ratingAllowed:ratingAllowed
             state:videoState
             streams:ytStreams
             thumbnailURLs:thumbnails
@@ -500,7 +516,7 @@
             viewCount:viewCount
             likesCount:likesCount
             dislikesCount:0
-            ratingAllowed:YES
+            ratingAllowed:ratingAllowed
             state:videoState
             streams:ytStreams
             thumbnailURLs:thumbnails
@@ -534,7 +550,7 @@
             viewCount:viewCount
             likesCount:likesCount
             dislikesCount:0
-            ratingAllowed:YES
+            ratingAllowed:ratingAllowed
             state:videoState
             streams:ytStreams
             thumbnailURLs:thumbnails
@@ -546,7 +562,7 @@
             claimed:NO
             monetized:NO
             monetizedCountries:@[]
-            listed:YES // todo: this should be easy enough to implement
+            listed:isListed
             categoryLabel:@"Gaming"
             categoryTerm:category ?: @"Unknown"
             adultContent:NO
@@ -569,7 +585,7 @@
             viewCount:viewCount
             likesCount:likesCount
             dislikesCount:0
-            ratingAllowed:YES
+            ratingAllowed:ratingAllowed
             state:videoState
             streams:ytStreams
             thumbnailURLs:thumbnails
@@ -581,13 +597,13 @@
             claimed:NO
             monetized:NO
             monetizedCountries:@[]
-            listed:YES // todo: this should be easy enough to implement
+            listed:isListed
             categoryLabel:@"Gaming"
             categoryTerm:category ?: @"Unknown"
             adultContent:NO
             editURL:nil
             paidContent:NO
-            privateContent:NO // todo: should also be easy enough to implement
+            privateContent:isPrivate
             videoPro:nil
             liveEventURL:nil
             currentViewers:39
@@ -1063,7 +1079,7 @@
 
 #pragma mark - Video Enhancement (/next response)
 
-- (void)enhanceVideo:(id)video withNextResponse:(NSDictionary *)nextData {
+- (void)enhanceVideo:(YTVideo*)video withNextResponse:(NSDictionary *)nextData {
     if (!video || !nextData || !nextData[@"next"]) return;
     
     @try {
@@ -1071,7 +1087,8 @@
 
         // Navigate to the like button data in /next response
         NSDictionary *resultContents = nextData[@"next"][@"contents"][@"singleColumnWatchNextResults"][@"results"][@"results"][@"contents"];
-        
+        long likes = [video likesCount];
+
         double dislikeRatio = 0;
         if (nextData[@"dislikes"]) {
             double rawLikes = [nextData[@"dislikes"][@"rawLikes"] doubleValue];
@@ -1134,12 +1151,9 @@
 
                         if (accessibilityText) { 
                             NSArray *accessibilityTextContent = [accessibilityText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                            long likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
+                            likes = [TRJSONUtils numberFromText:accessibilityTextContent[5]];
                             if (likes > 0) {
                                 [video setValue:[NSNumber numberWithLong:likes] forKey:l(@"likesCount")];
-                                if (dislikeRatio != 0) {
-                                    [video setValue:[NSNumber numberWithLong:likes*dislikeRatio] forKey:l(@"dislikesCount")];
-                                }
                             }
                             break;
                         }
@@ -1163,6 +1177,9 @@
             }
         }
     
+        if (likes > 0 && dislikeRatio != 0) {
+            [video setValue:[NSNumber numberWithLong:likes*dislikeRatio] forKey:l(@"dislikesCount")];
+        }
         
         
     } @catch (NSException *e) {

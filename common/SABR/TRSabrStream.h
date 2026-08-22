@@ -1,5 +1,6 @@
 #include "TRSabrHTTPServer.h"
 #include "common/SABR/TRAdaptiveFormat.h"
+#import "googleapp/appheaders.h"
 #include "video_streaming/PlaybackCookie.pbobjc.h"
 #include "video_streaming/MediaHeader.pbobjc.h"
 #include "TRSabrMedia.h"
@@ -47,6 +48,8 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property(nonatomic, retain) NSOperationQueue *networkQueue;
 
 @property (nonatomic, assign) BOOL isStreamBad;
+@property (nonatomic, retain) GTMOAuth2Authentication *authentication;
+
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId;
 -(NSString*)createHLSRootManifest;

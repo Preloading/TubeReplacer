@@ -129,6 +129,12 @@
             [self reloadPlayerStream];
         };
 
+        if (version10) {
+            sabrStream.authentication = [[(YTServices*)[self valueForKey:l(@"services")] userAuthenticator] authentication];
+        } else {
+            sabrStream.authentication = [[(YTPlayerServices*)[self valueForKey:l(@"playerServices")] userAuth] authentication];
+        }
+
         [sabrStream start];
         
         NSLog(@"e");

@@ -341,7 +341,7 @@
     [request setValue:@"identity" forHTTPHeaderField:@"accept-encoding"];
     [request setValue:@"application/vnd.yt-ump" forHTTPHeaderField:@"accept"];
     
-
+    [self.authentication authorizeNSRequest:&request];
     self.requestNumber += 1;
     // GTMHTTPFetcher *fetcher = [NSClassFromString(@"GTMHTTPFetcher") fetcherWithRequest:request];
     // if (auth != nil)

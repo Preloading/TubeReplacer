@@ -1671,6 +1671,9 @@ typedef struct _TBXMLElement {
 -(void)reloadPlayerStream;
 @end
 
+@interface YTPlayerServices : NSObject
+-(YTUserAuthenticator*)userAuth;
+@end
 
 @interface YTPlayerView : NSObject
 
