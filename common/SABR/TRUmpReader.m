@@ -70,24 +70,32 @@ insufficientData:
     return 0; // unreachable
 }
 
-+(void)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler {
++(NSUInteger)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler {
     NSUInteger offset = 0;
+    NSUInteger successfullyRead = 0;
 
     while (offset < [data length]) {
-        NSUInteger partType = [self readVarint:data offset:&offset];
-        NSUInteger partSize = [self readVarint:data offset:&offset];
-        if (offset > [data length]) {
+        @try {
+            NSUInteger partType = [self readVarint:data offset:&offset];
+            NSUInteger partSize = [self readVarint:data offset:&offset];
+            if (offset > [data length]) {
+                break;
+            }
+            NSData *partData = [data subdataWithRange:NSMakeRange(offset, partSize)];
+            if (partData == nil) {
+                NSLog(@"part data is nil! offset -> %lu, size -> %lu, data length -> %lu", (unsigned long)offset, (unsigned long)partSize, (unsigned long)[data length]);
+            }
+            offset += partSize;
+            TRUmpPart *part = [[TRUmpPart alloc] initWithType:partType data:partData];
+            partHandler(part);
+            [part release];
+            successfullyRead = offset;
+            }
+        @catch (NSException *exception) {
             break;
         }
-        NSData *partData = [data subdataWithRange:NSMakeRange(offset, partSize)];
-        if (partData == nil) {
-            NSLog(@"part data is nil! offset -> %lu, size -> %lu, data length -> %lu", (unsigned long)offset, (unsigned long)partSize, (unsigned long)[data length]);
-        }
-        offset += partSize;
-        TRUmpPart *part = [[TRUmpPart alloc] initWithType:partType data:partData];
-        partHandler(part);
-        [part release];
     }
+    return successfullyRead;
 }
 
 @end

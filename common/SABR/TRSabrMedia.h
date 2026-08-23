@@ -47,10 +47,12 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 @property (nonatomic, assign) double latestTimestampBuffered;
 @property (nonatomic, assign) uint32_t latestSegmentIndexBuffered;
 
+@property (nonatomic, assign) uint32_t lastRequestedSegment;
+
 -(void)parseMP4Header:(NSData*)header;
 -(void)addNewFMP4FragmentWithID:(int)fragmentId data:(NSData*)data;
 -(NSString*)generateHLSManifest;
 -(NSData*)convertFMP4ToMPEGTSWithIndex:(int)index;
--(void)updateBufferTime;
+-(void)updateBufferTime:(uint32_t)currentSegment;
 -(void)registerCallback:(void(^)())callback forLoadedSegment:(int)segment;
 @end

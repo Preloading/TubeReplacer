@@ -925,41 +925,71 @@ unsigned int crc32b(unsigned char *message, size_t l)
     return finalTSData;
 }
 
--(void)updateBufferTime {
+// current segment starts at 1
+-(void)updateBufferTime:(uint32_t)currentSegment {
+    NSLog(@"called an unimplemented function!!!"); // not having this is somewhat wasteful on network side, but oh boy this has a lot of edgecases
+
+
+    // for whenever i feel like reimplementing this
+    // deal with case where the current segment is not downloaded, it must not be included in the set.
+
     // kinda awful
-    int segmentNumber = 1;
-    uint64_t segmentTimestamp = 0;
-    double earliestTime = -1;
-    int32_t earliestSegment = -1;
-    int64_t latestTimeInScale = -1;
-    int32_t latestSegment = -1;
-    uint32_t observedSegments = 0;
 
-    for (NSNumber *timestamp in self.segmentIndexes) {
-        if (self.segmentData[@(segmentNumber)] != nil) {
-            // we have that segment
-            if (earliestTime == -1) {
-                earliestTime = (double)segmentTimestamp/(double)self.timescale;
-                earliestSegment = segmentNumber;
-            }
-        }
-        segmentTimestamp += [timestamp unsignedLongLongValue];
-        if (self.segmentData[@(segmentNumber)] != nil) {
-            latestTimeInScale = segmentTimestamp;
-            latestSegment = segmentNumber;
-            observedSegments++;
-        }
+    // // uint64_t segmentTimestamp = 0;
+    // // double currentTime = -1;
+    // int32_t earliestSegment = -1;
+    // // int64_t latestTimeInScale = -1;
+    // int32_t latestSegment = -1;
+    // // uint32_t observedSegments = 0;
 
-        if (observedSegments >= self.segmentData.count)
-            break;
+    // int segmentNumber = currentSegment;
 
-        segmentNumber++;
+    // // check for farthest connected 
+    // while (segmentNumber <= self.segmentIndexes.count) {
+    //     if (self.segmentData[@(segmentNumber)] == nil)
+    //         break;
+    //     latestSegment = segmentNumber;
+    //     segmentNumber++;
+    // }
 
-    }
-    self.earliestTimestampBuffered = earliestTime;
-    self.earliestSegmentIndexBuffered = earliestSegment;
-    self.latestTimestampBuffered = (double)latestTimeInScale/(double)self.timescale;
-    self.latestSegmentIndexBuffered = latestSegment;
+    // // check for earliest connected
+    // segmentNumber = currentSegment;
+    // while (segmentNumber > 0) {
+    //     if (self.segmentData[@(segmentNumber)] == nil)
+    //         break;
+    //     earliestSegment = segmentNumber;
+    //     segmentNumber++;
+    // }
+
+    // NSLog(@"earliest %i, latest %i", earliestSegment, latestSegment);
+
+    // fill in timestamp info
+    // // for (int i = 1; i > self.segmentIndexes.count-1; i++)  {
+    // //     // we have that segment
+
+
+    // //     if (earliestTime == -1) {
+    // //         earliestTime = (double)segmentTimestamp/(double)self.timescale;
+    // //         earliestSegment = segmentNumber;
+    // //     }
+    
+    // //     segmentTimestamp += [timestamp unsignedLongLongValue];
+    // //     if (self.segmentData[@(segmentNumber)] != nil) {
+    // //         latestTimeInScale = segmentTimestamp;
+    // //         latestSegment = segmentNumber;
+    // //         observedSegments++;
+    // //     }
+
+    // //     if (observedSegments >= self.segmentData.count)
+    // //         break;
+
+    // //     segmentNumber++;
+
+    // // }
+    // // self.earliestTimestampBuffered = earliestTime;
+    // self.earliestSegmentIndexBuffered = earliestSegment;
+    // self.latestTimestampBuffered = (double)latestTimeInScale/(double)self.timescale;
+    // self.latestSegmentIndexBuffered = latestSegment;
 }
 
 -(void)dealloc {

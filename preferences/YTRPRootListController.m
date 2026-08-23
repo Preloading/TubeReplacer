@@ -1,9 +1,12 @@
 #import <Foundation/Foundation.h>
+#include <spawn.h>
 #import <Preferences/PSSpecifier.h>
 #import "YTRPRootListController.h"
 
 #define PREFS_PATH @"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"
 #define NOTIFY_NAME CFSTR("dev.preloading.tubereplacer.preferences/settingschanged")
+
+extern char **environ;
 
 @implementation YTRPRootListController
 
@@ -12,7 +15,7 @@
         NSMutableArray *specs = [[self loadSpecifiersFromPlistName:@"Root" target:self] mutableCopy];
         
         NSDictionary *prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        NSString *selectedValue = [prefs objectForKey:@"StreamType"] ?: @"360p";
+        NSString *selectedValue = [prefs objectForKey:@"StreamType"] ?: @"web";
         
         if (![selectedValue isEqualToString:@"custom"]) {
             NSInteger indexToRemove = NSNotFound;
@@ -39,6 +42,7 @@
     
     // Reload when list selection changes
     if ([[specifier.properties objectForKey:@"key"] isEqualToString:@"StreamType"]) {
+        [self killYouTube];
         _specifiers = nil;
         [self reloadSpecifiers];
     }
@@ -116,6 +120,19 @@
     // Reload UI
     _specifiers = nil;
     [self reloadSpecifiers];
+}
+
+-(void)killYouTube {
+    pid_t pid;
+
+    char *argv[] = {
+        "killall",
+        "-9",
+        "YouTube",
+        NULL
+    };
+
+    posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, argv, environ);
 }
 
 @end

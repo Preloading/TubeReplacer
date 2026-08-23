@@ -8,7 +8,7 @@
 @implementation TRSabrStream(PartHandler)
 
 -(void)handlePart:(TRUmpPart*)part currentlyParsingDatas:(NSMutableDictionary**)currentlyParsingDatas currentlyParsingHeaders:(NSMutableDictionary**)currentlyParsingHeaders {
-    NSLog(@"data type -> %i", part.type);
+    // NSLog(@"data type -> %i", part.type);
     NSError *error = nil;
     switch (part.type) {
     case UMPPartId_UmpPartIdStreamProtectionStatus: {

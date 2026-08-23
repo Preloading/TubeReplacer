@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 
 @interface TRUmpReader : NSObject
-
-+(uint64_t)readVarint:(NSData *)data offset:(NSUInteger*)offset;
-+(void)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler;
+// reads as much SABR data as is presently in the NSData specified.
+// @returns amount of data successfully read
++(NSUInteger)read:(NSData*)data handlePartWith:(void (^)(TRUmpPart *))partHandler;
 @end
