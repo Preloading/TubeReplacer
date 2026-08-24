@@ -3,7 +3,4 @@
 
 @implementation TRSabrHTTPServer
 
--(BOOL)isSocketActive {
-    return [asyncSocket isConnected];
-}
 @end

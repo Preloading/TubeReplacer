@@ -39,6 +39,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	subtitles.x \
 	crashreporter.x \
 	infooverflowfix.x \
+	videostats.x \
 	$(COMMON)/potoken.m \
 	$(COMMON_GOOGLE)/potoken-google.m \
 	$(shell find $(COMMON)/SABR -type f -name '*.m') \

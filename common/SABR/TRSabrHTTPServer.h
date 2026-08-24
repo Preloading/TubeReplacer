@@ -3,6 +3,4 @@
 
 @interface TRSabrHTTPServer : HTTPServer
 @property (nonatomic, assign) TRSabrStream *stream;
-
--(BOOL)isSocketActive;
 @end
