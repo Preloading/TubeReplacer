@@ -46,7 +46,7 @@ FOUNDATION_EXPORT DDRange DDRangeFromString(NSString *aString);
 
 NSInteger DDRangeCompare(DDRangePointer pDDRange1, DDRangePointer pDDRange2);
 
-@interface NSValue (NSValueDDRangeExtensions)
+@interface NSValue (NSValueTRDDRangeExtensions)
 
 + (NSValue *)valueWithDDRange:(DDRange)range;
 - (DDRange)ddrangeValue;

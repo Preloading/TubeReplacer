@@ -2,7 +2,7 @@
 #import "HTTPConnection.h"
 
 
-@implementation HTTPDynamicFileResponse
+@implementation TRHTTPDynamicFileResponse
 
 static NSOperationQueue *operationQueue;
 
@@ -43,7 +43,7 @@ static NSOperationQueue *operationQueue;
 // The HTTPConnection will then request our data via the readDataOfLength method.
 
 - (id)initWithFilePath:(NSString *)fpath
-         forConnection:(HTTPConnection *)parent
+         forConnection:(TRHTTPConnection *)parent
           runLoopModes:(NSArray *)modes
              separator:(NSString *)separatorStr
  replacementDictionary:(NSDictionary *)dict

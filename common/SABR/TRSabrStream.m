@@ -124,6 +124,10 @@
     } completionCallback:^(NSError *error) {
         if (error) {
             NSLog(@"an error occured! error -> %@", error);
+            [currentlyParsingDatas release];
+            [currentlyParsingHeaders release];
+            [self declareStreamBad];
+            return;
         }
         [currentlyParsingDatas release];
         [currentlyParsingHeaders release];
@@ -501,6 +505,18 @@
             [self requestAdditionalData:requestedAudioSegmentEnd*1000  state:TRSabrBufferingNormal];
         }
     }
+}
+
+-(NSURL*)URL {
+    return [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", self.httpServer.port]];
+}
+
+-(int)format {
+    return 5;
+}
+
+-(BOOL)encrypted {
+    return NO;
 }
 
 -(void)cleanup {

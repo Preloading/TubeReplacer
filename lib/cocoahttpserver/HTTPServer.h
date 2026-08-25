@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-@class AsyncSocket;
-@class WebSocket;
+@class TRAsyncSocket;
+@class TRWebSocket;
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060 // Mac OS X 10.6
   #define IMPLEMENTED_PROTOCOLS <NSNetServiceDelegate>
@@ -12,10 +12,10 @@
 #endif
 
 
-@interface HTTPServer : NSObject IMPLEMENTED_PROTOCOLS
+@interface TRHTTPServer : NSObject IMPLEMENTED_PROTOCOLS
 {
 	// Underlying asynchronous TCP/IP socket
-	AsyncSocket *asyncSocket;
+	TRAsyncSocket *asyncSocket;
 	
 	// Standard delegate
 	id delegate;
@@ -64,7 +64,7 @@
 - (BOOL)start:(NSError **)errPtr;
 - (BOOL)stop;
 
-- (void)addWebSocket:(WebSocket *)ws;
+- (void)addWebSocket:(TRWebSocket *)ws;
 
 - (NSUInteger)numberOfHTTPConnections;
 - (NSUInteger)numberOfWebSocketConnections;

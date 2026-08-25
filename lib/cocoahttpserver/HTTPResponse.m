@@ -1,7 +1,7 @@
 #import "HTTPResponse.h"
 
 
-@implementation HTTPFileResponse
+@implementation TRHTTPFileResponse
 
 - (id)initWithFilePath:(NSString *)filePathParam
 {
@@ -67,7 +67,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation HTTPDataResponse
+@implementation TRHTTPDataResponse
 
 - (id)initWithData:(NSData *)dataParam
 {
@@ -123,7 +123,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation HTTPRedirectResponse
+@implementation TRHTTPRedirectResponse
 
 - (id)initWithPath:(NSString *)path
 {

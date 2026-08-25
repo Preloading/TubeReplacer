@@ -1,15 +1,15 @@
 #import "HTTPAuthenticationRequest.h"
 #import "HTTPMessage.h"
 
-@interface HTTPAuthenticationRequest (PrivateAPI)
+@interface TRHTTPAuthenticationRequest (PrivateAPI)
 - (NSString *)quotedSubHeaderFieldValue:(NSString *)param fromHeaderFieldValue:(NSString *)header;
 - (NSString *)nonquotedSubHeaderFieldValue:(NSString *)param fromHeaderFieldValue:(NSString *)header;
 @end
 
 
-@implementation HTTPAuthenticationRequest
+@implementation TRHTTPAuthenticationRequest
 
-- (id)initWithRequest:(HTTPMessage *)request
+- (id)initWithRequest:(TRHTTPMessage *)request
 {
 	if ((self = [super init]))
 	{

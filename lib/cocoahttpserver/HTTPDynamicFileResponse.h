@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "HTTPResponse.h"
 
-@class HTTPConnection;
+@class TRHTTPConnection;
 
 /**
  * This class is designed to assist with dynamic content.
@@ -35,9 +35,9 @@
  * This class is also asynchronous, so it will perform the file IO on a background thread via an NSOperationQueue.
 **/
 
-@interface HTTPDynamicFileResponse : NSObject <HTTPResponse>
+@interface TRHTTPDynamicFileResponse : NSObject <TRHTTPResponse>
 {
-	HTTPConnection *connection;
+	TRHTTPConnection *connection;
 	NSThread *connectionThread;
 	NSArray *connectionRunLoopModes;
 	
@@ -59,7 +59,7 @@
 }
 
 - (id)initWithFilePath:(NSString *)filePath
-         forConnection:(HTTPConnection *)connection
+         forConnection:(TRHTTPConnection *)connection
           runLoopModes:(NSArray *)modes
              separator:(NSString *)separatorStr
  replacementDictionary:(NSDictionary *)dictionary;

@@ -8,7 +8,7 @@
 #define HTTPVersion1_1  ((NSString *)kCFHTTPVersion1_1)
 
 
-@interface HTTPMessage : NSObject
+@interface TRHTTPMessage : NSObject
 {
 	CFHTTPMessageRef message;
 }

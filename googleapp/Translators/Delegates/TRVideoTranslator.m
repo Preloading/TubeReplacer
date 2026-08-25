@@ -313,18 +313,21 @@
 
             // sabr testing
             TRSabrStream *sabrStream = [[TRSabrStream alloc] initWithStreamUrl:sabrURL ustreamConfig:ustreamConfig formats:adaptiveFormats videoId:videoId];
+            [ytStreams addObject:sabrStream];
+
+
             // NSURL *sabrURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%i/master.m3u8", sabrStream.httpServer.port]];
-            id stream = nil;
-            if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
-                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream format:5 encrypted:NO precached:NO];
-            } else if ([version() isEqualToString:@"2.0.0"]) {
-                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream MIMEType:@"sabr" format:5];
-            } else {
-                stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream format:5 encrypted:NO];
-            }
-            if (stream) {
-                [ytStreams addObject:stream];
-            }
+            // id stream = nil;
+            // if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+            //     stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream format:5 encrypted:NO precached:NO];
+            // } else if ([version() isEqualToString:@"2.0.0"]) {
+            //     stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream MIMEType:@"sabr" format:5];
+            // } else {
+            //     stream = [NSClassFromString(@"YTStream") streamWithURL:sabrStream format:5 encrypted:NO];
+            // }
+            // if (stream) {
+            //     [ytStreams addObject:stream];
+            // }
         }
         
             

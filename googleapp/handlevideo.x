@@ -23,7 +23,7 @@
     for (YTStream *stream in streams) {
         if ([stream format] == 5) {
             // sabr case
-            TRSabrStream *sabrStream = [stream URL];
+            TRSabrStream *sabrStream = (TRSabrStream*)stream;
             if ([sabrStream isStreamBad])
                 continue;
         }
@@ -46,7 +46,7 @@
     for (YTStream *stream in streams) {
         if ([stream format] == 5) {
             // sabr case
-            TRSabrStream *sabrStream = [stream URL];
+            TRSabrStream *sabrStream = (TRSabrStream*)stream;
             if ([sabrStream isStreamBad])
                 continue;
         }
@@ -71,7 +71,7 @@
     for (YTStream *stream in streams) {
         if ([stream format] == 5) {
             // sabr case
-            TRSabrStream *sabrStream = [stream URL];
+            TRSabrStream *sabrStream = (TRSabrStream*)stream;
             if ([sabrStream isStreamBad])
                 continue;
         }
@@ -92,34 +92,13 @@
 
 -(void)setAndPlayVideoStream:(YTStream *)stream
 {
-    NSLog(@"a");
     BOOL version10 = ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]);
 
-    if (!version10) {
-        if ([[self valueForKey:l(@"hasFocus")] intValue] == 0)
-        {
-            [self setValue:@0 forKey:l(@"startPlayback")];
-            return;
-        }
-    }
-    
-    NSLog(@"b");
-    [(YTPlayerView *)[self valueForKey:l(@"playerView")] setAirPlayAllowed:1];
     YTPlayer *player = [self valueForKey:l(@"player")];
     
-
-    double currentPostion = 0;
-    if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
-        currentPostion = [[self valueForKey:l(@"savedMediaTime")] doubleValue];
-    else if (!version10)
-        currentPostion = [[self valueForKey:l(@"savedSeekTime")] doubleValue];
-
-
-    NSLog(@"c");
-
     // deal with SABR
     if ([stream format] == 5) {
-        TRSabrStream *sabrStream = (TRSabrStream*)[stream URL];
+        TRSabrStream *sabrStream = (TRSabrStream*)stream;
         NSLog(@"d");
         sabrStream.currentPlayerTimeFunction = ^double{
             return [player currentMediaTime];
@@ -136,47 +115,17 @@
         }
 
         [sabrStream start];
-        
-        NSLog(@"e");
-
-        if (version10) {
-            [player setContentURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]];
-        } else {
-            if (currentPostion != 0)
-                [player seekToTime:currentPostion];
-        
-            [player setStreamURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", sabrStream.httpServer.port]]
-                initialMediaTime:currentPostion
-                airPlayAllowed:1];
-        }
-      
-          NSLog(@"f");
-
-    } else {
-        if (version10) {
-            [player setContentURL:[stream URL]];
-        } else {
-            [player setStreamURL:[stream URL]
-                      initialMediaTime:currentPostion
-                      airPlayAllowed:1];
-        }
     }
     
-    NSLog(@"d");
-    if (version10) {
-        [self playIfPermitted];
-    } else {
-      if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
-            [self setValue:@0.0 forKey:l(@"savedMediaTime")];
-        else
-            [self setValue:@0.0 forKey:l(@"savedSeekTime")];
+    return %orig;
+}
 
-        if ([[self valueForKey:l(@"startPlayback")] intValue] != 0)
-        {
-            [self setValue:@0 forKey:l(@"startPlayback")];
-            [self playIfPermitted];
-        }
+
+-(MLRemoteStream*)remoteStreamFromYTStream:(YTStream*)stream withURL:(NSURL*)url {
+    if ([stream format] == 5) {
+        return (MLRemoteStream*)stream;
     }
+    return %orig;
 }
 
 -(void)dealloc {
@@ -225,6 +174,33 @@
 //     [self reloadPlayerStream];
 //     %orig;
 // }
+
+%end
+
+%hook MLPassThroughProxy
+
+-(MLRemoteStream*)selectStream {
+    NSArray<YTStream*> *streams = [(MLStreamManifest*)[self valueForKey:l(@"streamManifest")] remoteStreams];
+    
+    // return the stream with the highest number lol
+    MLRemoteStream *selectedStream = nil;
+    
+    for (MLRemoteStream *stream in streams) {
+        if ([stream format] == 5) {
+            // sabr case
+            TRSabrStream *sabrStream = (TRSabrStream*)stream;
+            if ([sabrStream isStreamBad])
+                continue;
+        }
+        if ([stream format] == 2)
+            return stream; // if they are using custom, **we use custom**
+        if ([stream format] > [selectedStream format])
+            selectedStream = stream;
+    }
+
+    NSLog(@"selected new stream -> %@", selectedStream);
+    return selectedStream;
+}
 
 %end
 

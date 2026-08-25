@@ -2,7 +2,7 @@
 #import "TRSabrMedia.h"
 #include <objc/NSObjCRuntime.h>
 
-@interface TRSabrHTTPResponse : NSObject <HTTPResponse>
+@interface TRSabrHTTPResponse : NSObject <TRHTTPResponse>
 {
 	BOOL done;
     NSUInteger offset;

@@ -28,8 +28,8 @@
 #define READALL_CHUNKSIZE	256         // Incremental increase in buffer size
 #define WRITE_CHUNKSIZE    (1024 * 4)   // Limit on size of each write pass
 
-NSString *const AsyncSocketException = @"AsyncSocketException";
-NSString *const AsyncSocketErrorDomain = @"AsyncSocketErrorDomain";
+NSString *const TRAsyncSocketException = @"TRAsyncSocketException";
+NSString *const TRAsyncSocketErrorDomain = @"TRAsyncSocketErrorDomain";
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 // Mutex lock used by all instances of AsyncSocket, to protect getaddrinfo.
@@ -37,7 +37,7 @@ NSString *const AsyncSocketErrorDomain = @"AsyncSocketErrorDomain";
 static NSString *getaddrinfoLock = @"lock";
 #endif
 
-enum AsyncSocketFlags
+enum TRAsyncSocketFlags
 {
 	kEnablePreBuffering      = 1 <<  0,  // If set, pre-buffering is enabled
 	kDidStartDelegate        = 1 <<  1,  // If set, disconnection results in delegate call
@@ -55,7 +55,7 @@ enum AsyncSocketFlags
 	kSocketHasBytesAvailable = 1 << 13,  // If set, we know socket has bytes available. If unset, it's unknown.
 };
 
-@interface AsyncSocket (Private)
+@interface TRAsyncSocket (Private)
 
 // Connecting
 - (void)startConnectTimeout:(NSTimeInterval)timeout;
@@ -173,7 +173,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
  *  - reading to a certain separator
  *  - or simply reading the first chunk of available data
 **/
-@interface AsyncReadPacket : NSObject
+@interface TRAsyncReadPacket : NSObject
 {
   @public
 	NSMutableData *buffer;
@@ -203,7 +203,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 - (NSInteger)searchForTermAfterPreBuffering:(NSUInteger)numBytes;
 @end
 
-@implementation AsyncReadPacket
+@implementation TRAsyncReadPacket
 
 - (id)initWithData:(NSMutableData *)d
        startOffset:(NSUInteger)s
@@ -597,7 +597,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 /**
  * The AsyncWritePacket encompasses the instructions for any given write.
 **/
-@interface AsyncWritePacket : NSObject
+@interface TRAsyncWritePacket : NSObject
 {
   @public
 	NSData *buffer;
@@ -608,7 +608,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 - (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(long)i;
 @end
 
-@implementation AsyncWritePacket
+@implementation TRAsyncWritePacket
 
 - (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(long)i
 {
@@ -669,7 +669,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation AsyncSocket
+@implementation TRAsyncSocket
 
 - (id)init
 {
@@ -796,7 +796,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 {
 	// Check to make sure we're actually reading something right now,
 	// and that the read packet isn't an AsyncSpecialPacket (upgrade to TLS).
-	if (!theCurrentRead || ![theCurrentRead isKindOfClass:[AsyncReadPacket class]])
+	if (!theCurrentRead || ![theCurrentRead isKindOfClass:[TRAsyncReadPacket class]])
 	{
 		if (tag != NULL)   *tag = 0;
 		if (done != NULL)  *done = 0;
@@ -826,7 +826,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 {
 	// Check to make sure we're actually writing something right now,
 	// and that the write packet isn't an AsyncSpecialPacket (upgrade to TLS).
-	if (!theCurrentWrite || ![theCurrentWrite isKindOfClass:[AsyncWritePacket class]])
+	if (!theCurrentWrite || ![theCurrentWrite isKindOfClass:[TRAsyncWritePacket class]])
 	{
 		if (tag != NULL)   *tag = 0;
 		if (done != NULL)  *done = 0;
@@ -1191,13 +1191,13 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 {
 	if (theDelegate == NULL)
     {
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to accept without a delegate. Set a delegate first."];
     }
 	
 	if (theSocket4 != NULL || theSocket6 != NULL)
     {
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to accept while connected or accepting connections. Disconnect first."];
     }
 
@@ -1400,13 +1400,13 @@ Failed:
 {
 	if(theDelegate == NULL)
 	{
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to connect without a delegate. Set a delegate first."];
 	}
 
 	if(![self isDisconnected])
 	{
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to connect while connected or accepting connections. Disconnect first."];
 	}
 	
@@ -1460,13 +1460,13 @@ Failed:
 {
 	if (theDelegate == NULL)
 	{
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to connect without a delegate. Set a delegate first."];
 	}
 	
 	if (![self isDisconnected])
 	{
-		[NSException raise:AsyncSocketException
+		[NSException raise:TRAsyncSocketException
 		            format:@"Attempting to connect while connected or accepting connections. Disconnect first."];
 	}
 	
@@ -1584,7 +1584,7 @@ Failed:
 			NSString *errMsg = @"Remote address is not IPv4 or IPv6";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
+			*errPtr = [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
 		}
 		return NO;
 	}
@@ -1619,7 +1619,7 @@ Failed:
 			NSString *errMsg = @"Interface address is not IPv4 or IPv6";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
+			*errPtr = [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
 		}
 		return NO;
 	}
@@ -1704,7 +1704,7 @@ Failed:
 	{
 		// New socket inherits same delegate and run loop modes.
 		// Note: We use [self class] to support subclassing AsyncSocket.
-		AsyncSocket *newSocket = [[[[self class] alloc] initWithDelegate:theDelegate] autorelease];
+		TRAsyncSocket *newSocket = [[[[self class] alloc] initWithDelegate:theDelegate] autorelease];
 		[newSocket setRunLoopModes:theRunLoopModes];
 		
 		if(![newSocket createStreamsFromNative:newNativeSocket error:nil])
@@ -2089,7 +2089,7 @@ Failed:
 		// We never finished the current read.
 		// Check to see if it's a normal read packet (not AsyncSpecialPacket) and if it had read anything yet.
 		
-		if(([theCurrentRead isKindOfClass:[AsyncReadPacket class]]) && (theCurrentRead->bytesDone > 0))
+		if(([theCurrentRead isKindOfClass:[TRAsyncReadPacket class]]) && (theCurrentRead->bytesDone > 0))
 		{
 			// We need to move its data into the front of the partial read buffer.
 			
@@ -2359,7 +2359,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketCFSocketError userInfo:info];
 }
 
 - (NSError *)getStreamError
@@ -2391,7 +2391,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketCanceledError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketCanceledError userInfo:info];
 }
 
 /**
@@ -2405,7 +2405,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketConnectTimeoutError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketConnectTimeoutError userInfo:info];
 }
 
 /**
@@ -2419,7 +2419,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketReadMaxedOutError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketReadMaxedOutError userInfo:info];
 }
 
 /**
@@ -2433,7 +2433,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketReadTimeoutError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketReadTimeoutError userInfo:info];
 }
 
 /**
@@ -2447,7 +2447,7 @@ Failed:
 	
 	NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 	
-	return [NSError errorWithDomain:AsyncSocketErrorDomain code:AsyncSocketWriteTimeoutError userInfo:info];
+	return [NSError errorWithDomain:TRAsyncSocketErrorDomain code:AsyncSocketWriteTimeoutError userInfo:info];
 }
 
 - (NSError *)errorFromCFStreamError:(CFStreamError)err
@@ -3204,7 +3204,7 @@ Failed:
 	if (offset > [buffer length]) return;
 	if (theFlags & kForbidReadsWrites) return;
 	
-	AsyncReadPacket *packet = [[AsyncReadPacket alloc] initWithData:buffer
+	TRAsyncReadPacket *packet = [[TRAsyncReadPacket alloc] initWithData:buffer
 	                                                    startOffset:offset
 	                                                      maxLength:length
 	                                                        timeout:timeout
@@ -3232,7 +3232,7 @@ Failed:
 	if (offset > [buffer length]) return;
 	if (theFlags & kForbidReadsWrites) return;
 	
-	AsyncReadPacket *packet = [[AsyncReadPacket alloc] initWithData:buffer
+	TRAsyncReadPacket *packet = [[TRAsyncReadPacket alloc] initWithData:buffer
 	                                                    startOffset:offset
 	                                                      maxLength:0
 	                                                        timeout:timeout
@@ -3276,7 +3276,7 @@ Failed:
 	if (length > 0 && length < [data length]) return;
 	if (theFlags & kForbidReadsWrites) return;
 	
-	AsyncReadPacket *packet = [[AsyncReadPacket alloc] initWithData:buffer
+	TRAsyncReadPacket *packet = [[TRAsyncReadPacket alloc] initWithData:buffer
 	                                                    startOffset:offset
 	                                                      maxLength:length
 	                                                        timeout:timeout
@@ -3730,7 +3730,7 @@ Failed:
 	if (data == nil || [data length] == 0) return;
 	if (theFlags & kForbidReadsWrites) return;
 	
-	AsyncWritePacket *packet = [[AsyncWritePacket alloc] initWithData:data timeout:timeout tag:tag];
+	TRAsyncWritePacket *packet = [[TRAsyncWritePacket alloc] initWithData:data timeout:timeout tag:tag];
 	
 	[theWriteQueue addObject:packet];
 	[self scheduleDequeueWrite];
@@ -4121,7 +4121,7 @@ static void MyCFSocketCallback (CFSocketRef sref, CFSocketCallBackType type, CFD
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	AsyncSocket *theSocket = [[(AsyncSocket *)pInfo retain] autorelease];
+	TRAsyncSocket *theSocket = [[(TRAsyncSocket *)pInfo retain] autorelease];
 	[theSocket doCFSocketCallback:type forSocket:sref withAddress:(NSData *)address withData:pData];
 	
 	[pool release];
@@ -4135,7 +4135,7 @@ static void MyCFReadStreamCallback (CFReadStreamRef stream, CFStreamEventType ty
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	AsyncSocket *theSocket = [[(AsyncSocket *)pInfo retain] autorelease];
+	TRAsyncSocket *theSocket = [[(TRAsyncSocket *)pInfo retain] autorelease];
 	[theSocket doCFReadStreamCallback:type forStream:stream];
 	
 	[pool release];
@@ -4149,7 +4149,7 @@ static void MyCFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType 
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	AsyncSocket *theSocket = [[(AsyncSocket *)pInfo retain] autorelease];
+	TRAsyncSocket *theSocket = [[(TRAsyncSocket *)pInfo retain] autorelease];
 	[theSocket doCFWriteStreamCallback:type forStream:stream];
 	
 	[pool release];

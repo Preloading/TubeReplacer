@@ -79,7 +79,7 @@ NSInteger DDRangeCompare(DDRangePointer pDDRange1, DDRangePointer pDDRange2)
 	return NSOrderedSame;
 }
 
-@implementation NSValue (NSValueDDRangeExtensions)
+@implementation NSValue (NSValueTRDDRangeExtensions)
 
 + (NSValue *)valueWithDDRange:(DDRange)range
 {

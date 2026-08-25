@@ -57,4 +57,11 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType;
 -(void)declareStreamBad;
 -(void)start;
+
+// YTStream compatibility
+-(NSURL*)URL;
+-(int)format;
+-(BOOL)encrypted;
+
+
 @end

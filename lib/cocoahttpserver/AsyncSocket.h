@@ -10,14 +10,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class AsyncSocket;
-@class AsyncReadPacket;
-@class AsyncWritePacket;
+@class TRAsyncSocket;
+@class TRAsyncReadPacket;
+@class TRAsyncWritePacket;
 
-extern NSString *const AsyncSocketException;
-extern NSString *const AsyncSocketErrorDomain;
+extern NSString *const TRAsyncSocketException;
+extern NSString *const TRAsyncSocketErrorDomain;
 
-enum AsyncSocketError
+enum TRAsyncSocketError
 {
 	AsyncSocketCFSocketError = kCFSocketError,	// From CFSocketError enum.
 	AsyncSocketNoError = 0,						// Never used.
@@ -27,9 +27,9 @@ enum AsyncSocketError
 	AsyncSocketReadTimeoutError,
 	AsyncSocketWriteTimeoutError
 };
-typedef enum AsyncSocketError AsyncSocketError;
+typedef enum TRAsyncSocketError AsyncSocketError;
 
-@interface NSObject (AsyncSocketDelegate)
+@interface NSObject (TRAsyncSocketDelegate)
 
 /**
  * In the event of an error, the socket is closed.
@@ -37,7 +37,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * When connecting, this delegate method may be called
  * before"onSocket:didAcceptNewSocket:" or "onSocket:didConnectToHost:".
 **/
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err;
+- (void)onSocket:(TRAsyncSocket *)sock willDisconnectWithError:(NSError *)err;
 
 /**
  * Called when a socket disconnects with or without error.  If you want to release a socket after it disconnects,
@@ -46,19 +46,19 @@ typedef enum AsyncSocketError AsyncSocketError;
  * If you call the disconnect method, and the socket wasn't already disconnected,
  * this delegate method will be called before the disconnect method returns.
 **/
-- (void)onSocketDidDisconnect:(AsyncSocket *)sock;
+- (void)onSocketDidDisconnect:(TRAsyncSocket *)sock;
 
 /**
  * Called when a socket accepts a connection.  Another socket is spawned to handle it. The new socket will have
  * the same delegate and will call "onSocket:didConnectToHost:port:".
 **/
-- (void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket;
+- (void)onSocket:(TRAsyncSocket *)sock didAcceptNewSocket:(TRAsyncSocket *)newSocket;
 
 /**
  * Called when a new socket is spawned to handle a connection.  This method should return the run-loop of the
  * thread on which the new socket and its delegate should operate. If omitted, [NSRunLoop currentRunLoop] is used.
 **/
-- (NSRunLoop *)onSocket:(AsyncSocket *)sock wantsRunLoopForNewSocket:(AsyncSocket *)newSocket;
+- (NSRunLoop *)onSocket:(TRAsyncSocket *)sock wantsRunLoopForNewSocket:(TRAsyncSocket *)newSocket;
 
 /**
  * Called when a socket is about to connect. This method should return YES to continue, or NO to abort.
@@ -71,37 +71,37 @@ typedef enum AsyncSocketError AsyncSocketError;
  * CFSocket and CFSocketNativeHandle (BSD socket) as desired prior to connection. You will be able to access and
  * configure the CFReadStream and CFWriteStream in the onSocket:didConnectToHost:port: method.
 **/
-- (BOOL)onSocketWillConnect:(AsyncSocket *)sock;
+- (BOOL)onSocketWillConnect:(TRAsyncSocket *)sock;
 
 /**
  * Called when a socket connects and is ready for reading and writing.
  * The host parameter will be an IP address, not a DNS name.
 **/
-- (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port;
+- (void)onSocket:(TRAsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port;
 
 /**
  * Called when a socket has completed reading the requested data into memory.
  * Not called if there is an error.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag;
+- (void)onSocket:(TRAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag;
 
 /**
  * Called when a socket has read in data, but has not yet completed the read.
  * This would occur if using readToData: or readToLength: methods.
  * It may be used to for things such as updating progress bars.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
+- (void)onSocket:(TRAsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
 
 /**
  * Called when a socket has completed writing the requested data. Not called if there is an error.
 **/
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag;
+- (void)onSocket:(TRAsyncSocket *)sock didWriteDataWithTag:(long)tag;
 
 /**
  * Called when a socket has written some data, but has not yet completed the entire write.
  * It may be used to for things such as updating progress bars.
 **/
-- (void)onSocket:(AsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
+- (void)onSocket:(TRAsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
 
 /**
  * Called if a read operation has reached its timeout without completing.
@@ -114,7 +114,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * Note that this method may be called multiple times for a single read if you return positive numbers.
 **/
-- (NSTimeInterval)onSocket:(AsyncSocket *)sock
+- (NSTimeInterval)onSocket:(TRAsyncSocket *)sock
   shouldTimeoutReadWithTag:(long)tag
                    elapsed:(NSTimeInterval)elapsed
                  bytesDone:(NSUInteger)length;
@@ -130,7 +130,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * Note that this method may be called multiple times for a single write if you return positive numbers.
 **/
-- (NSTimeInterval)onSocket:(AsyncSocket *)sock
+- (NSTimeInterval)onSocket:(TRAsyncSocket *)sock
  shouldTimeoutWriteWithTag:(long)tag
                    elapsed:(NSTimeInterval)elapsed
                  bytesDone:(NSUInteger)length;
@@ -142,7 +142,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * If a SSL/TLS negotiation fails (invalid certificate, etc) then the socket will immediately close,
  * and the onSocket:willDisconnectWithError: delegate method will be called with the specific SSL error code.
 **/
-- (void)onSocketDidSecure:(AsyncSocket *)sock;
+- (void)onSocketDidSecure:(TRAsyncSocket *)sock;
 
 @end
 
@@ -150,7 +150,7 @@ typedef enum AsyncSocketError AsyncSocketError;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface AsyncSocket : NSObject
+@interface TRAsyncSocket : NSObject
 {
 	CFSocketNativeHandle theNativeSocket4;
 	CFSocketNativeHandle theNativeSocket6;
@@ -170,12 +170,12 @@ typedef enum AsyncSocketError AsyncSocketError;
 	NSTimer *theConnectTimer;
 
 	NSMutableArray *theReadQueue;
-	AsyncReadPacket *theCurrentRead;
+	TRAsyncReadPacket *theCurrentRead;
 	NSTimer *theReadTimer;
 	NSMutableData *partialReadBuffer;
 	
 	NSMutableArray *theWriteQueue;
-	AsyncWritePacket *theCurrentWrite;
+	TRAsyncWritePacket *theCurrentWrite;
 	NSTimer *theWriteTimer;
 
 	id theDelegate;

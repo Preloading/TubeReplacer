@@ -1,5 +1,5 @@
 #include "lib/cocoahttpserver/HTTPConnection.h"
 
-@interface TRSabrHTTPConnection : HTTPConnection
+@interface TRSabrHTTPConnection : TRHTTPConnection
 
 @end

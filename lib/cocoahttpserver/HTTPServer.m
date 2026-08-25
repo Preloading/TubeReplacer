@@ -2,7 +2,7 @@
 #import "HTTPServer.h"
 #import "HTTPConnection.h"
 
-@implementation HTTPServer
+@implementation TRHTTPServer
 
 /**
  * Standard Constructor.
@@ -13,10 +13,10 @@
 	if((self = [super init]))
 	{
 		// Initialize underlying asynchronous tcp/ip socket
-		asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
+		asyncSocket = [[TRAsyncSocket alloc] initWithDelegate:self];
 		
 		// Use default connection class of HTTPConnection
-		connectionClass = [HTTPConnection self];
+		connectionClass = [TRHTTPConnection self];
 		
 		// Configure default values for bonjour service
 		
@@ -281,7 +281,7 @@
 	return YES;
 }
 
-- (void)addWebSocket:(WebSocket *)ws
+- (void)addWebSocket:(TRWebSocket *)ws
 {
 	@synchronized(webSockets)
 	{
@@ -325,7 +325,7 @@
 #pragma mark AsyncSocket Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
--(void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket
+-(void)onSocket:(TRAsyncSocket *)sock didAcceptNewSocket:(TRAsyncSocket *)newSocket
 {
 	id newConnection = [[connectionClass alloc] initWithAsyncSocket:newSocket forServer:self];
 	

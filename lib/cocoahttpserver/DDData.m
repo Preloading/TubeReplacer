@@ -6,7 +6,7 @@
 #import "SSCrypto.h"
 #endif
 
-@implementation NSData (DDData)
+@implementation NSData (TRDDData)
 
 #if TARGET_OS_IPHONE
 static char encodingTable[64] = {

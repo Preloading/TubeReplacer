@@ -63,9 +63,9 @@
 // the HTTP_RESPONSE tag. For all other segments prior to the last segment use HTTP_PARTIAL_RESPONSE, or some other
 // tag of your own invention.
 
-@interface HTTPConnection (PrivateAPI)
-- (HTTPMessage *)newUniRangeResponse:(UInt64)contentLength;
-- (HTTPMessage *)newMultiRangeResponse:(UInt64)contentLength;
+@interface TRHTTPConnection (PrivateAPI)
+- (TRHTTPMessage *)newUniRangeResponse:(UInt64)contentLength;
+- (TRHTTPMessage *)newMultiRangeResponse:(UInt64)contentLength;
 - (NSData *)chunkedTransferSizeLineForLength:(NSUInteger)length;
 - (NSData *)chunkedTransferFooter;
 @end
@@ -74,7 +74,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation HTTPConnection
+@implementation TRHTTPConnection
 
 static NSMutableArray *recentNonces;
 
@@ -112,7 +112,7 @@ static NSMutableArray *recentNonces;
  * Associates this new HTTP connection with the given AsyncSocket.
  * This HTTP connection object will become the socket's delegate and take over responsibility for the socket.
 **/
-- (id)initWithAsyncSocket:(AsyncSocket *)newSocket forServer:(HTTPServer *)myServer
+- (id)initWithAsyncSocket:(TRAsyncSocket *)newSocket forServer:(TRHTTPServer *)myServer
 {
 	if ((self = [super init]))
 	{
@@ -132,7 +132,7 @@ static NSMutableArray *recentNonces;
 		lastNC = 0;
 		
 		// Create a new HTTP message
-		request = [[HTTPMessage alloc] initEmptyRequest];
+		request = [[TRHTTPMessage alloc] initEmptyRequest];
 		
 		numHeaderLines = 0;
 		
@@ -346,7 +346,7 @@ static NSMutableArray *recentNonces;
 	[recentNonces addObject:newNonce];
 	
 	[NSTimer scheduledTimerWithTimeInterval:NONCE_TIMEOUT
-	                                 target:[HTTPConnection class]
+	                                 target:[TRHTTPConnection class]
 	                               selector:@selector(removeRecentNonce:)
 	                               userInfo:newNonce
 	                                repeats:NO];
@@ -359,7 +359,7 @@ static NSMutableArray *recentNonces;
 - (BOOL)isAuthenticated
 {
 	// Extract the authentication information from the Authorization header
-	HTTPAuthenticationRequest *auth = [[[HTTPAuthenticationRequest alloc] initWithRequest:request] autorelease];
+	TRHTTPAuthenticationRequest *auth = [[[TRHTTPAuthenticationRequest alloc] initWithRequest:request] autorelease];
 	
 	if ([self useDigestAccessAuthentication])
 	{
@@ -490,7 +490,7 @@ static NSMutableArray *recentNonces;
 /**
  * Adds a digest access authentication challenge to the given response.
 **/
-- (void)addDigestAuthChallenge:(HTTPMessage *)response
+- (void)addDigestAuthChallenge:(TRHTTPMessage *)response
 {
 	NSString *authFormat = @"Digest realm=\"%@\", qop=\"auth\", nonce=\"%@\"";
 	NSString *authInfo = [NSString stringWithFormat:authFormat, [self realm], [self generateNonce]];
@@ -501,7 +501,7 @@ static NSMutableArray *recentNonces;
 /**
  * Adds a basic authentication challenge to the given response.
 **/
-- (void)addBasicAuthChallenge:(HTTPMessage *)response
+- (void)addBasicAuthChallenge:(TRHTTPMessage *)response
 {
 	NSString *authFormat = @"Basic realm=\"%@\"";
 	NSString *authInfo = [NSString stringWithFormat:authFormat, [self realm]];
@@ -518,7 +518,7 @@ static NSMutableArray *recentNonces;
 **/
 - (void)startReadingRequest
 {
-	[asyncSocket readDataToData:[AsyncSocket CRLFData]
+	[asyncSocket readDataToData:[TRAsyncSocket CRLFData]
 	                withTimeout:READ_TIMEOUT
 	                  maxLength:LIMIT_MAX_HEADER_LINE_LENGTH
 	                        tag:HTTP_REQUEST_HEADER];
@@ -845,7 +845,7 @@ static NSMutableArray *recentNonces;
 		}
 	}
 	
-	HTTPMessage *response;
+	TRHTTPMessage *response;
 	
 	if (!isRangeRequest)
 	{
@@ -857,7 +857,7 @@ static NSMutableArray *recentNonces;
 		{
 			status = [httpResponse status];
 		}
-		response = [[HTTPMessage alloc] initResponseWithStatusCode:status description:nil version:HTTPVersion1_1];
+		response = [[TRHTTPMessage alloc] initResponseWithStatusCode:status description:nil version:HTTPVersion1_1];
 		
 		if (isChunked)
 		{
@@ -921,7 +921,7 @@ static NSMutableArray *recentNonces;
 					}
 					else
 					{
-						NSData *footer = [AsyncSocket CRLFData];
+						NSData *footer = [TRAsyncSocket CRLFData];
 						[asyncSocket writeData:footer withTimeout:WRITE_HEAD_TIMEOUT tag:HTTP_CHUNKED_RESPONSE_FOOTER];
 					}
 				}
@@ -991,10 +991,10 @@ static NSMutableArray *recentNonces;
  * 
  * Note: The returned HTTPMessage is owned by the sender, who is responsible for releasing it.
 **/
-- (HTTPMessage *)newUniRangeResponse:(UInt64)contentLength
+- (TRHTTPMessage *)newUniRangeResponse:(UInt64)contentLength
 {
 	// Status Code 206 - Partial Content
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:206 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:206 description:nil version:HTTPVersion1_1];
 	
 	DDRange range = [[ranges objectAtIndex:0] ddrangeValue];
 	
@@ -1013,10 +1013,10 @@ static NSMutableArray *recentNonces;
  * 
  * Note: The returned HTTPMessage is owned by the sender, who is responsible for releasing it.
 **/
-- (HTTPMessage *)newMultiRangeResponse:(UInt64)contentLength
+- (TRHTTPMessage *)newMultiRangeResponse:(UInt64)contentLength
 {
 	// Status Code 206 - Partial Content
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:206 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:206 description:nil version:HTTPVersion1_1];
 	
 	// We have to send each range using multipart/byteranges
 	// So each byterange has to be prefix'd and suffix'd with the boundry
@@ -1175,7 +1175,7 @@ static NSMutableArray *recentNonces;
 			}
 			else
 			{
-				NSData *footer = [AsyncSocket CRLFData];
+				NSData *footer = [TRAsyncSocket CRLFData];
 				[asyncSocket writeData:footer withTimeout:WRITE_HEAD_TIMEOUT tag:HTTP_CHUNKED_RESPONSE_FOOTER];
 			}
 		}
@@ -1417,7 +1417,7 @@ static NSMutableArray *recentNonces;
  * HTTPFileResponse is a wrapper for an NSFileHandle object, and is the preferred way to send a file response.
  * HTTPDataResponse is a wrapper for an NSData object, and may be used to send a custom response.
 **/
-- (NSObject<HTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path
+- (NSObject<TRHTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path
 {
 	// Override me to provide custom responses.
 	
@@ -1427,7 +1427,7 @@ static NSMutableArray *recentNonces;
 	
 	if (filePath && [[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDir] && !isDir)
 	{
-		return [[[HTTPFileResponse alloc] initWithFilePath:filePath] autorelease];
+		return [[[TRHTTPFileResponse alloc] initWithFilePath:filePath] autorelease];
 	
 		// Use me instead for asynchronous file IO
 		
@@ -1439,7 +1439,7 @@ static NSMutableArray *recentNonces;
 	return nil;
 }
 
-- (WebSocket *)webSocketForURI:(NSString *)path
+- (TRWebSocket *)webSocketForURI:(NSString *)path
 {
 	// Override me to provide custom WebSocket responses.
 	// To do so, simply override the base WebSocket implementation, and add your custom functionality.
@@ -1500,7 +1500,7 @@ static NSMutableArray *recentNonces;
 	
 	NSLog(@"HTTP Server: Error 505 - Version Not Supported: %@ (%@)", version, [self requestURI]);
 	
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:505 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:505 description:nil version:HTTPVersion1_1];
 	[response setHeaderField:@"Content-Length" value:@"0"];
     
 	NSData *responseData = [self preprocessErrorResponse:response];
@@ -1521,7 +1521,7 @@ static NSMutableArray *recentNonces;
 	NSLog(@"HTTP Server: Error 401 - Unauthorized (%@)", [self requestURI]);
 		
 	// Status Code 401 - Unauthorized
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:401 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:401 description:nil version:HTTPVersion1_1];
 	[response setHeaderField:@"Content-Length" value:@"0"];
 	
 	if ([self useDigestAccessAuthentication])
@@ -1553,7 +1553,7 @@ static NSMutableArray *recentNonces;
 	NSLog(@"HTTP Server: Error 400 - Bad Request (%@)", [self requestURI]);
 	
 	// Status Code 400 - Bad Request
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:400 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:400 description:nil version:HTTPVersion1_1];
 	[response setHeaderField:@"Content-Length" value:@"0"];
 	[response setHeaderField:@"Connection" value:@"close"];
 	
@@ -1582,7 +1582,7 @@ static NSMutableArray *recentNonces;
 	NSLog(@"HTTP Server: Error 405 - Method Not Allowed: %@ (%@)", method, [self requestURI]);
 	
 	// Status code 405 - Method Not Allowed
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:405 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:405 description:nil version:HTTPVersion1_1];
 	[response setHeaderField:@"Content-Length" value:@"0"];
 	[response setHeaderField:@"Connection" value:@"close"];
 	
@@ -1608,7 +1608,7 @@ static NSMutableArray *recentNonces;
 	NSLog(@"HTTP Server: Error 404 - Not Found (%@)", [self requestURI]);
 	
 	// Status Code 404 - Not Found
-	HTTPMessage *response = [[HTTPMessage alloc] initResponseWithStatusCode:404 description:nil version:HTTPVersion1_1];
+	TRHTTPMessage *response = [[TRHTTPMessage alloc] initResponseWithStatusCode:404 description:nil version:HTTPVersion1_1];
 	[response setHeaderField:@"Content-Length" value:@"0"];
 	
 	NSData *responseData = [self preprocessErrorResponse:response];
@@ -1642,7 +1642,7 @@ static NSMutableArray *recentNonces;
  * This method is called immediately prior to sending the response headers.
  * This method adds standard header fields, and then converts the response to an NSData object.
 **/
-- (NSData *)preprocessResponse:(HTTPMessage *)response
+- (NSData *)preprocessResponse:(TRHTTPMessage *)response
 {
 	// Override me to customize the response headers
 	// You'll likely want to add your own custom headers, and then return [super preprocessResponse:response]
@@ -1677,7 +1677,7 @@ static NSMutableArray *recentNonces;
  * This method is called immediately prior to sending the response headers (for an error).
  * This method adds standard header fields, and then converts the response to an NSData object.
 **/
-- (NSData *)preprocessErrorResponse:(HTTPMessage *)response;
+- (NSData *)preprocessErrorResponse:(TRHTTPMessage *)response;
 {
 	// Override me to customize the error response headers
 	// You'll likely want to add your own custom headers, and then return [super preprocessErrorResponse:response]
@@ -1732,7 +1732,7 @@ static NSMutableArray *recentNonces;
  * This method is called immediately prior to opening up the stream.
  * This is the time to manually configure the stream if necessary.
 **/
-- (BOOL)onSocketWillConnect:(AsyncSocket *)sock
+- (BOOL)onSocketWillConnect:(TRAsyncSocket *)sock
 {
 	if ([self isSecureServer])
 	{
@@ -1767,7 +1767,7 @@ static NSMutableArray *recentNonces;
  * This method is called after the socket has been fully opened.
  * It is called on the proper thread/runloop that HTTPServer configured our socket to run on.
 **/
-- (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
+- (void)onSocket:(TRAsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	// The socket is up and ready, and this method is called on the socket's corresponding thread.
 	// We can now start reading the HTTP requests...
@@ -1778,7 +1778,7 @@ static NSMutableArray *recentNonces;
  * This method is called after the socket has successfully read data from the stream.
  * Remember that this method will only be called after the socket reaches a CRLF, or after it's read the proper length.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData*)data withTag:(long)tag
+- (void)onSocket:(TRAsyncSocket *)sock didReadData:(NSData*)data withTag:(long)tag
 {
 	if (tag == HTTP_REQUEST_HEADER)
 	{
@@ -1804,7 +1804,7 @@ static NSMutableArray *recentNonces;
 			}
 			else
 			{
-				[asyncSocket readDataToData:[AsyncSocket CRLFData]
+				[asyncSocket readDataToData:[TRAsyncSocket CRLFData]
 				                withTimeout:READ_TIMEOUT
 				                  maxLength:LIMIT_MAX_HEADER_LINE_LENGTH
 				                        tag:HTTP_REQUEST_HEADER];
@@ -1936,7 +1936,7 @@ static NSMutableArray *recentNonces;
 /**
  * This method is called after the socket has successfully written data to the stream.
 **/
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
+- (void)onSocket:(TRAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
 	BOOL doneSendingResponse = NO;
 	
@@ -2029,7 +2029,7 @@ static NSMutableArray *recentNonces;
 			{
 				// Release the old request, and create a new one
 				[request release];
-				request = [[HTTPMessage alloc] initEmptyRequest];
+				request = [[TRHTTPMessage alloc] initEmptyRequest];
 				
 				numHeaderLines = 0;
 				
@@ -2046,7 +2046,7 @@ static NSMutableArray *recentNonces;
  *  - if the remote socket cleanly disconnects.
  *  - before the local socket is disconnected.
 **/
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
+- (void)onSocket:(TRAsyncSocket *)sock willDisconnectWithError:(NSError *)err
 {
 //	NSLog(@"HTTPConnection: onSocket:willDisconnectWithError: %@", err);
 }
@@ -2054,7 +2054,7 @@ static NSMutableArray *recentNonces;
 /**
  * Sent after the socket has been disconnected.
 **/
-- (void)onSocketDidDisconnect:(AsyncSocket *)sock
+- (void)onSocketDidDisconnect:(TRAsyncSocket *)sock
 {
 	[self die];
 }

@@ -1,7 +1,7 @@
 #import "HTTPMessage.h"
 
 
-@implementation HTTPMessage
+@implementation TRHTTPMessage
 
 - (id)initEmptyRequest
 {

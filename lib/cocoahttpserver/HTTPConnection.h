@@ -5,27 +5,27 @@
 #import <CFNetwork/CFNetwork.h>
 #endif
 
-@class AsyncSocket;
-@class HTTPMessage;
-@class HTTPServer;
-@class WebSocket;
-@protocol HTTPResponse;
+@class TRAsyncSocket;
+@class TRHTTPMessage;
+@class TRHTTPServer;
+@class TRWebSocket;
+@protocol TRHTTPResponse;
 
 
 #define HTTPConnectionDidDieNotification  @"HTTPConnectionDidDie"
 
-@interface HTTPConnection : NSObject
+@interface TRHTTPConnection : NSObject
 {
-	AsyncSocket *asyncSocket;
-	HTTPServer *server;
+	TRAsyncSocket *asyncSocket;
+	TRHTTPServer *server;
 	
-	HTTPMessage *request;
+	TRHTTPMessage *request;
 	int numHeaderLines;
 	
 	NSString *nonce;
 	long lastNC;
 	
-	NSObject<HTTPResponse> *httpResponse;
+	NSObject<TRHTTPResponse> *httpResponse;
 	
 	NSMutableArray *ranges;
 	NSMutableArray *ranges_headers;
@@ -38,7 +38,7 @@
 	NSMutableArray *responseDataSizes;
 }
 
-- (id)initWithAsyncSocket:(AsyncSocket *)newSocket forServer:(HTTPServer *)myServer;
+- (id)initWithAsyncSocket:(TRAsyncSocket *)newSocket forServer:(TRHTTPServer *)myServer;
 
 - (BOOL)supportsMethod:(NSString *)method atPath:(NSString *)path;
 - (BOOL)expectsRequestBodyFromMethod:(NSString *)method atPath:(NSString *)path;
@@ -58,8 +58,8 @@
 
 - (NSArray *)directoryIndexFileNames;
 - (NSString *)filePathForURI:(NSString *)path;
-- (NSObject<HTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path;
-- (WebSocket *)webSocketForURI:(NSString *)path;
+- (NSObject<TRHTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path;
+- (TRWebSocket *)webSocketForURI:(NSString *)path;
 
 - (void)prepareForBodyWithSize:(UInt64)contentLength;
 - (void)processDataChunk:(NSData *)postDataChunk;
@@ -70,14 +70,14 @@
 - (void)handleInvalidRequest:(NSData *)data;
 - (void)handleUnknownMethod:(NSString *)method;
 
-- (NSData *)preprocessResponse:(HTTPMessage *)response;
-- (NSData *)preprocessErrorResponse:(HTTPMessage *)response;
+- (NSData *)preprocessResponse:(TRHTTPMessage *)response;
+- (NSData *)preprocessErrorResponse:(TRHTTPMessage *)response;
 
 - (BOOL)shouldDie;
 - (void)die;
 
 @end
 
-@interface HTTPConnection (AsynchronousHTTPResponse)
+@interface TRHTTPConnection (AsynchronousHTTPResponse)
 - (void)responseHasAvailableData;
 @end

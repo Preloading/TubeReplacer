@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol HTTPResponse
+@protocol TRHTTPResponse
 
 // Returns the length of the data in bytes.
 // If you don't know the length in advance, implement the isChunked method and have it return YES.
@@ -51,7 +51,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface HTTPFileResponse : NSObject <HTTPResponse>
+@interface TRHTTPFileResponse : NSObject <TRHTTPResponse>
 {
 	NSString *filePath;
 	NSFileHandle *fileHandle;
@@ -68,7 +68,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface HTTPDataResponse : NSObject <HTTPResponse>
+@interface TRHTTPDataResponse : NSObject <TRHTTPResponse>
 {
 	NSUInteger offset;
 	NSData *data;
@@ -82,7 +82,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface HTTPRedirectResponse : NSObject <HTTPResponse>
+@interface TRHTTPRedirectResponse : NSObject <TRHTTPResponse>
 {
 	NSString *redirectPath;
 }

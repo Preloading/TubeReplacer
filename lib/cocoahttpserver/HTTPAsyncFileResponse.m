@@ -2,7 +2,7 @@
 #import "HTTPConnection.h"
 
 
-@implementation HTTPAsyncFileResponse
+@implementation TRHTTPAsyncFileResponse
 
 static NSOperationQueue *operationQueue;
 
@@ -37,7 +37,7 @@ static NSOperationQueue *operationQueue;
 // calling HTTPConnection's responseHasAvailableData.
 // The HTTPConnection will then request our data via the readDataOfLength method.
 
-- (id)initWithFilePath:(NSString *)fpath forConnection:(HTTPConnection *)parent runLoopModes:(NSArray *)modes
+- (id)initWithFilePath:(NSString *)fpath forConnection:(TRHTTPConnection *)parent runLoopModes:(NSArray *)modes
 {
 	if ((self = [super init]))
 	{

@@ -9,7 +9,7 @@
 
 @implementation TRSabrHTTPConnection
 
-- (NSObject<HTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path
+- (NSObject<TRHTTPResponse> *)httpResponseForMethod:(NSString *)method URI:(NSString *)path
 {
 	TRSabrStream *stream = ((TRSabrHTTPServer*)self->server).stream;
 	NSString *cmpPath = [path componentsSeparatedByString:@"?"][0];
@@ -17,7 +17,7 @@
 	
 	if ([cmpPath isEqualToString:@"/master.m3u8"])
 	{
-		return [[[HTTPDataResponse alloc] initWithData:[[stream createHLSRootManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+		return [[[TRHTTPDataResponse alloc] initWithData:[[stream createHLSRootManifest] dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 	} else if ([cmpPath isEqualToString:@"/video.m3u8"])
 	{
 		if (!stream.videoStream.isReadyForPlayback) {
@@ -52,7 +52,7 @@
 		// is requesting a stream of some type of media
 		NSArray *videoComponents = [[cmpPath substringWithRange:NSMakeRange(2, [cmpPath length]-5)] componentsSeparatedByString:@"-"];
 		if (videoComponents.count != 2)
-			return [[[HTTPDataResponse alloc] initWithData:[@"bad url" dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+			return [[[TRHTTPDataResponse alloc] initWithData:[@"bad url" dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 
 		int itag = [videoComponents[0] unsignedIntValue];
 		int fragmentIndex = [videoComponents[1] unsignedIntValue];
@@ -92,7 +92,7 @@
 	}
 
 
-	return [[[HTTPDataResponse alloc] initWithData:[@"tubereplacer sabr player" dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[[TRHTTPDataResponse alloc] initWithData:[@"tubereplacer sabr player" dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
 -(NSDictionary*)httpResponseHeaders {

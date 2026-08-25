@@ -693,6 +693,22 @@ typedef struct _TBXMLElement {
 + (id)streamWithURL:(id)fp8 MIMEType:(NSString*)mimeType format:(int)fp12;
 @end
 
+@interface MLRemoteStream : NSObject
+{
+    NSURL *URL_;
+    int format_;
+    BOOL encrypted_;
+}
+
+- (BOOL)encrypted;
+- (int)format;
+- (id)URL;
+@end
+
+@interface MLStreamManifest : NSObject
+-(NSArray*)remoteStreams;
+@end
+
 @interface YTChannel : NSObject
 // {
 //     NSString *summary_;

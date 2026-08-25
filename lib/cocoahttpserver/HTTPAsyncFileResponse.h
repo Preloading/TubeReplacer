@@ -1,16 +1,16 @@
 #import <Foundation/Foundation.h>
 #import "HTTPResponse.h"
 
-@class HTTPConnection;
+@class TRHTTPConnection;
 
 /**
  * This is an asynchronous version of HTTPFileResponse.
  * It reads data from the given file in a background thread via an NSOperationQueue.
 **/
 
-@interface HTTPAsyncFileResponse : NSObject <HTTPResponse>
+@interface TRHTTPAsyncFileResponse : NSObject <TRHTTPResponse>
 {
-	HTTPConnection *connection;
+	TRHTTPConnection *connection;
 	NSThread *connectionThread;
 	NSArray *connectionRunLoopModes;
 	
@@ -27,7 +27,7 @@
 	BOOL asyncReadInProgress;
 }
 
-- (id)initWithFilePath:(NSString *)filePath forConnection:(HTTPConnection *)connection runLoopModes:(NSArray *)modes;
+- (id)initWithFilePath:(NSString *)filePath forConnection:(TRHTTPConnection *)connection runLoopModes:(NSArray *)modes;
 - (NSString *)filePath;
 
 @end
