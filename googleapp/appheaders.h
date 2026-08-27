@@ -691,6 +691,10 @@ typedef struct _TBXMLElement {
 
 // 2.0.0+
 + (id)streamWithURL:(id)fp8 MIMEType:(NSString*)mimeType format:(int)fp12;
+- (int)height;
+- (int)bitrate;
+-(NSString*)MIMEType;
+-(int)itag;
 @end
 
 @interface MLRemoteStream : NSObject
@@ -1689,6 +1693,8 @@ typedef struct _TBXMLElement {
 
 @interface YTPlayerServices : NSObject
 -(YTUserAuthenticator*)userAuth;
+
+-(YTUserAuthenticator*)userAuthenticator;
 @end
 
 @interface YTPlayerView : NSObject
@@ -1735,6 +1741,85 @@ typedef struct _TBXMLElement {
 
 @end
 
+@interface MLPlayer : NSObject
+{
+    NSTimer *_playbackStatusPoller;
+    double _lastReportedSystemTime;
+    double _lastReportedPlaybackTime;
+    double _lastReportedBufferTime;
+    double _initialMediaTime;
+    BOOL _pendingPlay;
+    BOOL _manuallyPaused;
+    BOOL _airPlayAllowed;
+    BOOL _backgroundPlaybackAllowed;
+    UIView *_renderingView;
+    NSDate *_playbackStartDate;
+    int _state;
+    NSError *_error;
+}
+
++ (id)stringWithState:(int)fp8;
++ (id)sharedInstance;
+- (void)setDelegate:(id)fp8;
+- (id)delegate;
+- (id)QoEMeasurementCollectorDelegate;
+- (void)setClosedCaptionsDelegate:(id)fp8;
+- (id)closedCaptionsDelegate;
+- (id)error;
+- (int)state;
+- (id)playbackStartDate;
+- (id)renderingView;
+- (void)setBackgroundPlaybackAllowed:(BOOL)fp8;
+- (BOOL)backgroundPlaybackAllowed;
+- (void)playerRateDidChange;
+- (void)playerItemStatusDidChange;
+- (void)playbackDidReachEnd;
+- (void)checkForSeekErrorWithArgs:(id)fp8;
+- (void)appDidBecomeActive;
+- (void)appDidEnterBackground;
+- (void)updateStateAndReportMediaTimes;
+- (void)stopPlaybackStatusPoller;
+- (void)startPlaybackStatusPoller;
+- (void)setState:(int)fp8;
+- (void)setAndObservePlayerItem:(id)fp8 player:(id)fp12;
+- (BOOL)isPlaybackLikelyToKeepUp;
+- (BOOL)isLive;
+- (BOOL)isPlaybackAlmostFinished;
+- (BOOL)isPlayableState;
+- (id)playerClosedCaptionsOptions;
+- (void)disablePlayerClosedCaptions;
+- (void)enablePlayerClosedCaptionsWithOption:(id)fp8;
+- (void)handlePlayableAsset:(id)fp8 airPlayAllowed:(BOOL)fp12;
+- (void)failWithError:(id)fp8;
+- (void)clearQoECollector;
+- (void)startQoECollector;
+- (void)clearProxy;
+- (void)clearPlayer;
+- (void)loadStreamURL:(id)fp8;
+- (id)networkAccessLog;
+- (void)onAudioSessionInterruption:(id)fp8;
+- (BOOL)isAirPlayActive;
+- (id)currentFrame;
+- (double)bufferedMediaTime;
+- (double)totalMediaTime;
+- (double)currentMediaTime;
+- (void)seekToTime:(double)fp8;
+- (void)replay;
+- (void)pause;
+- (void)play;
+- (void)proxy:(id)fp8 didSetURL:(id)fp12;
+- (void)proxyURLWillChange:(id)fp8;
+- (void)proxy:(id)fp8 failedWithError:(id)fp12;
+- (void)flushQoEMeasurementCollector;
+- (void)setQoEMeasurementCollectorDelegate:(id)fp8;
+- (void)reset;
+- (void)loadWithStreamManifest:(id)fp8 deviceCapabilities:(id)fp12 services:(id)fp16 initialMediaTime:(double)fp20 airPlayAllowed:(BOOL)fp28 authentication:(id)fp32;
+- (void)observeValueForKeyPath:(id)fp8 ofObject:(id)fp12 change:(id)fp16 context:(void *)fp20;
+- (void)dealloc;
+- (id)init;
+
+@end
+
 @interface YTPlayer : NSObject
 - (void)setDelegate:(id)fp8;
 - (id)currentFrame;
@@ -1756,3 +1841,39 @@ typedef struct _TBXMLElement {
 -(double)currentMediaTime;
 @end
 
+@interface PBGeneratedMessage : NSObject
++ (id)builder;
+- (id)build;
+@end
+
+@interface PBGeneratedMessage_Builder : PBGeneratedMessage
+- (void)setItag:(int)value;
+- (void)setUrl:(NSString *)value;
+- (void)setMimeType:(NSString *)value;
+- (void)setBitrate:(int)value;
+- (void)setHeight:(int)value;
+
+- (void)setFormatsArray:(id)formats;
+- (void)setHlsManifestUrl:(NSString *)url;
+@end
+
+@interface PBMutableArray : NSMutableArray
+@end
+
+@interface MLProxyDelegate : NSObject
+@end
+
+@interface NSError (YouTube)
++(instancetype)playerErrorWithCode:(int)code;
+@end
+
+@interface MLProxy: NSObject
+-(id)delegate;
+-(MLRemoteStream*)selectStream;
+-(void)proxy:(id)proxy didSetURL:(id)didSetURL;
+-(void)proxy:(id)proxy didChangeURL:(id)didChangeURL;
+-(void)proxyURLWillChange:(id)fp1;
+@end
+
+@interface MLPassThroughProxy : MLProxy
+@end

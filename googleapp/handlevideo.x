@@ -99,7 +99,7 @@
     // deal with SABR
     if ([stream format] == 5) {
         TRSabrStream *sabrStream = (TRSabrStream*)stream;
-        NSLog(@"d");
+        NSLog(@"format -> %i", [stream format]);
         sabrStream.currentPlayerTimeFunction = ^double{
             return [player currentMediaTime];
         };
@@ -181,7 +181,8 @@
 
 -(MLRemoteStream*)selectStream {
     NSArray<YTStream*> *streams = [(MLStreamManifest*)[self valueForKey:l(@"streamManifest")] remoteStreams];
-    
+    NSLog(@"streams to select from -> %@", streams);
+
     // return the stream with the highest number lol
     MLRemoteStream *selectedStream = nil;
     
@@ -200,6 +201,170 @@
 
     NSLog(@"selected new stream -> %@", selectedStream);
     return selectedStream;
+}
+
+%end
+
+// 2.0.0
+%hook YTPBStreamingData
+
++(YTPBStreamingData *)streamingDataWithStreams:(NSArray<YTStream *>*)streams
+{
+    NSMutableArray *newStreams = [[NSMutableArray alloc] initWithCapacity:streams.count];
+    for (YTStream *stream in streams) {
+        if ([stream format] == 5)
+            continue;
+        [newStreams addObject:stream];
+    }
+
+    return %orig(newStreams);
+}
+
+%end
+
+%hook YTPlayerViewController
+
+/// this is incredibly hacked together, just since I can't seem to figure out protobuf, AND i also do not want to rewrite stuff again.
+/// For some reason, to transition smoothly ig, they translate all video streams into the proper protobuf format. 
+/// Now TRSabrStream is not protobuf, and probably won't be nicely translated over to protobuf. Along with this, I have absolutely no idea
+/// how to properly decompile the streamingDataWithStreams function where it can compile back, as all the headers seem to just not exist...
+/// For the time being, this is my hack to just make this work, though realistically future versions should just hook the newer innertube
+/// functions instead of relying soley on the old gdata ones which will eventually disappear.
+-(void)loadPlayerWithStreamManifest:(MLStreamManifest*)streamManifest deviceCapabilities:(id)deviceCapabilities airPlayAllowed:(BOOL)airPlayAllowed {
+    NSLog(@"loadPlayer called!");
+    [[self valueForKey:l(@"activePlayerOverlayViewController")] setAirPlayAllowed:airPlayAllowed];
+
+    YTPlayerServices *playerServices = [self valueForKey:l(@"playerServices")];
+    double savedMediaTime = [(NSNumber*)[self valueForKey:l(@"savedMediaTime")] doubleValue];
+
+    YTUserAuthenticator *userAuthenticatior = [playerServices userAuthenticator];
+    id authentication = [userAuthenticatior authentication];
+
+    // JANK START
+    if (objc_getAssociatedObject(streamManifest, "sabrHackApplied") == NULL) {
+        NSMutableArray *manifestStreams = [[streamManifest valueForKey:l(@"remoteStreams")] mutableCopy];
+
+        NSArray *gdataStreams = [(YTVideo*)[self valueForKey:l(@"video")] streams];
+        for (YTStream *stream in gdataStreams) {
+            // SABR case
+            if ([stream format] == 5) {
+                [manifestStreams addObject:stream];
+            }
+        }
+        [streamManifest setValue:[manifestStreams copy] forKey:l(@"remoteStreams")];
+        [manifestStreams release];
+        objc_setAssociatedObject(streamManifest, "sabrHackApplied", @(1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    // JANK END
+    
+
+    [(MLPlayer*)[self valueForKey:l(@"player")] loadWithStreamManifest:streamManifest
+                                    deviceCapabilities:deviceCapabilities
+                                    services:playerServices
+                                    initialMediaTime:savedMediaTime
+                                    airPlayAllowed:airPlayAllowed
+                                    authentication:authentication
+        ];
+
+    [self setValue:@(0.0) forKey:l(@"savedMediaTime")];
+}
+
+%end
+
+@interface MLPassThroughProxy (TubeReplacer)
+-(void)reloadPlayerStream;
+@end
+
+%hook MLPassThroughProxy
+
+// 1.4.0
+-(BOOL)start:(NSError**)error {
+    MLRemoteStream *selectedStream = [self selectStream];
+    MLRemoteStream *oldSelectedStream = [self valueForKey:l(@"selectedStream")];
+    [self setValue:selectedStream forKey:l(@"selectedStream")];
+    [oldSelectedStream release];
+
+    if (selectedStream != nil)
+    {
+        if ([selectedStream format] == 5) {
+            TRSabrStream *sabrStream = (TRSabrStream*)selectedStream;
+            sabrStream.currentPlayerTimeFunction = ^double{
+                // return [player currentMediaTime];
+                return 0.0; // unimplemented
+            };
+
+            sabrStream.reloadPlayerFunction = ^{
+                [self reloadPlayerStream];
+            };
+
+            // if (version10) {
+            //     sabrStream.authentication = [[(YTServices*)[self valueForKey:l(@"services")] userAuthenticator] authentication];
+            // } else {
+            //     sabrStream.authentication = [[(YTPlayerServices*)[self valueForKey:l(@"playerServices")] userAuth] authentication];
+            // }
+
+            [sabrStream start];
+        }
+        return YES;
+    }
+    else
+    {
+        *error = [NSError errorWithDomain:@"com.google.ios.medialib.ErrorDomain.Player" code:1 userInfo:nil];
+        return NO;
+    }
+}
+
+// 2.0.0
+-(void)start {
+    MLRemoteStream *selectedStream = [self selectStream];
+    MLRemoteStream *oldSelectedStream = [self valueForKey:l(@"selectedStream")];
+    [self setValue:selectedStream forKey:l(@"selectedStream")];
+    [oldSelectedStream release];
+
+    if (selectedStream != nil)
+    {
+        if ([selectedStream format] == 5) {
+            TRSabrStream *sabrStream = (TRSabrStream*)selectedStream;
+            sabrStream.currentPlayerTimeFunction = ^double{
+                // return [player currentMediaTime];
+                return 0.0; // unimplemented
+            };
+
+            sabrStream.reloadPlayerFunction = ^{
+                [self reloadPlayerStream];
+            };
+
+            // if (version10) {
+            //     sabrStream.authentication = [[(YTServices*)[self valueForKey:l(@"services")] userAuthenticator] authentication];
+            // } else {
+            //     sabrStream.authentication = [[(YTPlayerServices*)[self valueForKey:l(@"playerServices")] userAuth] authentication];
+            // }
+
+            [sabrStream start];
+        }
+        MLProxy *delegate = [self delegate];
+        NSURL *streamURL = [selectedStream URL];
+        [delegate proxy:self didSetURL:streamURL];
+        [delegate release];
+    }
+    else
+    {
+        NSError *error = [NSError playerErrorWithCode:1];
+        // [streamURL proxy:self failedWithError:error];
+        [error release];
+    }
+}
+
+%new
+-(void)reloadPlayerStream
+{
+    MLProxy *delegate = [self delegate];
+    [delegate proxyURLWillChange:self];
+    
+    if ([version() isEqualToString:@"1.4.0"])
+        [delegate proxy:self didChangeURL:[(MLRemoteStream*)[self valueForKey:l(@"selectedStream")] URL]];
+    else
+        [delegate proxy:self didSetURL:[(MLRemoteStream*)[self valueForKey:l(@"selectedStream")] URL]];
 }
 
 %end

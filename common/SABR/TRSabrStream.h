@@ -62,6 +62,6 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 -(NSURL*)URL;
 -(int)format;
 -(BOOL)encrypted;
-
+-(BOOL)isWidevine;
 
 @end

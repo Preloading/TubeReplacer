@@ -519,6 +519,10 @@
     return NO;
 }
 
+-(BOOL)isWidevine {
+    return NO;
+}
+
 -(void)cleanup {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopHTTPServerOnThread];
