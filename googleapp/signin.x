@@ -358,6 +358,7 @@
 
 %hook SSOAuthorizationImpl
 
+// TODO: there is a basically identical function of this, search authorizeNSRequest, they should really be merged into one.
 -(void)authorizeRequest:(NSMutableURLRequest*)request handler:(id)handler delegate:(id)delegate didFinishSelector:(SEL)selector {
   NSThread *thread = [NSThread currentThread];
   id callback = [%c(AuthorizerCallback) callbackWithRequest:request handler:handler delegate:delegate selector:selector thread:thread];
@@ -367,13 +368,6 @@
   GTMOAuth2Authentication *auth = [[self identity] auth];
   int errorCode = 0;
   NSURL *url = [request URL];
-
-  NSString *sid = [auth sid];
-  NSString *hsid = [auth hsid];
-  NSString *ssid = [auth ssid];
-  NSString *sidcc = [auth sidcc];
-  NSString *sapisid = [auth sapisid];
-  NSString *datasyncID = [auth datasyncID];
 
   if (![self shouldAuthorizeAllRequests]) {
     errorCode = -1004;
@@ -397,42 +391,12 @@
   }
 
   errorCode = -1001;
-  if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
-  {
-    if ( request )
-    {
-        // NSHTTPCookieStorage *sharedHTTPCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-        // NSArray *cookies = [sharedHTTPCookieStorage cookies];
-        // for (id cookie in cookies) {
-        //     [sharedHTTPCookieStorage deleteCookie:cookie];
-        // }
-        [request setHTTPShouldHandleCookies:NO];
-        NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
-        [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
-        NSURL *requestedURL = [request URL];
+  BOOL authorizeResult = [auth authorizeNSRequest:&request];
 
-        // SAPISIDHASH
-        long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-        NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
-        // NSLog(@"unhashed SAPISIDHASH -> %@", unhashedSAPISIDHASH);
-
-        NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
-        uint8_t digest[CC_SHA1_DIGEST_LENGTH];
-
-        CC_SHA1(unhashedData.bytes, (CC_LONG)unhashedData.length, digest);
-
-        NSMutableString *output = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 2];
-
-        for (int i = 0; i < CC_SHA1_DIGEST_LENGTH; i++)
-        {
-            [output appendFormat:@"%02x", digest[i]];
-        }
-        // NSLog(@"Hashed SAPISID: %@", output);
-        [request setValue:[NSString stringWithFormat:@"SAPISIDHASH %ld_%@_u", unixTime, output] forHTTPHeaderField:@"Authorization"];
-        [request setValue:[NSString stringWithFormat:@"%@://%@", [requestedURL scheme], [requestedURL host]] forHTTPHeaderField:@"Origin"];
-    }
+  if (authorizeResult) {
     goto done;
   }
+
 requestOK: ; // i hate compilers, why is this semicolon needed                                                                                                                         
   // todo: i forget why i named it requestOK
   NSDictionary *userInfo = nil;
@@ -839,6 +803,7 @@ done:
     NSString *sapisid = [self sapisid];
     NSString *datasyncID = [self datasyncID];
     NSString *pageID = [self pageID];
+    NSLog(@"pageID -> %@", pageID);
     if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
       {
         if ( *request )

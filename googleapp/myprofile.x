@@ -49,7 +49,6 @@
         if (!originalResponseBlock) return;
         // kinda annoyed this has to exist, buh oh well.
         NSDictionary *accountInfo = nil;
-        NSLog(@"[auth pageID] -> %@", [auth pageID]);
         for (NSDictionary *account in accounts) {
             // i hope this'll work
             NSString *accountPageId = [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.serviceEndpoint.selectActiveIdentityEndpoint.supportedTokens[0].pageIdToken.pageId"];
