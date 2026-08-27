@@ -432,10 +432,13 @@
             if ([subtitleURL hasPrefix:@"/"]) {
                 subtitleURL = [NSString stringWithFormat:@"https://www.youtube.com%@", subtitleURL];
             }
+            NSString *subtitleText = track[@"name"][@"runs"][0][@"text"];
+            if (subtitleText == nil)
+                subtitleText = track[@"name"][@"simpleText"];
             if ([version() isEqualToString:@"2.0.0"]) {
-                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:subtitleURL] format:@"ass"]];
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:subtitleText trackName:[NSURL URLWithString:subtitleURL] format:@"ass"]];
             } else {
-                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:track[@"name"][@"runs"][0][@"text"] trackName:[NSURL URLWithString:subtitleURL]]];
+                [subtitleTracks addObject:[[NSClassFromString(@"YTSubtitlesTrack") alloc] initWithLanguageCode:track[@"languageCode"] languageName:subtitleText trackName:[NSURL URLWithString:subtitleURL]]];
             }
         }
     }
