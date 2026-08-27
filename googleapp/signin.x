@@ -258,7 +258,6 @@
     NSURL *authorizationURL = [NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID"];
     NSLog(@"authorization URL: %@", authorizationURL);
     NSArray *cookies = [cookieStorage cookiesForURL:authorizationURL];
-
     NSHTTPCookie *sid = nil;
     NSHTTPCookie *hsid = nil;
     NSHTTPCookie *ssid = nil;
@@ -286,27 +285,27 @@
         }
     }
 
-    NSLog(@"things");
-    if (sid) {
-        NSLog(@"SID: %@", [sid value]);
-    }
-    if (hsid) {
-        NSLog(@"HSID: %@", [hsid value]);
-    }
-    if (ssid) {
-        NSLog(@"ssid: %@", [ssid value]);
-    }
-    if (sapisid) {
-        NSLog(@"sapisid: %@", [sapisid value]);
-    }
-    NSLog(@"selected account -> %@", [pageid value]);
+    // NSLog(@"things");
+    // if (sid) {
+    //     NSLog(@"SID: %@", [sid value]);
+    // }
+    // if (hsid) {
+    //     NSLog(@"HSID: %@", [hsid value]);
+    // }
+    // if (ssid) {
+    //     NSLog(@"ssid: %@", [ssid value]);
+    // }
+    // if (sapisid) {
+    //     NSLog(@"sapisid: %@", [sapisid value]);
+    // }
+    // NSLog(@"selected account -> %@", [pageid value]);
 
     BOOL result = 0;
     if (sid && hsid && ssid && sapisid) {
-        NSLog(@"SID: %@", [sid value]); 
-        NSLog(@"HSID: %@", [hsid value]);
-        NSLog(@"SSID: %@", [hsid value]);
-        NSLog(@"SAPISID: %@", [sapisid value]);
+        // NSLog(@"SID: %@", [sid value]); 
+        // NSLog(@"HSID: %@", [hsid value]);
+        // NSLog(@"SSID: %@", [hsid value]);
+        // NSLog(@"SAPISID: %@", [sapisid value]);
 
         if (pageid) {
             NSString *pageIdValue = [pageid value];
@@ -346,7 +345,6 @@
             // }
         } else {
           UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
-          NSLog(@"current url -> %@", [[[webView request] URL] absoluteString]);
           if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]) {
             // we haven't selected an account yet, lets go prompt the user for it
             [self generateSelectAccountPageWithSID:[sid value] hsid:[hsid value] ssid:[ssid value] sapisid:[sapisid value]];
@@ -1138,10 +1136,18 @@ done:
 
 
 
-// TODO: check if polyfil isn't loaded already (._.)
-// JS Polyfils (i blame iOS 5!) Sadly, this makes iOS 5 kinda slow...
 %hook GTMOAuth2ViewControllerTouch
 
+-(void)viewWillAppear:(BOOL)unk {
+    [self setBrowserCookiesURL:[NSURL URLWithString:@"https://accounts.youtube.com/"]];
+    [self clearBrowserCookies];
+    [self setBrowserCookiesURL:[NSURL URLWithString:@"https://accounts.google.com/"]];
+    [self clearBrowserCookies]; // technically unneeded, it will clear in the %orig, but just for safety :)
+    return %orig;
+}
+
+// TODO: check if polyfil isn't loaded already (._.)
+// JS Polyfils (i blame iOS 5!) Sadly, this makes iOS 5 kinda slow...
 - (void)webViewDidStartLoad:(UIWebView *)webView
 {
     %orig;
