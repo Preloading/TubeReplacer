@@ -222,6 +222,35 @@
 
 %end
 
+// 1.4.0 only
+%hook YTPlayerController
+-(void)loadPlayerWithStreamManifest:(MLStreamManifest*)streamManifest deviceCapabilities:(id)deviceCapabilities airPlayAllowed:(BOOL)airPlayAllowed  {
+    if (objc_getAssociatedObject(streamManifest, "sabrHackApplied") == NULL) {
+        YTPlayerServices *playerServices = [self valueForKey:l(@"playerServices")];
+        
+        YTUserAuthenticator *userAuthenticatior = [playerServices userAuth];
+        id authentication = [userAuthenticatior authentication];
+
+        for (MLRemoteStream *stream in [streamManifest valueForKey:l(@"remoteStreams")]) {
+            // SABR case
+            if ([stream format] == 5) {
+                TRSabrStream *sabrStream = (TRSabrStream*)stream;
+
+                // most convient place to put authentication.
+                if (authentication != nil) {
+                    if ([version() isEqualToString:@"1.4.0"])
+                        sabrStream.authentication = authentication;
+                    else
+                        sabrStream.authentication = [[(SSOAuthorizationImpl*)authentication identity] auth];
+                }
+            }
+        }
+        objc_setAssociatedObject(streamManifest, "sabrHackApplied", @(1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return %orig;
+}
+%end
+
 %hook YTPlayerViewController
 
 /// this is incredibly hacked together, just since I can't seem to figure out protobuf, AND i also do not want to rewrite stuff again.
@@ -248,7 +277,17 @@
         for (YTStream *stream in gdataStreams) {
             // SABR case
             if ([stream format] == 5) {
-                [manifestStreams addObject:stream];
+                TRSabrStream *sabrStream = (TRSabrStream*)stream;
+
+                // most convient place to put authentication.
+                if (authentication != nil) {
+                    if ([version() isEqualToString:@"1.4.0"])
+                        sabrStream.authentication = authentication;
+                    else
+                        sabrStream.authentication = [[(SSOAuthorizationImpl*)authentication identity] auth];
+                }
+                
+                [manifestStreams addObject:sabrStream];
             }
         }
         [streamManifest setValue:[manifestStreams copy] forKey:l(@"remoteStreams")];
@@ -297,12 +336,6 @@
                 [self reloadPlayerStream];
             };
 
-            // if (version10) {
-            //     sabrStream.authentication = [[(YTServices*)[self valueForKey:l(@"services")] userAuthenticator] authentication];
-            // } else {
-            //     sabrStream.authentication = [[(YTPlayerServices*)[self valueForKey:l(@"playerServices")] userAuth] authentication];
-            // }
-
             [sabrStream start];
         }
         return YES;
@@ -333,12 +366,6 @@
             sabrStream.reloadPlayerFunction = ^{
                 [self reloadPlayerStream];
             };
-
-            // if (version10) {
-            //     sabrStream.authentication = [[(YTServices*)[self valueForKey:l(@"services")] userAuthenticator] authentication];
-            // } else {
-            //     sabrStream.authentication = [[(YTPlayerServices*)[self valueForKey:l(@"playerServices")] userAuth] authentication];
-            // }
 
             [sabrStream start];
         }

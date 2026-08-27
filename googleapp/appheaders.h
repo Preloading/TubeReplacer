@@ -1877,3 +1877,116 @@ typedef struct _TBXMLElement {
 
 @interface MLPassThroughProxy : MLProxy
 @end
+
+
+@interface GTMOAuth2AuthorizationArgs : NSObject
+// {
+//     NSMutableURLRequest *request_;
+//     id delegate_;
+//     SEL sel_;
+//     id completionHandler_;
+//     NSThread *thread_;
+//     NSError *error_;
+// }
+
++ (id)argsWithRequest:(id)fp8 delegate:(id)fp12 selector:(SEL)selector completionHandler:(id)fp20 thread:(NSThread*)thread;
+- (void)setError:(id)fp8;
+- (id)error;
+- (void)setThread:(id)fp8;
+- (id)thread;
+- (void)setCompletionHandler:(id)fp8;
+- (id)completionHandler;
+- (void)setSelector:(SEL)fp8;
+- (SEL)selector;
+- (void)setDelegate:(id)fp8;
+- (id)delegate;
+- (void)setRequest:(id)fp8;
+- (id)request;
+- (void)dealloc;
+
+@end
+
+@interface SSOAuthAdvice : NSObject
+
+@property (readonly, nonatomic) NSDictionary *json; // ivar: _json
+@property (readonly, nonatomic) int adviceCode; // ivar: _adviceCode
+@property (readonly, nonatomic) NSURL *URI; // ivar: _URI
+@property (readonly, nonatomic) NSString *verifier; // ivar: _verifier
+@property (readonly, nonatomic) NSString *clientState; // ivar: _clientState
+@property (readonly, nonatomic) NSString *error; // ivar: _error
+@property (readonly, nonatomic) NSString *errorDescription; // ivar: _errorDescription
+@property (readonly, nonatomic) NSURL *errorURI; // ivar: _errorURI
+
+
+-(id)init;
+-(id)initWithJSONDictionary:(id)arg0 ;
+-(id)description;
+
+
+@end
+
+// 2.0.0
+@interface SSOIdentity : NSObject
+
+
+
+-(id)userEmail;
+-(id)userID;
+-(char)isSignedIn;
+-(id)userFullName;
+
+
+@end
+
+@interface SSOIdentityPrivate : SSOIdentity
+
+// @property (readonly, nonatomic) SSOConfiguration *configuration; // ivar: _configuration
+@property (retain) GTMOAuth2Authentication *auth; // ivar: _auth
+@property (copy, nonatomic) NSString *userFullName; // ivar: _userFullName
+@property (getter=isSignedIn) char signedIn; // ivar: _signedIn
+@property (getter=isGuestIdentity) char guestIdentity; // ivar: _guestIdentity
+// @property (copy, nonatomic) id *signInCallback; // ivar: _signInCallback
+@property (nonatomic, getter=isDisabled) char disabled; // ivar: _disabled
+@property (copy, nonatomic) NSString *filterAnnotation; // ivar: _filterAnnotation
+
+
+-(id)fetcherWithRequest:(id)arg0 ;
+// -(id)parseJSONResponse:(id)arg0 error:(*id)arg1 ;
+-(id)appendJSONDataToError:(id)arg0 data:(id)arg1 fetcher:(id)arg2 ;
+// -(void)authenticateWithPresentBlock:(id)arg0 callback:(unk)arg1 authorizationURL:(id)arg2  ;
+-(void)signInWithCode:(id)arg0 finishedWithAuth:(id)arg1 error:(id)arg2 ;
+-(void)authenticateWithCode:(id)arg0 verifier:(id)arg1 callback:(id)arg2 ;
+-(void)requestTokenForService:(id)arg0 callback:(id)arg1 ;
+-(void)requestTokenAuthURL:(id)arg0 service:(id)arg1 source:(id)arg2 callback:(id)arg3 ;
+-(void)requestResultsOfType:(id)arg0 scopes:(id)arg1 extraParameters:(id)arg2 callback:(id)arg3 ;
+-(void)requestAccessTokenForScopes:(id)arg0 callback:(id)arg1 ;
+-(void)requestAuthorizationCodeForScopes:(id)arg0 auth:(id)arg1 clientID:(id)arg2 applicationID:(id)arg3 extraParameters:(id)arg4 callback:(id)arg5 ;
+-(void)requestAuthAdviceReauthenticating:(id)arg0 callback:(id)arg1 ;
+-(id)revokeToken:(id)arg0 ;
+-(id)initWithConfiguration:(id)arg0 keychainItem:(id)arg1 ;
+-(id)keychainItem;
+-(id)initWithConfiguration:(id)arg0 ;
+-(id)description;
+-(id)userEmail;
+-(id)userID;
+-(char)isAuthAdviceCleared;
++(id)guestIdentity;
+-(GTMOAuth2Authentication*)auth;
+
+@end
+
+@interface SSOKeychain : NSObject
+
++(void)setAuthAdviceState:(NSString*)adviceState error:(NSError*)error;
+
+@end
+
+@interface AuthorizerCallback : NSObject
++(id)callbackWithRequest:(id)request handler:(id)handler delegate:(id)delegate selector:(SEL)selector thread:(NSThread*)thread;
+@end
+
+@interface SSOAuthorizationImpl : NSObject
+-(SSOIdentityPrivate*)identity; // **TECHNICALLY** this isn't correct, it's actually SSOIdentity, but objc magic stuff just makes this easier lol
+-(id)invokeCallback:(id)callback;
+-(BOOL)shouldAuthorizeAllRequests;
+@end
