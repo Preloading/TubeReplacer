@@ -764,7 +764,7 @@ done:
         NSRange searchRange = [htmlString rangeOfString:@"\"datasyncId\":\""];
         if (searchRange.location != NSNotFound) {
           NSInteger startPos = searchRange.location + searchRange.length;
-          NSRange endRange = [htmlString rangeOfString:@"||" options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
+          NSRange endRange = [htmlString rangeOfString:@"\"," options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
           
           if (endRange.location != NSNotFound) {
             datasyncID = [htmlString substringWithRange:NSMakeRange(startPos, endRange.location - startPos)];
@@ -900,7 +900,10 @@ done:
 
             // SAPISIDHASH
             long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
+            NSArray *datasyncComponents = [datasyncID componentsSeparatedByString:@"||"]; // this is wrong but works, it should grab the 0 one, but the last one is the only one that works. idk why.
+
+            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncComponents[datasyncComponents.count-1], unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
+            NSLog(@"unhashed thingy -> %@", unhashedSAPISIDHASH);
             NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
             uint8_t digest[CC_SHA1_DIGEST_LENGTH];
 
