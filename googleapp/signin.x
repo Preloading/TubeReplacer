@@ -929,10 +929,16 @@ done:
 
             // SAPISIDHASH
             long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-            NSArray *datasyncComponents = [datasyncID componentsSeparatedByString:@"||"]; // this is wrong but works, it should grab the 0 one, but the last one is the only one that works. idk why.
 
-            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncComponents[datasyncComponents.count-1], unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
-            NSLog(@"unhashed thingy -> %@", unhashedSAPISIDHASH);
+            // god awful
+            NSString *datasyncToHash = nil;
+            for (NSString *component in [datasyncID componentsSeparatedByString:@"||"]) {
+                if ([component isEqualToString:@""])
+                  continue;
+                datasyncToHash = component;
+            }
+
+            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncToHash, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
             NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
             uint8_t digest[CC_SHA1_DIGEST_LENGTH];
 
