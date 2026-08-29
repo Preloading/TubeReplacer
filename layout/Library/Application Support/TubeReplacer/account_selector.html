@@ -1179,9 +1179,23 @@
     function selectAccount(id) {
         // tubereplacer already has stuff to check for changed cookies, so this will just add a cookie dedicated to this
         console.log(id);
-        document.cookie = "tubereplacer_account_selected="+id; 
         document.write("<html><body>Please wait...</body></html>");
-        window.location.href = "https://www.youtube.com/ytscframe";
+        if (id != 0) {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4) {
+                    document.cookie = "tubereplacer_account_selected="+id; 
+                    window.location.href = "https://www.youtube.com/ytscframe";
+                }
+            }
+            xmlHttp.open("GET", "https://m.youtube.com/signin?action_handle_signin=true&authuser=0&next=https://m.youtube.com/ytscframe&feature=masthead_switcher&skip_identity_prompt=true&pageid=" + id, false);
+            xmlHttp.send(null);
+            
+        } else {
+            document.cookie = "tubereplacer_account_selected="+id; 
+            window.location.href = "https://www.youtube.com/ytscframe";
+        }
+        
     }
   </script>
   </body>
