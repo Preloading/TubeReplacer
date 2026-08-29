@@ -25,7 +25,7 @@
 // @property (readonly, nonatomic) NSString *errorDescription; // ivar: _errorDescription
 // @property (readonly, nonatomic) NSURL *errorURI; // ivar: _errorURI
 
-    [authAdvice setValue:[NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://www.youtube.com/ytscframe&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"] forKey:l(@"URI")];
+    [authAdvice setValue:[NSURL URLWithString:@"https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https://m.youtube.com/ytscframe&app=m&hl=en&next=%2F&hl=en&flowName=WebLiteSignIn"] forKey:l(@"URI")];
     [authAdvice setValue:@(2) forKey:l(@"adviceCode")]; // 2 = embeeded
     [authAdvice setValue:@"ChIiEAiDoPbg0jIQ-tua6twzGCESAzAuMQ" forKey:l(@"clientState")]; // i don't know what this does....
 
@@ -268,12 +268,47 @@
           NSError *err = nil;
           NSString *baseHTML = [NSString stringWithContentsOfFile:@"/Library/Application Support/TubeReplacer/account_selector.html" encoding:NSUTF8StringEncoding error:&err];
           htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_ACCOUNTS_FIELD }}" withString:allAccountsHTML];
+
+
+          htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_SIDCC_FIELD }}" withString:allAccountsHTML]; // hack!
         }
 
-        NSLog(@"html string -> %@", htmlString);
+        // gets rid of some... problematic cookies for setting profile.
+        NSHTTPCookieStorage *browserCookies = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSArray<NSHTTPCookie*> *urlCookies = [browserCookies cookiesForURL:[NSURL URLWithString:@"https://m.youtube.com/ytscframe"]];
+
+        for (NSHTTPCookie* cookie in urlCookies) {
+            NSString *cookieName = [cookie name];
+            if ([cookieName isEqual:@"SID"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"HSID"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"SSID"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"SAPISID"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"SIDCC"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"__Secure-3PAPISID"]) { // same value as sapisid
+                continue;
+            }
+            if ([cookieName isEqual:@"tubereplacer_account_selected"]) {
+                continue;
+            }
+            if ([cookieName isEqual:@"LOGIN_INFO"]) {
+                continue;
+            }
+            [browserCookies deleteCookie:cookie];
+        }
+
         // render
         UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
-        [webView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]];
+        [webView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]];
   }];
 
   
@@ -284,13 +319,15 @@
 -(BOOL)cookiesChanged:(GTMCookieStorage*)cookieStorage {
 //   authCookie = 0;
     // NSURL *authorizationURL = [self authorizationURL];
-    NSURL *authorizationURL = [NSURL URLWithString:@"https://accounts.youtube.com/accounts/SetSID"];
+    NSURL *authorizationURL = [NSURL URLWithString:@"https://m.youtube.com/ytscframe"];
     NSLog(@"authorization URL: %@", authorizationURL);
     NSArray *cookies = [cookieStorage cookiesForURL:authorizationURL];
     NSHTTPCookie *sid = nil;
     NSHTTPCookie *hsid = nil;
     NSHTTPCookie *ssid = nil;
     NSHTTPCookie *sapisid = nil;
+    NSHTTPCookie *sidcc = nil;
+    NSHTTPCookie *logininfo = nil;
     NSHTTPCookie *pageid = nil;
     for (NSHTTPCookie* cookie in cookies) {
         NSString *cookieName = [cookie name];
@@ -306,11 +343,17 @@
         if ([cookieName isEqual:@"SAPISID"]) {
             sapisid = cookie;
         }
+        if ([cookieName isEqual:@"SIDCC"]) {
+            sidcc = cookie;
+        }
         if ([cookieName isEqual:@"__Secure-3PAPISID"]) { // same value as sapisid
             sapisid = cookie;
         }
         if ([cookieName isEqual:@"tubereplacer_account_selected"]) {
             pageid = cookie;
+        }
+        if ([cookieName isEqual:@"LOGIN_INFO"]) {
+            logininfo = cookie;
         }
     }
 
@@ -357,6 +400,10 @@
 
             if (pageIdValue)
               [code setObject:pageIdValue forKey:@"PAGE_ID"];
+            if ([logininfo value])
+              [code setObject:[logininfo value] forKey:@"LOGIN_INFO"];
+            if ([sidcc value])
+              [code setObject:[sidcc value] forKey:@"SIDCC"];
 
             GTMOAuth2Authentication *auth = [self authentication];
             [auth setKeysForResponseDictionary:code];
@@ -374,7 +421,10 @@
             // }
         } else {
           UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
-          if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://accounts.youtube.com/accounts/SetSID?tubereplacer_next_login=1"]) {
+          if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]) {
+            UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
+            [webView loadHTMLString:@"Loading..." baseURL:[NSURL URLWithString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]];
+
             // we haven't selected an account yet, lets go prompt the user for it
             [self generateSelectAccountPageWithSID:[sid value] hsid:[hsid value] ssid:[ssid value] sapisid:[sapisid value]];
           }
@@ -448,6 +498,11 @@ done:
   return [[[self identity] auth] pageID]; // im lazy and dont wanna change shit
 }
 
+%new
+-(NSString*)loginInfo {
+  return [[[self identity] auth] loginInfo]; // im lazy and dont wanna change shit
+}
+
 %end
 
 // clears all keychain items on start
@@ -518,6 +573,12 @@ done:
     return [parameters objectForKey:@"PAGE_ID"];
 }
 
+%new
+-(NSString*)loginInfo {
+    NSDictionary *parameters = [self parameters];
+    return [parameters objectForKey:@"LOGIN_INFO"];
+}
+
 
 // -(NSString*)userAgent {
 //     return @"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329";
@@ -555,6 +616,8 @@ done:
   if ([self pageID])
     [data setValue:[self pageID] forKey:@"PAGE_ID"];
   [data setValue:[self datasyncID] forKey:@"userID"]; // idk
+  if ([self loginInfo])
+    [data setValue:[self loginInfo] forKey:@"LOGIN_INFO"];
 
   [data setValue:[self serviceProvider] forKey:@"serviceProvider"];
   [data setValue:[[self parameters] objectForKey:@"userEmail"] forKey:@"email"];
@@ -569,19 +632,28 @@ done:
   NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/feed/library?app=mobile"]]; // we need to use this to get the channel id & datasync id. Pain.
 
    NSString *sid = [self sid];
-  NSString *hsid = [self hsid];
-  NSString *ssid = [self ssid];
-  NSString *sapisid = [self sapisid];
-  NSString *pageId = [self pageID];
+    NSString *hsid = [self hsid];
+    NSString *ssid = [self ssid];
+    NSString *sapisid = [self sapisid];
+    NSString *sidcc = [self sidcc];
+    NSString *pageId = [self pageID];
+    NSString *loginInfo = [self loginInfo];
 
 
-    NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+    NSMutableString *cookieData = [NSMutableString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+    if (loginInfo) {
+        [cookieData appendString:[NSString stringWithFormat:@"; LOGIN_INFO=%@", loginInfo]];
+    }
+    if (sidcc) {
+        [cookieData appendString:[NSString stringWithFormat:@"; SIDCC=%@", sidcc]];
+    }
     [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
     [request setValue:@"https://accounts.google.com/" forHTTPHeaderField:@"Referer"];
     if (pageId) {
       [request setValue:@"0" forHTTPHeaderField:@"X-Goog-AuthUser"];
       [request setValue:pageId forHTTPHeaderField:@"X-Goog-PageId"];
     }
+
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"User-Agent"];
     // [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10B329" forHTTPHeaderField:@"user-agent"];
     
@@ -631,9 +703,13 @@ done:
     NSString *hsid = [self hsid];
     NSString *ssid = [self ssid];
     NSString *sapisid = [self sapisid];
+    NSString *sidcc = [self sidcc];
     NSString *pageId = [self pageID];
 
-    NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+    NSMutableString *cookieData = [NSMutableString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@", hsid,ssid,sapisid,sapisid,sid];
+    if (sidcc) {
+      [cookieData appendString:[NSString stringWithFormat:@"; SIDCC=%@", sidcc]];
+    }
     [request setValue:cookieData forHTTPHeaderField:@"Cookie"];
 
     // simple get request, so we don't need the datasync id. Yay!
@@ -717,7 +793,7 @@ done:
         NSRange searchRange = [htmlString rangeOfString:@"\"datasyncId\":\""];
         if (searchRange.location != NSNotFound) {
           NSInteger startPos = searchRange.location + searchRange.length;
-          NSRange endRange = [htmlString rangeOfString:@"||" options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
+          NSRange endRange = [htmlString rangeOfString:@"\"," options:0 range:NSMakeRange(startPos, [htmlString length] - startPos)];
           
           if (endRange.location != NSNotFound) {
             datasyncID = [htmlString substringWithRange:NSMakeRange(startPos, endRange.location - startPos)];
@@ -832,7 +908,8 @@ done:
     NSString *sapisid = [self sapisid];
     NSString *datasyncID = [self datasyncID];
     NSString *pageID = [self pageID];
-    NSLog(@"pageID -> %@", pageID);
+    NSString *loginInfo = [self loginInfo];
+
     if ([hsid length] && [ssid length] && [sapisid length] && [sid length]&& [sidcc length] && [datasyncID length])
       {
         if ( *request )
@@ -843,13 +920,19 @@ done:
             //     [sharedHTTPCookieStorage deleteCookie:cookie];
             // }
             [*request setHTTPShouldHandleCookies:NO];
-            NSString *cookieData = [NSString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
+            NSMutableString *cookieData = [NSMutableString stringWithFormat:@"hideBrowserUpgradeBox=true; HSID=%@; SSID=%@; SAPISID=%@; __Secure-3PAPISID=%@; SID=%@; SIDCC=%@", hsid,ssid,sapisid,sapisid,sid,sidcc];
+            if (loginInfo) {
+                [cookieData appendString:[NSString stringWithFormat:@"; LOGIN_INFO=%@", loginInfo]];
+            }
             [*request setValue:cookieData forHTTPHeaderField:@"Cookie"];
             NSURL *requestedURL = [*request URL];
 
             // SAPISIDHASH
             long unixTime = (long)[[NSDate date] timeIntervalSince1970];
-            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncID, unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
+            NSArray *datasyncComponents = [datasyncID componentsSeparatedByString:@"||"]; // this is wrong but works, it should grab the 0 one, but the last one is the only one that works. idk why.
+
+            NSString *unhashedSAPISIDHASH = [NSString stringWithFormat:@"%@ %ld %@ %@://%@", datasyncComponents[datasyncComponents.count-1], unixTime, sapisid, [requestedURL scheme], [requestedURL host]];
+            NSLog(@"unhashed thingy -> %@", unhashedSAPISIDHASH);
             NSData *unhashedData = [unhashedSAPISIDHASH dataUsingEncoding:NSUTF8StringEncoding];
             uint8_t digest[CC_SHA1_DIGEST_LENGTH];
 
@@ -1133,6 +1216,8 @@ done:
 %hook GTMOAuth2ViewControllerTouch
 
 -(void)viewWillAppear:(BOOL)unk {
+    [self setBrowserCookiesURL:[NSURL URLWithString:@"https://m.youtube.com/"]];
+    [self clearBrowserCookies];
     [self setBrowserCookiesURL:[NSURL URLWithString:@"https://accounts.youtube.com/"]];
     [self clearBrowserCookies];
     [self setBrowserCookiesURL:[NSURL URLWithString:@"https://accounts.google.com/"]];

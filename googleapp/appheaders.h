@@ -1307,6 +1307,7 @@ typedef struct _TBXMLElement {
 - (NSString*)datasyncID;
 - (NSString*)channelID;
 - (NSString*)pageID;
+- (NSString*)loginInfo;
 - (BOOL)authorizeNSRequest:(NSMutableURLRequest **)request;
 - (void)fillInTokenExtraDataWithParameters:(NSDictionary*)params;
 @end
