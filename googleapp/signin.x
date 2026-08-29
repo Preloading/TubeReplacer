@@ -119,26 +119,55 @@
 %hook SSOService
 
 - (void)requestProfileForIdentity:(SSOIdentityPrivate *)identity callback:(void (^)(id profile, NSError *error))callback {
-  NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
-  [[identity auth] fillInTokenExtraDataWithParameters:params];
-  // i kinda did this strange so here's hoping this works.
-    NSDictionary *newProfile = @{
-        @"id": [identity userID],
-        @"email": [identity userEmail],
-        @"verified_email": @YES,
-        @"name": [params objectForKey:@"fullName"],
-        @"given_name": [params objectForKey:@"fullName"],
-        @"family_name": [params objectForKey:@"fullName"], // oh god did this have parental controls?
-        @"picture": [params objectForKey:@"avatar"] ? : @"https://ssl.gstatic.com/accounts/ui/avatar_2x.png",
-        @"locale": @"en"
-    };
 
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://m.youtube.com/getAccountSwitcherEndpoint"]]; // thanks for asking, yes, it is the same as the user in myprofile.x. it doesn't include channel id, so we can't use this outright, would make my life easier tho.
+    GTMHTTPFetcher *fetcher = [%c(GTMHTTPFetcher) fetcherWithRequest:request];
 
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (callback) {
-            callback(newProfile, nil);
+    [fetcher setAuthorizer:[identity auth]];
+    // [fetcher setCommentWithFormat:@"SSO userinfo %@", [identity userEmail]]; // pain
+    [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error) {
+        if (error != nil) {
+            callback(nil, error);
         }
-    });
+
+        
+        const unsigned char* bytes = [response bytes];
+        NSUInteger length = [response length];
+        NSData *cleanData = nil;
+        if (length >= 5 &&  // jsonp stuff because hell
+            bytes[0] == ')' && 
+            bytes[1] == ']' && 
+            bytes[2] == '}' && 
+            bytes[3] == '\'' && 
+            bytes[4] == '\n') {
+            bytes += 5;
+            length -= 5;
+            cleanData = [NSData dataWithBytes:bytes length:length];
+        } else {
+          cleanData = [response copy];
+        }
+
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:0 error:&error];
+        if (error != nil) {
+            // [cleanData release];
+            callback(nil, error);
+        }
+
+        NSString *name = [TRJSONUtils stringFromJSON:json 
+            keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.header.googleAccountHeaderRenderer.name.simpleText"];
+        NSString *picture = [TRJSONUtils stringFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem.accountPhoto.thumbnails[0].url"];
+
+        return @{
+          @"id": [identity userID],
+          @"email": [identity userEmail],
+          @"verified_email": @YES,
+          @"name": name,
+          @"given_name": name,
+          @"family_name": name, // is this suppost to be like a first name last name kinda deal?
+          @"picture": picture ? picture : @"https://ssl.gstatic.com/accounts/ui/avatar_2x.png", // not the account profile picture
+          @"locale": @"en" // the logout page  *technically* has this.
+      };
+    }];
 }
 
 // this appends a size tag, which is super hacky and doesn't work here.

@@ -68,7 +68,7 @@
 - (id)credential;
 - (void)setMutableRequest:(id)fp8;
 - (id)mutableRequest;
-- (void)setCommentWithFormat:(id)fp8;
+- (void)setCommentWithFormat:(NSString*)fp8, ...;
 - (void)addPropertiesFromDictionary:(id)fp8;
 - (id)propertyForKey:(id)fp8;
 - (void)setProperty:(id)fp8 forKey:(id)fp12;
