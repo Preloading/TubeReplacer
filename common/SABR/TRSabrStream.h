@@ -47,6 +47,7 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 
 @property(nonatomic, retain) NSOperationQueue *networkQueue;
 
+@property (nonatomic, assign) BOOL isStreamReady;
 @property (nonatomic, assign) BOOL isStreamBad;
 @property (nonatomic, retain) GTMOAuth2Authentication *authentication;
 
@@ -56,6 +57,7 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 -(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState;
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType;
 -(void)declareStreamBad;
+-(void)cleanup;
 -(void)start;
 
 // YTStream compatibility

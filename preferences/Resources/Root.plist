@@ -653,13 +653,6 @@
 			<key>label</key>
 			<string>Reset Category Settings</string>
 		</dict>
-
-
-
-
-
-
-
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -706,6 +699,50 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>CustomStreamURL</string>
+			<key>label</key>
+			<string>Custom Stream URL</string>
+			<key>placeholder</key>
+			<string>https://tuberepair.uptimetrackers.com/getvideo/%v</string>
+			<key>isController</key>
+			<true/>
+			<key>cellClass</key>
+			<string>PSEditTextCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AllowSABR</string>
+			<key>label</key>
+			<string>Enable SABR</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>dev.preloading.tubereplacer.preferences</string>
+			<key>key</key>
+			<string>AllowHLS</string>
+			<key>label</key>
+			<string>Enable HLS</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>default</key>
 			<true/>
@@ -746,22 +783,6 @@
 			<key>default</key>
 			<true/>
 		</dict> -->
-		<dict>
-			<key>cell</key>
-			<string>PSEditTextCell</string>
-			<key>defaults</key>
-			<string>dev.preloading.tubereplacer.preferences</string>
-			<key>key</key>
-			<string>CustomStreamURL</string>
-			<key>label</key>
-			<string>Custom Stream URL</string>
-			<key>placeholder</key>
-			<string>https://tuberepair.uptimetrackers.com/getvideo/%v</string>
-			<key>isController</key>
-			<true/>
-			<key>cellClass</key>
-			<string>PSEditTextCell</string>
-		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>

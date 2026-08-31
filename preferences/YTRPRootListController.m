@@ -6,8 +6,6 @@
 #define PREFS_PATH @"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"
 #define NOTIFY_NAME CFSTR("dev.preloading.tubereplacer.preferences/settingschanged")
 
-extern char **environ;
-
 @implementation YTRPRootListController
 
 - (NSArray *)specifiers {
@@ -132,7 +130,7 @@ extern char **environ;
         NULL
     };
 
-    posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, argv, environ);
+    posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, argv, NULL);
 }
 
 @end

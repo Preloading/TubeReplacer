@@ -188,7 +188,7 @@ static TRPOTokenSolver *_sharedInstance = nil;
             UIWindow *window = [UIApplication sharedApplication].keyWindow;
 
             // self.webView = [[UIWebView alloc] initWithFrame:window.bounds]; // visible
-            self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)]; // invisible
+            self.webView = [[[UIWebView alloc] initWithFrame:CGRectMake(-500, -500, 100, 100)] autorelease]; // invisible
             self.webView.hidden = NO;
             self.webView.alpha = 1.0;
             self.webView.delegate = self;
@@ -501,6 +501,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         url = signatureQueries[@"url"];
         s = signatureQueries[@"s"];
         sp = signatureQueries[@"sp"];
+        [signatureQueries release];
     }
     
 
@@ -539,6 +540,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
                                                     error:&error];
     if (error) {
         NSLog(@"[N/Sig] solution did not succeed!");
+        [urlQueries release];
         return nil;
     }
 
@@ -546,6 +548,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
     if (!solvedNSig[@"n"] && !solvedNSig[@"sig"]) {
         NSLog(@"n/sig failed to decipher!");
+        [urlQueries release];
         return nil;
     }
 
@@ -611,6 +614,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     if (_botguardResponseCallback) [_botguardResponseCallback release];
 
     if (_nsigJS) [_nsigJS release];
+    if (_ytCfg) [_ytCfg release];
+
+    if (_integrityToken) [_integrityToken release];
+    if (_integrityTokenExpiration) [_integrityTokenExpiration release];
+    if (_integrityTokenShouldProbablyRenew) [_integrityTokenShouldProbablyRenew release];
 
     [super dealloc];
 }

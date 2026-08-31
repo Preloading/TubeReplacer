@@ -628,7 +628,7 @@
 
     objc_setAssociatedObject(video, "videoStatsInfo", playbackUrlQueryParams, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
-    return video;
+    return [video autorelease];
 }
 
 #pragma mark - Feed Item (Minimal Video Details from Feed)

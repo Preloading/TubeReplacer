@@ -25,13 +25,9 @@
     self = [super init];
     if (!self) return nil;
     self.isStreamBad = NO;
+    self.isStreamReady = NO;
 
     NSString *decipheredStreamURL = [[TRPOTokenSolver sharedInstance] decipherUrl:streamURL signatureCipher:nil];
-    
-    self.currentlyRequestingInNormal = NO;
-    self.currentlyRequestingInFastTrack = NO;
-    self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
-    self.networkQueue.maxConcurrentOperationCount = 2;
 
     // NSLog(@"stream URL -> %@ ustreamConfig -> %@", decipheredStreamURL, ustreamConfig);
     if (decipheredStreamURL != nil)
@@ -45,6 +41,15 @@
     }
     self.formats = formatsDict;
     self.videoId = videoId;
+
+    return self;
+}
+
+-(void)start {
+    self.currentlyRequestingInNormal = NO;
+    self.currentlyRequestingInFastTrack = NO;
+    self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
+    self.networkQueue.maxConcurrentOperationCount = 2;
 
     NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
     NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
@@ -60,14 +65,11 @@
     self.audioFormatsWeHave = audioFormatsWeHave;
     [videoFormatsWeHave release];
     [audioFormatsWeHave release];
-
-    return self;
-}
-
--(void)start {
+    
     self.videoStream = [[[TRSabrMedia alloc] init] autorelease];
     self.audioStream = [[[TRSabrMedia alloc] init] autorelease];
 
+    self.isStreamReady = YES;
     [self startWebServerThreaded];
     [[NSNotificationCenter defaultCenter]
         addObserver:self
@@ -122,6 +124,11 @@
     [sabrRequest startRequestWithURL:requestURL body:requestBody auth:self.authentication partCallback:^(TRUmpPart *part) {
         [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
     } completionCallback:^(NSError *error) {
+        if (!self.isStreamReady) {
+            [currentlyParsingDatas release];
+            [currentlyParsingHeaders release];
+            return;
+        }
         if (error) {
             NSLog(@"an error occured! error -> %@", error);
             [currentlyParsingDatas release];
@@ -141,7 +148,7 @@
         else
             self.currentlyRequestingInNormal = NO;
 
-        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && !self.isStreamBad) {
+        if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.isStreamReady) {
             if (self.requestNumber > 10) {
                 [self declareStreamBad];
             } else {
@@ -357,7 +364,7 @@
             NSLog(@"reloading player...");
             [self stopWebServer];
             [self startWebServerThreaded];
-            self.reloadPlayerFunction();
+            // self.reloadPlayerFunction();
        }
     }];
 }
@@ -418,6 +425,8 @@
 
 // segment idx starts at 0
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType {
+    if (!self.isStreamReady)
+        return; // bad things will happen
     if (mediaType == TRSabrMediaTypeVideo) {
         double requestedVideoSegmentStart = [self.videoStream.segmentIndexesCombined[segmentIdx] doubleValue]/(double)self.videoStream.timescale;
         double requestedVideoSegmentEnd = requestedVideoSegmentStart + ([self.videoStream.segmentIndexes[segmentIdx] doubleValue]/(double)self.videoStream.timescale);
@@ -523,25 +532,27 @@
     return NO;
 }
 
+// it's intended to be able to restart is cleanup is called.
 -(void)cleanup {
+    self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopHTTPServerOnThread];
     [_videoStream release];
     [_audioStream release];
     [_playbackCookie release];
-    [_videoFormatsWeHave release];
-    [_audioFormatsWeHave release];
-    [_formats release];
     [_poToken release];
     [_coldstart release];
-    [_videoId release];
-    [_ustreamConfig release];
-    [_decipheredStreamURL release];
     [_networkQueue release];
+    [_videoFormatsWeHave release];
+    [_audioFormatsWeHave release];
 }
 
 -(void)dealloc {
     NSLog(@"deallocating!!!");
+    [_videoId release];
+    [_ustreamConfig release];
+    [_decipheredStreamURL release];
+    [_formats release];
     [self cleanup];
 
     [super dealloc];

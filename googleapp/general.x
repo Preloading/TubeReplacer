@@ -257,16 +257,6 @@ static void compat_check() {
 
 %end
 
-// todo: so i don't forget this, i want to find a way of selectively blocking this.
-%hook YTItemListHeader 
-
--(BOOL)itemCountHidden {
-    return YES;
-}
-
-%end
-
-
 %hook YTItemListHeader
 -(void)setItemCount:(unsigned int)count
 {

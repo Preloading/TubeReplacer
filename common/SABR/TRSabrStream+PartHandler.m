@@ -8,6 +8,8 @@
 @implementation TRSabrStream(PartHandler)
 
 -(void)handlePart:(TRUmpPart*)part currentlyParsingDatas:(NSMutableDictionary**)currentlyParsingDatas currentlyParsingHeaders:(NSMutableDictionary**)currentlyParsingHeaders {
+    if (!self.isStreamReady)
+        return;
     // NSLog(@"data type -> %i", part.type);
     NSError *error = nil;
     switch (part.type) {

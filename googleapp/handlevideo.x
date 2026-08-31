@@ -7,14 +7,20 @@
 // 5 = SABR
 
 #include <Foundation/Foundation.h>
+#include <AVFoundation/AVFoundation.h>
 #include "appheaders.h"
 #include "general.h"
 #include "common/SABR/TRSabrStream.h"
 
+@interface YTStream (TubeReplacerInternal)
++(YTStream*)internalSelectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn;
+@end
+
+
 %hook YTStream
 
-
-+(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi {
+%new
++(YTStream*)internalSelectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn {
     NSArray<YTStream*> *streams = [video streams];
     
     // return the stream with the highest number lol
@@ -24,31 +30,10 @@
         if ([stream format] == 5) {
             // sabr case
             TRSabrStream *sabrStream = (TRSabrStream*)stream;
-            if ([sabrStream isStreamBad])
+            if ([sabrStream isStreamBad]) {
+                NSLog(@"SABR stream is bad! lets not use it...");
                 continue;
-        }
-        if ([stream format] == 2)
-            return stream; // if they are using custom, **we use custom**
-        if ([stream format] > [selectedStream format])
-            selectedStream = stream;
-    }
-
-    return selectedStream;
-
-}
-
-+(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges {
-    NSArray<YTStream*> *streams = [video streams];
-    
-    // return the stream with the highest number lol
-    YTStream *selectedStream = nil;
-    
-    for (YTStream *stream in streams) {
-        if ([stream format] == 5) {
-            // sabr case
-            TRSabrStream *sabrStream = (TRSabrStream*)stream;
-            if ([sabrStream isStreamBad])
-                continue;
+            }
         }
         if ([stream format] == 2)
             return stream; // if they are using custom, **we use custom**
@@ -59,31 +44,19 @@
     NSLog(@"selected new stream -> %@", selectedStream);
     return selectedStream;
 
+}
+
++(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi {
+    return [%c(YTStream) internalSelectStreamForVideo:video maxQualityStreamFormat:-1 onWiFi:onWifi devicePrivileges:nil CPN:nil];
+}
+
++(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges {
+    return [%c(YTStream) internalSelectStreamForVideo:video maxQualityStreamFormat:-1 onWiFi:onWifi devicePrivileges:devicePrivileges CPN:nil];
 }
 
 // 1.2.1 - 1.3.0
 +(YTStream*)selectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn {
-    NSArray<YTStream*> *streams = [video streams];
-    
-    // return the stream with the highest number lol
-    YTStream *selectedStream = nil;
-    
-    for (YTStream *stream in streams) {
-        if ([stream format] == 5) {
-            // sabr case
-            TRSabrStream *sabrStream = (TRSabrStream*)stream;
-            if ([sabrStream isStreamBad])
-                continue;
-        }
-        if ([stream format] == 2)
-            return stream; // if they are using custom, **we use custom**
-        if ([stream format] > [selectedStream format])
-            selectedStream = stream;
-    }
-
-    NSLog(@"selected new stream -> %@", selectedStream);
-    return selectedStream;
-
+    return [%c(YTStream) internalSelectStreamForVideo:video maxQualityStreamFormat:-1 onWiFi:onWifi devicePrivileges:devicePrivileges CPN:cpn];
 }
 
 %end
@@ -137,12 +110,18 @@
     return %orig;
 }
 
+// TODO: for some reason this goes back 3 seconds??? kinda odd. maybe fix that.
 %new
 -(void)reloadPlayerStream
 {
+    NSLog(@"reloading stream...");
     BOOL version10 = [version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"];
     if (!version10)
       [self saveMediaTime];
+    // double currentTime = [[self valueForKey:l(@"savedMediaTime")] doubleValue];
+    
+    // [self setValue:@(YES) forKey:l(@"wasPlayingBeforeSeeking")];
+
     YTStream *selectedStream = nil;
     if ([version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"])
         selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")] maxQualityStreamFormat:9999 devicePrivileges:[self valueForKey:l(@"privileges")] CPN:[self valueForKey:l(@"videoCPN")]];
@@ -151,10 +130,12 @@
     else
         selectedStream = [self selectStreamForVideo:[self valueForKey:l(@"video")]];
 
-    // [self setValue:@(1) forKey:l(@"startPlayback")];
+    
     if (version10) {
         [self setAndPlayVideoStream:selectedStream];
     } else {
+        BOOL isPlaying = [(AVPlayer*)([[self valueForKey:l(@"player")] valueForKey:l(@"player")]) rate] != 0;
+        [self setValue:@(isPlaying) forKey:l(@"startPlayback")];
         if ( selectedStream != nil)
         {
             if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
@@ -165,8 +146,14 @@
             }
         }
         NSLog(@"video stream -> %@", [self valueForKey:l(@"videoStream")]);
+        // NSLog(@"time -> %f", [[self valueForKey:l(@"savedMediaTime")] doubleValue]);
+        // [(YTPlayer*)[self valueForKey:l(@"player")] reset];
+        // [(YTPlayer*)[self valueForKey:l(@"player")] setDelegate:self];
         [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
+        // [self setAndPlayVideoStream:[self valueForKey:l(@"videoStream")]];
+        // [(YTPlayer*)[self valueForKey:l(@"player")] seekToTime:currentTime];
     }
+    // [(YTPlayer*)[self valueForKey:l(@"player")] play];
 }
 
 // -(void)appDidBecomeActive {
@@ -227,7 +214,7 @@
 -(void)loadPlayerWithStreamManifest:(MLStreamManifest*)streamManifest deviceCapabilities:(id)deviceCapabilities airPlayAllowed:(BOOL)airPlayAllowed  {
     if (objc_getAssociatedObject(streamManifest, "sabrHackApplied") == NULL) {
         YTPlayerServices *playerServices = [self valueForKey:l(@"playerServices")];
-        
+
         YTUserAuthenticator *userAuthenticatior = [playerServices userAuth];
         id authentication = [userAuthenticatior authentication];
 

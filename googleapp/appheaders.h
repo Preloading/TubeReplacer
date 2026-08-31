@@ -1683,6 +1683,7 @@ typedef struct _TBXMLElement {
 
 
 -(void)saveMediaTime;
+-(void)refreshPlayerStreamIfNeeded;
 
 // 1.2.1 - 1.3.0
 -(YTStream*)selectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn;
@@ -1838,6 +1839,7 @@ typedef struct _TBXMLElement {
 - (id)contentURL;
 - (void)releasePlayer;
 
+-(void)reset;
 -(void)setStreamURL:(NSURL*)url initialMediaTime:(double)initalMediaTime airPlayAllowed:(BOOL)airplayAllowed;
 -(double)currentMediaTime;
 @end
