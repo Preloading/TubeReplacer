@@ -103,7 +103,7 @@
 
     if (!([preferences[@"StreamType"] isEqualToString:@"custom"] || [preferences[@"StreamType"] isEqualToString:@"tuberepair"]) ) {
         NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
-        if (hlsStreamURL) {
+        if (hlsStreamURL && (preferences[@"AllowHLS"] == nil || [preferences[@"AllowHLS"] isEqual:@YES])) {
             // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
             NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:hlsStreamURL]];
             NSURLResponse *response = nil;
@@ -261,7 +261,7 @@
         NSString *sabrURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"];
         NSString *ustreamConfig = [TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"];
 
-        if (sabrURL && ustreamConfig) {
+        if (sabrURL && ustreamConfig && (preferences[@"AllowSABR"] == nil || [preferences[@"AllowSABR"] isEqual:@YES]) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil )) {
             // handle SABR
             NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
             for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
@@ -339,13 +339,19 @@
             NSString *signatureCipher = format[@"signatureCipher"];
             if (urlString || signatureCipher) {
                 NSURL *url = nil;
-                // todo: check if this is android before running this.
-                NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
-                if (decipheredURL) {
-                    url = [NSURL URLWithString:decipheredURL];
+
+                if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil) {
+                    NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
+                    if (decipheredURL) {
+                        url = [NSURL URLWithString:decipheredURL];
+                    } else {
+                        url = [NSURL URLWithString:urlString];
+                    }
                 } else {
                     url = [NSURL URLWithString:urlString];
                 }
+                // todo: check if this is android before running this.
+                
 
                 if (url) {
                     id stream = nil;
@@ -373,7 +379,7 @@
         }
         // we don't really have a way of knowing the video quality so
         id stream = nil;
-        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) { // technically this should be 4, but then cellular fails
+        if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
             stream = [NSClassFromString(@"YTStream") streamWithURL:url format:2 encrypted:NO precached:NO];
         } else if ([version() isEqualToString:@"2.0.0"]) {
             stream = [NSClassFromString(@"YTStream") streamWithURL:url MIMEType:@"video/mp4" format:2];
@@ -598,7 +604,7 @@
             subtitlesTracksURL:subtitleTracks ? subtitleTracks : nil
             commentsAllowed:YES
             commentsURL:videoId
-            commentsCountHint:0
+            commentsCountHint:2147483647
             relatedURL:videoId
             claimed:NO
             monetized:NO

@@ -342,7 +342,6 @@
         kCFStringEncodingUTF8
     );
     
-    // Transfer ownership to ARC-compatible autorelease
     return [(NSString *)escaped autorelease];
 }
 

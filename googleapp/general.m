@@ -1,15 +1,15 @@
 #import "general.h"
 #include <Foundation/Foundation.h>
 
+@interface NSBundle (YouTube)
+-(NSString*)localizedQuantityStringForKey:(NSString*)key quantity:(NSUInteger)quantity table:(NSString*)table;
+@end
+
 NSString* localizedStringForKey(NSString *key)
 {
   NSBundle *v2 = [NSBundle mainBundle];
   return [v2 localizedStringForKey:key value:key table:0];
 }
-
-@interface NSBundle (YouTube)
--(NSString*)localizedQuantityStringForKey:(NSString*)key quantity:(NSUInteger)quantity table:(NSString*)table;
-@end
 
 NSString* localizedStringForKey2(NSString *key, NSUInteger quantity) {
     NSBundle *bundle = [NSBundle mainBundle];
@@ -19,6 +19,11 @@ NSString* localizedStringForKey2(NSString *key, NSUInteger quantity) {
 NSString* localizedStringForKey2UILib(NSString *key, NSUInteger quantity) {
     NSBundle *bundle = [NSBundle mainBundle];
     return [bundle localizedQuantityStringForKey:key quantity:quantity table:@"UILib"];
+}
+
+NSString* localizedStringForKeyUILib(NSString *key) {
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle localizedStringForKey:key value:key table:@"UILib"];
 }
 
 

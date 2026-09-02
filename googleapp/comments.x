@@ -104,3 +104,13 @@
 }
 
 %end
+
+%hook YTCommentsFeedTableSectionController
+-(void)setHeaderCellCommentsCount:(uint64_t)commentCount {
+    if (commentCount == 2147483647) {
+        [[self valueForKey:@"headerCell"] setTitle:localizedStringForKeyUILib(@"watch.comments")];
+    } else {
+        %orig;
+    }
+}
+%end
