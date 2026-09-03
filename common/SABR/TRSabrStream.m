@@ -536,7 +536,7 @@
 -(void)cleanup {
     self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self stopHTTPServerOnThread];
+    [self stopWebServer];
     [_videoStream release];
     [_audioStream release];
     [_playbackCookie release];

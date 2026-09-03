@@ -20,6 +20,7 @@
     [request setValue:@"application/x-protobuf" forHTTPHeaderField:@"content-type"];
     [request setValue:@"identity" forHTTPHeaderField:@"accept-encoding"];
     [request setValue:@"application/vnd.yt-ump" forHTTPHeaderField:@"accept"];
+    [request setTimeoutInterval:15.0];
     
     if (auth != nil)
         [auth authorizeNSRequest:&request];

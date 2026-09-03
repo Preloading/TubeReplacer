@@ -646,6 +646,7 @@
     // Unwrap the video data from various container formats
     NSDictionary *videoData = [self unwrapVideoData:json];
     NSString *dataType = [self detectDataType:json];
+    NSLog(@"data type -> %@", dataType);
     
     if (!videoData) {
         if (error) {
@@ -713,12 +714,14 @@
     NSString *channelId = nil;
     if ([dataType isEqualToString:@"lockupViewModel"]) {
         channelId = [TRJSONUtils stringFromJSON:videoData 
-                        keyPath:@"metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.renderContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId"];
+                        keyPath:@"metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId"];
     } else {
         channelId = [TRJSONUtils stringFromJSON:videoData 
                         keyPath:@"shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId"];
     }
     
+    NSLog(@"channel id -> %@", channelId);
+
     // Thumbnails 
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:videoData keyPath:@"thumbnail.thumbnails"];
     if ([dataType isEqualToString:@"lockupViewModel"]) {
