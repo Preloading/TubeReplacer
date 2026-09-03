@@ -235,12 +235,15 @@
         }
     }
 
-
+    // NSLog(@"json -> %@", json);
     unsigned long long totalResults = 2147483647UL;
     if (json[@"estimatedResults"] != nil) {
         totalResults = [json[@"estimatedResults"] intValue];
+    } else if (json[@"header"][@"playlistHeaderRenderer"][@"briefStats"][0][@"runs"][0][@"text"]) {
+        totalResults = [json[@"header"][@"playlistHeaderRenderer"][@"briefStats"][0][@"runs"][0][@"text"] intValue];
     }
 
+   
    
     NSString *basePlaylistsVideosCount = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"];
     if (basePlaylistsVideosCount) {
