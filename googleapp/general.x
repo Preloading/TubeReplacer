@@ -6,6 +6,7 @@
 @interface NSURLConnection(YouTube)
 
 +(NSString*)userAgent;
++(NSMutableURLRequest*)requestWithRequest:(NSURLRequest*)request;
 
 @end
 
@@ -15,19 +16,21 @@
 +(NSMutableURLRequest*)requestWithRequest:(NSURLRequest*)request
 {
     NSMutableURLRequest *copy = [request mutableCopyWithZone:0];
-    // NSLog(@"[request allHTTPHeaderFields] -> %@, url -> %@", [copy allHTTPHeaderFields], [copy URL]);
     if ([copy valueForHTTPHeaderField:@"OV-User-Agent"]) {
         [copy setValue:[[copy valueForHTTPHeaderField:@"OV-User-Agent"] copy] forHTTPHeaderField:@"User-Agent"];
-        // NSLog(@"setting custom UA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         return copy;
     } else if ([copy valueForHTTPHeaderField:@"Ov-User-Agent"]) {
         [copy setValue:[[copy valueForHTTPHeaderField:@"Ov-User-Agent"] copy] forHTTPHeaderField:@"User-Agent"];
-        // NSLog(@"setting custom UA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         return copy;
     } else {
         [copy setValue:[NSURLConnection userAgent] forHTTPHeaderField:@"User-Agent"];
         return copy;
     }
+}
+
++(void)sendAsynchronousRequest:(NSURLRequest*)request queue:(id)queue completionHandler:(id)completionHandler
+{
+    %orig([[NSURLConnection requestWithRequest:request] autorelease], queue, completionHandler);
 }
 %end
 
