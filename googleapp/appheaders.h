@@ -29,7 +29,20 @@
 -(TRPOTokenSolver*)challengeSolver;
 @end
 
-@interface YTFeedController : NSObject
+@protocol YTFeedViewProtocol <NSObject>
+- (void)showError:(id)fp8 onRefresh:(BOOL)fp12;
+- (void)showLoading;
+- (void)deleteCellsAtIndices:(id)fp8;
+- (void)insertCellsAtIndices:(id)fp8;
+- (void)reload;
+- (id)cellAtIndex:(int)fp8;
+- (void)setFeedViewDelegate:(id)fp8;
+- (BOOL)cellsRespondToSelector:(SEL)selector forEntry:(id)entry;
+
+- (BOOL)cellsRespondToSelector:(SEL)selector;
+@end
+
+@interface YTFeedController : NSObject<YTFeedViewProtocol>
 - (void)setRefreshExtraRequest:(id)fp8;
 - (id)refreshExtraRequest;
 - (void)setRefreshRequest:(id)fp8;
@@ -80,6 +93,28 @@
 - (void)updateAccountCell:(id)fp8;
 
 @end 
+@interface YTEventsFeedController : YTFeedController
+{
+    NSMutableDictionary *avatars_;
+    NSMutableSet *groupIDs_;
+    int source_;
+    UIImage *YouTubeSystemChannelImage_;
+}
+
+- (void)feedView:(id)fp8 didSelectEntryAtIndex:(int)fp12;
+- (void)updateCell:(id)fp8 forEntry:(id)fp12 animated:(BOOL)fp16;
+- (void)setAvatar:(id)fp8 forEntry:(id)fp12;
+- (void)loadAvatarForEvent:(id)fp8;
+- (void)clear;
+- (void)handleEntries:(id)fp8;
+- (void)dealloc;
+- (id)initWithFeedView:(id)fp8 services:(id)fp12;
+- (id)initWithFeedView:(id)fp8 services:(id)fp12 source:(int)fp16;
+
+- (void)setUploaderThumbnail:(id)thumbnail forEntry:(id)entry;
+- (void)setChannelThumbnail:(id)thumbnail forEntry:(id)entry;
+@end
+
 
 @interface YTUtils
 + (id)userLanguageCode;
@@ -268,6 +303,25 @@
 - (id)initWithOperationQueue:(id)fp8 HTTPFetcherService:(id)fp12;
 
 @end
+@interface YTImageService : YTBaseService
+// {
+//     YTCache *imageCache_;
+//     YTCache *dataCache_;
+//     YTReachability *reachability_;
+// }
+
+- (id)closestImageURLWithTargetSize:(struct CGSize)fp8 preferredSize:(struct CGSize)fp16 URLs:(id)fp24;
+- (id)selectURLForTargetSize:(struct CGSize)fp8 fromURLs:(id)fp16;
+- (void)didReceiveMemoryWarning;
+- (void)makeImageRequestWithURLs:(id)fp8 targetSize:(struct CGSize)fp12 responseBlock:(id)responseBlock errorBlock:(id)fp20;
+- (void)makeImageRequestWithURL:(id)fp8 responseBlock:(id)unk2 errorBlock:(id)fp12;
+- (void)dealloc;
+- (id)initWithOperationQueue:(id)fp8 HTTPFetcherService:(id)fp12;
+- (id)initWithOperationQueue:(id)fp8 HTTPFetcherService:(id)fp12 reachability:(id)fp16;
+
+@end
+
+
 
 @interface GTMURLBuilder : NSObject
 {
@@ -1412,6 +1466,7 @@ typedef struct _TBXMLElement {
 
 // 1.1.0+
 - (id)initWithAuthorDisplayName:(id)fp8 authorUserID:(id)fp12 action:(int)fp16 target:(id)fp20 targetDisplayName:(NSString*)targetDisplayName when:(id)fp24 video:(id)fp28 groupID:(id)fp32 feedURL:(id)fp36 title:(id)title;
+- (BOOL)isYouTubeAuthored;
 @end
 
 @interface YTEventParser : YTTBParser
@@ -1993,3 +2048,25 @@ typedef struct _TBXMLElement {
 -(id)invokeCallback:(id)callback;
 -(BOOL)shouldAuthorizeAllRequests;
 @end
+
+@interface YTEventCell_iPhone : NSObject
+
++ (void)setDefaultTitleFontOnLabel:(id)fp8;
++ (float)titleWidthForWidth:(float)fp8;
++ (float)maximumCellHeight;
++ (float)cellHeightForEntry:(id)fp8 width:(float)fp12;
++ (struct CGSize)thumbnailSizeForEntry:(id)fp8;
+- (void)setTargetChannelThumbnail:(id)fp8 animated:(BOOL)fp12;
+- (void)setTargetChannel:(id)fp8;
+- (void)setChannelThumbnailHidden;
+- (void)setChannelThumbnail:(id)fp8 animated:(BOOL)fp12;
+- (void)setThumbnail:(id)fp8 animated:(BOOL)fp12;
+- (id)entry;
+- (void)setEntry:(id)fp8;
+- (void)prepareForReuse;
+- (void)layoutSubviews;
+- (id)initWithReuseIdentifier:(id)fp8;
+
+- (void)setChannelThumbnail:(id)fp8 animated:(BOOL)fp12;
+@end
+

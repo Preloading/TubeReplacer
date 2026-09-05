@@ -694,7 +694,7 @@
     } else {
         title = [TRJSONUtils stringFromJSON:videoData keyPath:@"title.runs[0].text"];
     }
-    NSLog(@"title -> %@", title);
+    // NSLog(@"title -> %@", title);
     if (!title) title = @"";
 
     if ([title isEqualToString:@"[Deleted video]"]) return nil;
@@ -719,9 +719,16 @@
         channelId = [TRJSONUtils stringFromJSON:videoData 
                         keyPath:@"shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId"];
     }
-    
-    NSLog(@"channel id -> %@", channelId);
 
+    NSString *channelThumbnail = nil;
+    if ([dataType isEqualToString:@"lockupViewModel"]) {
+        channelThumbnail = [TRJSONUtils stringFromJSON:videoData 
+                        keyPath:@"metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.avatar.avatarViewModel.image.sources[0].url"];
+    } else {
+        channelThumbnail = [TRJSONUtils stringFromJSON:videoData 
+                        keyPath:@"channelThumbnail.thumbnails[0].url"];
+    }
+    
     // Thumbnails 
     NSArray *thumbArray = [TRJSONUtils arrayFromJSON:videoData keyPath:@"thumbnail.thumbnails"];
     if ([dataType isEqualToString:@"lockupViewModel"]) {
@@ -759,7 +766,7 @@
                                                  keyPath:@"title.accessibility.accessibilityData.label"];
     }
 
-    NSLog(@"accessiblity label -> %@", accessibilityLabel);
+    // NSLog(@"accessiblity label -> %@", accessibilityLabel);
     
     if (accessibilityLabel && [accessibilityLabel length] > 0) {
         // Parse accessibility label for views and date
@@ -1044,6 +1051,10 @@
             videoPro:nil
             liveEventURL:nil
             currentViewers:0];
+    }
+
+    if (channelThumbnail) {
+        objc_setAssociatedObject(video, "uploaderChannelProfilePicture", [NSURL URLWithString:channelThumbnail], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 
     return [video autorelease];
