@@ -121,7 +121,6 @@
         }
     }
     
-    @throw NSInternalInconsistencyException;
     return video;
 }
 
