@@ -10,6 +10,7 @@ typedef NS_ENUM(uint32_t, ProtobufWireType) {
 @interface ProtobufEncoder : NSObject
 @property (nonatomic, strong) NSMutableData *buffer;
 - (instancetype)init;
+- (instancetype)initWithExistingData:(NSData*)data;
 - (NSData *)dataRepresentation;
 
 // Primitive writes

@@ -13,6 +13,13 @@
     return self;
 }
 
+- (instancetype)initWithExistingData:(NSData*)data {
+    if (self = [super init]) {
+        _buffer = [[data mutableCopy] retain];
+    }
+    return self;
+}
+
 - (NSData *)dataRepresentation {
     return [_buffer copy];
 }
@@ -101,5 +108,10 @@ static inline uint64_t zigzag64(int64_t n) {
     [self writeKey:field wireType:ProtobufWireTypeLengthDelimited];
     [self writeLengthDelimited:d];
 }
+
+// -(void)dealloc {
+//     [_buffer release];
+//     [super dealloc];
+// }
 
 @end

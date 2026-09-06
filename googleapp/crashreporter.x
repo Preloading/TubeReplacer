@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "appheaders.h"
+#import "common/Protobuf.h"
+#import "general.h"
 
 @interface SomeProtobufClassIDontWantToRE
 
@@ -34,16 +36,12 @@
 
 @end
 
-
-
 %hook GIPFeedback
 
 + (void)submitFeedbackWithCollectedData:(GIPFeedbackCollectedData *)collectedData
 {
-    // Grab crash report from collected data
     GIPCrashReportData *crashReport = [collectedData crashReport];
 
-    // Build request
     NSURL *url = [NSURL URLWithString:
         @"http://preloading.dev/tweaks/tubereplacer/crashreports.php"];
 
@@ -52,16 +50,21 @@
 
     [request setValue:@"application/x-protobuf"
         forHTTPHeaderField:@"Content-Type"];
-
-    // Create fetcher
+        
     GTMHTTPFetcher *fetcher =
         [%c(GTMHTTPFetcher) fetcherWithRequest:request];
 
-    // Attach protobuf payload
     NSData *postData = [[collectedData exportAsProto] data];
-    [fetcher setPostData:postData];
 
-    // Show toast depending on connectivity
+    // patching the protobuf to add some extra info about tubereplacer
+    ProtobufEncoder *pb = [[ProtobufEncoder alloc] initWithExistingData:postData];
+
+    [pb writeMessageField:5 usingBlock:^(ProtobufEncoder *tbSpecific) {
+        [tbSpecific writeStringField:1 string:TRPackageVersion(@"dev.preloading.tubereplacer")];
+    }];
+
+    [fetcher setPostData:[[pb dataRepresentation] retain]];
+
     if ([self hasInternetConnection]) {
         NSString *message =
             [%c(GIPFeedbackLocalizedString) sendMessageString];
@@ -71,18 +74,11 @@
             [%c(GIPFeedbackLocalizedString) sendMessageLaterString];
         [%c(GIPToast) showToast:message forDuration:3.0];
 
-        // Mark crash report as "pending"
         [crashReport setReportStatus:0];
     }
 
-    // Begin async fetch
     [fetcher beginFetchWithCompletionHandler:
      ^(NSData *data, NSError *error) {
-
-         // NOTE: In your decompilation this pointer type
-         // looks slightly off, but behavior is clear:
-         // status = 2 on error, 1 on success
-
          if (error) {
              [crashReport setReportStatus:2];   // failed
          } else {
