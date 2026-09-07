@@ -10,4 +10,11 @@
     }
 }
 
+-(void)performSignedHTTPRequestWithBuilder:(id)builder {
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    if ([preferences[@"EnableVideoStats"] isEqual:@(YES)] || preferences[@"EnableVideoStats"] == nil) {
+        return %orig;
+    }
+}
+
 %end
