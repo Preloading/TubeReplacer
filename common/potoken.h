@@ -31,6 +31,7 @@
 @property (nonatomic, copy) void (^poGenReady)();
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
 @property (nonatomic, copy) void (^webviewReadyCallback)();
+@property (nonatomic, copy) void (^errorAlert)(NSString *);
 
 // player
 // @property (nonatomic, strong) NSString *playerId;

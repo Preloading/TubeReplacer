@@ -1,4 +1,5 @@
 #import "potoken.h"
+#include <Foundation/NSObjCRuntime.h>
 #import "../base64/NSData+Base64.h"
 #import "../base64/NSString+Base64.h"
 #import <Foundation/Foundation.h>
@@ -474,6 +475,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     // check if we actually can solve n/sig
     if (!self.isWebViewReady) {
         NSLog(@"[N/Sig] webview is not ready!");
+        self.errorAlert(@"n/sig failed to start correctly! playback may not work.");
         return nil;
     }
 
@@ -481,6 +483,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
     if (!self.nsigJS) {
         NSLog(@"[N/Sig] JS code is not available!");
+        self.errorAlert(@"n/sig failed to fetch in time. playback may not work.");
         return nil;
     }
     

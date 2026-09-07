@@ -15,13 +15,13 @@ typedef NS_ENUM(NSInteger, TRSabrMediaType) {
 
 @property (nonatomic, assign) BOOL isReadyForPlayback;
 
-// contains the time duration of each segment, in ticks, including the segments we do not have downloaded yet, starting from 0 
-@property (nonatomic, strong) NSArray *segmentIndexes;
-// contains the time durations all combined together, starting from 0
-@property (nonatomic, strong) NSArray *segmentIndexesCombined;
+// contains the time duration (in ms) of each segment, in ticks, including the segments we do not have downloaded yet, starting from 0 
+@property (nonatomic, strong) NSArray<NSNumber*> *segmentIndexes;
+// contains the time durations (in ms) all combined together, starting from 0
+@property (nonatomic, strong) NSArray<NSNumber*> *segmentIndexesCombined;
 
 // the full NSData of each segment (excl. the header), indexed by the sequence number provided by SABR. This starts at 1.
-@property (nonatomic, strong) NSMutableDictionary *segmentData;
+@property (nonatomic, strong) NSMutableDictionary<NSNumber*, NSData*> *segmentData;
 
 // all pending requests for segments (0 is manifest)
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSMutableArray *> *pendingResponses;

@@ -156,6 +156,16 @@
     // [(YTPlayer*)[self valueForKey:l(@"player")] play];
 }
 
+-(void)willLoseFocus {
+    %orig;
+    if ([[self valueForKey:l(@"videoStream")] isKindOfClass:[TRSabrStream class]]) {
+        TRSabrStream *sabrStream = [self valueForKey:l(@"videoStream")];
+
+        NSLog(@"trimming segments");
+        [sabrStream trimSegments];
+    }
+}
+
 // -(void)appDidBecomeActive {
 //   NSLog(@"We have awaken from a slumber, reloading things......");
 //     [self reloadPlayerStream];

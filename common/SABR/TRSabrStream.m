@@ -123,14 +123,13 @@
 
     [sabrRequest startRequestWithURL:requestURL body:requestBody auth:self.authentication partCallback:^(TRUmpPart *part) {
         [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
-    } completionCallback:^(NSError *error) {
+    } completionCallback:^(NSError *error, BOOL isFatal) {
         if (!self.isStreamReady) {
             [currentlyParsingDatas release];
             [currentlyParsingHeaders release];
             return;
         }
-        if (error) {
-            NSLog(@"an error occured! error -> %@", error);
+        if (isFatal) {
             [currentlyParsingDatas release];
             [currentlyParsingHeaders release];
             [self declareStreamBad];
@@ -140,22 +139,49 @@
         [currentlyParsingHeaders release];
 
 
-        NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
-        NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
+        // NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
+        // NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
 
         if (bufferingState == TRSabrBufferingFastTrack)
             self.currentlyRequestingInFastTrack = NO;
         else
             self.currentlyRequestingInNormal = NO;
-
+        NSLog(@"self.videoStream.pendingResponses.allKeys -> %@", self.videoStream.pendingResponses.allKeys);
+        NSLog(@"downloaded video segments -> %@", self.videoStream.segmentData.allKeys);
+        // NSLog(@"self.audioStream.pendingResponses.allKeys -> %@", self.audioStream.pendingResponses.allKeys);
         if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.isStreamReady) {
             if (self.requestNumber > 10) {
                 [self declareStreamBad];
             } else {
                 NSLog(@"not enough data to start stream! requesting again...");
                 [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+                return;
             }
-        }
+        } // else if (bufferingState == TRSabrBufferingFastTrack) {
+        //     int earliestTimestamp = INT_MAX;
+        //     // int earliestSegment = 0;
+        //     for (NSNumber *segment in self.videoStream.pendingResponses.allKeys) {
+        //         if (self.videoStream.segmentData[segment])
+        //             continue;
+        //         if (earliestTimestamp > [(self.videoStream.segmentIndexesCombined[[segment intValue]]) intValue]) {
+        //             earliestTimestamp = [(self.videoStream.segmentIndexesCombined[[segment intValue]]) intValue];
+        //         }
+        //     }
+        //     for (NSNumber *segment in self.audioStream.pendingResponses.allKeys) {
+        //         if (self.audioStream.segmentData[segment])
+        //             continue;
+                
+        //         if (earliestTimestamp > [(self.audioStream.segmentIndexesCombined[[segment intValue]]) intValue]) {
+        //             earliestTimestamp = [(self.audioStream.segmentIndexesCombined[[segment intValue]]) intValue];
+        //         }
+        //     }
+        //     if (earliestTimestamp != INT_MAX) {
+        //         NSLog(@"earliestTimestamp -> %i", earliestTimestamp);
+        //         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //             [self requestAdditionalData:earliestTimestamp/1000 state:TRSabrBufferingFastTrack];
+        //         });
+        //     }
+        // }
     }];
 }
 
@@ -364,7 +390,7 @@
             NSLog(@"reloading player...");
             [self stopWebServer];
             [self startWebServerThreaded];
-            // self.reloadPlayerFunction();
+            self.reloadPlayerFunction();
        }
     }];
 }
@@ -530,6 +556,11 @@
 
 -(BOOL)isWidevine {
     return NO;
+}
+
+-(void)trimSegments {
+    [_videoStream.segmentData removeAllObjects];
+    [_audioStream.segmentData removeAllObjects];
 }
 
 // it's intended to be able to restart is cleanup is called.

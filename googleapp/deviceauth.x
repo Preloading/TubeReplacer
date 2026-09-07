@@ -26,6 +26,10 @@
 + (id)decryptDeviceKey:(id)fp8 secret:(id)fp12;
 @end
 
+@interface GIPToast : NSObject
++(void)showToast:(NSString*)text forDuration:(double)duration;
+@end
+
 // capture app
 @interface KUDeviceAuth : NSObject
 {
@@ -72,6 +76,9 @@
 -(void)loadRegistrationFromStorage {
     TRPOTokenSolver *solver = [TRPOTokenSolver sharedInstance];
     objc_setAssociatedObject(self, "_challengeSolver", solver, OBJC_ASSOCIATION_RETAIN);
+    solver.errorAlert = ^(NSString *alertText) {
+        [%c(GIPToast) showToast:alertText forDuration:1.5];
+    };
     [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
     
     return %orig;

@@ -5,10 +5,11 @@
 @interface TRSabrRequest : NSObject<NSURLConnectionDelegate> {
     NSMutableData *sabrBuffer;
     void (^partCallback)(TRUmpPart *);
-    void (^completionCallback)(NSError*);
+    // error, isFatal
+    void (^completionCallback)(NSError*,BOOL);
 }
 
 - (void)startRequestWithURL:(NSURL*)requestURL body:(NSData*)body auth:(GTMOAuth2Authentication*)auth 
-        partCallback:(void (^)(TRUmpPart *))partHandler completionCallback:(void (^)(NSError*))setCompletionCallback;
+        partCallback:(void (^)(TRUmpPart *))partHandler completionCallback:(void (^)(NSError*,BOOL))setCompletionCallback;
 
 @end

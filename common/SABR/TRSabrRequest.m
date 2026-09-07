@@ -11,7 +11,7 @@
 @implementation TRSabrRequest
 
 - (void)startRequestWithURL:(NSURL*)requestURL body:(NSData*)body auth:(GTMOAuth2Authentication*)auth 
-        partCallback:(void (^)(TRUmpPart *))partHandler completionCallback:(void (^)(NSError*))setCompletionCallback {
+        partCallback:(void (^)(TRUmpPart *))partHandler completionCallback:(void (^)(NSError*,BOOL))setCompletionCallback {
 
     NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
 
@@ -38,6 +38,14 @@
 
 - (void)connection:(NSURLConnection *)connection
 didReceiveResponse:(NSURLResponse *)response {
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+        if (!(httpResponse.statusCode >= 200 && httpResponse.statusCode<400)) {
+            // codes outside of this range are likely fatal
+            completionCallback(nil, true);
+        }
+    }
+
     [sabrBuffer setLength:0];
 }
 
@@ -50,12 +58,12 @@ didReceiveResponse:(NSURLResponse *)response {
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    completionCallback(nil);
+    completionCallback(nil, false);
 }
 
 - (void)connection:(NSURLConnection *)connection
   didFailWithError:(NSError *)error {
-    completionCallback(error);
+    completionCallback(error, false);
 }
 
 -(void)dealloc {
