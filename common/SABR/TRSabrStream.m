@@ -18,8 +18,38 @@
 #import "common/YoutubeClientType.h"
 #import "base64/NSData+Base64.h"
 #import "TRSabrRequest.h"
+#import <sys/utsname.h>
 
 @implementation TRSabrStream : NSObject
+
++(BOOL)canPlayH264HighProfile {
+    struct utsname systemInfo;
+    uname(&systemInfo);
+
+    NSString *hardwareModel = [NSString stringWithCString:systemInfo.machine
+                                encoding:NSUTF8StringEncoding];
+
+    if ([hardwareModel isEqualToString:@"iPhone1,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPhone1,2"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPhone2,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPhone3,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPhone3,2"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPhone3,3"]) { return NO; }
+
+    if ([hardwareModel isEqualToString:@"iPad1,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPad1,2"]) { return NO; }
+
+    if ([hardwareModel isEqualToString:@"iPod1,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPod2,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPod3,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPod4,1"]) { return NO; }
+    if ([hardwareModel isEqualToString:@"iPod5,1"]) { return NO; }
+    // what happened to 6,1
+    if ([hardwareModel isEqualToString:@"iPod7,1"]) { return NO; }
+
+    return YES;
+
+}
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId {
     self = [super init];
@@ -35,10 +65,33 @@
     else
         self.decipheredStreamURL = streamURL;
     self.ustreamConfig = [NSData dataWithBase64EncodedString:[[ustreamConfig stringByReplacingOccurrencesOfString:@"-" withString:@"+"] stringByReplacingOccurrencesOfString:@"_" withString:@"/"]];
+
     NSMutableDictionary *formatsDict = [NSMutableDictionary dictionary];
+    NSMutableDictionary *fullFormatsDict = [NSMutableDictionary dictionary];
+    int videoStreams = 0;
+
+    BOOL canPlayH264HighProfile = [TRSabrStream canPlayH264HighProfile];
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+
     for (TRAdaptiveFormat *format in formats) {
-        formatsDict[@(format.itag)] = format;
+        if (!canPlayH264HighProfile && [format.mimeType containsString:@"avc1.64"])
+            continue;
+        NSNumber *qualityEnabled = preferences[[NSString stringWithFormat:@"allowquality_%@", format.quality]];
+        fullFormatsDict[@(format.itag)] = format;
+        if ([format.mimeType hasPrefix:@"video"]) {
+            if (qualityEnabled == nil || [qualityEnabled isEqual:@(YES)]) {
+                videoStreams += 1;
+                formatsDict[@(format.itag)] = format;
+            }
+        } else {
+            formatsDict[@(format.itag)] = format;
+        }
     }
+
+    if (videoStreams == 0) {
+        formatsDict = fullFormatsDict;
+    }
+
     self.formats = formatsDict;
     self.videoId = videoId;
 
@@ -59,6 +112,12 @@
         } else {
             [videoFormatsWeHave addObject:format];
         }
+    }
+
+    if (videoFormatsWeHave.count == 0 || audioFormatsWeHave.count == 0) {
+        [videoFormatsWeHave release];
+        [audioFormatsWeHave release];
+        [self declareStreamBad];
     }
 
     self.videoFormatsWeHave = videoFormatsWeHave;
