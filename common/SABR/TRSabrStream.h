@@ -41,6 +41,8 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
 
+@property (nonatomic, assign) int bandwidthEstimate;
+
 // player callbacks
 @property (nonatomic, copy) double (^currentPlayerTimeFunction)();
 @property (nonatomic, copy) void (^reloadPlayerFunction)();

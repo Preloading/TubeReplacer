@@ -178,7 +178,7 @@
     __block NSMutableDictionary *currentlyParsingDatas = [[NSMutableDictionary alloc] init];
     __block NSMutableDictionary *currentlyParsingHeaders = [[NSMutableDictionary alloc] init];
 
-    TRSabrRequest *sabrRequest = [[TRSabrRequest alloc] init];
+    TRSabrRequest *sabrRequest = [[[TRSabrRequest alloc] init] autorelease];
 
     [sabrRequest startRequestWithURL:requestURL body:requestBody auth:self.authentication partCallback:^(TRUmpPart *part) {
         [self handlePart:part currentlyParsingDatas:&currentlyParsingDatas currentlyParsingHeaders:&currentlyParsingHeaders];
@@ -197,7 +197,7 @@
         [currentlyParsingDatas release];
         [currentlyParsingHeaders release];
 
-
+        self.bandwidthEstimate = sabrRequest.bandwidthAvailable;
         // NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
         // NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
 
@@ -269,6 +269,7 @@
 
     // state.stickyResolution = 720;
     state.enableVoiceBoost = false;
+    state.bandwidthEstimate = self.bandwidthEstimate;
 
 
     // PlaybackAuthorization *playerAuth = [[PlaybackAuthorization alloc] init];

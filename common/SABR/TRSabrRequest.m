@@ -44,6 +44,7 @@ didReceiveResponse:(NSURLResponse *)response {
             // codes outside of this range are likely fatal
             completionCallback(nil, true);
         }
+        timeStarted = [[NSDate date] retain];
     }
 
     [sabrBuffer setLength:0];
@@ -53,11 +54,14 @@ didReceiveResponse:(NSURLResponse *)response {
     didReceiveData:(NSData *)data {
     [sabrBuffer appendData:data];
     NSUInteger readBytes = [TRUmpReader read:sabrBuffer handlePartWith:partCallback];
-    if (readBytes != 0)
+    if (readBytes != 0) {
         [sabrBuffer replaceBytesInRange:NSMakeRange(0, readBytes) withBytes:NULL length:0];
+        bytesDownloaded+=readBytes;
+    }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    self.bandwidthAvailable = floor((double)bytesDownloaded/-[timeStarted timeIntervalSinceNow]);
     completionCallback(nil, false);
 }
 
@@ -67,6 +71,7 @@ didReceiveResponse:(NSURLResponse *)response {
 }
 
 -(void)dealloc {
+    [timeStarted release];
     [sabrBuffer release];
     [super dealloc];
 }
