@@ -7,8 +7,8 @@
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
 #include "general.h"
-// #import <execinfo.h>
-// #import <mach-o/dyld.h>
+#import <execinfo.h>
+#import <mach-o/dyld.h>
 
 #pragma mark - Request Building
 
@@ -41,16 +41,16 @@
 %hook YTGDataService
 
 -(void)makeChannelRequestWithID:(NSString*)channelId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    // intptr_t slide = _dyld_get_image_vmaddr_slide(0);
-    // NSLog(@"ASLR Slide Offset: 0x%lx\n", (unsigned long)slide);
-    // void *callstack[128];
-    // int frames = backtrace(callstack, 128);
-    // char **symbols = backtrace_symbols(callstack, frames);
-    // NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
-    // for (int i = 0; i < frames; i++) {
-    // [callstackString appendFormat:@"%s\n", symbols[i]];
-    // }
-    // NSLog(@"%@", callstackString);
+    intptr_t slide = _dyld_get_image_vmaddr_slide(0);
+    NSLog(@"ASLR Slide Offset: 0x%lx\n", (unsigned long)slide);
+    void *callstack[128];
+    int frames = backtrace(callstack, 128);
+    char **symbols = backtrace_symbols(callstack, frames);
+    NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+    for (int i = 0; i < frames; i++) {
+    [callstackString appendFormat:@"%s\n", symbols[i]];
+    }
+    NSLog(@"%@", callstackString);
 
 
     id cache = [[self channelCache] objectForKey:channelId];
@@ -207,6 +207,30 @@
 
 %hook YTVideosFeedController
     
+-(void)loadChannelThumbnailWithVideo:(YTVideo*)entry {
+    NSURL *profilePicture = objc_getAssociatedObject(entry, "uploaderChannelProfilePicture");
+    
+    BOOL hasSel = NO;
+    if ([version() isEqualToString:@"1.2.1"]) {
+        hasSel = [(id<YTFeedViewProtocol>)[self valueForKey:l(@"feedView")] cellsRespondToSelector:@selector(setUploaderThumbnail:animated:)];
+    } else {
+        hasSel = [(id<YTFeedViewProtocol>)[self valueForKey:l(@"feedView")] cellsRespondToSelector:@selector(setUploaderThumbnail:animated:) forEntry:entry];
+    }
+
+    if (profilePicture && hasSel) {
+        YTImageService *imageService = [self valueForKey:l(@"imageService")];
+        [imageService makeImageRequestWithURL:profilePicture responseBlock:^(id image, BOOL unk2) {
+            [self setUploaderThumbnail:image forEntry:entry];
+            [self updateCellForEntry:entry animated:YES];
+        } errorBlock:^(NSError *error){
+            
+        }];
+    } else {
+        NSLog(@"sad");
+        return %orig;
+    }
+}
+
 -(void)loadChannelThumbnailForVideo:(YTVideo*)entry inCell:(YTEventCell_iPhone*)inCell { // YTEventCell_iPhone *should be* compatible with the ipad version
     NSURL *profilePicture = objc_getAssociatedObject(entry, "uploaderChannelProfilePicture");
 
