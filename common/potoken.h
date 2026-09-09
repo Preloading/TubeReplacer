@@ -46,6 +46,7 @@
 @property (atomic, assign) BOOL isVMInitalized;
 @property (atomic, assign) BOOL isReadyToMintTokens;
 @property (atomic, assign) BOOL isNSigReady;
+@property (atomic, assign) BOOL isStartingPOTokenGen;
 
 +(TRPOTokenSolver *)sharedInstance;
 

@@ -34,16 +34,15 @@
     } else {
         id responseBlock2 = [responseBlock copy];
         id errorBlock2 = [errorBlock copy];
+        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+        NSString *poToken = @"";
         TRPOTokenSolver *challengeSolver = [(YTDeviceAuthorizer*)[self valueForKey:l(@"deviceAuthorizer")] challengeSolver];
-
-        NSLog(@"challenge solver -> %@", challengeSolver);
-        // todo: error handling and such, we need to make sure the challenge solver is actually ready...
-        NSString *poToken = [challengeSolver mintPOTokenOrColdStart:videoId];
-        NSLog(@"Video POToken => %@", poToken);
+        if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+            poToken = [challengeSolver mintPOTokenOrColdStart:videoId];
+        }
 
         NSString *requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false";     
 
-        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
         YoutubeClientType *client = [YoutubeClientType webClient];
         if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
             client = [YoutubeClientType webMobileClient];

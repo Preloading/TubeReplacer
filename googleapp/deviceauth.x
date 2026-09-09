@@ -79,7 +79,9 @@
     solver.errorAlert = ^(NSString *alertText) {
         [%c(GIPToast) showToast:alertText forDuration:1.5];
     };
-    [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+    });
     
     return %orig;
 }

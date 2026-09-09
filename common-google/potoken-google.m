@@ -416,11 +416,12 @@
 -(void)setupPOTokenGenerationWithAuth:(id)authentication {
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil) {
-        [self setupNSig]; // this should be decently fast, and also threaded-ish that we shouldn't need to worry about how long this takes for the crucial webview to start
         [self initWebViewWithCallback:^{
+            [self setupNSig]; // this should be decently fast, and also threaded-ish that we shouldn't need to worry about how long this takes for the crucial webview to start
             [self fetchYTCfg:^(NSError *error) {
                 if (error) {
                     NSLog(@"an error has occured fetching the botguard challenge! %@", error);
+                    self.errorAlert(@"failed to fetch botguard challenge, videos might not play.");
                     return;
                 }
 
@@ -444,6 +445,7 @@
                         } callback:^(NSDictionary *response, NSError *error) {
                             if (error) {
                                 NSLog(@"An error occured while fetching the integrity token -> %@", error);
+                                self.errorAlert(@"an error occured while fetching integrity token, videos might not play.");
                                 return;
                             }
 
@@ -453,10 +455,10 @@
                                 self.integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]*0.8];
                                 [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{}];
                             } else {
+                                self.errorAlert(@"botguard challenge failed! videos might not play.");
                                 NSLog(@"missing integrity token!!!");
                             }
                         } auth:nil];
-                        NSLog(@"botguard response -> %@", botguardResponse);
                     }];
                 }];
             } auth:nil isStudio:NO];            

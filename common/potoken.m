@@ -300,8 +300,9 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 }
 
 -(NSString*)mintPOTokenWithData:(NSString*)data {
-    if (!self.isReadyToMintTokens) 
+    if (!self.isReadyToMintTokens)  {
         return nil;
+    }
 
     __block NSString *poToken = nil;
 
