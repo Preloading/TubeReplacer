@@ -147,6 +147,10 @@
           cleanData = [response copy];
         }
 
+        if (cleanData == nil || [cleanData length] == 0) {
+            callback(nil, [NSError errorWithDomain:@"com.google.sso" code:-206 userInfo:nil]);
+        }
+
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:0 error:&error];
         if (error != nil) {
             // [cleanData release];
@@ -157,7 +161,7 @@
             keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.header.googleAccountHeaderRenderer.name.simpleText"];
         NSString *picture = [TRJSONUtils stringFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem.accountPhoto.thumbnails[0].url"];
 
-        return @{
+        callback(@{
           @"id": [identity userID],
           @"email": [identity userEmail],
           @"verified_email": @YES,
@@ -166,7 +170,7 @@
           @"family_name": name, // is this suppost to be like a first name last name kinda deal?
           @"picture": picture ? picture : @"https://ssl.gstatic.com/accounts/ui/avatar_2x.png", // not the account profile picture
           @"locale": @"en" // the logout page  *technically* has this.
-      };
+      }, nil);
     }];
 }
 

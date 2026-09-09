@@ -628,14 +628,20 @@
     self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopWebServer];
-    [_videoStream release];
-    [_audioStream release];
-    [_playbackCookie release];
-    [_poToken release];
-    [_coldstart release];
-    [_networkQueue release];
-    [_videoFormatsWeHave release];
-    [_audioFormatsWeHave release];
+    if (_videoStream)
+        [_videoStream release];
+    if (_audioStream)
+        [_audioStream release];
+    if (_poToken)
+        [_poToken release];
+    if (_coldstart)
+        [_coldstart release];
+    if (_networkQueue)
+        [_networkQueue release];
+    if (_videoFormatsWeHave)
+        [_videoFormatsWeHave release];
+    if (_audioFormatsWeHave)
+        [_audioFormatsWeHave release];
 }
 
 -(void)dealloc {

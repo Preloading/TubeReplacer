@@ -204,7 +204,6 @@
     MLRemoteStream *selectedStream = [self valueForKey:l(@"selectedStream")];
 
     if ([selectedStream format] == 5) {
-        NSLog(@"cleaning SABR stream");
         [(TRSabrStream*)selectedStream cleanup];
     }
 
