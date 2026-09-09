@@ -680,9 +680,9 @@
 			<array>
 				<string>web</string>
 				<string>mweb</string>
-				<string>visionos</string>
+				<!-- <string>visionos</string> -->
 				<string>android</string>
-				<string>androidvr</string>
+				<!-- <string>androidvr</string> -->
 				<string>tuberepair</string>
 				<string>custom</string>
 			</array>
@@ -690,9 +690,9 @@
 			<array>
 				<string>HQ (web)</string>
 				<string>HQ (mobile web)</string>
-				<string>Adaptive (visionOS)</string>
+				<!-- <string>Adaptive (visionOS)</string> -->
 				<string>360p (Android)</string>
-				<string>360p (Android VR)</string>
+				<!-- <string>360p (Android VR)</string> -->
 				<string>kevinf100's tuberepair server</string>
 				<string>Custom URL</string>
 			</array>
