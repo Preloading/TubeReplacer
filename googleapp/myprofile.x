@@ -52,7 +52,7 @@
         for (NSDictionary *account in accounts) {
             // i hope this'll work
             NSString *accountPageId = [TRJSONUtils stringFromJSON:account keyPath:@"accountItem.serviceEndpoint.selectActiveIdentityEndpoint.supportedTokens[0].pageIdToken.pageId"];
-            if (![auth pageID] && !accountPageId) {
+            if ([auth pageID] == nil && accountPageId == nil) {
                 accountInfo = account[@"accountItem"];
                 break;
             }

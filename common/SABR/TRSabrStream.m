@@ -625,6 +625,7 @@
 
 // it's intended to be able to restart is cleanup is called.
 -(void)cleanup {
+    NSLog(@"cleanup called!");
     self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopWebServer];
@@ -642,6 +643,14 @@
         [_videoFormatsWeHave release];
     if (_audioFormatsWeHave)
         [_audioFormatsWeHave release];
+
+    _videoStream = nil;
+    _audioStream = nil;
+    _poToken = nil;
+    _coldstart = nil;
+    _networkQueue = nil;
+    _videoFormatsWeHave = nil;
+    _audioFormatsWeHave = nil;
 }
 
 -(void)dealloc {
