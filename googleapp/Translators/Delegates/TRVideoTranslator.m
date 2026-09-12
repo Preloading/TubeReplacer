@@ -104,6 +104,13 @@
     if (!([preferences[@"StreamType"] isEqualToString:@"custom"] || [preferences[@"StreamType"] isEqualToString:@"tuberepair"]) ) {
         NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
         if (hlsStreamURL && (preferences[@"AllowHLS"] == nil || [preferences[@"AllowHLS"] isEqual:@YES])) {
+            if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil) {
+                NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:hlsStreamURL signatureCipher:nil];
+                if (decipheredURL) {
+                    hlsStreamURL = decipheredURL;
+                }
+            }
+            
             // this sux, it gives me fucking dubbed feeds, so i get to select the dubbed one out.
             NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:hlsStreamURL]];
             NSURLResponse *response = nil;
@@ -205,7 +212,7 @@
                                     // original_audio_ids are ordered in reverse
                                     [newPlaylist removeObjectAtIndex:[original_id intValue]];
                                 }
-                            } else {
+                            } else { 
                                 continue;
                             }
                         }
@@ -261,7 +268,7 @@
         NSString *sabrURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"];
         NSString *ustreamConfig = [TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"];
 
-        if (sabrURL && ustreamConfig && (preferences[@"AllowSABR"] == nil || [preferences[@"AllowSABR"] isEqual:@YES]) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil )) {
+        if (sabrURL && ustreamConfig && PreferencesBoolValue(preferences, @"AllowSABR", YES) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil )) {
             // handle SABR
             NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
             for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
@@ -292,13 +299,15 @@
                 format.width = [f[@"width"] intValue];
                 format.height = [f[@"height"] intValue];
                 format.lastModified = f[@"lastModified"];
-                format.contentLength = strtoul([f[@"contentLength"] UTF8String], NULL, 10);
+                if (f[@"contentLength"])
+                    format.contentLength = strtoul([f[@"contentLength"] UTF8String], NULL, 10);
                 format.quality = f[@"quality"];
                 format.qualityLabel = f[@"qualityLabel"];
                 format.fps = [f[@"fps"] intValue];
                 format.projectionType = f[@"projectionType"];
                 format.averageBitrate = [f[@"averageBitrate"] unsignedIntValue];
-                format.approxDurationMs = strtoul([f[@"approxDurationMs"] UTF8String], NULL, 10);
+                if (f[@"approxDurationMs"])
+                    format.approxDurationMs = strtoul([f[@"approxDurationMs"] UTF8String], NULL, 10);
                 format.qualityOrdinal = f[@"qualityOrdinal"];
 
                 // audio

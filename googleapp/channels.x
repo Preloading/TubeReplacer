@@ -7,8 +7,6 @@
 #include "appheaders.h"
 #include "Translators/TRTranslators.h"
 #include "general.h"
-#import <execinfo.h>
-#import <mach-o/dyld.h>
 
 #pragma mark - Request Building
 
@@ -41,18 +39,6 @@
 %hook YTGDataService
 
 -(void)makeChannelRequestWithID:(NSString*)channelId responseBlock:(id)responseBlock errorBlock:(id)errorBlock {
-    intptr_t slide = _dyld_get_image_vmaddr_slide(0);
-    NSLog(@"ASLR Slide Offset: 0x%lx\n", (unsigned long)slide);
-    void *callstack[128];
-    int frames = backtrace(callstack, 128);
-    char **symbols = backtrace_symbols(callstack, frames);
-    NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
-    for (int i = 0; i < frames; i++) {
-    [callstackString appendFormat:@"%s\n", symbols[i]];
-    }
-    NSLog(@"%@", callstackString);
-
-
     id cache = [[self channelCache] objectForKey:channelId];
     if (cache) {
         if (cache == [NSNull null]) {

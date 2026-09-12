@@ -42,7 +42,7 @@
         }
 
         NSString *requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false";     
-
+//  @throw NSInternalInconsistencyException;
         YoutubeClientType *client = [YoutubeClientType webClient];
         if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
             client = [YoutubeClientType webMobileClient];

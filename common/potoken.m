@@ -508,20 +508,48 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         [signatureQueries release];
     }
     
+    BOOL isHLS = NO;
 
     // split URL up by query parameters
     NSArray *splitURL = [url componentsSeparatedByString:@"?"];
-    NSString *querySection = splitURL[1];
-    
-    NSArray *allQueriesCombined = [querySection componentsSeparatedByString:@"&"];
     NSMutableDictionary *urlQueries =  [[NSMutableDictionary alloc] init];
 
-    for (NSString *query in allQueriesCombined) {
-        NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
-        [urlQueries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
-    }
+    if (splitURL.count >= 2) {
+        NSString *querySection = splitURL[1];
+        
+        NSArray *allQueriesCombined = [querySection componentsSeparatedByString:@"&"];
 
-    n = urlQueries[@"n"];
+        for (NSString *query in allQueriesCombined) {
+            NSArray *seperatedQuery = [query componentsSeparatedByString:@"="];
+            [urlQueries setObject:[seperatedQuery[1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:seperatedQuery[0]];
+        }
+
+        n = urlQueries[@"n"];
+    } else {
+        // hls
+        isHLS = YES;
+
+        splitURL = [url componentsSeparatedByString:@"/"];
+
+        for (int i = 0; i < splitURL.count; i++) {
+            if ([splitURL[i] isEqualToString:@"n"]) {
+                n = splitURL[i+1];
+                i++;
+            }
+            if ([splitURL[i] isEqualToString:@"s"]) {
+                s = splitURL[i+1];
+                i++;
+            }
+            if ([splitURL[i] isEqualToString:@"sp"]) {
+                sp = splitURL[i+1];
+                i++;
+            }
+            if ([splitURL[i] isEqualToString:@"sig"]) {
+                urlQueries[@"sig"] = splitURL[i+1];
+                i++;
+            }
+        }
+    }
 
 
     __block NSString *solvedNSigJSON = nil;
@@ -548,8 +576,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         return nil;
     }
 
-    NSLog(@"solvedNsig -> %@", solvedNSig);
-
     if (!solvedNSig[@"n"] && !solvedNSig[@"sig"]) {
         NSLog(@"n/sig failed to decipher!");
         [urlQueries release];
@@ -571,31 +597,62 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     // rebuild the query
 
     NSMutableString *newURL = [[[NSMutableString alloc] init] autorelease];
-    [newURL appendString:splitURL[0]];
-    [newURL appendString:@"?"];
-    BOOL start = YES;
-    
-    for (NSString *queryKey in urlQueries) {
-        if (start) {
-            start = NO;
-        } else {
-            [newURL appendString:@"&"];
+    if (isHLS) {
+        NSLog(@"rebuild -> %@", splitURL);
+        for (int i = 0; i < splitURL.count; i++) {
+            if ([splitURL[i] isEqualToString:@"n"]) {
+                [newURL appendString:@"n/"];
+                if (solvedNSig[@"n"]) {
+                    [newURL appendString:solvedNSig[@"n"]];
+                } else {
+                    [newURL appendString:splitURL[i+1]];
+                }
+
+                [newURL appendString:@"/"];
+
+                if (solvedNSig[@"sig"]) {
+                    if (sp) {
+                        [newURL appendString:[NSString stringWithFormat:@"%@/%@/", sp, solvedNSig[@"sig"]]];
+                    } else {
+                        [newURL appendString:[NSString stringWithFormat:@"signature/%@/", solvedNSig[@"sig"]]];
+                    }
+                } else if (urlQueries[@"sig"]) {
+                    [newURL appendString:[NSString stringWithFormat:@"sig/%@/", urlQueries[@"sig"]]];
+                }
+                i++;
+            } else if ([splitURL[i] isEqualToString:@"sig"]) {
+                i++;
+            } else {
+                [newURL appendString:splitURL[i]];
+                [newURL appendString:@"/"];
+            }
         }
+    } else {
+        [newURL appendString:splitURL[0]];
+        [newURL appendString:@"?"];
+        BOOL start = YES;
+        
+        for (NSString *queryKey in urlQueries) {
+            if (start) {
+                start = NO;
+            } else {
+                [newURL appendString:@"&"];
+            }
 
-        NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(
-            NULL,
-        (CFStringRef)[urlQueries objectForKey:queryKey],
-            NULL,
-            CFSTR("!*'();:@&=+$,/?%#[]\" "),
-            kCFStringEncodingUTF8);
+            NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+                NULL,
+            (CFStringRef)[urlQueries objectForKey:queryKey],
+                NULL,
+                CFSTR("!*'();:@&=+$,/?%#[]\" "),
+                kCFStringEncodingUTF8);
 
-        [newURL appendString:[NSString stringWithFormat:@"%@=%@", queryKey, escapedString]];
-        [escapedString release];
+            [newURL appendString:[NSString stringWithFormat:@"%@=%@", queryKey, escapedString]];
+            [escapedString release];
+        }
     }
 
     [urlQueries release];
 
-    // NSLog(@"good url -> %@", newURL);
     return newURL;
 }
 

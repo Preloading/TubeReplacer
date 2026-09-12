@@ -2,6 +2,8 @@
 #import "appheaders.h"
 #import "common/Protobuf.h"
 #import "general.h"
+#import <execinfo.h>
+#import <mach-o/dyld.h>
 
 @interface SomeProtobufClassIDontWantToRE
 
@@ -93,3 +95,40 @@
 }
 
 %end
+
+// %hook GIPFeedbackCrashReportHandler
+
+// - (id)initWithViewController:(id)controller categoryTag:(id)categoryTag
+// {
+//     intptr_t slide = _dyld_get_image_vmaddr_slide(0);
+//     NSLog(@"ASLR Slide Offset: 0x%lx", (unsigned long)slide);
+
+//     NSLog(@"controller = %@", controller);
+//     NSLog(@"controller class = %@", [controller class]);
+
+//     void *callstack[128];
+//     int frames = backtrace(callstack, 128);
+//     char **symbols = backtrace_symbols(callstack, frames);
+
+//     NSMutableString *callstackString =
+//         [NSMutableString stringWithString:@"uwu >_<"];
+
+//     for (int i = 0; i < frames; i++)
+//         [callstackString appendFormat:@"%s\n", symbols[i]];
+
+//     free(symbols);
+
+//     NSLog(@"%@", callstackString);
+
+//     return %orig(controller, categoryTag);
+// }
+
+// - (void)alertView:(id)alertView clickedButtonAtIndex:(int)clickedButtonIndex
+// {
+//     NSLog(@"alert aaaaaaa");
+//     NSLog(@"view controller -> %@", [self valueForKey:@"viewController_"]);
+
+//     %orig(alertView, clickedButtonIndex);
+// }
+
+// %end
