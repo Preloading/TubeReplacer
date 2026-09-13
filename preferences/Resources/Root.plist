@@ -661,7 +661,7 @@
 			<key>label</key>
 			<string>Video</string>
 			<key>footerText</key>
-			<string>TODO: Rewrite this.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1-1.3.0 for now.</string>
+			<string>HQ streams all have SABR support.&#10;Only the WEB formats are capable of playing private videos.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1-1.3.0 for now.</string>
 		</dict>
 		<dict>
 			<key>cell</key>

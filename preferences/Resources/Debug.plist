@@ -16,7 +16,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>If you don't know what you are doing, don't touch anything.</string>
+			<string>If you don't know what you are doing, don't touch anything.&#10;The file size limit is quite small, make sure you only capture the thing you need to look at.</string>
 		</dict>
 		<dict>
 			<key>cell</key>

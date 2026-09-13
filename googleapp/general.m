@@ -55,7 +55,7 @@ NSString *TRPackageVersion(NSString *packageID) {
     NSString *needle = [NSString stringWithFormat:@"Package: %@", packageID];
 
     for (NSString *block in blocks) {
-        if ([block containsString:needle]) {
+        if ([block rangeOfString:needle].location != NSNotFound) {
             for (NSString *line in [block componentsSeparatedByString:@"\n"]) {
                 if ([line hasPrefix:@"Version: "]) {
                     return [line substringFromIndex:@"Version: ".length];
