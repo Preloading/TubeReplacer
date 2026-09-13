@@ -54,6 +54,7 @@
 - (id)translateCompactPlaylist:(NSDictionary *)json 
                    withContext:(NSDictionary *)context 
                          error:(NSError **)error {
+        NSLog(@"compact playlist");
     
     NSDictionary *data = [TRJSONUtils dictFromJSON:json keyPath:@"i.compactPlaylistRenderer"];
     
@@ -132,6 +133,7 @@
 
 - (id)translateVideoListPlaylist:(NSDictionary *)json 
                          error:(NSError **)error {
+    NSLog(@"vidoeplaylist");
     // thankfully none of these seem to be used except for playlist id. thank god.
     NSDictionary *headerBody = [TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel"];
     NSString *playlistId = [TRJSONUtils stringFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.playlistId"];
@@ -188,12 +190,14 @@
             isPrivate:isPrivate
         ] autorelease];
     }
+    NSLog(@"playlist -> %@", playlist);
     
     return playlist;
 }
 
 - (id)translateCreatedPlaylist:(NSDictionary *)json 
                          error:(NSError **)error {
+    NSLog(@"createdpalylist");
     // thankfully none of these seem to be used except for playlist id. thank god.
     NSString *playlistId = json[@"playlistId"];
     id playlist = nil;

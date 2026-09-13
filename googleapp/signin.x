@@ -128,6 +128,7 @@
     [fetcher beginFetchWithCompletionHandler:^(NSData *response, NSError *error) {
         if (error != nil) {
             callback(nil, error);
+            return;
         }
 
         
@@ -149,17 +150,23 @@
 
         if (cleanData == nil || [cleanData length] == 0) {
             callback(nil, [NSError errorWithDomain:@"com.google.sso" code:-206 userInfo:nil]);
+            return;
         }
 
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:cleanData options:0 error:&error];
         if (error != nil) {
             // [cleanData release];
             callback(nil, error);
+            return;
         }
 
         NSString *name = [TRJSONUtils stringFromJSON:json 
             keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.header.googleAccountHeaderRenderer.name.simpleText"];
         NSString *picture = [TRJSONUtils stringFromJSON:json keyPath:@"data.actions[0].getMultiPageMenuAction.menu.multiPageMenuRenderer.sections[0].accountSectionListRenderer.contents[0].accountItemSectionRenderer.contents[0].accountItem.accountPhoto.thumbnails[0].url"];
+        if (name == nil) {
+            callback(nil, [NSError errorWithDomain:@"com.google.sso" code:-206 userInfo:nil]);
+            return;
+        }
 
         callback(@{
           @"id": [identity userID],
