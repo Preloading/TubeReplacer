@@ -1864,6 +1864,7 @@ typedef struct _TBXMLElement {
 - (void)replay;
 - (void)pause;
 - (void)play;
+- (void)proxy:(id)proxy didChangeURL:(id)didChangeURL;
 - (void)proxy:(id)fp8 didSetURL:(id)fp12;
 - (void)proxyURLWillChange:(id)fp8;
 - (void)proxy:(id)fp8 failedWithError:(id)fp12;
@@ -1928,9 +1929,6 @@ typedef struct _TBXMLElement {
 @interface MLProxy: NSObject
 -(id)delegate;
 -(MLRemoteStream*)selectStream;
--(void)proxy:(id)proxy didSetURL:(id)didSetURL;
--(void)proxy:(id)proxy didChangeURL:(id)didChangeURL;
--(void)proxyURLWillChange:(id)fp1;
 @end
 
 @interface MLPassThroughProxy : MLProxy

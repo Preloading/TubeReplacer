@@ -386,7 +386,7 @@
 
             [sabrStream start];
         }
-        MLProxy *delegate = [self delegate];
+        MLPlayer *delegate = [self delegate];
         NSURL *streamURL = [selectedStream URL];
         [delegate proxy:self didSetURL:streamURL];
         [delegate release];
@@ -402,8 +402,11 @@
 %new
 -(void)reloadPlayerStream
 {
-    MLProxy *delegate = [self delegate];
+    MLPlayer *delegate = [self delegate];
+    AVPlayer *videoPlayer = [delegate valueForKey:l(@"player")];
+    BOOL isCurrentlyPlaying = [videoPlayer rate] != 0.0;
     [delegate proxyURLWillChange:self];
+    [delegate setValue:@(isCurrentlyPlaying) forKey:l(@"pendingPlay")];
     
     if ([version() isEqualToString:@"1.4.0"])
         [delegate proxy:self didChangeURL:[(MLRemoteStream*)[self valueForKey:l(@"selectedStream")] URL]];
