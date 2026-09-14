@@ -183,71 +183,25 @@
 
   [webView setToolbarColor:[UIColor backgroundDarkColor]];
   [webView loadURL:url];
-  [self presentModalViewController:webView]; // todo: the equiv doesn't decompile cleanly on 2.0.0 (  Weak = objc_loadWeak((id *)((char *)&self->_services + 1));), and it crashes here, figure this out
-  [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString:
-   @"window.addEventListener('load', function () {"
-    "document.body.insertAdjacentHTML('afterbegin', '<h3>TubeReplacer Specific</h3><pre>"
-    "TubeReplacer<br>"
-    "Copyright (C) 2026 Preloading<br><br>"
-    "This program is free software: you can redistribute it and/or modify "
-    "it under the terms of the GNU General Public License as published by "
-    "the Free Software Foundation, either version 3 of the License, or "
-    "(at your option) any later version.<br><br>"
 
-    "This program is distributed in the hope that it will be useful,"
-    " but WITHOUT ANY WARRANTY; without even the implied warranty of"
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
-    "GNU General Public License for more details.<br><br>"
+  if ([version() isEqualToString:@"2.0.0"]) {
+      [(YTSettingsTableControllerDelegate*)[self valueForKey:l(@"delegate")] presentViewController:webView];
+  } else {
+      [self presentModalViewController:webView];
+  }
 
-    "You should have received a copy of the GNU General Public License "
-    "along with this program.  If not, see <a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.<br><br>"
-    "A copy of this program\\'s source can be found at <a href=\"https://github.com/Preloading/TubeReplacer\">https://github.com/Preloading/TubeReplacer</a>"
-  "</pre>"
-  "<p><a href=\"https://github.com/nicklockwood/Base64\">Base64</a></p><pre>"
-  "Version 1.0<br><br>"
-  "Created by Nick Lockwood on 12/01/2012.<br>"
-  "Copyright (C) 2012 Charcoal Design<br><br>"
+  NSData* injectData = [NSData dataWithContentsOfFile:@"/Library/Application Support/TubeReplacer/licenseinject.html"];
+  NSString* injectString = [[NSString alloc] initWithBytes:[injectData bytes]
+                                              length:[injectData length]
+                                            encoding:NSUTF8StringEncoding];
 
-  "Distributed under the permissive zlib License<br>"
-  "Get the latest version from here: <a href=\"https://github.com/nicklockwood/Base64\">https://github.com/nicklockwood/Base64</a><br><br>"
+  injectString = [[[injectString stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
 
-  "This software is provided \\'as-is\\', without any express or implied"
-  "warranty.  In no event will the authors be held liable for any damages"
-  "arising from the use of this software."
-  "Permission is granted to anyone to use this software for any purpose,"
-  "including commercial applications, and to alter it and redistribute it"
-  "freely, subject to the following restrictions:<br>"
-  "1. The origin of this software must not be misrepresented; you must not"
-  "claim that you wrote the original software. If you use this software"
-  "in a product, an acknowledgment in the product documentation would be"
-  "appreciated but is not required.<br><br>"
-  "2. Altered source versions must be plainly marked as such, and must not be"
-  "misrepresented as being the original software.<br>"
-  "3. This notice may not be removed or altered from any source distribution."
-  "</pre>"
-  "<p><a href=\"https://github.com/robbiehanson/CocoaHTTPServer/tree/dc323a39b38668494f010edf16d89aa6c38ca2f3\">CocoaHTTPServer</a></p><pre>"
-  "Software License Agreement (BSD License)<br><br>"
+  NSString *jsToRun = [NSString stringWithFormat:@"window.addEventListener('load', function () {document.body.insertAdjacentHTML('afterbegin', '%@');});", injectString];
+  NSLog(@"jsToRun -> %@", jsToRun);
 
-"Copyright (c) 2006, Deusty Designs, LLC<br>"
-"All rights reserved.<br><br>"
 
-"Redistribution and use of this software in source and binary forms,<br>"
-"with or without modification, are permitted provided that the following conditions are met:<br><br>"
-
-"* Redistributions of source code must retain the above<br>"
-"  copyright notice, this list of conditions and the<br>"
-"  following disclaimer.<br><br>"
-
-"* Neither the name of Desuty Designs nor the names of its<br>"
-"  contributors may be used to endorse or promote products<br>"
-"  derived from this software without specific prior<br>"
-"  written permission of Deusty Designs, LLC.<br><br>"
-
-"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-  "</pre>"
-  "');"
-  "})"
-  ];
+  [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString:jsToRun];
 
 }
 
@@ -266,70 +220,18 @@
   [webView loadURL:url];
   // [self presentModalViewController:webView];
   [(YTSettingsTableControllerDelegate*)[self valueForKey:l(@"delegate")] presentViewController:webView];
-  [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString: // todo: make this text easier to manage
-   @"window.addEventListener('load', function () {"
-    "document.body.insertAdjacentHTML('afterbegin', '<h3>TubeReplacer Specific</h3><pre>"
-    "TubeReplacer<br>"
-    "Copyright (C) 2026 Preloading<br><br>"
-    "This program is free software: you can redistribute it and/or modify "
-    "it under the terms of the GNU General Public License as published by "
-    "the Free Software Foundation, either version 3 of the License, or "
-    "(at your option) any later version.<br><br>"
+    NSData* injectData = [NSData dataWithContentsOfFile:@"/Library/Application Support/TubeReplacer/licenseinject.html"];
+  NSString* injectString = [[NSString alloc] initWithBytes:[injectData bytes]
+                                              length:[injectData length]
+                                            encoding:NSUTF8StringEncoding];
 
-    "This program is distributed in the hope that it will be useful,"
-    " but WITHOUT ANY WARRANTY; without even the implied warranty of"
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
-    "GNU General Public License for more details.<br><br>"
+  injectString = [[[injectString stringByReplacingOccurrencesOfString:@"\n" withString:@""] stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
 
-    "You should have received a copy of the GNU General Public License "
-    "along with this program.  If not, see <a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.<br><br>"
-    "A copy of this program\\'s source can be found at <a href=\"https://github.com/Preloading/TubeReplacer\">https://github.com/Preloading/TubeReplacer</a>"
-  "</pre>"
-  "<p><a href=\"https://github.com/nicklockwood/Base64\">Base64</a></p><pre>"
-  "Version 1.0<br><br>"
-  "Created by Nick Lockwood on 12/01/2012.<br>"
-  "Copyright (C) 2012 Charcoal Design<br><br>"
+  NSString *jsToRun = [NSString stringWithFormat:@"window.addEventListener('load', function () {document.body.insertAdjacentHTML('afterbegin', '%@');});", injectString];
+  NSLog(@"jsToRun -> %@", jsToRun);
 
-  "Distributed under the permissive zlib License<br>"
-  "Get the latest version from here: <a href=\"https://github.com/nicklockwood/Base64\">https://github.com/nicklockwood/Base64</a><br><br>"
 
-  "This software is provided \\'as-is\\', without any express or implied"
-  "warranty.  In no event will the authors be held liable for any damages"
-  "arising from the use of this software."
-  "Permission is granted to anyone to use this software for any purpose,"
-  "including commercial applications, and to alter it and redistribute it"
-  "freely, subject to the following restrictions:<br>"
-  "1. The origin of this software must not be misrepresented; you must not"
-  "claim that you wrote the original software. If you use this software"
-  "in a product, an acknowledgment in the product documentation would be"
-  "appreciated but is not required.<br><br>"
-  "2. Altered source versions must be plainly marked as such, and must not be"
-  "misrepresented as being the original software.<br>"
-  "3. This notice may not be removed or altered from any source distribution."
-  "</pre>"
-  "<p><a href=\"https://github.com/robbiehanson/CocoaHTTPServer/tree/dc323a39b38668494f010edf16d89aa6c38ca2f3\">CocoaHTTPServer</a></p><pre>"
-  "Software License Agreement (BSD License)<br><br>"
-
-"Copyright (c) 2006, Deusty Designs, LLC<br>"
-"All rights reserved.<br><br>"
-
-"Redistribution and use of this software in source and binary forms,<br>"
-"with or without modification, are permitted provided that the following conditions are met:<br><br>"
-
-"* Redistributions of source code must retain the above<br>"
-"  copyright notice, this list of conditions and the<br>"
-"  following disclaimer.<br><br>"
-
-"* Neither the name of Desuty Designs nor the names of its<br>"
-"  contributors may be used to endorse or promote products<br>"
-"  derived from this software without specific prior<br>"
-"  written permission of Deusty Designs, LLC.<br><br>"
-
-"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-  "</pre>"
-  "');"
-  "})"
-  ];
+  [(UIWebView*)[webView webView] stringByEvaluatingJavaScriptFromString:jsToRun];
 
 }
 
