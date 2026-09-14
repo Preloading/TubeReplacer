@@ -84,18 +84,7 @@
                                                             client:[YoutubeClientType webMobileClient]]];
 }
 
-    #import <execinfo.h>
 -(id)requestForPlaylistVideosWithURL:(NSString*)playlistId {
-      void *callstack[128];
-  int frames = backtrace(callstack, 128);
-  char **symbols = backtrace_symbols(callstack, frames);
-  NSMutableString *callstackString = [NSMutableString stringWithFormat:@"playlists why do you be safe"];
-  for (int i = 0; i < frames; i++) {
-  [callstackString appendFormat:@"%s\n", symbols[i]];
-  }
-   NSLog(@"%@", callstackString);
-        NSLog(@"playlist id -> %@", playlistId);
-
     NSString *browseId = [NSString stringWithFormat:@"VL%@", playlistId];
     return [self requestWithURL:[NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"] 
                  authentication:nil 

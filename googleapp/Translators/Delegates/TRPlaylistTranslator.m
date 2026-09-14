@@ -53,9 +53,7 @@
 
 - (id)translateCompactPlaylist:(NSDictionary *)json 
                    withContext:(NSDictionary *)context 
-                         error:(NSError **)error {
-        NSLog(@"compact playlist");
-    
+                         error:(NSError **)error {    
     NSDictionary *data = [TRJSONUtils dictFromJSON:json keyPath:@"i.compactPlaylistRenderer"];
     
     if (!data) {
@@ -133,10 +131,11 @@
 
 - (id)translateVideoListPlaylist:(NSDictionary *)json 
                          error:(NSError **)error {
-    NSLog(@"vidoeplaylist");
     // thankfully none of these seem to be used except for playlist id. thank god.
     NSDictionary *headerBody = [TRJSONUtils dictFromJSON:json keyPath:@"header.pageHeaderRenderer.content.pageHeaderViewModel"];
-    NSString *playlistId = [TRJSONUtils stringFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.playlistId"];
+    NSString *playlistId = [TRJSONUtils stringFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.targetId"]; // other user's playlists
+    if (playlistId == nil)
+        playlistId = [TRJSONUtils stringFromJSON:json keyPath:@"contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.playlistId"]; // the signed in user's playlist
     NSString *title = [TRJSONUtils stringFromJSON:json keyPath:@"header.pageHeaderRenderer.pageTitle"];
     NSString *description = [TRJSONUtils stringFromJSON:headerBody keyPath:@"description.descriptionPreviewViewModel.description.content"];
     NSString *baseVideosCount = [TRJSONUtils stringFromJSON:headerBody keyPath:@"metadata.contentMetadataViewModel.metadataRows[1].metadataParts[2].text.content"];
@@ -190,14 +189,12 @@
             isPrivate:isPrivate
         ] autorelease];
     }
-    NSLog(@"playlist -> %@", playlist);
     
     return playlist;
 }
 
 - (id)translateCreatedPlaylist:(NSDictionary *)json 
                          error:(NSError **)error {
-    NSLog(@"createdpalylist");
     // thankfully none of these seem to be used except for playlist id. thank god.
     NSString *playlistId = json[@"playlistId"];
     id playlist = nil;
