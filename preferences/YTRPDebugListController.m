@@ -14,7 +14,6 @@ NSString *TRPackageVersion(NSString *packageID) {
 
     NSArray<NSString *> *blocks = [status componentsSeparatedByString:@"\n\n"];
     NSString *needle = [NSString stringWithFormat:@"Package: %@", packageID];
-    NSLog(@"status -> %@", status);
 
     for (NSString *block in blocks) {
         if ([block rangeOfString:needle].location != NSNotFound) {
