@@ -59,7 +59,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	$(shell find $(LIB_DIR)/cocoahttpserver -type f -name '*.m') \
 	$(COMMON)/Protobuf.m $(COMMON)/YoutubeClientType.m general.m ../base64/NSData+Base64.m ../base64/NSString+Base64.m
 	
-TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators
+TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators -DGOOGLE_APP=1
 # TubeReplacerGoogle_LDFLAGS = ../lib/libtree-sitter.a
 # TubeReplacerGoogle_LDFLAGS = ../lib/libposixshim.a
 TubeReplacerGoogle_OBJCFLAGS += -I$(LIB_DIR)/protobuf
