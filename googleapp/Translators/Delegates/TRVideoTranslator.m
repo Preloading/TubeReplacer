@@ -144,59 +144,6 @@
                 for (NSString *element in elements) {
                     idx++;
                     if ([element hasPrefix:@"#EXT-X-MEDIA:"]) {
-                        // NSMutableDictionary *components = [NSMutableDictionary dictionary];
-                        // NSString *attributeList = [element substringFromIndex:13];
-                        
-                        // Parse attributes while respecting quoted values
-                        // NSMutableString *currentKey = [NSMutableString string];
-                        // NSMutableString *currentValue = [NSMutableString string];
-                        // BOOL inQuotes = NO;
-                        
-                        // for (NSInteger i = 0; i < [attributeList length]; i++) {
-                        //     unichar c = [attributeList characterAtIndex:i];
-                            
-                        //     if (c == '"') {
-                        //         inQuotes = !inQuotes;
-                        //         [currentValue appendFormat:@"%c", c];
-                        //     } else if (c == '=' && !inQuotes) {
-                        //         // Key-value separator
-                        //         [currentKey appendFormat:@"%c", c];
-                        //     } else if (c == ',' && !inQuotes) {
-                        //         // Attribute separator - save current pair
-                        //         if ([currentKey length] > 0) {
-                        //             NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
-                        //             if ([keyValue count] == 2) {
-                        //                 NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                        //                 NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                        //                 components[key] = value;
-                        //             }
-                        //         }
-                        //         [currentKey setString:@""];
-                        //         [currentValue setString:@""];
-                        //     } else {
-                        //         if ([currentKey rangeOfString:@"="].location != NSNotFound) {
-                        //             [currentValue appendFormat:@"%c", c];
-                        //         } else {
-                        //             [currentKey appendFormat:@"%c", c];
-                        //         }
-                        //     }
-                        // }
-                        
-                        // Don't forget the last pair
-                        // if ([currentKey length] > 0) {
-                        //     NSArray *keyValue = [currentKey componentsSeparatedByString:@"="];
-                        //     if ([keyValue count] == 2) {
-                        //         NSString *key = [keyValue[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                        //         NSString *value = [currentValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                        //         components[key] = value;
-                        //     }
-                        // }
-                        
-                        // Now that it's parsed, lets check and see if we should include it
-                        // if ([components[@"name"] hasSuffix:@" - dubbed-auto\""]) {
-                        //     continue;
-                        // }
-
                         if ([element rangeOfString:@" - dubbed-auto\""].location != NSNotFound) {
                             continue; // its really bad
                         }
@@ -411,6 +358,7 @@
     
     NSString *uploadDateStr = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.uploadDate"];
     NSString *publishDateStr = [TRJSONUtils stringFromJSON:json keyPath:@"microformat.playerMicroformatRenderer.publishDate"];
+    NSLog(@"date string -> %@", uploadDateStr);
     NSDate *uploadDate = [TRJSONUtils dateFromRFC3339:uploadDateStr];
     NSDate *publishDate = [TRJSONUtils dateFromRFC3339:publishDateStr];
 

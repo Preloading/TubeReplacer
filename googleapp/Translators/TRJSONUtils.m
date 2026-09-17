@@ -136,18 +136,30 @@
     if (!string || ![string isKindOfClass:[NSString class]]) {
         return nil;
     }
-    
+
+    // Convert "-07:00" / "+05:30" to "-0700" / "+0530"
+    if ([string length] >= 6) {
+        unichar c = [string characterAtIndex:[string length] - 6];
+
+        if ((c == '+' || c == '-') &&
+            [string characterAtIndex:[string length] - 3] == ':') {
+
+            NSMutableString *normalized = [NSMutableString stringWithString:string];
+            [normalized deleteCharactersInRange:NSMakeRange([normalized length] - 3, 1)];
+            string = normalized;
+        }
+    }
+
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
+    NSLocale *enUSPOSIXLocale =
+        [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+
     [formatter setLocale:enUSPOSIXLocale];
-    [formatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
+    [formatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
     NSDate *result = [formatter dateFromString:string];
     [formatter release];
     [enUSPOSIXLocale release];
-    
+
     return result;
 }
 
