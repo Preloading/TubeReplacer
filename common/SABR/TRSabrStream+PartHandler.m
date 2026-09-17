@@ -11,6 +11,7 @@
     if (!self.isStreamReady)
         return;
     // NSLog(@"data type -> %i", part.type);
+    // NSLog(@"data -> %@", part.data);
     NSError *error = nil;
     switch (part.type) {
     case UMPPartId_UmpPartIdStreamProtectionStatus: {
@@ -50,6 +51,10 @@
                 self.audioStream.itag = self.playbackCookie.audioFmt.itag;
                 self.audioStream.mediaType = TRSabrMediaTypeAudio;
             }
+        }
+        
+        if (nextRequestPolicy.hasBackoffTimeMs) {
+            self.backoffTill = [NSDate dateWithTimeIntervalSinceNow:(double)(nextRequestPolicy.backoffTimeMs)/1000.0];
         }
 
         [nextRequestPolicy release];

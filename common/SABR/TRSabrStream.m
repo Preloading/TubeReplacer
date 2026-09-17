@@ -1,4 +1,6 @@
 #import "TRSabrStream.h"
+#include <Foundation/NSDate.h>
+#include <stdint.h>
 #include <CoreFoundation/CFRunLoop.h>
 #include <Foundation/NSOperation.h>
 #include <Foundation/NSValue.h>
@@ -101,6 +103,8 @@
 -(void)start {
     self.currentlyRequestingInNormal = NO;
     self.currentlyRequestingInFastTrack = NO;
+    self.playbackStartAt = [NSDate date];
+    self.backoffTill = [NSDate date];
     self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
     self.networkQueue.maxConcurrentOperationCount = 2;
 
@@ -213,7 +217,18 @@
                 [self declareStreamBad];
             } else {
                 NSLog(@"not enough data to start stream! requesting again...");
-                [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+                int64_t timeToDelay = [self.backoffTill timeIntervalSinceNow];
+                NSLog(@"time to delay -> %lli", timeToDelay);
+                if (timeToDelay > 0) {
+                    NSLog(@"backing off...");
+                    dispatch_time_t dispatchTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeToDelay * NSEC_PER_SEC));
+                    dispatch_after(dispatchTime, dispatch_get_main_queue(), ^(void){
+                        [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+                    });
+                } else {
+                    [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
+                }
+
                 return;
             }
         } // else if (bufferingState == TRSabrBufferingFastTrack) {
@@ -270,7 +285,7 @@
     // state.stickyResolution = 720;
     state.enableVoiceBoost = false;
     state.bandwidthEstimate = self.bandwidthEstimate;
-
+    state.elapsedWallTimeMs = (-[self.playbackStartAt timeIntervalSinceNow] * 1000);
 
     // PlaybackAuthorization *playerAuth = [[PlaybackAuthorization alloc] init];
 
@@ -643,6 +658,8 @@
         [_videoFormatsWeHave release];
     if (_audioFormatsWeHave)
         [_audioFormatsWeHave release];
+    if (_backoffTill)
+        [_backoffTill release];
 
     _videoStream = nil;
     _audioStream = nil;
@@ -651,6 +668,7 @@
     _networkQueue = nil;
     _videoFormatsWeHave = nil;
     _audioFormatsWeHave = nil;
+    _backoffTill = nil;
 }
 
 -(void)dealloc {

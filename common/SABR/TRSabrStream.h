@@ -40,6 +40,9 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 // SABR data
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
+@property (nonatomic, strong) NSDate *backoffTill;
+@property (nonatomic, strong) NSDate *playbackStartAt;
+
 
 @property (nonatomic, assign) int bandwidthEstimate;
 
