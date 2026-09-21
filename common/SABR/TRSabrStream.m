@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include "googleapp/general.h"
 #include <Foundation/NSDate.h>
 #include <stdint.h>
 #include <CoreFoundation/CFRunLoop.h>
@@ -219,9 +220,10 @@
                 [self declareStreamBad];
             } else {
                 NSLog(@"not enough data to start stream! requesting again...");
+                NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
                 int64_t timeToDelay = [self.backoffTill timeIntervalSinceNow];
                 NSLog(@"time to delay -> %lli", timeToDelay);
-                if (timeToDelay > 0) {
+                if (PreferencesBoolValue(preferences, @"RespectBackoff", YES) && timeToDelay > 0) {
                     NSLog(@"backing off...");
                     dispatch_time_t dispatchTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeToDelay * NSEC_PER_SEC));
                     dispatch_after(dispatchTime, dispatch_get_main_queue(), ^(void){
