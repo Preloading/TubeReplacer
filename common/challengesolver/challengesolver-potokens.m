@@ -1,4 +1,5 @@
 #include "challengesolver-potokens.h"
+#import "challengesolver-manager.h"
 #import "base64/NSData+Base64.h"
 
 @implementation TRPOTokenSolver (POTokens) 
@@ -109,6 +110,11 @@
 
 -(NSString*)mintPOTokenWithData:(NSString*)data {
     if (!self.isReadyToMintTokens)  {
+        if (self.isPOTokenEngineStarting) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [self setupPOTokenGenerationWithAuth:nil];
+            });
+        }
         return nil;
     }
 
@@ -166,6 +172,12 @@
     } else {
         // mint a coldstart
         token = [TRPOTokenSolver generateColdStartTokenWithContent:contentBinding clientState:1];
+        if (self.isPOTokenEngineStarting) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [self setupPOTokenGenerationWithAuth:nil];
+            });
+        }
+
     }
 
     return token;

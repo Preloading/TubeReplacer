@@ -17,7 +17,7 @@
             [self fetchYTCfg:^(NSError *error) {
                 if (error) {
                     NSLog(@"an error has occured fetching the botguard challenge! %@", error);
-                    self.errorAlert(@"failed to fetch botguard challenge, videos might not play.");
+                    // self.errorAlert(@"failed to fetch botguard challenge, videos might not play.");
                     self.isPOTokenEngineStarting = NO;
                     return;
                 }
@@ -42,7 +42,7 @@
                         } callback:^(NSDictionary *response, NSError *error) {
                             if (error) {
                                 NSLog(@"An error occured while fetching the integrity token -> %@", error);
-                                self.errorAlert(@"an error occured while fetching integrity token, videos might not play.");
+                                // self.errorAlert(@"an error occured while fetching integrity token, videos might not play.");
                                 self.isPOTokenEngineStarting = NO;
                                 return;
                             }
