@@ -41,8 +41,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	infooverflowfix.x \
 	videostats.x \
 	migration.x \
-	$(COMMON)/potoken.m \
-	$(COMMON_GOOGLE)/potoken-google.m \
+	$(shell find $(COMMON)/challengesolver -type f -name '*.m') \
 	$(shell find $(COMMON)/SABR -type f -name '*.m') \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \

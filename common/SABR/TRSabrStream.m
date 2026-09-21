@@ -16,7 +16,9 @@
 #include <Foundation/NSArray.h>
 #import "TRAdaptiveFormat.h"
 #import "proto/generated/video_streaming/VideoPlaybackAbrRequest.pbobjc.h"
-#import "common/potoken.h"
+#import "common/challengesolver/challengesolver.h"
+#import "common/challengesolver/challengesolver-nsig.h"
+#import "common/challengesolver/challengesolver-potokens.h"
 #import "common/YoutubeClientType.h"
 #import "base64/NSData+Base64.h"
 #import "TRSabrRequest.h"

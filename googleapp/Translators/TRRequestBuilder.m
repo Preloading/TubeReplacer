@@ -111,7 +111,7 @@
                 @"signatureTimestamp":signatureTimestamp,
                 @"vis":@0,
                 @"splay": @NO,
-                @"lactMilliseconds": @"-1",
+                // @"lactMilliseconds": @"-1",
             },
             @"devicePlaybackCapabilities": @{
                 @"supportsVp9Encoding":@NO

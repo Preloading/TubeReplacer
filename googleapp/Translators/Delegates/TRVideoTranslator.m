@@ -15,6 +15,9 @@
 #import "../general.h"
 #import "common/SABR/TRSabrStream.h"
 #import "common/SABR/TRAdaptiveFormat.h"
+#import "common/challengesolver/challengesolver.h"
+#import "common/challengesolver/challengesolver-nsig.h"
+
 
 @implementation TRVideoTranslator
 

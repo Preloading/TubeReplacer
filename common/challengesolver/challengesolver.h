@@ -32,6 +32,8 @@
 @property (nonatomic, copy) void (^botguardResponseCallback)(NSString *);
 @property (nonatomic, copy) void (^webviewReadyCallback)();
 @property (nonatomic, copy) void (^errorAlert)(NSString *);
+@property (nonatomic, copy) void (^retryStartup)();
+
 
 // player
 // @property (nonatomic, strong) NSString *playerId;
@@ -42,29 +44,13 @@
 @property (atomic, assign) int nsigSignatureTimestamp;
 
 // states
+@property (atomic, assign) BOOL isPOTokenEngineStarting;
 @property (atomic, assign) BOOL isWebViewReady;
 @property (atomic, assign) BOOL isVMInitalized;
 @property (atomic, assign) BOOL isReadyToMintTokens;
 @property (atomic, assign) BOOL isNSigReady;
 @property (atomic, assign) BOOL isStartingPOTokenGen;
 
+// general
 +(TRPOTokenSolver *)sharedInstance;
-
--(NSDictionary*)fetchPOJNNChallengeWithMethod:(NSString*)method andBody:(NSDictionary*)body;
-// -(BOOL)fetchStudioIntegrityChallenge;
--(void)descrambleChallenge:(NSString*)scrambledChallenge;
--(void)startFetchingChallengeResponseWithCallback:(void (^)(NSString *))callback;
--(void)startFetchingIntegrityTokenForPOTokenWithCallback:(void (^)(NSString *))callback;
--(void)startPOTokenMinterWithIntegrityToken:(NSString*)integrityToken callback:(void (^)())callback;
--(void)initWebViewWithCallback:(void(^)())callback;
--(void)startBotguardVM:(void(^)())callback;
-+(NSString*)generateColdStartTokenWithContent:(NSString*)contentBinding clientState:(int)clientState;
--(NSString*)mintPOTokenWithData:(NSString*)data;
--(NSString*)mintPOTokenOrColdStart:(NSString*)contentBinding;
-
-// n/sig
-// -(void)getPlayerJSWithCallback:(void(^)())callback;
--(void)setupNSig;
--(void)fetchNSigFromServerWithCallback:(void(^)())callback;
--(NSString*)decipherUrl:(NSString*)url signatureCipher:(NSString*)signatureCipher;
 @end

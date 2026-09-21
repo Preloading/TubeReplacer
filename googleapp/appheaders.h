@@ -1,7 +1,7 @@
 #include <Foundation/Foundation.h>
 #include <UIKit/UIKit.h>
 #include <objc/NSObject.h>
-#include "common/potoken.h"
+#include "common/challengesolver/challengesolver.h"
 
 /// This is where we put headers that are used in more than one section/.x file
 

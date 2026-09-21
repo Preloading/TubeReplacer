@@ -1,6 +1,7 @@
 #include <Foundation/Foundation.h>
 #include "general.h"
-#include "common-google/potoken-google.h"
+#include "common/challengesolver/challengesolver.h"
+#include "common/challengesolver/challengesolver-manager.h"
 
 // youtube google app
 @interface YTDeviceAuth : NSObject
@@ -85,6 +86,18 @@
     
     return %orig;
 }
+
+// %new
+// -(void)restartPOTokenEngine {
+//     TRPOTokenSolver *solver = [TRPOTokenSolver sharedInstance];
+//     objc_setAssociatedObject(self, "_challengeSolver", solver, OBJC_ASSOCIATION_RETAIN);
+//     solver.errorAlert = ^(NSString *alertText) {
+//         [%c(GIPToast) showToast:alertText forDuration:1.5];
+//     };
+//     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//         [solver setupPOTokenGenerationWithAuth:nil]; // nil for now.
+//     });
+// }
 
 %new
 -(TRPOTokenSolver*)challengeSolver {

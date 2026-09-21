@@ -10,6 +10,7 @@
 #include "appheaders.h"
 #include "general.h"
 #include "Translators/TRTranslators.h"
+#import "common/challengesolver/challengesolver-potokens.h"
 
 // Forward declare new methods for YTVideoParser
 @interface YTVideoParser : NSObject
