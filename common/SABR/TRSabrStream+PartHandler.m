@@ -123,7 +123,7 @@
             break;
 
         // i really love Address of property expression requested
-        NSLog(@"itag -> %i, segment -> %i", mediaHeader.itag, mediaHeader.sequenceNumber);
+        // NSLog(@"itag -> %i, segment -> %i", mediaHeader.itag, mediaHeader.sequenceNumber);
         if (mediaHeader.itag == self.videoStream.itag) {
             if (mediaHeader.isInitSeg) {
                 if (!self.videoStream.isReadyForPlayback)

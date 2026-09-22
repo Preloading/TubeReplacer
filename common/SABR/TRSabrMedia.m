@@ -192,7 +192,7 @@
         NSMutableArray *segmentIndexes = [[NSMutableArray alloc] initWithCapacity:referenceCount];
         NSMutableArray *segmentIndexesCombined = [[NSMutableArray alloc] initWithCapacity:referenceCount];
 
-        NSLog(@"ref count -> %i", referenceCount);
+        // NSLog(@"ref count -> %i", referenceCount);
         uint32_t lastSegmentDuration = 0;
 
         for (uint16_t i = 0; i < referenceCount; i++) {

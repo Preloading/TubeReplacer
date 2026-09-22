@@ -165,7 +165,7 @@
 }
 
 -(void)requestAdditionalData:(int)currentStreamTimeMS state:(TRSabrBufferingType)bufferingState {
-    NSLog(@"current stream ts -> %i", currentStreamTimeMS);
+    // NSLog(@"current stream ts -> %i", currentStreamTimeMS);
     if (self.currentlyRequestingInNormal && bufferingState == TRSabrBufferingNormal) {
         return;
     } else if (bufferingState == TRSabrBufferingNormal) {
@@ -212,8 +212,8 @@
             self.currentlyRequestingInFastTrack = NO;
         else
             self.currentlyRequestingInNormal = NO;
-        NSLog(@"self.videoStream.pendingResponses.allKeys -> %@", self.videoStream.pendingResponses.allKeys);
-        NSLog(@"downloaded video segments -> %@", self.videoStream.segmentData.allKeys);
+        // NSLog(@"self.videoStream.pendingResponses.allKeys -> %@", self.videoStream.pendingResponses.allKeys);
+        // NSLog(@"downloaded video segments -> %@", self.videoStream.segmentData.allKeys);
         // NSLog(@"self.audioStream.pendingResponses.allKeys -> %@", self.audioStream.pendingResponses.allKeys);
         if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.isStreamReady) {
             if (self.requestNumber > 10) {
@@ -222,9 +222,9 @@
                 NSLog(@"not enough data to start stream! requesting again...");
                 NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
                 int64_t timeToDelay = [self.backoffTill timeIntervalSinceNow];
-                NSLog(@"time to delay -> %lli", timeToDelay);
+                NSLog(@"backing off for %llis", timeToDelay);
                 if (PreferencesBoolValue(preferences, @"RespectBackoff", YES) && timeToDelay > 0) {
-                    NSLog(@"backing off...");
+                    // NSLog(@"backing off...");
                     dispatch_time_t dispatchTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeToDelay * NSEC_PER_SEC));
                     dispatch_after(dispatchTime, dispatch_get_main_queue(), ^(void){
                         [self requestAdditionalData:currentStreamTimeMS state:bufferingState];
@@ -581,7 +581,7 @@
             return;
         }
         if ((self.videoStream.segmentIndexes.count > segmentIdx) || (self.videoStream.segmentData[@(segmentIdx+2)] == nil && self.videoStream.segmentIndexes.count > segmentIdx+1)) {
-            NSLog(@"standard buffering occuring");
+            // NSLog(@"standard buffering occuring");
             [self requestAdditionalData:requestedVideoSegmentEnd*1000  state:TRSabrBufferingNormal];
         }
     } else if (mediaType == TRSabrMediaTypeAudio) {
@@ -615,7 +615,7 @@
             return;
         }
         if ((self.audioStream.segmentData[@(segmentIdx+1)] == nil && self.audioStream.segmentIndexes.count > segmentIdx) || (self.audioStream.segmentData[@(segmentIdx+2)] == nil && self.audioStream.segmentIndexes.count > segmentIdx+1)) {
-            NSLog(@"standard buffering occuring");
+            // NSLog(@"standard buffering occuring");
             [self requestAdditionalData:requestedAudioSegmentEnd*1000  state:TRSabrBufferingNormal];
         }
     }
