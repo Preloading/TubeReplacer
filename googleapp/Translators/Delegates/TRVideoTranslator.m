@@ -1085,7 +1085,7 @@
 
         long likes = [video likesCount];
 
-        if (!nextData[@"next"]) {
+        if (nextData[@"next"]) {
             // Navigate to the like button data in /next response
             NSDictionary *resultContents = nextData[@"next"][@"contents"][@"singleColumnWatchNextResults"][@"results"][@"results"][@"contents"];
             
