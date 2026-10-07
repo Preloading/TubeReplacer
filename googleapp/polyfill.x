@@ -26,6 +26,9 @@
 #include <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+@interface __NSArrayI : NSArray
+@end
+
 @interface __NSArrayM : NSMutableArray
 @end
 
