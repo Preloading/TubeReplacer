@@ -226,21 +226,18 @@ void setBackgroundPlaybackAllowed(id obj)
 %hook YTPlayerController
 - (void)appDidEnterBackground
 {
-    NSLog(@"YTPC enter background :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
 
 - (void)appDidBecomeActive
 {
-    NSLog(@"YTPC become active :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
 
 - (void)appWillResignActive
 {
-    NSLog(@"YTPC resign active :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
@@ -255,13 +252,11 @@ void setBackgroundPlaybackAllowed(id obj)
 %hook YTPlayerViewController
 - (void)appWillResignActive
 {
-    NSLog(@"YTPVC resign active :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
 - (void)playerStateDidChangeToPlaying
 {
-    NSLog(@"YTPVC change to playing :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
@@ -277,13 +272,11 @@ void setBackgroundPlaybackAllowed(id obj)
 
 - (void)appDidBecomeActive
 {
-    NSLog(@"ML become active :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
 - (void)appDidEnterBackground
 {
-    NSLog(@"ML enter background :3c");
     setBackgroundPlaybackAllowed(self);
     %orig;
 }
