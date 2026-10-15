@@ -192,63 +192,83 @@
 }
 %end
 
-BOOL bkgPlay(void)
+id bkgPlayPref(void)
 {
-    // currently crashes on 1.0.1, and fades out on 1.1.0.
-    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])
-        return NO;
-    
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    id rawBkgPlay = preferences[@"BkgPlay"];
-    BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
-    return bkgPlay;
+    return preferences[@"BkgPlay"];
 }
-void bkgPlaySet(id obj)
+void setBackgroundPlaybackAllowed(id obj)
 {
-    NSNumber *shouldBkgPlay = [NSNumber numberWithBool:bkgPlay()];
-    [obj setValue:shouldBkgPlay forKey:l(@"backgroundPlaybackAllowed")];
+    // 1.0.0 & 1.0.1 don't have this field and would crash
+    // 1.1.0 has this field, but the logic is incomplete
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])
+        return;
+
+    id bkgPlay = bkgPlayPref();
+    if (!bkgPlay) {
+        return;
+    }
+    [obj setValue:bkgPlay forKey:l(@"backgroundPlaybackAllowed")];
 }
 
 %hook YTPlayer
 -(BOOL)backgroundPlaybackAllowed
 {
-    return bkgPlay();
+    id bkgPlay = bkgPlayPref();
+    return bkgPlay ? [bkgPlay boolValue] : %orig;
 }
 -(void)setStreamURL:(id)streamURL initialMediaTime:(double)initialMediaTime airPlayAllowed:(BOOL)airPlayAllowed {
     %orig;
-    bkgPlaySet(self);
+    setBackgroundPlaybackAllowed(self);
 }
 %end
 
 %hook YTPlayerController
+- (void)appDidEnterBackground
+{
+    NSLog(@"YTPC enter background :3c");
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
+- (void)appDidBecomeActive
+{
+    NSLog(@"YTPC become active :3c");
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
+- (void)appWillResignActive
+{
+    NSLog(@"YTPC resign active :3c");
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
 -(void)loadVideoStream
 {
     %orig;
-    bkgPlaySet(self);
+    setBackgroundPlaybackAllowed(self);
 }
 %end
 
 %hook YTPlayerViewController
 - (void)appWillResignActive
 {
-    // this prevents the uhh
-    // when you go to the app switcher
-    // that it stops playing there
-    // and also going to the background
-    NSLog(@"YTPVC nuh uh 1 :3c");
-    bkgPlaySet(self);
+    NSLog(@"YTPVC resign active :3c");
+    setBackgroundPlaybackAllowed(self);
     %orig;
 }
 - (void)playerStateDidChangeToPlaying
 {
-    NSLog(@"YTPVC nahhhh 2 :3c");
-    bkgPlaySet(self);
+    NSLog(@"YTPVC change to playing :3c");
+    setBackgroundPlaybackAllowed(self);
     %orig;
 }
 -(BOOL)backgroundPlaybackAllowed
 {
-    NSLog(@"hi1 from my tweakkk :3c");
-    return bkgPlay();
+    id bkgPlay = bkgPlayPref();
+    return bkgPlay ? [bkgPlay boolValue] : %orig;
 }
 
 %end
@@ -257,20 +277,20 @@ void bkgPlaySet(id obj)
 
 - (void)appDidBecomeActive
 {
-    NSLog(@"MLP become active :3c");
-    bkgPlaySet(self);
+    NSLog(@"ML become active :3c");
+    setBackgroundPlaybackAllowed(self);
     %orig;
 }
 - (void)appDidEnterBackground
 {
-    NSLog(@"MLP enter background :3c");
-    bkgPlaySet(self);
+    NSLog(@"ML enter background :3c");
+    setBackgroundPlaybackAllowed(self);
     %orig;
 }
 -(BOOL)backgroundPlaybackAllowed
 {
-    NSLog(@"hi2 from my tweakkk :3c");
-    return bkgPlay();
+    id bkgPlay = bkgPlayPref();
+    return bkgPlay ? [bkgPlay boolValue] : %orig;
 }
 
 %end
