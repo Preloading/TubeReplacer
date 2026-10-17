@@ -192,47 +192,93 @@
 }
 %end
 
+BOOL bkgPlayPref(void)
+{
+    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
+    return PreferencesBoolValue(preferences, @"BkgPlay", YES);
+}
+
+void setBackgroundPlaybackAllowed(id obj)
+{
+    // 1.0.0 & 1.0.1 don't have this field and would crash
+    // 1.1.0 has this field, but the logic is incomplete
+    if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])
+        return;
+
+    id bkgPlay = bkgPlayPref() ? @YES : @NO;
+    [obj setValue:bkgPlay forKey:l(@"backgroundPlaybackAllowed")];
+}
+
 %hook YTPlayer
 -(BOOL)backgroundPlaybackAllowed
 {
-    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
-        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        id rawBkgPlay = preferences[@"BkgPlay"];
-        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
-
-        if (bkgPlay) {
-            return YES;
-        }
-    }
-    return %orig;
+    return bkgPlayPref();
 }
 -(void)setStreamURL:(id)streamURL initialMediaTime:(double)initialMediaTime airPlayAllowed:(BOOL)airPlayAllowed {
     %orig;
-    // currently crashes on 1.0.1, and fades out on 1.1.0.
-    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
-        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        id rawBkgPlay = preferences[@"BkgPlay"];
-        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
-
-        if (bkgPlay) {
-            [self setValue:@YES forKey:l(@"backgroundPlaybackAllowed")];
-        }
-    }
+    setBackgroundPlaybackAllowed(self);
 }
 %end
 
 %hook YTPlayerController
+- (void)appDidEnterBackground
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
+- (void)appDidBecomeActive
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
+- (void)appWillResignActive
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+
 -(void)loadVideoStream
 {
     %orig;
-    if (!([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"] || [version() isEqualToString:@"1.1.0"])) {
-        NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-        id rawBkgPlay = preferences[@"BkgPlay"];
-        BOOL bkgPlay = rawBkgPlay ? [rawBkgPlay boolValue] : YES;
-
-        if (bkgPlay) {
-            [self setValue:@YES forKey:l(@"backgroundPlaybackAllowed")];
-        }
-    }
+    setBackgroundPlaybackAllowed(self);
 }
+%end
+
+%hook YTPlayerViewController
+- (void)appWillResignActive
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+- (void)playerStateDidChangeToPlaying
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+-(BOOL)backgroundPlaybackAllowed
+{
+    return bkgPlayPref();
+}
+
+%end
+
+%hook MLPlayer
+
+- (void)appDidBecomeActive
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+- (void)appDidEnterBackground
+{
+    setBackgroundPlaybackAllowed(self);
+    %orig;
+}
+-(BOOL)backgroundPlaybackAllowed
+{
+    return bkgPlayPref();
+}
+
 %end
