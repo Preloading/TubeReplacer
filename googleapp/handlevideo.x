@@ -11,6 +11,9 @@
 #include "appheaders.h"
 #include "general.h"
 #include "common/SABR/TRSabrStream.h"
+    #import <execinfo.h>
+#import <mach-o/dyld.h>
+
 
 @interface YTStream (TubeReplacerInternal)
 +(YTStream*)internalSelectStreamForVideo:(YTVideo*)video maxQualityStreamFormat:(int)maxQualityStreamFormat onWiFi:(BOOL)onWifi devicePrivileges:(id)devicePrivileges CPN:(NSString*)cpn;
@@ -212,9 +215,21 @@
 }
 
 -(void)stop {
+
+intptr_t slide = _dyld_get_image_vmaddr_slide(0);
+NSLog(@"ASLR Slide Offset: 0x%lx\n", (unsigned long)slide);
+void *callstack[128];
+int frames = backtrace(callstack, 128);
+char **symbols = backtrace_symbols(callstack, frames);
+NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
+for (int i = 0; i < frames; i++) {
+  [callstackString appendFormat:@"%s\n", symbols[i]];
+}
+NSLog(@"%@", callstackString);
     MLRemoteStream *selectedStream = [self valueForKey:l(@"selectedStream")];
 
     if ([selectedStream format] == 5) {
+        NSLog(@"proxy stop called! stopping...");
         [(TRSabrStream*)selectedStream cleanup];
     }
 
@@ -509,3 +524,15 @@
 // }
 
 // %end
+
+
+%hook MLPlayer
+-(void)playerItemStatusDidChange
+{
+    if ([(AVPlayerItem*)[self valueForKey:@"playerItem"] status] == AVPlayerItemStatusFailed )
+    {
+        NSLog(@"player error -> %@", [(AVPlayerItem*)[self valueForKey:@"playerItem"] error]);
+    }
+    return %orig;
+}
+%end

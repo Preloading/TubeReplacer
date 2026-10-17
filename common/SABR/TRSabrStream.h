@@ -55,7 +55,7 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property (nonatomic, assign) BOOL isStreamReady;
 @property (nonatomic, assign) BOOL isStreamBad;
 @property (nonatomic, retain) GTMOAuth2Authentication *authentication;
-
+@property (nonatomic, assign) BOOL isHTTPServerReady;
 
 -(instancetype)initWithStreamUrl:(NSString*)streamURL ustreamConfig:(NSString*)ustreamConfig formats:(NSArray*)formats videoId:(NSString*)videoId;
 -(NSString*)createHLSRootManifest;

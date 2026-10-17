@@ -124,7 +124,9 @@
     if (videoFormatsWeHave.count == 0 || audioFormatsWeHave.count == 0) {
         [videoFormatsWeHave release];
         [audioFormatsWeHave release];
+        NSLog(@"formats are missing! has %lu video formats and %lu audio formats", (unsigned long)videoFormatsWeHave.count, (unsigned long)audioFormatsWeHave.count);
         [self declareStreamBad];
+        return;
     }
 
     self.videoFormatsWeHave = videoFormatsWeHave;
@@ -511,21 +513,25 @@
 	if(!success)
 	{
 		NSLog(@"Error starting HTTP Server: %@", error);
+        self.isHTTPServerReady = YES;
 	}
 
-    while (self.httpServer) {
-        @autoreleasepool {
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-                                        beforeDate:[NSDate distantFuture]];
-        }
+    NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+    self.isHTTPServerReady = YES;
+    while (self.httpServer && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) {
+        if (!self.httpServer) break;
     }
 
     // NSLog(@"http server at -> http://%@:%hu/", [self.httpServer [self.httpServer port]);
 }
 
 - (void)startWebServerThreaded {
+    self.isHTTPServerReady = NO;
     self.httpServerThread = [[NSThread alloc] initWithTarget:self selector:@selector(startWebServer) object:nil];
     [self.httpServerThread start];
+    while (!self.isHTTPServerReady) {
+        ;;
+    }
 }
 
 // segment idx starts at 0
