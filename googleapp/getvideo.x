@@ -195,7 +195,7 @@
 BOOL bkgPlayPref(void)
 {
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    return PreferencesBoolValue(preferences, @"BkgPlay", NO);
+    return PreferencesBoolValue(preferences, @"BkgPlay", YES);
 }
 
 void setBackgroundPlaybackAllowed(id obj)
