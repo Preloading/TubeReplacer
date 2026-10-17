@@ -192,11 +192,12 @@
 }
 %end
 
-id bkgPlayPref(void)
+BOOL bkgPlayPref(void)
 {
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    return preferences[@"BkgPlay"];
+    return PreferencesBoolValue(preferences, @"BkgPlay", NO);
 }
+
 void setBackgroundPlaybackAllowed(id obj)
 {
     // 1.0.0 & 1.0.1 don't have this field and would crash
@@ -204,18 +205,14 @@ void setBackgroundPlaybackAllowed(id obj)
     if ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"])
         return;
 
-    id bkgPlay = bkgPlayPref();
-    if (!bkgPlay) {
-        return;
-    }
+    id bkgPlay = bkgPlayPref() ? @YES : @NO;
     [obj setValue:bkgPlay forKey:l(@"backgroundPlaybackAllowed")];
 }
 
 %hook YTPlayer
 -(BOOL)backgroundPlaybackAllowed
 {
-    id bkgPlay = bkgPlayPref();
-    return bkgPlay ? [bkgPlay boolValue] : %orig;
+    return bkgPlayPref();
 }
 -(void)setStreamURL:(id)streamURL initialMediaTime:(double)initialMediaTime airPlayAllowed:(BOOL)airPlayAllowed {
     %orig;
@@ -262,8 +259,7 @@ void setBackgroundPlaybackAllowed(id obj)
 }
 -(BOOL)backgroundPlaybackAllowed
 {
-    id bkgPlay = bkgPlayPref();
-    return bkgPlay ? [bkgPlay boolValue] : %orig;
+    return bkgPlayPref();
 }
 
 %end
@@ -282,8 +278,7 @@ void setBackgroundPlaybackAllowed(id obj)
 }
 -(BOOL)backgroundPlaybackAllowed
 {
-    id bkgPlay = bkgPlayPref();
-    return bkgPlay ? [bkgPlay boolValue] : %orig;
+    return bkgPlayPref();
 }
 
 %end
