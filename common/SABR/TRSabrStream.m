@@ -195,18 +195,21 @@
         if (!self.isStreamReady) {
             [currentlyParsingDatas release];
             [currentlyParsingHeaders release];
+            [sabrRequest release];
             return;
         }
         if (isFatal) {
             [currentlyParsingDatas release];
             [currentlyParsingHeaders release];
+            [sabrRequest release];
             [self declareStreamBad];
             return;
         }
         [currentlyParsingDatas release];
         [currentlyParsingHeaders release];
-
         self.bandwidthEstimate = sabrRequest.bandwidthAvailable;
+        [sabrRequest release];
+
         // NSLog(@"we now have these video segments -> %@", [self.videoStream.segmentData allKeys]);
         // NSLog(@"we now have these audio segments -> %@", [self.audioStream.segmentData allKeys]);
 
