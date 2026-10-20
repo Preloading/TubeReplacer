@@ -33,8 +33,6 @@
     if (cachedVideo) {
         [self performResponseBlock:responseBlock response:cachedVideo];
     } else {
-        id responseBlock2 = [responseBlock copy];
-        id errorBlock2 = [errorBlock copy];
         NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
         NSString *poToken = @"";
         TRPOTokenSolver *challengeSolver = [(YTDeviceAuthorizer*)[self valueForKey:l(@"deviceAuthorizer")] challengeSolver];
@@ -81,8 +79,8 @@
         }
         [self makePOSTRequest:request 
                     withParser:[self valueForKey:l(@"videoParser")] 
-                    responseBlock:responseBlock2 
-                    errorBlock:errorBlock2];
+                    responseBlock:responseBlock
+                    errorBlock:errorBlock];
     }
 }
 

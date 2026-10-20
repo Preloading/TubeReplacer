@@ -215,17 +215,6 @@
 }
 
 -(void)stop {
-
-intptr_t slide = _dyld_get_image_vmaddr_slide(0);
-NSLog(@"ASLR Slide Offset: 0x%lx\n", (unsigned long)slide);
-void *callstack[128];
-int frames = backtrace(callstack, 128);
-char **symbols = backtrace_symbols(callstack, frames);
-NSMutableString *callstackString = [NSMutableString stringWithFormat:@"uwu >_<"];
-for (int i = 0; i < frames; i++) {
-  [callstackString appendFormat:@"%s\n", symbols[i]];
-}
-NSLog(@"%@", callstackString);
     MLRemoteStream *selectedStream = [self valueForKey:l(@"selectedStream")];
 
     if ([selectedStream format] == 5) {
@@ -445,7 +434,11 @@ NSLog(@"%@", callstackString);
 // %hook YTWatchViewController_iPhone 
 
 // -(void)viewDidUnload {
-//     NSLog(@"dealloc aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//     NSLog(@"dealloc2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+// }
+
+// -(void)dealloc {
+//     NSLog(@"dealloc3 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 // }
 
 // %end
