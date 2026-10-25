@@ -183,23 +183,23 @@
 
 -(void)willLoseFocus {
     %orig;
-    if ([version() isEqualToString:@"1.4.0"]) {
-        if ([self valueForKey:l(@"player")] != nil && [[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] isKindOfClass:[%c(MLPassThroughProxy) class]]) {
-            if ([[(MLPassThroughProxy*)[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] valueForKey:l(@"selectedStream")] isKindOfClass:[TRSabrStream class]]) {
-                TRSabrStream *sabrStream = [(MLPassThroughProxy*)[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] valueForKey:l(@"selectedStream")];
+    // if ([version() isEqualToString:@"1.4.0"]) {
+    //     if ([self valueForKey:l(@"player")] != nil && [[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] isKindOfClass:[%c(MLPassThroughProxy) class]]) {
+    //         if ([[(MLPassThroughProxy*)[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] valueForKey:l(@"selectedStream")] isKindOfClass:[TRSabrStream class]]) {
+    //             TRSabrStream *sabrStream = [(MLPassThroughProxy*)[[self valueForKey:l(@"player")] valueForKey:l(@"proxy")] valueForKey:l(@"selectedStream")];
 
-                NSLog(@"trimming segments");
-                [sabrStream trimSegments];
-            }
-        }
-    } else {
-        if ([[self valueForKey:l(@"videoStream")] isKindOfClass:[TRSabrStream class]]) {
-            TRSabrStream *sabrStream = [self valueForKey:l(@"videoStream")];
+    //             NSLog(@"trimming segments");
+    //             [sabrStream trimSegments];
+    //         }
+    //     }
+    // } else {
+    //     if ([[self valueForKey:l(@"videoStream")] isKindOfClass:[TRSabrStream class]]) {
+    //         TRSabrStream *sabrStream = [self valueForKey:l(@"videoStream")];
 
-            NSLog(@"trimming segments");
-            [sabrStream trimSegments];
-        }
-    }
+    //         NSLog(@"trimming segments");
+    //         [sabrStream trimSegments];
+    //     }
+    // }
 }
 
 // -(void)appDidBecomeActive {

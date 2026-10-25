@@ -6,7 +6,6 @@
 -(void)stopHTTPServerOnThread {
     self.httpServer.stream = nil;
     [self.httpServer stop];
-    [self.httpServer release];
     self.httpServer = nil;
 
     CFRunLoopStop(CFRunLoopGetCurrent());

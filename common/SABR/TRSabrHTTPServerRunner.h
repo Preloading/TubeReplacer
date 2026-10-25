@@ -9,7 +9,7 @@
     BOOL isHTTPServerReady;
     BOOL isStopping;
 }
-@property (nonatomic, strong) TRSabrHTTPServer *httpServer;
+@property (nonatomic, retain) TRSabrHTTPServer *httpServer;
 @property (nonatomic, assign) uint16_t port;
 
 -(void)startWithStream:(id)stream;
