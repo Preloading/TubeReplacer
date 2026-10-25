@@ -749,6 +749,7 @@ typedef struct _TBXMLElement {
 - (int)bitrate;
 -(NSString*)MIMEType;
 -(int)itag;
+-(BOOL)precached;
 @end
 
 @interface MLRemoteStream : NSObject

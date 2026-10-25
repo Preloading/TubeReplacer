@@ -1,4 +1,4 @@
-#include "TRSabrHTTPServer.h"
+#include "TRSabrHTTPServerRunner.h"
 #include "common/SABR/TRAdaptiveFormat.h"
 #import "googleapp/appheaders.h"
 #include "video_streaming/PlaybackCookie.pbobjc.h"
@@ -33,8 +33,7 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property (nonatomic, strong) TRSabrMedia *audioStream;
 
 // HTTP server used for serving HLS content
-@property (nonatomic, strong) TRSabrHTTPServer *httpServer;
-@property (nonatomic, assign) uint16_t port;
+@property (nonatomic, strong) TRSabrHTTPServerRunner *httpServerRunner;
 @property (nonatomic, strong) NSThread *httpServerThread;
 
 // SABR data

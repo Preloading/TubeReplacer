@@ -269,9 +269,7 @@
                 [adaptiveFormats addObject:format];
             }
 
-
-            // sabr testing
-            TRSabrStream *sabrStream = [[TRSabrStream alloc] initWithStreamUrl:sabrURL ustreamConfig:ustreamConfig formats:adaptiveFormats videoId:videoId];
+            TRSabrStream *sabrStream = [[[TRSabrStream alloc] initWithStreamUrl:sabrURL ustreamConfig:ustreamConfig formats:adaptiveFormats videoId:videoId] autorelease];
             [ytStreams addObject:sabrStream];
 
 

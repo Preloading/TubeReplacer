@@ -44,9 +44,27 @@
             selectedStream = stream;
     }
 
-    NSLog(@"selected new stream -> %@", selectedStream);
-    return selectedStream;
+    if ([selectedStream isKindOfClass:[%c(YTStream) class]]) {
+        if ([[[selectedStream URL] scheme] isEqualToString:@"file"]) {
+            return selectedStream; // it seems really odd to me that they would account for this. Was good for me in previous versions tho.
+        } else {
+            GTMURLBuilder *builderURL = [%c(GTMURLBuilder) builderWithURL:[selectedStream URL]];
+            [builderURL setValue:@"1" forParameter:@"dnc"];
+            if (cpn != nil)
+                [builderURL setValue:cpn forParameter:@"cpn"];
 
+            if ([version() isEqualToString:@"1.3.0"] || [version() isEqualToString:@"1.2.1"]) {
+                return [%c(YTStream) streamWithURL:[builderURL URL] format:[selectedStream format] encrypted:[selectedStream encrypted] precached:[selectedStream precached]];
+            } else if ([version() isEqualToString:@"2.0.0"]) {
+                return [%c(YTStream) streamWithURL:[builderURL URL] MIMEType:[selectedStream MIMEType] format:[selectedStream format]];
+            } else {
+                return [%c(YTStream) streamWithURL:[builderURL URL] format:[selectedStream format] encrypted:[selectedStream encrypted]];
+            }
+        }
+    } else {
+        // SABR
+        return selectedStream;
+    }
 }
 
 +(YTStream*)selectStreamForVideo:(YTVideo*)video onWiFi:(BOOL)onWifi {
@@ -69,19 +87,20 @@
 -(void)setAndPlayVideoStream:(YTStream *)stream
 {
     BOOL version10 = ([version() isEqualToString:@"1.0.0"] || [version() isEqualToString:@"1.0.1"]);
-
-    YTPlayer *player = [self valueForKey:l(@"player")];
     
     // deal with SABR
     if ([stream format] == 5) {
         TRSabrStream *sabrStream = (TRSabrStream*)stream;
-        NSLog(@"format -> %i", [stream format]);
+        
+        __block YTPlayer *player = [self valueForKey:l(@"player")];
+        __block YTPlayerController *blockSelf = self; // prevents a retain cycle
+
         sabrStream.currentPlayerTimeFunction = ^double{
             return [player currentMediaTime];
         };
 
         sabrStream.reloadPlayerFunction = ^{
-            [self reloadPlayerStream];
+            [blockSelf reloadPlayerStream];
         };
 
         if (version10) {
@@ -98,6 +117,7 @@
 
 
 -(MLRemoteStream*)remoteStreamFromYTStream:(YTStream*)stream withURL:(NSURL*)url {
+    // NSLog(@"remoteStreamFromYTStream");
     if ([stream format] == 5) {
         return (MLRemoteStream*)stream;
     }
@@ -106,9 +126,11 @@
 
 -(void)dealloc {
     NSLog(@"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
-      // sabr
-        [[[self valueForKey:l(@"videoStream")] URL] release];
+    if ([version() isEqualToString:@"1.1.0"] || [version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"]) {
+        if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
+        // sabr
+            [[self valueForKey:l(@"videoStream")] release];
+        }
     }
     return %orig;
 }
@@ -211,10 +233,10 @@
     }
 
     NSLog(@"selected new stream -> %@", selectedStream);
-    return selectedStream;
+    return [selectedStream autorelease];
 }
 
--(void)stop {
+-(void)stop { 
     MLRemoteStream *selectedStream = [self valueForKey:l(@"selectedStream")];
 
     if ([selectedStream format] == 5) {
@@ -353,8 +375,10 @@
                 return 0.0; // unimplemented
             };
 
+            __block MLPassThroughProxy *blockSelf = self;
+
             sabrStream.reloadPlayerFunction = ^{
-                [self reloadPlayerStream];
+                [blockSelf reloadPlayerStream];
             };
 
             [sabrStream start];
@@ -384,8 +408,10 @@
                 return 0.0; // unimplemented
             };
 
+            __block MLPassThroughProxy *blockSelf = self;
+
             sabrStream.reloadPlayerFunction = ^{
-                [self reloadPlayerStream];
+                [blockSelf reloadPlayerStream];
             };
 
             [sabrStream start];
@@ -527,5 +553,27 @@
         NSLog(@"player error -> %@", [(AVPlayerItem*)[self valueForKey:@"playerItem"] error]);
     }
     return %orig;
+}
+%end
+
+%hook YTVideoStatsService
+-(void)dealloc {
+    NSLog(@"YTVideoStatsService deallocating, also video (%p)", [self valueForKey:l(@"video")]);
+    return %orig;
+}
+
+%end
+
+%hook YTVideo
+-(void)dealloc {
+    NSLog(@"YTVideo (%p) deallocating", self);
+    %orig;
+}
+%end
+
+%hook YTStream
+-(void)dealloc {
+    NSLog(@"YTStream (%p) deallocating", self);
+    %orig;
 }
 %end

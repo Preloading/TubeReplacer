@@ -138,7 +138,9 @@
     self.audioStream = [[[TRSabrMedia alloc] init] autorelease];
 
     self.isStreamReady = YES;
-    [self startWebServerThreaded];
+    self.httpServerRunner = [[[TRSabrHTTPServerRunner alloc] init] autorelease];
+    [self.httpServerRunner startWithStream:self];
+
     [[NSNotificationCenter defaultCenter]
         addObserver:self
         selector:@selector(applicationDidBecomeActive:)
@@ -464,78 +466,23 @@
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
-    NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u", self.httpServer.port]];
+    if (self.isStreamReady) {
+        NSURL *requestURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u", self.httpServerRunner.port]];
 
-    NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
-    [request setTimeoutInterval:0.5];
+        NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] initWithURL:requestURL] autorelease];
+        [request setTimeoutInterval:0.5];
 
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
-       if (error) {
-            NSLog(@"reloading player...");
-            [self stopWebServer];
-            [self startWebServerThreaded];
-            self.reloadPlayerFunction();
-       }
-    }];
-}
-
--(void)stopHTTPServerOnThread {
-    self.httpServer.stream = nil;
-    [self.httpServer stop];
-    self.httpServer = nil;
-
-    CFRunLoopStop(CFRunLoopGetCurrent());
-}
-
--(void)stopWebServer {
-    if (!self.httpServer || !self.httpServerThread) return;
-
-    [self performSelector:@selector(stopHTTPServerOnThread)
-            onThread:self.httpServerThread 
-            withObject:nil 
-            waitUntilDone:YES];
-
-    // [self.httpServerThread release];
-    self.httpServerThread = nil;
-}
-
--(void)startWebServer {
-    self.httpServer = [[[TRSabrHTTPServer alloc] init] autorelease];
-	
-    self.httpServer.stream = self;
-	[self.httpServer setConnectionClass:[TRSabrHTTPConnection class]];
-    
-    if (self.port != 0) {
-        [self.httpServer setPort:self.port];
-    }
-
-	NSError *error;
-	BOOL success = [self.httpServer start:&error];
-	self.port = self.httpServer.port;
-
-	if(!success)
-	{
-		NSLog(@"Error starting HTTP Server: %@", error);
-        self.isHTTPServerReady = YES;
-	}
-
-    NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
-    self.isHTTPServerReady = YES;
-    while (self.httpServer && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) {
-        if (!self.httpServer) break;
-    }
-
-    // NSLog(@"http server at -> http://%@:%hu/", [self.httpServer [self.httpServer port]);
-}
-
-- (void)startWebServerThreaded {
-    self.isHTTPServerReady = NO;
-    self.httpServerThread = [[NSThread alloc] initWithTarget:self selector:@selector(startWebServer) object:nil];
-    [self.httpServerThread start];
-    while (!self.isHTTPServerReady) {
-        ;;
+        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *urlResponse, NSData *response, NSError *error) {
+            if (error) {
+                    NSLog(@"reloading player...");
+                    [self.httpServerRunner stop];
+                    [self.httpServerRunner startWithStream:self];
+                    self.reloadPlayerFunction();
+            }
+        }];
     }
 }
+
 
 // segment idx starts at 0
 -(void)handleBufferingWithCurrentSegment:(uint16_t)segmentIdx mediaType:(TRSabrMediaType)mediaType {
@@ -631,7 +578,7 @@
 }
 
 -(NSURL*)URL {
-    return [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", self.httpServer.port]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%u/master.m3u8", self.httpServerRunner.port]];
 }
 
 -(int)format {
@@ -656,7 +603,8 @@
     NSLog(@"cleanup called!");
     self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self stopWebServer];
+    if (_httpServerRunner)
+        [_httpServerRunner release];
     if (_videoStream)
         [_videoStream release];
     if (_audioStream)
@@ -686,11 +634,11 @@
 
 -(void)dealloc {
     NSLog(@"deallocating!!!");
+    [self cleanup];
     [_videoId release];
     [_ustreamConfig release];
     [_decipheredStreamURL release];
     [_formats release];
-    [self cleanup];
 
     [super dealloc];
 }
