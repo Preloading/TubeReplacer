@@ -8,7 +8,6 @@ TWEAK_NAME = TubeReplacerGoogle
 
 GOOGLE_APP = 1
 
-
 GOOGLE_APP_FILES = $(THEOS_PROJECT_DIR)/googleapp
 COMMON = $(THEOS_PROJECT_DIR)/common
 LIB_DIR = $(THEOS_PROJECT_DIR)/lib

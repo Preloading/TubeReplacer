@@ -71,6 +71,8 @@ didReceiveResponse:(NSURLResponse *)response {
 }
 
 -(void)dealloc {
+    [partCallback release];
+    [completionCallback release];
     [timeStarted release];
     [sabrBuffer release];
     [super dealloc];

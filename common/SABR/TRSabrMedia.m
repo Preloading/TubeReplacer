@@ -391,10 +391,10 @@
             }
         }
 
-        (*fragmentOut).sampleDuration = [sampleDurationArray copy];
-        (*fragmentOut).sampleSize = [sampleSizeArray copy];
-        (*fragmentOut).sampleCompositionOffsets = [sampleCompositionOffsetsArray copy];
-        (*fragmentOut).sampleFlags = [sampleFlagsArray copy];
+        (*fragmentOut).sampleDuration = sampleDurationArray;
+        (*fragmentOut).sampleSize = sampleSizeArray;
+        (*fragmentOut).sampleCompositionOffsets = sampleCompositionOffsetsArray;
+        (*fragmentOut).sampleFlags = sampleFlagsArray;
 
         [sampleDurationArray release];
         [sampleSizeArray release];
@@ -849,9 +849,11 @@ unsigned int crc32b(unsigned char *message, size_t l)
     }
 
     NSData *source = self.segmentData[@(index)];
+    [source retain];
 
     TRMP4FragmentInfo *fragmentInfo = [[TRMP4FragmentInfo alloc] init];
     [self parseFMP4Fragment:source out:&fragmentInfo];
+    [source release];
 
     if (!fragmentInfo.data || fragmentInfo.sampleSize.count == 0) {
         NSLog(@"[TubeReplacer] required format data is missing");

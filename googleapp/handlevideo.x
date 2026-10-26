@@ -126,12 +126,6 @@
 
 -(void)dealloc {
     NSLog(@"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    if ([version() isEqualToString:@"1.1.0"] || [version() isEqualToString:@"1.2.1"] || [version() isEqualToString:@"1.3.0"]) {
-        if ([(YTStream*)[self valueForKey:l(@"videoStream")] format] == 5) {
-        // sabr
-            [[self valueForKey:l(@"videoStream")] release];
-        }
-    }
     return %orig;
 }
 

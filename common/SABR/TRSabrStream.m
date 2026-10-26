@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include "video_streaming/StreamerContext.pbobjc.h"
 #include "googleapp/general.h"
 #include <Foundation/NSDate.h>
 #include <stdint.h>
@@ -371,7 +372,17 @@
     if (self.playbackCookie)
         context.playbackCookie = [self.playbackCookie data];
 
-    
+    // NSMutableArray<StreamerContext_SabrContext*> *sabrContextUpdates = [NSMutableArray arrayWithCapacity:self.contextUpdates.allKeys.count];
+    // for (NSNumber *contextUpdateType in self.contextUpdates.allKeys) {
+    //     StreamerContext_SabrContext *context = [[[StreamerContext_SabrContext alloc] init] autorelease];
+    //     context.type = [contextUpdateType unsignedIntValue];
+    //     context.value = self.contextUpdates[contextUpdateType];
+    //     [sabrContextUpdates addObject:context];
+    // }
+
+    // context.sabrContextsArray = sabrContextUpdates;
+
+    // context.unsentSabrContextsArray = self.unsentContextUpdates;
     return context;
 }
 
@@ -603,8 +614,11 @@
     NSLog(@"cleanup called!");
     self.isStreamReady = false;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if (_httpServerRunner)
+    
+    if (_httpServerRunner) {
+        [_httpServerRunner stop];
         [_httpServerRunner release];
+    }
     if (_videoStream)
         [_videoStream release];
     if (_audioStream)
@@ -622,6 +636,7 @@
     if (_backoffTill)
         [_backoffTill release];
 
+    _httpServerRunner = nil;
     _videoStream = nil;
     _audioStream = nil;
     _poToken = nil;

@@ -1,6 +1,7 @@
 #include "TRSabrHTTPServerRunner.h"
 #include "common/SABR/TRAdaptiveFormat.h"
 #import "googleapp/appheaders.h"
+#include "video_streaming/SabrContextUpdate.pbobjc.h"
 #include "video_streaming/PlaybackCookie.pbobjc.h"
 #include "video_streaming/MediaHeader.pbobjc.h"
 #include "TRSabrMedia.h"
@@ -37,6 +38,8 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 @property (nonatomic, strong) NSThread *httpServerThread;
 
 // SABR data
+@property (nonatomic, strong) NSMutableDictionary<NSNumber*, NSData*> *contextUpdates;
+@property (nonatomic, strong) NSMutableArray<NSNumber*> *unsentContextUpdates; // contains the type of each unsent context update
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
 @property (nonatomic, strong) NSDate *backoffTill;
