@@ -40,6 +40,7 @@ typedef NS_ENUM(NSInteger, TRSabrBufferingType) {
 // SABR data
 @property (nonatomic, strong) NSMutableDictionary<NSNumber*, NSData*> *contextUpdates;
 @property (nonatomic, strong) NSMutableArray<NSNumber*> *unsentContextUpdates; // contains the type of each unsent context update
+@property (nonatomic, strong) NSMutableArray<NSNumber*> *activeContextUpdates; // contains the type of context updates that are currently active
 @property (nonatomic, assign) int streamProtectionStatus;
 @property (nonatomic, assign) int requestNumber;
 @property (nonatomic, strong) NSDate *backoffTill;

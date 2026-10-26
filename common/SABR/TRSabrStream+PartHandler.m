@@ -1,5 +1,6 @@
 #include "TRSabrStream+PartHandler.h"
 #include "video_streaming/NextRequestPolicy.pbobjc.h"
+#include "video_streaming/SabrContextSendingPolicy.pbobjc.h"
 #include "video_streaming/SabrRedirect.pbobjc.h"
 #include "video_streaming/StreamProtectionStatus.pbobjc.h"
 #include <Foundation/NSData.h>
@@ -73,6 +74,44 @@
 
         [redirect release];
         break;
+    }
+    case UMPPartId_UmpPartIdSabrContextUpdate: {
+        SabrContextUpdate *contextUpdate = [[SabrContextUpdate alloc] initWithData:part.data error:&error];
+        if (contextUpdate.writePolicy == SabrContextUpdate_SabrContextWritePolicy_KeepExisting && [self.activeContextUpdates containsObject:@(contextUpdate.type)]) {
+            [contextUpdate release];
+            break;
+        }
+
+        self.contextUpdates[@(contextUpdate.type)] = part.data;
+
+        if (contextUpdate.sendByDefault) {
+            [self.activeContextUpdates addObject:@(contextUpdate.type)];
+        }
+
+        [contextUpdate release];
+    }
+    case UMPPartId_UmpPartIdSabrContextSendingPolicy: {
+        SabrContextSendingPolicy *sendingPolicy = [[SabrContextSendingPolicy alloc] initWithData:part.data error:&error];
+
+        for (int i = 0; i>sendingPolicy.startPolicyArray_Count; i++) {
+            if (![self.activeContextUpdates containsObject:@([sendingPolicy.startPolicyArray valueAtIndex:i])]) {
+                [self.activeContextUpdates addObject:@([sendingPolicy.startPolicyArray valueAtIndex:i])];
+            }
+        }
+
+        for (int i = 0; i>sendingPolicy.stopPolicyArray_Count; i++) {
+            if (![self.activeContextUpdates containsObject:@([sendingPolicy.stopPolicyArray valueAtIndex:i])]) {
+                [self.activeContextUpdates removeObject:@([sendingPolicy.stopPolicyArray valueAtIndex:i])];
+            }
+        }
+
+        for (int i = 0; i>sendingPolicy.discardPolicyArray_Count; i++) {
+            if (self.contextUpdates[@([sendingPolicy.stopPolicyArray valueAtIndex:i])] != nil) {
+                [self.contextUpdates removeObjectForKey:@([sendingPolicy.stopPolicyArray valueAtIndex:i])];
+            }
+        }
+
+        [sendingPolicy release];
     }
     case UMPPartId_UmpPartIdSabrError: {
         [self declareStreamBad];

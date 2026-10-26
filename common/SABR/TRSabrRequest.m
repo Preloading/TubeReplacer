@@ -22,8 +22,8 @@
     [request setValue:@"application/vnd.yt-ump" forHTTPHeaderField:@"accept"];
     [request setTimeoutInterval:15.0];
     
-    // if (auth != nil)
-    //     [auth authorizeNSRequest:&request];
+    if (auth != nil)
+        [auth authorizeNSRequest:&request];
         
 
 

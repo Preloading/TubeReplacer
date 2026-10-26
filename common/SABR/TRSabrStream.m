@@ -1,4 +1,5 @@
 #import "TRSabrStream.h"
+#include "GPBArray.h"
 #include "video_streaming/StreamerContext.pbobjc.h"
 #include "googleapp/general.h"
 #include <Foundation/NSDate.h>
@@ -111,6 +112,9 @@
     self.backoffTill = [NSDate date];
     self.networkQueue = [[[NSOperationQueue alloc] init] autorelease];
     self.networkQueue.maxConcurrentOperationCount = 2;
+    self.contextUpdates = [NSMutableDictionary dictionary];
+    self.activeContextUpdates = [NSMutableArray array];
+    self.unsentContextUpdates = [NSMutableArray array];
 
     NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
     NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
@@ -372,17 +376,24 @@
     if (self.playbackCookie)
         context.playbackCookie = [self.playbackCookie data];
 
-    // NSMutableArray<StreamerContext_SabrContext*> *sabrContextUpdates = [NSMutableArray arrayWithCapacity:self.contextUpdates.allKeys.count];
-    // for (NSNumber *contextUpdateType in self.contextUpdates.allKeys) {
-    //     StreamerContext_SabrContext *context = [[[StreamerContext_SabrContext alloc] init] autorelease];
-    //     context.type = [contextUpdateType unsignedIntValue];
-    //     context.value = self.contextUpdates[contextUpdateType];
-    //     [sabrContextUpdates addObject:context];
-    // }
+    NSMutableArray<StreamerContext_SabrContext*> *sabrContextUpdates = [NSMutableArray arrayWithCapacity:self.contextUpdates.allKeys.count];
+    for (NSNumber *contextUpdateType in self.contextUpdates.allKeys) {
+        if ([self.activeContextUpdates containsObject:contextUpdateType]) {
+            StreamerContext_SabrContext *context = [[[StreamerContext_SabrContext alloc] init] autorelease];
+            context.type = [contextUpdateType unsignedIntValue];
+            context.value = self.contextUpdates[contextUpdateType];
+            [sabrContextUpdates addObject:context];
+        }
+    }
 
-    // context.sabrContextsArray = sabrContextUpdates;
+    context.sabrContextsArray = sabrContextUpdates;
 
-    // context.unsentSabrContextsArray = self.unsentContextUpdates;
+    GPBInt32Array *unsentContexts = [[[GPBInt32Array alloc] init] autorelease];
+    for (NSNumber *unsent in self.unsentContextUpdates) {
+        [unsentContexts addValue:[unsent unsignedIntValue]];
+    } 
+    context.unsentSabrContextsArray = unsentContexts;
+    // [self.unsentContextUpdates removeAllObjects]; // guessing
     return context;
 }
 
@@ -635,6 +646,12 @@
         [_audioFormatsWeHave release];
     if (_backoffTill)
         [_backoffTill release];
+    if (_contextUpdates)
+        [_contextUpdates release];
+    if (_activeContextUpdates)
+        [_activeContextUpdates release];
+    if (_unsentContextUpdates)
+        [_unsentContextUpdates release];
 
     _httpServerRunner = nil;
     _videoStream = nil;
@@ -645,6 +662,9 @@
     _videoFormatsWeHave = nil;
     _audioFormatsWeHave = nil;
     _backoffTill = nil;
+    _activeContextUpdates = nil;
+    _contextUpdates = nil;
+    _unsentContextUpdates = nil;
 }
 
 -(void)dealloc {
