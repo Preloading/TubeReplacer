@@ -1,6 +1,7 @@
 #include "TRSabrStream+PartHandler.h"
 #include "video_streaming/NextRequestPolicy.pbobjc.h"
 #include "video_streaming/SabrContextSendingPolicy.pbobjc.h"
+#include "video_streaming/SabrError.pbobjc.h"
 #include "video_streaming/SabrRedirect.pbobjc.h"
 #include "video_streaming/StreamProtectionStatus.pbobjc.h"
 #include <Foundation/NSData.h>
@@ -26,6 +27,7 @@
         
         if (protectionStatus.status == 3) {
             // stream is RIP
+            NSLog(@"Stream protection status is 3, unlikely to be able to continue, failing..");
             [self declareStreamBad];
         }
         [protectionStatus release];
@@ -77,18 +79,19 @@
     }
     case UMPPartId_UmpPartIdSabrContextUpdate: {
         SabrContextUpdate *contextUpdate = [[SabrContextUpdate alloc] initWithData:part.data error:&error];
-        if (contextUpdate.writePolicy == SabrContextUpdate_SabrContextWritePolicy_KeepExisting && [self.activeContextUpdates containsObject:@(contextUpdate.type)]) {
+                if (contextUpdate.writePolicy == SabrContextUpdate_SabrContextWritePolicy_KeepExisting && [self.activeContextUpdates containsObject:@(contextUpdate.type)]) {
             [contextUpdate release];
             break;
         }
 
-        self.contextUpdates[@(contextUpdate.type)] = part.data;
+        self.contextUpdates[@(contextUpdate.type)] = contextUpdate.value;
 
         if (contextUpdate.sendByDefault) {
             [self.activeContextUpdates addObject:@(contextUpdate.type)];
         }
 
         [contextUpdate release];
+        break;
     }
     case UMPPartId_UmpPartIdSabrContextSendingPolicy: {
         SabrContextSendingPolicy *sendingPolicy = [[SabrContextSendingPolicy alloc] initWithData:part.data error:&error];
@@ -112,8 +115,12 @@
         }
 
         [sendingPolicy release];
+        break;
     }
     case UMPPartId_UmpPartIdSabrError: {
+        SabrError *sabrError = [[SabrError alloc] initWithData:part.data error:&error];
+        NSLog(@"SABR reported an error! type -> %@, code -> %i", sabrError.type, sabrError.code);
+        [sabrError release];
         [self declareStreamBad];
         break;
     }

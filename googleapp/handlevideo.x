@@ -160,7 +160,7 @@
             if (![selectedStream isEqual:(YTStream*)[self valueForKey:l(@"videoStream")]])
             {
                 NSLog(@"switching streams to -> %@", selectedStream);
-                [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
+                // [(YTStream*)[self valueForKey:l(@"videoStream")] autorelease];
                 [self setValue:[selectedStream retain] forKey:l(@"videoStream")];
             }
         }

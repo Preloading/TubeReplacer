@@ -114,7 +114,6 @@
     self.networkQueue.maxConcurrentOperationCount = 2;
     self.contextUpdates = [NSMutableDictionary dictionary];
     self.activeContextUpdates = [NSMutableArray array];
-    self.unsentContextUpdates = [NSMutableArray array];
 
     NSMutableArray *videoFormatsWeHave = [[NSMutableArray alloc] init];
     NSMutableArray *audioFormatsWeHave = [[NSMutableArray alloc] init];
@@ -209,6 +208,7 @@
             [currentlyParsingDatas release];
             [currentlyParsingHeaders release];
             [sabrRequest release];
+            NSLog(@"a fatal SABR instance occured. failing!");
             [self declareStreamBad];
             return;
         }
@@ -229,6 +229,7 @@
         // NSLog(@"self.audioStream.pendingResponses.allKeys -> %@", self.audioStream.pendingResponses.allKeys);
         if (((self.videoStream == nil || !self.videoStream.isReadyForPlayback || self.audioStream == nil || !self.audioStream.isReadyForPlayback)) && self.isStreamReady) {
             if (self.requestNumber > 10) {
+                NSLog(@">10 attempts to get a video stream has failed, giving up!");
                 [self declareStreamBad];
             } else {
                 NSLog(@"not enough data to start stream! requesting again...");
@@ -376,6 +377,7 @@
     if (self.playbackCookie)
         context.playbackCookie = [self.playbackCookie data];
 
+    GPBInt32Array *unsentContexts = [[[GPBInt32Array alloc] init] autorelease];
     NSMutableArray<StreamerContext_SabrContext*> *sabrContextUpdates = [NSMutableArray arrayWithCapacity:self.contextUpdates.allKeys.count];
     for (NSNumber *contextUpdateType in self.contextUpdates.allKeys) {
         if ([self.activeContextUpdates containsObject:contextUpdateType]) {
@@ -383,15 +385,11 @@
             context.type = [contextUpdateType unsignedIntValue];
             context.value = self.contextUpdates[contextUpdateType];
             [sabrContextUpdates addObject:context];
+        } else {
+            [unsentContexts addValue:[contextUpdateType unsignedIntValue]];
         }
     }
-
     context.sabrContextsArray = sabrContextUpdates;
-
-    GPBInt32Array *unsentContexts = [[[GPBInt32Array alloc] init] autorelease];
-    for (NSNumber *unsent in self.unsentContextUpdates) {
-        [unsentContexts addValue:[unsent unsignedIntValue]];
-    } 
     context.unsentSabrContextsArray = unsentContexts;
     // [self.unsentContextUpdates removeAllObjects]; // guessing
     return context;
@@ -650,8 +648,6 @@
         [_contextUpdates release];
     if (_activeContextUpdates)
         [_activeContextUpdates release];
-    if (_unsentContextUpdates)
-        [_unsentContextUpdates release];
 
     _httpServerRunner = nil;
     _videoStream = nil;
@@ -664,7 +660,6 @@
     _backoffTill = nil;
     _activeContextUpdates = nil;
     _contextUpdates = nil;
-    _unsentContextUpdates = nil;
 }
 
 -(void)dealloc {

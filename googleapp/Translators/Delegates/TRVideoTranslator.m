@@ -222,7 +222,7 @@
             // handle SABR
             NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
             for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
-                if ([f[@"mimeType"] rangeOfString:@"codecs=\"vp9\""].location != NSNotFound)
+                if ([f[@"mimeType"] rangeOfString:@"codecs=\"vp9"].location != NSNotFound)
                     continue; // None of the devices can play VP9 (introduced in 2020)
 
                 if ([f[@"mimeType"] rangeOfString:@"codecs=\"av01"].location != NSNotFound)
@@ -230,6 +230,8 @@
 
                 if ([f[@"mimeType"] rangeOfString:@"codecs=\"opus"].location != NSNotFound)
                     continue; // None of the devices can play Opus out of the box, it would need another library to deal with it
+
+                NSLog(@"itag %@ is OK, mimetype %@", f[@"itag"], f[@"mimeType"]);
 
                 // NSString *urlString = f[@"url"];
                 // NSString *signatureCipher = f[@"signatureCipher"];

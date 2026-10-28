@@ -42,6 +42,7 @@ didReceiveResponse:(NSURLResponse *)response {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
         if (!(httpResponse.statusCode >= 200 && httpResponse.statusCode<400)) {
             // codes outside of this range are likely fatal
+            NSLog(@"SABR stream gave a %li error!", (long)httpResponse.statusCode);
             completionCallback(nil, true);
         }
         timeStarted = [[NSDate date] retain];
