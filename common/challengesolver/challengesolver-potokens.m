@@ -132,6 +132,7 @@
         });
     }
 
+    NSLog(@"potoken -> %@", poToken);
 
     return poToken;
 }

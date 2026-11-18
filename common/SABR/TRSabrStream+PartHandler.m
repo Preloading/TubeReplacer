@@ -199,7 +199,7 @@
                 [(*currentlyParsingHeaders) removeObjectForKey:@(mediaHeaderId)];
             }
         } else {
-            NSLog(@"Something went wrong buffering the media!");
+            NSLog(@"Something went wrong buffering the media! media header -> %@", mediaHeader);
         }
 
         break;
