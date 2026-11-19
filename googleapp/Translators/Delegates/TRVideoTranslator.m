@@ -629,6 +629,10 @@
         return nil;
     }
 
+     if (![videoData[@"contentType"] isEqualToString:@"LOCKUP_CONTENT_TYPE_VIDEO"]) {
+        return nil;
+    }
+
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     if (!preferences[@"ShowLiveContent"] && [[TRJSONUtils stringFromJSON:videoData keyPath:@"thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.style"] isEqualToString:@"LIVE"]) {
         return nil;
