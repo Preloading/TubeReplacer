@@ -355,7 +355,7 @@
 
 // 1.4.0
 -(BOOL)start:(NSError**)error {
-    MLRemoteStream *selectedStream = [self selectStream];
+    MLRemoteStream *selectedStream = [[self selectStream] retain];
     MLRemoteStream *oldSelectedStream = [self valueForKey:l(@"selectedStream")];
     [self setValue:selectedStream forKey:l(@"selectedStream")];
     [oldSelectedStream release];
@@ -548,6 +548,16 @@
     }
     return %orig;
 }
+
+// -(void)dealloc {
+//     NSLog(@"deallocating player (%p)", self);
+//     return %orig;
+// }
+
+// -(void)clearProxy {
+//     NSLog(@"deallocating player (%p)", self);
+//     return %orig;
+// }
 %end
 
 %hook YTVideoStatsService
