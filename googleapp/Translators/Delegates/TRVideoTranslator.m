@@ -629,7 +629,7 @@
         return nil;
     }
 
-     if (![videoData[@"contentType"] isEqualToString:@"LOCKUP_CONTENT_TYPE_VIDEO"]) {
+     if (![videoData[@"contentType"] isEqualToString:@"LOCKUP_CONTENT_TYPE_VIDEO"] && [dataType isEqualToString:@"lockupViewModel"]) {
         return nil;
     }
 
