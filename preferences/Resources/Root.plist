@@ -10,7 +10,7 @@
 			<key>key</key>
 			<string>Feeds</string>
 			<key>label</key>
-			<string>From Youtube feeds</string>
+			<string>settings.feeds.header</string>
 			
 		</dict>
 
@@ -19,7 +19,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Trending</string>
+			<string>settings.category.term.trending</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -29,11 +29,11 @@
 			<key>key</key>
 			<string>TrendingBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL</string>
+			<string>VLPLbgMm37FwiYk</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL</string>
+			<string>VLPLbgMm37FwiYk</string>
 		</dict>
 
 		<!-- film -->
@@ -45,7 +45,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Film</string>
+			<string>settings.category.term.film</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -55,11 +55,11 @@
 			<key>key</key>
 			<string>FilmName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Film &amp; Animation</string>
+			<string>category.film_name</string>
 			<key>default</key>
-			<string>Film &amp; Animation</string>
+			<string>category.film_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -69,11 +69,11 @@
 			<key>key</key>
 			<string>FilmBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY</string>
+			<string>VLPLQl1BIAhZO8E</string>
 		</dict>
 
 		<!-- auto -->
@@ -85,7 +85,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Autos</string>
+			<string>settings.category.term.autos</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -95,11 +95,11 @@
 			<key>key</key>
 			<string>AutosName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Autos &amp; Vehicles</string>
+			<string>category.autos_name</string>
 			<key>default</key>
-			<string>Autos &amp; Vehicles</string>
+			<string>category.autos_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -109,11 +109,11 @@
 			<key>key</key>
 			<string>AutosBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U</string>
+			<string>VLPLBw4JXJysQ4s</string>
 		</dict>
 
 		<!-- music -->
@@ -125,7 +125,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Music</string>
+			<string>settings.category.term.music</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -135,11 +135,11 @@
 			<key>key</key>
 			<string>MusicName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Music</string>
+			<string>category.music_name</string>
 			<key>default</key>
-			<string>Music</string>
+			<string>category.music_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -149,11 +149,11 @@
 			<key>key</key>
 			<string>MusicBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi</string>
+			<string>VLPLCiHOpZqcEeQ</string>
 		</dict>
 
 		<!-- animals -->
@@ -165,7 +165,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Animals</string>
+			<string>settings.category.term.animals</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -175,11 +175,11 @@
 			<key>key</key>
 			<string>AnimalsName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Pets &amp; Animals</string>
+			<string>category.animals_name</string>
 			<key>default</key>
-			<string>Pets &amp; Animals</string>
+			<string>category.animals_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -189,11 +189,11 @@
 			<key>key</key>
 			<string>AnimalsBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB</string>
+			<string>VLPLSzKMzJ51-ts</string>
 		</dict>
 
 		<!-- sports -->
@@ -205,7 +205,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Sports</string>
+			<string>settings.category.term.sports</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -215,11 +215,11 @@
 			<key>key</key>
 			<string>SportsName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Sports</string>
+			<string>category.sports_name</string>
 			<key>default</key>
-			<string>Sports</string>
+			<string>category.sports_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -229,11 +229,11 @@
 			<key>key</key>
 			<string>SportsBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb</string>
+			<string>VLPLT3_gZAgYD0A</string>
 		</dict>
 
 		<!-- travel -->
@@ -245,7 +245,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Travel</string>
+			<string>settings.category.term.travel</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -255,11 +255,11 @@
 			<key>key</key>
 			<string>TravelName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Travel</string>
+			<string>category.travel_name</string>
 			<key>default</key>
-			<string>Travel</string>
+			<string>category.travel_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -269,9 +269,9 @@
 			<key>key</key>
 			<string>TravelBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
 			<string></string>
 		</dict>
@@ -285,7 +285,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Games</string>
+			<string>settings.category.term.games</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -295,11 +295,11 @@
 			<key>key</key>
 			<string>GamesName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Gaming</string>
+			<string>category.games_name</string>
 			<key>default</key>
-			<string>Gaming</string>
+			<string>category.games_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -309,11 +309,11 @@
 			<key>key</key>
 			<string>GamesBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv</string>
+			<string>VLPLKleUjYjNPFk</string>
 		</dict>
 
 		<!-- comedy -->
@@ -325,7 +325,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Comedy</string>
+			<string>settings.category.term.comedy</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -335,11 +335,11 @@
 			<key>key</key>
 			<string>ComedyName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Comedy</string>
+			<string>category.comedy_name</string>
 			<key>default</key>
-			<string>Comedy</string>
+			<string>category.comedy_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -349,11 +349,11 @@
 			<key>key</key>
 			<string>ComedyBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz</string>
+			<string>VLPLXIYrLoXbXbY</string>
 		</dict>
 
 		<!-- people -->
@@ -365,7 +365,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>People</string>
+			<string>settings.category.term.people</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -375,11 +375,11 @@
 			<key>key</key>
 			<string>PeopleName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>People &amp; Blogs</string>
+			<string>category.people_name</string>
 			<key>default</key>
-			<string>People &amp; Blogs</string>
+			<string>category.people_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -389,11 +389,11 @@
 			<key>key</key>
 			<string>PeopleBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-</string>
+			<string>VLPLVm4sO2Q3j1I</string>
 		</dict>
 
 		<!-- news -->
@@ -405,7 +405,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>News</string>
+			<string>settings.category.term.news</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -415,11 +415,11 @@
 			<key>key</key>
 			<string>NewsName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>News &amp; Politics</string>
+			<string>category.news_name</string>
 			<key>default</key>
-			<string>News &amp; Politics</string>
+			<string>category.news_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -429,11 +429,11 @@
 			<key>key</key>
 			<string>NewsBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO</string>
+			<string>VLPLZfbKlafuccI</string>
 		</dict>
 
 		<!-- entertainment -->
@@ -445,7 +445,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Entertainment</string>
+			<string>settings.category.term.entertainment</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -455,11 +455,11 @@
 			<key>key</key>
 			<string>EntertainmentName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Entertainment</string>
+			<string>category.entertainment_name</string>
 			<key>default</key>
-			<string>Entertainment</string>
+			<string>category.entertainment_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -469,11 +469,11 @@
 			<key>key</key>
 			<string>EntertainmentBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF</string>
+			<string>VLPLaM7bIkoJFVs</string>
 		</dict>
 
 		<!-- education -->
@@ -485,7 +485,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Education</string>
+			<string>settings.category.term.education</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -495,11 +495,11 @@
 			<key>key</key>
 			<string>EducationName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Education</string>
+			<string>category.education_name</string>
 			<key>default</key>
-			<string>Education</string>
+			<string>category.education_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -509,9 +509,9 @@
 			<key>key</key>
 			<string>EducationBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
 			<string></string>
 		</dict>
@@ -525,9 +525,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Howto</string>
-			<key>default</key>
-			<string></string>
+			<string>settings.category.term.howto</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -537,11 +535,11 @@
 			<key>key</key>
 			<string>HowtoName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Howto &amp; Style</string>
+			<string>category.howto_name</string>
 			<key>default</key>
-			<string>Howto &amp; Style</string>
+			<string>category.howto_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -551,11 +549,11 @@
 			<key>key</key>
 			<string>HowtoBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn</string>
+			<string>VLPLZSHpCBcDPz8</string>
 		</dict>
 
 		<!-- nonprofit -->
@@ -567,7 +565,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Nonprofit</string>
+			<string>settings.category.term.nonprofit</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -577,11 +575,11 @@
 			<key>key</key>
 			<string>NonprofitName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Nonprofits &amp; Activism</string>
+			<string>category.nonprofit_name</string>
 			<key>default</key>
-			<string>Nonprofits &amp; Activism</string>
+			<string>category.nonprofit_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -591,11 +589,11 @@
 			<key>key</key>
 			<string>NonprofitBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xphnE3_KKGzkbmGNPqKF8rXp</string>
+			<string>VLPLQYpFIOJv4Z4</string>
 		</dict>
 
 		<!-- tech -->
@@ -607,7 +605,7 @@
 			<key>cell</key>
 			<string>PSStaticTextCell</string>
 			<key>label</key>
-			<string>Tech</string>
+			<string>settings.category.term.tech</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -617,11 +615,11 @@
 			<key>key</key>
 			<string>TechName</string>
 			<key>label</key>
-			<string>Name</string>
+			<string>settings.feeds.name</string>
 			<key>placeholder</key>
-			<string>Science &amp; Technology</string>
+			<string>category.tech_name</string>
 			<key>default</key>
-			<string>Science &amp; Technology</string>
+			<string>category.tech_name</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -631,17 +629,17 @@
 			<key>key</key>
 			<string>TechBrowseId</string>
 			<key>label</key>
-			<string>Browse ID</string>
+			<string>settings.feeds.browse_id</string>
 			<key>placeholder</key>
-			<string>(hides when blank)</string>
+			<string>settings.feeds.hides_when_blank</string>
 			<key>default</key>
-			<string>VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY</string>
+			<string>VLPLTfc2mqePDSY</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>For playlists, start with VL, then put the playlist ID from the URL</string>
+			<string>settings.feeds.note</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -651,7 +649,7 @@
 			<key>action</key>
 			<string>resetCategorySettings</string>
 			<key>label</key>
-			<string>Reset Category Settings</string>
+			<string>settings.feeds.reset_categories</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -659,9 +657,9 @@
 			<key>key</key>
 			<string>VideoCategory</string>
 			<key>label</key>
-			<string>Video</string>
+			<string>settings.video.header</string>
 			<key>footerText</key>
-			<string>HQ streams all have SABR support.&#10;Only WEB &amp; MWEB are capable of playing private videos.&#10;For custom fetching, %v gets replaced with the video id.&#10;To use a custom TubeRepair server: https://tuberepair.server.lol/getvideo/%v&#10;Background Playback is only for 1.2.1-2.0.0 for now.</string>
+			<string>settings.video.settings_notes</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -673,7 +671,7 @@
 			<key>key</key>
 			<string>StreamType</string>
 			<key>label</key>
-			<string>Video Stream</string>
+			<string>settings.video.stream</string>
 			<key>detail</key>
 			<string>PSListItemsController</string>
 			<key>validValues</key>
@@ -688,13 +686,13 @@
 			</array>
 			<key>validTitles</key>
 			<array>
-				<string>HQ (web)</string>
-				<string>HQ (mobile web)</string>
-				<!-- <string>Adaptive (visionOS)</string> -->
-				<string>360p (Android)</string>
-				<!-- <string>360p (Android VR)</string> -->
-				<string>kevinf100's tuberepair server</string>
-				<string>Custom URL</string>
+				<string>settings.video.stream.web</string>
+				<string>settings.video.stream.mweb</string>
+				<!-- <string>settings.video.stream.visionos</string> -->
+				<string>settings.video.stream.android</string>
+				<!-- <string>settings.video.stream.androidvr</string> -->
+				<string>settings.video.stream.tuberepair</string>
+				<string>settings.video.stream.custom</string>
 			</array>
 		</dict>
 		<dict>
@@ -705,7 +703,7 @@
 			<key>key</key>
 			<string>CustomStreamURL</string>
 			<key>label</key>
-			<string>Custom Stream URL</string>
+			<string>settings.video.stream.custom_url_label</string>
 			<key>placeholder</key>
 			<string>https://tuberepair.uptimetrackers.com/getvideo/%v</string>
 			<key>isController</key>
@@ -717,7 +715,7 @@
 			<key>cell</key>
 			<string>PSLinkCell</string>
 			<key>label</key>
-			<string>Quality Options</string>
+			<string>settings.video.enter_quality_options</string>
 			<key>detail</key>
 			<string>YTRPQualitySelectorListController</string>
 			<key>isController</key>
@@ -733,7 +731,7 @@
 			<key>key</key>
 			<string>AllowSABR</string>
 			<key>label</key>
-			<string>Enable SABR</string>
+			<string>settings.video.allow_sabr</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -747,7 +745,7 @@
 			<key>key</key>
 			<string>AllowHLS</string>
 			<key>label</key>
-			<string>Enable HLS</string>
+			<string>settings.video.allow_hls</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -761,7 +759,7 @@
 			<key>key</key>
 			<string>RespectBackoff</string>
 			<key>label</key>
-			<string>Respect YT backoff</string>
+			<string>settings.video.respect_youtube_backoff</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -775,7 +773,7 @@
 			<key>key</key>
 			<string>BkgPlay</string>
 			<key>label</key>
-			<string>Background Playback</string>
+			<string>settings.video.allow_background_play</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -789,7 +787,7 @@
 			<key>key</key>
 			<string>UseDubbedAudio</string>
 			<key>label</key>
-			<string>Use dubbed audio</string>
+			<string>settings.video.allow_dubbed_audio</string>
 			<key>default</key>
 			<true/>
 		</dict> -->
@@ -797,7 +795,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Misc Settings</string>
+			<string>settings.misc.header</string>
 			<key>footerText</key>
 			<string></string>
 		</dict>
@@ -811,7 +809,7 @@
 			<key>key</key>
 			<string>UseRYTDL</string>
 			<key>label</key>
-			<string>Use RYTDL</string>
+			<string>settings.misc.allow_returnyoutubedislikes</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -825,7 +823,7 @@
 			<key>key</key>
 			<string>EnableVideoStats</string>
 			<key>label</key>
-			<string>Enable Video Stats</string>
+			<string>settings.misc.allow_video_stats</string>
 			<key>default</key>
 			<true/>
 		</dict>
@@ -833,9 +831,9 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Experimental Settings</string>
+			<string>settings.experimental.header</string>
 			<key>footerText</key>
-			<string>No support will be given for these settings</string>
+			<string>settings.experimental.disclaimer</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -847,7 +845,7 @@
 			<key>key</key>
 			<string>ShowLiveContent</string>
 			<key>label</key>
-			<string>Show live content</string>
+			<string>settings.experimental.show_live_content</string>
 			<key>default</key>
 			<false/>
 		</dict>
@@ -855,7 +853,7 @@
 			<key>cell</key>
 			<string>PSLinkCell</string>
 			<key>label</key>
-			<string>Super Secret Debug Options</string>
+			<string>settings.experimental.super_secret_settings</string>
 			<key>detail</key>
 			<string>YTRPDebugListController</string>
 			<key>isController</key>

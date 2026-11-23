@@ -1,0 +1,2 @@
+settings.quality.header = "Quality Selector";
+settings.quality.notes = "The quality selector may be overridden if none of the selected qualities are available.\nThis only has effect on HQ streams.";

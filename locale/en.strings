@@ -1,0 +1,16 @@
+// categories in the side panel. these were previously fetched & localized server side.
+category.film_name = "Film & Animation";
+category.autos_name = "Autos & Vehicles";
+category.music_name = "Music";
+category.animals_name = "Pets & Animals";
+category.sports_name = "Sports";
+category.travel_name = "Travel";
+category.games_name = "Gaming";
+category.comedy_name = "Comedy";
+category.people_name = "People & Blogs";
+category.news_name = "News & Politics";
+category.entertainment_name = "Entertainment";
+category.education_name = "Education";
+category.howto_name = "Howto & Style";
+category.nonprofit_name = "Nonprofits & Activism";
+category.tech_name = "Science & Technology";

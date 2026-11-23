@@ -52,10 +52,10 @@
     // Define all category keys and their default values (from Root.plist)
     NSDictionary *defaultValues = @{
         // Trending
-        @"TrendingBrowseId": @"VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL",
+        @"TrendingBrowseId": @"VLPLbgMm37FwiYk",
         // Film
         @"FilmName": @"Film & Animation",
-        @"FilmBrowseId": @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY",
+        @"FilmBrowseId": @"VLPLQl1BIAhZO8E",
         // Auto
         @"AutoName": @"Autos & Vehicles",
         @"AutoBrowseId": @"VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U",
