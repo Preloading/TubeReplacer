@@ -1,5 +1,4 @@
 #include <Foundation/Foundation.h>
-#import "signinpolyfil.h"
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 #include "general.h"
@@ -1247,14 +1246,35 @@ done:
 - (void)webViewDidStartLoad:(UIWebView *)webView
 {
     %orig;
-    
-    NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
-    if ([systemVersion floatValue] < 6.0) {
-      NSString *js = [[NSString alloc] initWithBytes:signinpolyfil_js 
-                                          length:signinpolyfil_js_len 
-                                        encoding:NSUTF8StringEncoding];
-      [webView stringByEvaluatingJavaScriptFromString:js];
-      [js release];
+
+    NSString *path = @"/Library/Application Support/TubeReplacer/signin_inject.js";
+    NSError *error = nil;
+
+    NSString *js = [NSString stringWithContentsOfFile:path
+                                                encoding:NSUTF8StringEncoding
+                                                    error:&error];
+
+    if (error != nil) {
+        NSLog(@"an error occured while loading inject! -> %@", error);
+        // [path release];
+        return;
     }
+    [webView stringByEvaluatingJavaScriptFromString:js];
+    // [js release];
+    // [path release];
+
+
+    // NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
+    // if ([systemVersion floatValue] < 6.0) {
+    //     NSString *path = @"/Library/Application Support/TubeReplacer/iossignin_inject.html";
+    //     NSError *error = nil;
+
+    //     NSString *js = [NSString stringWithContentsOfFile:path
+    //                                                 encoding:NSUTF8StringEncoding
+    //                                                     error:&error];
+    //     [webView stringByEvaluatingJavaScriptFromString:js];
+    //     [js release];
+    //     [path release];
+    // }
 }
 %end

@@ -1,6 +1,5 @@
 #import "challengesolver-webview.h"
 #import "challengesolver-potokens.h"
-#include "TRChallengeSolverPolyfillProtocol.h"
 
 @implementation TRPOTokenSolver (WebView)
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -22,7 +21,6 @@
                                                     encoding:NSUTF8StringEncoding
                                                         error:&error];
 
-        [NSURLProtocol registerClass:[TRChallengeSolverPolyfillProtocol class]];
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.webView) return;
 

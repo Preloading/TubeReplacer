@@ -63,12 +63,4 @@ TubeReplacerGoogle_CFLAGS = -fno-objc-arc -ITranslators -DGOOGLE_APP=1
 TubeReplacerGoogle_OBJCFLAGS += -I$(LIB_DIR)/protobuf
 TubeReplacerGoogle_OBJCFLAGS += -I$(THEOS_PROJECT_DIR)/common/SABR/proto/generated
 
-before-all::
-	rm signinpolyfil.h || true
-	xxd -i signinpolyfil.js > signinpolyfil.h
-
-ifeq (, $(shell which xxd))
-$(error "You are missing `xxd` from your system, which is required to build.")
-endif
-
 include $(THEOS_MAKE_PATH)/tweak.mk

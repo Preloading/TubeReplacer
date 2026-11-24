@@ -1,11 +1,15 @@
 #include "TRChallengeSolverPolyfillProtocol.h"
 
+// This is used for both YouTube SABR botguard AND accounts signin
 @implementation TRChallengeSolverPolyfillProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request {
     NSString *path = request.URL.path;
 
     if ([path isEqualToString:@"/ytscframe"]) {
+        return YES;
+    }
+    if ([path isEqualToString:@"/_/bscframe"]) {
         return YES;
     }
 

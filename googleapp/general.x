@@ -2,6 +2,7 @@
 #include "general.h"
 #import "sys/utsname.h"
 #import <objc/runtime.h>
+#import "common/challengesolver/TRChallengeSolverPolyfillProtocol.h"
 
 @interface NSURLConnection(YouTube)
 
@@ -294,3 +295,7 @@ static void compat_check() {
     return orig;
 }
 %end
+
+%ctor {
+    [NSURLProtocol registerClass:[TRChallengeSolverPolyfillProtocol class]];
+}

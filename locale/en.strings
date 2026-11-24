@@ -14,3 +14,5 @@ category.education_name = "Education";
 category.howto_name = "Howto & Style";
 category.nonprofit_name = "Nonprofits & Activism";
 category.tech_name = "Science & Technology";
+
+login.select_account = "Choose an account";
