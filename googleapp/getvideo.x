@@ -43,7 +43,9 @@
         NSString *requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false";     
 //  @throw NSInternalInconsistencyException;
         YoutubeClientType *client = [YoutubeClientType webClient];
-        if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+        if ([preferences[@"StreamType"] isEqualToString:@"web"]) {
+            client = [YoutubeClientType webClient];
+        } else if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
             client = [YoutubeClientType webMobileClient];
         } else if ([preferences[@"StreamType"] isEqualToString:@"visionos"]) {
             client = [YoutubeClientType visionOSClient];
@@ -129,7 +131,7 @@
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     NSMutableDictionary *allData = [NSMutableDictionary dictionary];
 
-    if (!(preferences[@"StreamType"] == nil || [preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
+    if (!([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
         NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"];
     
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];

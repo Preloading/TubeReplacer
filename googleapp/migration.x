@@ -8,7 +8,7 @@
 -(void)loadView {
     NSMutableDictionary *preferences = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     if ([preferences[@"StreamType"] isEqualToString:@"adaptive"] || [preferences[@"StreamType"] isEqualToString:@"360p"] || [preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
-        preferences[@"StreamType"] = @"web";
+        preferences[@"StreamType"] = @"android";
         [preferences writeToFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist" atomically:YES];
     }
 

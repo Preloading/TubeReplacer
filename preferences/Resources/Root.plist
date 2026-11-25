@@ -665,7 +665,7 @@
 			<key>cell</key>
 			<string>PSLinkListCell</string>
 			<key>default</key>
-			<string>web</string>
+			<string>android</string>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>

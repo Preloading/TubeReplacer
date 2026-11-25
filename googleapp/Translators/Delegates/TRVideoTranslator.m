@@ -107,7 +107,7 @@
     if (!([preferences[@"StreamType"] isEqualToString:@"custom"] || [preferences[@"StreamType"] isEqualToString:@"tuberepair"]) ) {
         NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
         if (hlsStreamURL && (preferences[@"AllowHLS"] == nil || [preferences[@"AllowHLS"] isEqual:@YES])) {
-            if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil) {
+            if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] ) {
                 NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:hlsStreamURL signatureCipher:nil];
                 if (decipheredURL) {
                     hlsStreamURL = decipheredURL;
@@ -218,7 +218,7 @@
         NSString *sabrURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"];
         NSString *ustreamConfig = [TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"];
 
-        if (sabrURL && ustreamConfig && PreferencesBoolValue(preferences, @"AllowSABR", YES) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil )) {
+        if (sabrURL && ustreamConfig && PreferencesBoolValue(preferences, @"AllowSABR", YES) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
             // handle SABR
             NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
             for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
@@ -299,7 +299,7 @@
             if (urlString || signatureCipher) {
                 NSURL *url = nil;
 
-                if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] || preferences[@"StreamType"] == nil) {
+                if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"]) {
                     NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
                     if (decipheredURL) {
                         url = [NSURL URLWithString:decipheredURL];
