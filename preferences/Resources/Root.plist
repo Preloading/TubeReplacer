@@ -724,8 +724,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -738,8 +736,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -752,8 +748,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -766,8 +760,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -780,8 +772,6 @@
 		<!-- <dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -802,8 +792,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -816,8 +804,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>
@@ -838,8 +824,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<true/>
 			<key>defaults</key>
 			<string>dev.preloading.tubereplacer.preferences</string>
 			<key>key</key>

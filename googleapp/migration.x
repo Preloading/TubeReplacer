@@ -1,6 +1,6 @@
 #include <Foundation/Foundation.h>
 #import "appheaders.h"
-#include "common/localizer.m"
+#include "common/localizer.h"
 
 // 1.0.6 -> 2.0.0
 

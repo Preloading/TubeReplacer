@@ -33,4 +33,4 @@ nsig.webview_not_started = "n/sig failed to start correctly! playback may not wo
 nsig.error_occured ="an error occured during nsig deciphering. playback might not work. %@";
 nsig.no_solution = "n/sig failed to output anything. playback may not work.";
 
-migration.failed = "Auto Migration failed! Check FAQ in cydia page for solution."
+migration.failed = "Auto Migration failed! Check FAQ in cydia page for solution.";
