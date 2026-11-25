@@ -1241,8 +1241,28 @@ done:
     return %orig;
 }
 
-// TODO: check if polyfil isn't loaded already (._.)
-// JS Polyfils (i blame iOS 5!) Sadly, this makes iOS 5 kinda slow...
+-(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
+{
+    // this is for the bloody face verification stuff. the team at google doesn't know how to properly fail if an OPTIONAL part of signin can't be done -_-
+
+    // Just say no!
+    if ([[[request URL] host] isEqualToString:@"myaccount.google.com"] && [[[request URL] path] isEqualToString:@"/verification/selfie/precollection"]) {
+        NSString *queryParamsFull = [[request URL] query];
+        NSLog(@"query param -> %@", queryParamsFull);
+        NSArray<NSString*> *queryParams = [queryParamsFull componentsSeparatedByString:@"&"];
+        for (NSString *param in queryParams) {
+            if ([param hasPrefix:@"return"]) {
+                NSArray<NSString*> *splitParam = [param componentsSeparatedByString:@"="];
+                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:URLDecode(splitParam[1])]];
+                [webView loadRequest:request];
+                return NO;
+            }
+        }
+    }
+
+    return %orig;
+}
+
 - (void)webViewDidStartLoad:(UIWebView *)webView
 {
     %orig;

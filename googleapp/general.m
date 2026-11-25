@@ -75,3 +75,40 @@ bool PreferencesBoolValue(NSDictionary* preferences, NSString *key, bool default
     
     return [value boolValue];
 }
+
+NSString *URLDecode(NSString *string) {
+    if (!string) return nil;
+    
+    NSMutableString *result = [NSMutableString string];
+    NSUInteger length = [string length];
+    NSUInteger i = 0;
+    
+    while (i < length) {
+        unichar c = [string characterAtIndex:i];
+        if (c == '%' && i + 2 < length) {
+            // Try to parse the hex value
+            NSString *hexStr = [string substringWithRange:NSMakeRange(i + 1, 2)];
+            NSScanner *scanner = [NSScanner scannerWithString:hexStr];
+            unsigned int hexValue;
+            
+            if ([scanner scanHexInt:&hexValue]) {
+                [result appendFormat:@"%C", (unichar)hexValue];
+                i += 3; // Skip the '%' and the two hex digits
+            } else {
+                // If it's not a valid hex sequence, just add the '%'
+                [result appendString:@"%"];
+                i++;
+            }
+        } else if (c == '+') {
+            // '+' is decoded as space
+            [result appendString:@" "];
+            i++;
+        } else {
+            // Not encoded, add as is
+            [result appendFormat:@"%C", c];
+            i++;
+        }
+    }
+    
+    return result;
+}
