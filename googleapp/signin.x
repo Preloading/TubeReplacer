@@ -1286,17 +1286,15 @@ done:
     // [path release];
 
 
-    // NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
-    // if ([systemVersion floatValue] < 6.0) {
-    //     NSString *path = @"/Library/Application Support/TubeReplacer/iossignin_inject.html";
-    //     NSError *error = nil;
+    NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
+    if ([systemVersion floatValue] < 6.0) {
+        NSString *path = @"/Library/Application Support/TubeReplacer/ios5signin_inject.js";
+        NSError *error = nil;
 
-    //     NSString *js = [NSString stringWithContentsOfFile:path
-    //                                                 encoding:NSUTF8StringEncoding
-    //                                                     error:&error];
-    //     [webView stringByEvaluatingJavaScriptFromString:js];
-    //     [js release];
-    //     [path release];
-    // }
+        NSString *js = [NSString stringWithContentsOfFile:path
+                                                    encoding:NSUTF8StringEncoding
+                                                        error:&error];
+        [webView stringByEvaluatingJavaScriptFromString:js];
+    }
 }
 %end
