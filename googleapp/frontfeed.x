@@ -52,79 +52,79 @@
         if (preferences[@"GamesBrowseId"]) {
             browseId = preferences[@"GamesBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv";
+            browseId = @"VLPLKleUjYjNPFk";
         }
     } else if ([category isEqualToString:@"Film"]) {
         if (preferences[@"FilmBrowseId"]) {
             browseId = preferences[@"FilmBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
+            browseId = @"VLPLQl1BIAhZO8E";
         }
     } else if ([category isEqualToString:@"Autos"]) {
         if (preferences[@"AutosBrowseId"]) {
             browseId = preferences[@"AutosBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U";
+            browseId = @"VLPLBw4JXJysQ4s";
         }
     } else if ([category isEqualToString:@"Music"]) {
         if (preferences[@"MusicBrowseId"]) {
             browseId = preferences[@"MusicBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi";
+            browseId = @"VLPLCiHOpZqcEeQ";
         }
     } else if ([category isEqualToString:@"Animals"]) {
         if (preferences[@"AnimalsBrowseId"]) {
             browseId = preferences[@"AnimalsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB";
+            browseId = @"VLPLSzKMzJ51-ts";
         }
     } else if ([category isEqualToString:@"Sports"]) {
         if (preferences[@"SportsBrowseId"]) {
             browseId = preferences[@"SportsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb";
+            browseId = @"VLPLT3_gZAgYD0A";
         }
     } else if ([category isEqualToString:@"Comedy"]) {
         if (preferences[@"ComedyBrowseId"]) {
             browseId = preferences[@"ComedyBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz";
+            browseId = @"VLPLXIYrLoXbXbY";
         }
     } else if ([category isEqualToString:@"People"]) {
         if (preferences[@"PeopleBrowseId"]) {
             browseId = preferences[@"PeopleBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-";
+            browseId = @"VLPLVm4sO2Q3j1I";
         }
     } else if ([category isEqualToString:@"News"]) {
         if (preferences[@"NewsBrowseId"]) {
             browseId = preferences[@"NewsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO";
+            browseId = @"VLPLZfbKlafuccI";
         }
     } else if ([category isEqualToString:@"Entertainment"]) {
         if (preferences[@"EntertainmentBrowseId"]) {
             browseId = preferences[@"EntertainmentBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF";
+            browseId = @"VLPLaM7bIkoJFVs";
         }
     } else if ([category isEqualToString:@"Howto"]) {
         if (preferences[@"HowtoBrowseId"]) {
             browseId = preferences[@"HowtoBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn";
+            browseId = @"VLPLZSHpCBcDPz8";
         }
     } else if ([category isEqualToString:@"Tech"]) {
         if (preferences[@"TechBrowseId"]) {
             browseId = preferences[@"TechBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
+            browseId = @"VLPLTfc2mqePDSY";
         }
     } else if ([category isEqualToString:@"Travel"]) {
         if (preferences[@"TravelBrowseId"]) {
             browseId = preferences[@"TravelBrowseId"];
         } else {
-            browseId = @"";
+            browseId = @"VLPLZKugeBmg4Wk";
         }
     } else if ([category isEqualToString:@"Education"]) {
         if (preferences[@"EducationBrowseId"]) {
@@ -136,14 +136,14 @@
         if (preferences[@"NonprofitBrowseId"]) {
             browseId = preferences[@"NonprofitBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphnE3_KKGzkbmGNPqKF8rXp";
+            browseId = @"VLPPLQYpFIOJv4Z4";
         }
     } else {
         // trending
         if (preferences[@"TrendingBrowseId"]) {
             browseId = preferences[@"TrendingBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL";
+            browseId = @"VLPLbgMm37FwiYk";
         }
     }
     
@@ -172,79 +172,79 @@
         if (preferences[@"GamesBrowseId"]) {
             browseId = preferences[@"GamesBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv";
+            browseId = @"VLPLKleUjYjNPFk";
         }
     } else if ([category isEqualToString:@"Film"]) {
         if (preferences[@"FilmBrowseId"]) {
             browseId = preferences[@"FilmBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
+            browseId = @"VLPLQl1BIAhZO8E";
         }
     } else if ([category isEqualToString:@"Autos"]) {
         if (preferences[@"AutosBrowseId"]) {
             browseId = preferences[@"AutosBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U";
+            browseId = @"VLPLBw4JXJysQ4s";
         }
     } else if ([category isEqualToString:@"Music"]) {
         if (preferences[@"MusicBrowseId"]) {
             browseId = preferences[@"MusicBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi";
+            browseId = @"VLPLCiHOpZqcEeQ";
         }
     } else if ([category isEqualToString:@"Animals"]) {
         if (preferences[@"AnimalsBrowseId"]) {
             browseId = preferences[@"AnimalsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB";
+            browseId = @"VLPLSzKMzJ51-ts";
         }
     } else if ([category isEqualToString:@"Sports"]) {
         if (preferences[@"SportsBrowseId"]) {
             browseId = preferences[@"SportsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb";
+            browseId = @"VLPLT3_gZAgYD0A";
         }
     } else if ([category isEqualToString:@"Comedy"]) {
         if (preferences[@"ComedyBrowseId"]) {
             browseId = preferences[@"ComedyBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz";
+            browseId = @"VLPLXIYrLoXbXbY";
         }
     } else if ([category isEqualToString:@"People"]) {
         if (preferences[@"PeopleBrowseId"]) {
             browseId = preferences[@"PeopleBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-";
+            browseId = @"VLPLVm4sO2Q3j1I";
         }
     } else if ([category isEqualToString:@"News"]) {
         if (preferences[@"NewsBrowseId"]) {
             browseId = preferences[@"NewsBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO";
+            browseId = @"VLPLZfbKlafuccI";
         }
     } else if ([category isEqualToString:@"Entertainment"]) {
         if (preferences[@"EntertainmentBrowseId"]) {
             browseId = preferences[@"EntertainmentBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF";
+            browseId = @"VLPLaM7bIkoJFVs";
         }
     } else if ([category isEqualToString:@"Howto"]) {
         if (preferences[@"HowtoBrowseId"]) {
             browseId = preferences[@"HowtoBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn";
+            browseId = @"VLPLZSHpCBcDPz8";
         }
     } else if ([category isEqualToString:@"Tech"]) {
         if (preferences[@"TechBrowseId"]) {
             browseId = preferences[@"TechBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY";
+            browseId = @"VLPLTfc2mqePDSY";
         }
     } else if ([category isEqualToString:@"Travel"]) {
         if (preferences[@"TravelBrowseId"]) {
             browseId = preferences[@"TravelBrowseId"];
         } else {
-            browseId = @"";
+            browseId = @"VLPLZKugeBmg4Wk";
         }
     } else if ([category isEqualToString:@"Education"]) {
         if (preferences[@"EducationBrowseId"]) {
@@ -256,14 +256,14 @@
         if (preferences[@"NonprofitBrowseId"]) {
             browseId = preferences[@"NonprofitBrowseId"];
         } else {
-            browseId = @"";
+            browseId = @"VLPPLQYpFIOJv4Z4";
         }
     } else {
         // trending
         if (preferences[@"TrendingBrowseId"]) {
             browseId = preferences[@"TrendingBrowseId"];
         } else {
-            browseId = @"VLPL-p0-Yh03xpi2AsCiyuafMeQrMF6czMoL";
+            browseId = @"VLPLbgMm37FwiYk";
         }
     }
     

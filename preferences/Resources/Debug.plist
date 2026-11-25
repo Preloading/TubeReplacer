@@ -34,7 +34,7 @@
 			<key>key</key>
 			<string>ClearLog</string>
 			<key>label</key>
-			<string>Clear Debug Log</string>
+			<string>Clear Network Debug Log</string>
 			<key>action</key>
 			<string>clearLogs</string>
 		</dict>

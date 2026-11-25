@@ -1,0 +1,34 @@
+// do you speak a language that isn't already here? translate this file yourself, then send me a PR!
+
+// categories in the side panel. these were previously fetched & localized server side, you may be able to find the original version if you search hard enough in your language
+category.film_name = "Film & Animation";
+category.autos_name = "Autos & Vehicles";
+category.music_name = "Music";
+category.animals_name = "Pets & Animals";
+category.sports_name = "Sports";
+category.travel_name = "Travel";
+category.games_name = "Gaming";
+category.comedy_name = "Comedy";
+category.people_name = "People & Blogs";
+category.news_name = "News & Politics";
+category.entertainment_name = "Entertainment";
+category.education_name = "Education";
+category.howto_name = "Howto & Style";
+category.nonprofit_name = "Nonprofits & Activism";
+category.tech_name = "Science & Technology";
+
+login.select_account = "Choose an account";
+login.please_wait = "Please wait...";
+login.something_went_wrong = "Something went wrong. %@";
+login.loading = "Loading...";
+
+// botguard is a system from youtube to prevent bots
+botguard.integrity_fail = "botguard integrity challenge failed! SABR playback might not work.";
+botguard.scrambled_json_fail = "potoken descrambled challenge failed get correct output";
+botguard.challenge_json_fail = "potoken challenge failed get correct output";
+botguard.ytcfg_regex_fail = "botguard failed to find ytcfg";
+
+nsig.missing_js_on_use = "n/sig failed to fetch in time. playback may not work. try again or switch to a 360p stream";
+nsig.webview_not_started = "n/sig failed to start correctly! playback may not work.";
+nsig.error_occured ="an error occured during nsig deciphering. playback might not work. %@";
+nsig.no_solution = "n/sig failed to output anything. playback may not work.";

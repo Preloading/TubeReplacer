@@ -33,12 +33,14 @@
                         error:&error];
             if (error) {
                 NSLog(@"[TubeReplacer] POToken challenge json decode failed!");
+                self.errorAlert(localizedStringForKeyTR(@"botguard.challenge_json_fail"));
                 callback(nil, error);
                 return;
             }
 
             if (![json isKindOfClass:[NSDictionary class]]) {
                 NSLog(@"[TubeReplacer] POToken challenge json not a dictionary");
+                self.errorAlert(localizedStringForKeyTR(@"botguard.challenge_json_fail"));
                 callback(nil, [NSError errorWithDomain:@"dev.preloading.tubereplacer.botguard" code:1 userInfo:nil]);
                 return;
             }
@@ -275,7 +277,8 @@
                                                                                 error:&error];
 
         if (error) {
-            NSLog(@"error -> %@", error);
+            NSLog(@"[TubeReplacer] ytCfg regex error -> %@", error);
+            self.errorAlert(localizedStringForKeyTR(@"botguard.ytcfg_regex_fail"));
             callback(error);
             return;
         } 
@@ -436,11 +439,13 @@
                             error:&error];
     if (error) {
         NSLog(@"[TubeReplacer] POToken challenge json decode failed!");
+        self.errorAlert(localizedStringForKeyTR(@"botguard.challenge_json_fail"));
         return nil;
     }
 
     if (![json isKindOfClass:[NSDictionary class]]) {
         NSLog(@"[TubeReplacer] POToken challenge json not a dictionary");
+        self.errorAlert(localizedStringForKeyTR(@"botguard.challenge_json_fail"));
         return nil;
     }
 

@@ -42,6 +42,7 @@ TubeReplacerGoogle_FILES = polyfill.x \
 	migration.x \
 	$(shell find $(COMMON)/challengesolver -type f -name '*.m') \
 	$(shell find $(COMMON)/SABR -type f -name '*.m') \
+	$(COMMON)/localizer.m \
 	Translators/TRJSONUtils.m \
 	Translators/TRJSONTranslator.m \
 	Translators/TRContiunation.m \

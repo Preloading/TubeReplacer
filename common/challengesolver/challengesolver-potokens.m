@@ -22,11 +22,13 @@
 
     if (error) {
         NSLog(@"[TubeReplacer] POToken descrambled challenge json decode failed!");
+        self.errorAlert(localizedStringForKeyTR(@"botguard.scrambled_json_fail"));
         return;
     }
 
     if (![json isKindOfClass:[NSArray class]]) {
         NSLog(@"[TubeReplacer] POToken descrambled challenge json not an array");
+        self.errorAlert(localizedStringForKeyTR(@"botguard.scrambled_json_fail"));
         return;
     }
 

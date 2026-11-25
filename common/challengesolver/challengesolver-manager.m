@@ -53,7 +53,7 @@
                                 self.integrityTokenShouldProbablyRenew = [NSDate dateWithTimeIntervalSinceNow:[(NSNumber*)response[@"estimatedTtlSecs"] intValue]*0.8];
                                 [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{}];
                             } else {
-                                self.errorAlert(@"botguard challenge failed! videos might not play.");
+                                self.errorAlert(localizedStringForKeyTR(@"botguard.integrity_fail"));
                                 NSLog(@"missing integrity token!!!");
                             }
                         } auth:nil];

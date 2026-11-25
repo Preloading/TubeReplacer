@@ -101,7 +101,15 @@
 
 -(NSDictionary*)makeContext {
     NSMutableDictionary *clientContext = [[NSMutableDictionary alloc] init];
-    [clientContext setObject:@"en" forKey:@"hl"]; //[[NSLocale preferredLanguages] objectAtIndex:0] forKey:@"hl"]; // so this also localizes a few other things, like time :)
+    NSString *userLanguage = [[NSLocale preferredLanguages] objectAtIndex:0];
+    // NSLog(@"user language -> %@", userLanguage);
+    if ([userLanguage isEqualToString:@"en"] //||
+        // [userLanguage isEqualToString:@"fr"]
+    ) {
+        [clientContext setObject:userLanguage forKey:@"hl"]; // we parse some accessibility data in order to get more accurate view counts, time, etc. These are language dependant.
+    } else {
+        [clientContext setObject:@"en" forKey:@"hl"];
+    }
     [clientContext setObject:[[NSLocale currentLocale] objectForKey:NSLocaleCountryCode] forKey:@"gl"];
     [clientContext setObject:[self name] forKey:@"clientName"];
     [clientContext setObject:[self version] forKey:@"clientVersion"];

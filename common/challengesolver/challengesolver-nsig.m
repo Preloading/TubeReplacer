@@ -113,7 +113,7 @@
     // check if we actually can solve n/sig
     if (!self.isWebViewReady) {
         NSLog(@"[N/Sig] webview is not ready!");
-        self.errorAlert(@"n/sig failed to start correctly! playback may not work.");
+        self.errorAlert(localizedStringForKeyTR(@"nsig.webview_not_started"));
         return nil;
     }
 
@@ -121,7 +121,7 @@
 
     if (!self.nsigJS) {
         NSLog(@"[N/Sig] JS code is not available!");
-        self.errorAlert(@"n/sig failed to fetch in time. playback may not work.");
+        self.errorAlert(localizedStringForKeyTR(@"nsig.missing_js_on_use"));
         return nil;
     }
     
@@ -208,6 +208,7 @@
                                                     options:0
                                                     error:&error];
     if (error) {
+        self.errorAlert([NSString stringWithFormat:localizedStringForKeyTR(@"nsig.error_occured"), error]);
         NSLog(@"[N/Sig] solution did not succeed!");
         [urlQueries release];
         return nil;
@@ -215,6 +216,7 @@
 
     if (!solvedNSig[@"n"] && !solvedNSig[@"sig"]) {
         NSLog(@"n/sig failed to decipher!");
+        self.errorAlert(localizedStringForKeyTR(@"nsig.no_solution"));
         [urlQueries release];
         return nil;
     }

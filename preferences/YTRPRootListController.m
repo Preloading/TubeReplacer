@@ -58,61 +58,57 @@
         @"FilmBrowseId": @"VLPLQl1BIAhZO8E",
         // Auto
         @"AutoName": @"Autos & Vehicles",
-        @"AutoBrowseId": @"VLPL-p0-Yh03xphS0WmPB1u5mQbRJjPRn63U",
+        @"AutoBrowseId": @"VLPLBw4JXJysQ4s",
         // Music
         @"MusicName": @"Music",
-        @"MusicBrowseId": @"VLPL-p0-Yh03xpgeN91B_sPpv4lJY-UfThEi",
+        @"MusicBrowseId": @"VLPLCiHOpZqcEeQ",
         // Animals
         @"AnimalsName": @"Pets & Animals",
-        @"AnimalsBrowseId": @"VLPL-p0-Yh03xpgqRqXBDc9DbcCysUjd_CSB",
+        @"AnimalsBrowseId": @"VLPLSzKMzJ51-ts",
         // Sports
         @"SportsName": @"Sports",
-        @"SportsBrowseId": @"VLPL-p0-Yh03xpg6CLD7MDqzsAiB9aFjssWb",
+        @"SportsBrowseId": @"VLPLT3_gZAgYD0A",
         // Travel
         @"TravelName": @"Travel",
-        @"TravelBrowseId": @"",
+        @"TravelBrowseId": @"VLPLZKugeBmg4Wk",
         // Games
         @"GamesName": @"Gaming",
-        @"GamesBrowseId": @"VLPL-p0-Yh03xpi_x9L-Lqop_Kj6MTY38jqv",
+        @"GamesBrowseId": @"VLPLKleUjYjNPFk",
         // Comedy
         @"ComedyName": @"Comedy",
-        @"ComedyBrowseId": @"VLPL-p0-Yh03xpj0Js3pnGO20BWWiHVn1oHz",
+        @"ComedyBrowseId": @"VLPLXIYrLoXbXbY",
         // People
         @"PeopleName": @"People & Blogs",
-        @"PeopleBrowseId": @"VLPL-p0-Yh03xphi7-iBuIshu7olymbv7lY-",
+        @"PeopleBrowseId": @"VLPLVm4sO2Q3j1I",
         // News
         @"NewsName": @"News & Politics",
-        @"NewsBrowseId": @"VLPL-p0-Yh03xpgeG3YUmWESSrg84W8ELEUO",
+        @"NewsBrowseId": @"VLPLZfbKlafuccI",
         // Entertainment
         @"EntertainmentName": @"Entertainment",
-        @"EntertainmentBrowseId": @"VLPL-p0-Yh03xpjoqDAI46lgo8-TLDnE7mHF",
+        @"EntertainmentBrowseId": @"VLPLaM7bIkoJFVs",
         // Education
         @"EducationName": @"Education",
         @"EducationBrowseId": @"",
         // Howto
         @"HowtoName": @"Howto & Style",
-        @"HowtoBrowseId": @"VLPL-p0-Yh03xphCxNSaXOW09V3pKgRQCFvn",
+        @"HowtoBrowseId": @"VLPLZSHpCBcDPz8",
         // Nonprofit
         @"NonprofitName": @"Nonprofits & Activism",
-        @"NonprofitBrowseId": @"VLPL-p0-Yh03xphnE3_KKGzkbmGNPqKF8rXp",
+        @"NonprofitBrowseId": @"VLPPLQYpFIOJv4Z4",
         // Tech
         @"TechName": @"Science & Technology",
-        @"TechBrowseId": @"VLPL-p0-Yh03xpgQgBqDn3T4EZbxoaYXkQjY"
+        @"TechBrowseId": @"VLPLTfc2mqePDSY"
     };
 
-    // Load current prefs
     NSMutableDictionary *prefs = [NSMutableDictionary dictionaryWithContentsOfFile:PREFS_PATH];
     if (!prefs) prefs = [NSMutableDictionary dictionary];
 
-    // Set defaults for all category keys
     [defaultValues enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
         [prefs setObject:value forKey:key];
     }];
 
-    // Save back to disk
     [prefs writeToFile:PREFS_PATH atomically:YES];
 
-    // Notify system of changes
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), NOTIFY_NAME, NULL, NULL, YES);
 
     // Reload UI

@@ -2,6 +2,7 @@
 #import <CommonCrypto/CommonDigest.h>
 #include "appheaders.h"
 #include "general.h"
+#include "common/localizer.h"
 #include "Translators/TRJSONUtils.h"
 
 #import <execinfo.h>
@@ -239,7 +240,7 @@
                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
       NSString *htmlString = @"";
       if (error) {
-          htmlString = [NSString stringWithFormat:@"<html><body>Something went wrong. %@", error];
+          htmlString = [NSString stringWithFormat:[NSString stringWithFormat:@"<html><body>%@</body></html>", localizedStringForKeyTR(@"login.something_went_wrong")], error];
           NSLog(@"Error: %@", error.localizedDescription);
       } else {
           NSData *cleanData = [NSData dataWithBytes:([data bytes] + 5) length:([data length]-5)];
@@ -277,10 +278,11 @@
           }
           NSError *err = nil;
           NSString *baseHTML = [NSString stringWithContentsOfFile:@"/Library/Application Support/TubeReplacer/account_selector.html" encoding:NSUTF8StringEncoding error:&err];
-          htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_ACCOUNTS_FIELD }}" withString:allAccountsHTML];
+          htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ login.select_account }}" withString:localizedStringForKeyTR(@"login.select_account")];
+          htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ login.please_wait }}" withString:localizedStringForKeyTR(@"login.please_wait")];
+          htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_ACCOUNTS_FIELD }}" withString:allAccountsHTML];
 
-
-          htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_SIDCC_FIELD }}" withString:allAccountsHTML]; // hack!
+          // htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_SIDCC_FIELD }}" withString:allAccountsHTML]; // hack!
         }
 
         // gets rid of some... problematic cookies for setting profile.
@@ -433,7 +435,7 @@
           UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
           if (![[[[webView request] URL] absoluteString] isEqualToString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]) {
             UIWebView *webView = [(GTMOAuth2ViewControllerTouch*)[self delegate] webView];
-            [webView loadHTMLString:@"Loading..." baseURL:[NSURL URLWithString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]];
+            [webView loadHTMLString:localizedStringForKeyTR(@"login.loading") baseURL:[NSURL URLWithString:@"https://m.youtube.com/ytscframe?tubereplacer_next_login=1"]];
 
             // we haven't selected an account yet, lets go prompt the user for it
             [self generateSelectAccountPageWithSID:[sid value] hsid:[hsid value] ssid:[ssid value] sapisid:[sapisid value]];

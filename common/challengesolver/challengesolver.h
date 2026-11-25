@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+#include "common/localizer.h"
 #import <UIKit/UIKit.h>
 
 // This does both N/Sig & POToken solving.

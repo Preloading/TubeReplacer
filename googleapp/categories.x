@@ -1,6 +1,7 @@
 #include <Foundation/Foundation.h>
 #include "appheaders.h"
 #include "general.h"
+#include "common/localizer.h"
 
 // -[YTCategoryParser parseElement:error:]
 // -[YTGuideFeedController handleEntries: is where categories are requested
@@ -25,13 +26,13 @@
 
 @interface YTGuideFeedController (TubeReplacer)
 -(void)addCategories;
--(void)addCategoryTerm:(NSString*)term defaultLabel:(NSString*)defaultLabel toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault;
+-(void)addCategoryTerm:(NSString*)term toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault;
 @end
 
 %hook YTGuideFeedController
 
 %new
--(void)addCategoryTerm:(NSString*)term defaultLabel:(NSString*)defaultLabel toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault {
+-(void)addCategoryTerm:(NSString*)term toArray:(NSMutableArray*)categories enabledByDefault:(BOOL)enabledByDefault {
 	NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
 	NSArray *browsableCountries = @[@"ar", @"au", @"bd", @"be", @"bg", @"br", @"ca", @"cl", @"co", @"cz", @"de", @"dk", @"dz", @"ee", @"eg", @"es", @"et", @"fi", @"fr", @"gb", @"gr", @"hk", @"hr", @"hu", @"id", @"ie", @"il", @"in", @"ir", @"is", @"it", @"jo", @"jp", @"ke", @"kr", @"lt", @"lv", @"ma", @"mx", @"my", @"ng", @"nl", @"no", @"nz", @"ph", @"pk", @"pl", @"pt", @"ro", @"rs", @"ru", @"sa", @"se", @"sg", @"si", @"sk", @"th", @"tn", @"tr", @"tw", @"tz", @"ua", @"ug", @"us", @"vn", @"ye", @"za"];
 	if (![preferences[[NSString stringWithFormat:@"%@BrowseId", term]] isEqualToString:@""] && (enabledByDefault || preferences[[NSString stringWithFormat:@"%@BrowseId", term]])) {
@@ -40,7 +41,7 @@
 						[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:term label:preferences[[NSString stringWithFormat:@"%@Name", term]] browsableCountries:browsableCountries] autorelease]];
 			}
 		} else {
-			[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:term label:defaultLabel browsableCountries:browsableCountries] autorelease]];
+			[categories addObject:[[[%c(YTCategory) alloc] initWithTerm:term label:localizedStringForKeyTR([NSString stringWithFormat:@"category.%@_name", [term lowercaseString]]) browsableCountries:browsableCountries] autorelease]];
 		}
 	}
 }
@@ -50,21 +51,21 @@
 	NSMutableArray *categories = [NSMutableArray array];
 	
 	// TODO: The category fetching relies on the language being set correctly to have them all be translated correctly, we should move this 
-	[self addCategoryTerm:@"Film"          defaultLabel:@"Film & Animation"      toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Autos"         defaultLabel:@"Autos & Vehicles"      toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Music"         defaultLabel:@"Music"                 toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Animals"       defaultLabel:@"Pets & Animals"        toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Sports"        defaultLabel:@"Sports"                toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Travel"        defaultLabel:@"Travel"                toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Games"         defaultLabel:@"Gaming"                toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Comedy"        defaultLabel:@"Comedy"                toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"People"        defaultLabel:@"People & Blogs"        toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"News"          defaultLabel:@"News & Politics"       toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Entertainment" defaultLabel:@"Entertainment"         toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Education"     defaultLabel:@"Education"             toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Howto"         defaultLabel:@"Howto & Style"         toArray:categories enabledByDefault:YES];
-	[self addCategoryTerm:@"Nonprofit"     defaultLabel:@"Nonprofits & Activism" toArray:categories enabledByDefault:NO];
-	[self addCategoryTerm:@"Tech"          defaultLabel:@"Science & Technology"  toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Film"          toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Autos"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Music"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Animals"       toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Sports"        toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Travel"        toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Games"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Comedy"        toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"People"        toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"News"          toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Entertainment" toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Education"     toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Howto"         toArray:categories enabledByDefault:YES];
+	[self addCategoryTerm:@"Nonprofit"     toArray:categories enabledByDefault:NO];
+	[self addCategoryTerm:@"Tech"          toArray:categories enabledByDefault:YES];
 
 	[self handleEntries:categories];
 	NSLog(@"categoriesCount_ = %@", [self valueForKey:l(@"categoriesCount")]);

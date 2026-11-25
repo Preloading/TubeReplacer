@@ -1179,7 +1179,7 @@
     function selectAccount(id) {
         // tubereplacer already has stuff to check for changed cookies, so this will just add a cookie dedicated to this
         console.log(id);
-        document.write("<html><body>Please wait...</body></html>");
+        document.write("<html><body>{{ login.please_wait }}</body></html>");
         if (id != 0) {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
