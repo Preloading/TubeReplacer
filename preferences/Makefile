@@ -4,10 +4,15 @@ ARCHS := armv7 arm64
 
 include $(THEOS)/makefiles/common.mk
 
+COMMON = $(THEOS_PROJECT_DIR)/common
 BUNDLE_NAME = TubeReplacerPrefs
 LIB_DIR = $(THEOS_PROJECT_DIR)/lib
 
-TubeReplacerPrefs_FILES = YTRPRootListController.m YTRPDebugListController.m YTRPQualitySelectorListController.m $(LIB_DIR)/zip/src/zip.c
+TubeReplacerPrefs_FILES = YTRPRootListController.m \
+							YTRPDebugListController.m \
+							YTRPQualitySelectorListController.m \
+							$(LIB_DIR)/zip/src/zip.c \
+							$(COMMON)/localizer.m
 TubeReplacerPrefs_FRAMEWORKS = UIKit MessageUI
 TubeReplacerPrefs_PRIVATE_FRAMEWORKS = Preferences
 TubeReplacerPrefs_INSTALL_PATH = /Library/PreferenceBundles

@@ -37,7 +37,7 @@ settings.category.term.nonprofit = "Nonprofit";
 settings.category.term.tech = "Tech";
 
 
-settings.feeds.header = "From Youtube feeds";
+settings.feeds.header = "Feeds";
 settings.feeds.note = "For playlists, start with VL, then put the playlist ID from the URL";
 settings.feeds.browse_id = "Browse ID";
 settings.feeds.name = "Name";
