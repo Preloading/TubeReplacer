@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 #import "appheaders.h"
+#include "common/localizer.m"
 
 // 1.0.6 -> 2.0.0
 
@@ -14,7 +15,7 @@
 
     preferences = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     if ([preferences[@"StreamType"] isEqualToString:@"adaptive"] || [preferences[@"StreamType"] isEqualToString:@"360p"] || [preferences[@"StreamType"] isEqualToString:@"360pvr"]) {
-        [%c(GIPToast) showToast:@"Auto Migration failed! Check FAQ in cydia page for solution." forDuration:10.0];
+        [%c(GIPToast) showToast:localizedStringForKeyTR(@"migration.failed") forDuration:10.0];
     }
     return %orig;
 }

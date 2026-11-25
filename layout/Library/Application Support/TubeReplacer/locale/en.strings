@@ -32,3 +32,5 @@ nsig.missing_js_on_use = "n/sig failed to fetch in time. playback may not work. 
 nsig.webview_not_started = "n/sig failed to start correctly! playback may not work.";
 nsig.error_occured ="an error occured during nsig deciphering. playback might not work. %@";
 nsig.no_solution = "n/sig failed to output anything. playback may not work.";
+
+migration.failed = "Auto Migration failed! Check FAQ in cydia page for solution."
