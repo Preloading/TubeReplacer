@@ -1,0 +1,77 @@
+// translation done by nic0shub aka fishyloading
+
+// categories
+category.film_name = "Cine y animación";
+category.autos_name = "Motor y vehículos";
+category.music_name = "Música";
+category.animals_name = "Mascotas y animales";
+category.sports_name = "Deportes";
+category.travel_name = "Viajes y eventos";
+category.games_name = "Videojuegos";
+category.comedy_name = "Humor";
+category.people_name = "Personas y blogs";
+category.news_name = "Noticias y política";
+category.entertainment_name = "Entretenimiento";
+category.education_name = "Educación";
+category.howto_name = "Guías y estilo";
+category.nonprofit_name = "ONG y activismo";
+category.tech_name = "Ciencia y tecnología";
+
+
+// settings panel
+
+// this is what it is referred to internally
+settings.category.term.trending = "Tendencias";
+settings.category.term.film = "Cine";
+settings.category.term.autos = "Motor";
+settings.category.term.music = "Música";
+settings.category.term.animals = "Animales";
+settings.category.term.sports = "Deportes";
+settings.category.term.travel = "Viajes";
+settings.category.term.games = "Videojuegos";
+settings.category.term.comedy = "Humor";
+settings.category.term.people = "Personas";
+settings.category.term.news = "Noticias";
+settings.category.term.entertainment = "Entretenimiento";
+settings.category.term.education = "Educación";
+settings.category.term.howto = "Guías";
+settings.category.term.nonprofit = "ONG";
+settings.category.term.tech = "Tecnología";
+
+
+settings.feeds.header = "Fuentes";
+settings.feeds.note = "Para las listas de reproducción, empieza con VL y luego introduce el ID de la lista de reproducción de la URL";
+settings.feeds.browse_id = "ID de exploración";
+settings.feeds.name = "Nombre";
+settings.feeds.hides_when_blank = "(se oculta si está vacío)";
+
+settings.feeds.reset_categories = "Restablecer ajustes de categorías";
+
+settings.video.header = "Vídeo";
+settings.video.settings_notes = "Todas las transmisiones HQ son compatibles con SABR.\nSolo la web y la web móvil pueden reproducir vídeos privados.\nPara la obtención personalizada, %v se sustituye por el ID del vídeo.\nPara usar un servidor TubeRepair personalizado: https://tuberepair.server.lol/getvideo/%v\nLa reproducción en segundo plano solo está disponible para las versiones 1.2.1-2.0.0 por ahora.";
+settings.video.stream = "Transmisión de vídeo";
+
+settings.video.stream.web = "HQ (web)";
+settings.video.stream.mweb = "HQ (web móvil)";
+settings.video.stream.visionos = "Adaptativa (visionOS)";
+settings.video.stream.android = "360p (Android)";
+settings.video.stream.androidvr = "360p (Android VR)";
+settings.video.stream.tuberepair = "Servidor TubeRepair de kevinf100";
+settings.video.stream.custom = "URL personalizada";
+settings.video.stream.custom_url_label = "URL de transmisión personalizada";
+
+settings.video.enter_quality_options = "Opciones de calidad";
+settings.video.allow_sabr = "Activar SABR";
+settings.video.allow_hls = "Activar HLS";
+settings.video.respect_youtube_backoff = "Respetar el tiempo de espera de YouTube";
+settings.video.allow_background_play = "Reproducción en segundo plano";
+settings.video.allow_dubbed_audio = "Usar audio doblado";
+
+settings.misc.header = "Ajustes varios";
+settings.misc.allow_returnyoutubedislikes = "Usar RYTDL";
+settings.misc.allow_video_stats = "Activar estadísticas de vídeo";
+
+settings.experimental.header = "Ajustes experimentales";
+settings.experimental.disclaimer = "No se ofrecerá soporte para estos ajustes";
+settings.experimental.show_live_content = "Mostrar contenido en directo";
+settings.experimental.super_secret_settings = "Opciones de depuración supersecretas";

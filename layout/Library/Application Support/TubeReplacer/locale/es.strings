@@ -1,0 +1,35 @@
+// translation done by nic0shub aka fishyloading
+
+category.film_name = "Cine y animación";
+category.autos_name = "Coches y vehículos";
+category.music_name = "Música";
+category.animals_name = "Mascotas y animales";
+category.sports_name = "Deportes";
+category.travel_name = "Viajes y eventos";
+category.games_name = "Videojuegos";
+category.comedy_name = "Humor";
+category.people_name = "Personas y blogs";
+category.news_name = "Noticias y política";
+category.entertainment_name = "Entretenimiento";
+category.education_name = "Educación";
+category.howto_name = "Guías y estilo";
+category.nonprofit_name = "ONG y activismo";
+category.tech_name = "Ciencia y tecnología";
+
+login.select_account = "Elegir una cuenta";
+login.please_wait = "Espera, por favor...";
+login.something_went_wrong = "Se ha producido un error. %@";
+login.loading = "Cargando...";
+
+// botguard is a system from youtube to prevent bots
+botguard.integrity_fail = "¡La verificación de integridad de botguard ha fallado! Es posible que la reproducción SABR no funcione.";
+botguard.scrambled_json_fail = "La verificación de descifrado de potoken ha fallado. No se pudo obtener el resultado correcto.";
+botguard.challenge_json_fail = "La verificación de potoken ha fallado. No se pudo obtener el resultado correcto.";
+botguard.ytcfg_regex_fail = "Botguard no pudo encontrar ytcfg";
+
+nsig.missing_js_on_use = "n/sig no se pudo obtener a tiempo. Es posible que la reproducción no funcione. Inténtalo de nuevo o cambia a una transmisión de 360p.";
+nsig.webview_not_started = "¡n/sig no se inició correctamente! Es posible que la reproducción no funcione.";
+nsig.error_occured = "Se produjo un error durante la decodificación de nsig. Es posible que la reproducción no funcione. %@";
+nsig.no_solution = "n/sig no produjo ningún resultado. Es posible que la reproducción no funcione.";
+
+migration.failed = "¡La migración automática ha fallado! Consulta las preguntas frecuentes en la página de Cydia para encontrar una solución.";

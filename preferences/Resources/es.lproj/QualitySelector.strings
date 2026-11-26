@@ -1,0 +1,4 @@
+// translation done by nic0shub aka fishyloading
+
+settings.quality.header = "Selector de calidad";
+settings.quality.notes = "El selector de calidad puede ser sustituido si ninguna de las calidades seleccionadas está disponible.\nEsto solo tiene efecto en las transmisiones HQ.";
