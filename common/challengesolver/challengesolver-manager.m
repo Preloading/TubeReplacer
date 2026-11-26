@@ -54,7 +54,7 @@
                                 [self startPOTokenMinterWithIntegrityToken:self.integrityToken callback:^{}];
                             } else {
                                 self.errorAlert(localizedStringForKeyTR(@"botguard.integrity_fail"));
-                                NSLog(@"missing integrity token!!!");
+                                NSLog(@"missing integrity token!!! response -> %@", response);
                             }
                         } auth:nil];
                     }];

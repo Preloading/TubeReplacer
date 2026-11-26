@@ -22,7 +22,7 @@
             NSLog(@"an error occured while decoding stream protection status. error -> %@", error);
             break;
         }
-        // NSLog(@"current protection status -> %i", protectionStatus.status);
+        NSLog(@"current protection status -> %i", protectionStatus.status);
         self.streamProtectionStatus = protectionStatus.status;
         
         if (protectionStatus.status == 3) {
