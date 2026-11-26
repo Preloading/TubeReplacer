@@ -279,7 +279,7 @@
           NSError *err = nil;
           NSString *baseHTML = [NSString stringWithContentsOfFile:@"/Library/Application Support/TubeReplacer/account_selector.html" encoding:NSUTF8StringEncoding error:&err];
           htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ login.select_account }}" withString:localizedStringForKeyTR(@"login.select_account")];
-          htmlString = [baseHTML stringByReplacingOccurrencesOfString:@"{{ login.please_wait }}" withString:localizedStringForKeyTR(@"login.please_wait")];
+          htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ login.please_wait }}" withString:localizedStringForKeyTR(@"login.please_wait")];
           htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_ACCOUNTS_FIELD }}" withString:allAccountsHTML];
 
           // htmlString = [htmlString stringByReplacingOccurrencesOfString:@"{{ SPECIAL_TUBEREPLACER_SIDCC_FIELD }}" withString:allAccountsHTML]; // hack!
