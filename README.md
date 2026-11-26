@@ -26,4 +26,13 @@ There are a few ways you can contact me
 - Send in a github issue.
 - I guess on the bag.xml discord server somewhere.
 - Make a post on reddit or smth. I read it sometimes.
-- If you issue with the app or tweak, the crash reporter & the send feedback button redirects to me, so you can send stuff there.
+- If you issue with the app or tweak, the crash reporter & the send feedback button redirects to me, so you can send stuff there. However, keep in mind I cannot reply to you unless you add contact info within the report, so if there is a known solution, I can't tell you
+
+## Thanks & Credits
+- Preloading - made most of this tweak.
+- Requis - rewrote the parser mechanism.
+- SpaceSaver2000 - "From YouTube" default playlists, a few bugfixes, and sharing a lot of info about youtube's requests, and running the trending & category pages.
+- rob9315 - implemented background playback for 1.4.0-2.0.0
+
+### Localizers
+Spanish - @nic0shub aka fishyloading
