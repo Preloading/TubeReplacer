@@ -9,6 +9,7 @@
 #import <objc/runtime.h>
 #include "appheaders.h"
 #include "general.h"
+#include "common/preferences.h"
 #include "Translators/TRTranslators.h"
 #import "common/challengesolver/challengesolver-potokens.h"
 
@@ -36,24 +37,24 @@
         NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
         NSString *poToken = @"";
         TRPOTokenSolver *challengeSolver = [(YTDeviceAuthorizer*)[self valueForKey:l(@"deviceAuthorizer")] challengeSolver];
-        if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+        if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"]) {
             poToken = [challengeSolver mintPOTokenOrColdStart:videoId];
         }
 
         NSString *requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false";     
 //  @throw NSInternalInconsistencyException;
         YoutubeClientType *client = [YoutubeClientType webClient];
-        if ([preferences[@"StreamType"] isEqualToString:@"web"]) {
+        if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"]) {
             client = [YoutubeClientType webClient];
-        } else if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+        } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"]) {
             client = [YoutubeClientType webMobileClient];
-        } else if ([preferences[@"StreamType"] isEqualToString:@"visionos"]) {
+        } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"visionos"]) {
             client = [YoutubeClientType visionOSClient];
             requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
-        } else if ([preferences[@"StreamType"] isEqualToString:@"android"]) {
+        } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"android"]) {
             client = [YoutubeClientType androidClient];
             requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
-        } else if ([preferences[@"StreamType"] isEqualToString:@"androidvr"]) {
+        } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"androidvr"]) {
             client = [YoutubeClientType androidVrClient];
             requestURL = @"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&noauth=1";
         }
@@ -131,7 +132,7 @@
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     NSMutableDictionary *allData = [NSMutableDictionary dictionary];
 
-    if (!([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
+    if (!([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"])) {
         NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/youtubei/v1/next?prettyPrint=false"];
     
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];

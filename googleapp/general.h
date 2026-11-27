@@ -7,5 +7,4 @@ NSString* localizedStringForKey2UILib(NSString *key, NSUInteger quantity);
 NSString* version();
 NSString* l(NSString *local);
 NSString *TRPackageVersion(NSString *packageID);
-bool PreferencesBoolValue(NSDictionary* preferences, NSString *key, bool defaultValue);
 NSString *URLDecode(NSString *string);

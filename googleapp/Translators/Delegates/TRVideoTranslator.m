@@ -17,7 +17,7 @@
 #import "common/SABR/TRAdaptiveFormat.h"
 #import "common/challengesolver/challengesolver.h"
 #import "common/challengesolver/challengesolver-nsig.h"
-
+#include "common/preferences.h"
 
 @implementation TRVideoTranslator
 
@@ -104,10 +104,10 @@
     // 4 = HLS
     // 5 = SABR
 
-    if (!([preferences[@"StreamType"] isEqualToString:@"custom"] || [preferences[@"StreamType"] isEqualToString:@"tuberepair"]) ) {
+    if (!([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"custom"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"tuberepair"]) ) {
         NSString *hlsStreamURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.hlsManifestUrl"];
         if (hlsStreamURL && (preferences[@"AllowHLS"] == nil || [preferences[@"AllowHLS"] isEqual:@YES])) {
-            if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"] ) {
+            if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"] ) {
                 NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:hlsStreamURL signatureCipher:nil];
                 if (decipheredURL) {
                     hlsStreamURL = decipheredURL;
@@ -218,7 +218,7 @@
         NSString *sabrURL = [TRJSONUtils stringFromJSON:json keyPath:@"streamingData.serverAbrStreamingUrl"];
         NSString *ustreamConfig = [TRJSONUtils stringFromJSON:json keyPath:@"playerConfig.mediaCommonConfig.mediaUstreamerRequestConfig.videoPlaybackUstreamerConfig"];
 
-        if (sabrURL && ustreamConfig && PreferencesBoolValue(preferences, @"AllowSABR", YES) && ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"])) {
+        if (sabrURL && ustreamConfig && PreferencesBoolValue(preferences, @"AllowSABR", YES) && ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"])) {
             // handle SABR
             NSMutableArray *adaptiveFormats = [[NSMutableArray alloc] init];
             for (NSDictionary *f in [TRJSONUtils arrayFromJSON:json keyPath:@"streamingData.adaptiveFormats"]) {
@@ -299,7 +299,7 @@
             if (urlString || signatureCipher) {
                 NSURL *url = nil;
 
-                if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+                if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"]) {
                     NSString *decipheredURL = [[TRPOTokenSolver sharedInstance] decipherUrl:urlString signatureCipher:signatureCipher];
                     if (decipheredURL) {
                         url = [NSURL URLWithString:decipheredURL];
@@ -331,7 +331,7 @@
     } else {
         // they wanna use a custom url for playback, so we disable everything!
         NSURL *url = nil;
-        if ([preferences[@"StreamType"] isEqualToString:@"tuberepair"]) {
+        if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"tuberepair"]) {
             url = [NSURL URLWithString:[NSString stringWithFormat:@"https://tuberepair.uptimetrackers.com/getvideo/%@", videoId]];
         } else {
             url = [NSURL URLWithString:[preferences[@"CustomStreamURL"] stringByReplacingOccurrencesOfString:@"%v" withString:videoId]];

@@ -4,13 +4,14 @@
 #import "challengesolver-nsig.h"
 #import "challengesolver-requests.h"
 #import "challengesolver-potokens.h"
+#include "common/preferences.h"
 
 @implementation TRPOTokenSolver (Manager)
 
 -(void)setupPOTokenGenerationWithAuth:(id)authentication {
     self.isPOTokenEngineStarting = YES;
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
-    if ([preferences[@"StreamType"] isEqualToString:@"web"] || [preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+    if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"web"] || [PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"]) {
         [self initWebViewWithCallback:^{
             if (!self.isNSigReady)
                 [self setupNSig]; // this should be decently fast, and also threaded-ish that we shouldn't need to worry about how long this takes for the crucial webview to start

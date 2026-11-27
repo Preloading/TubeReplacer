@@ -26,6 +26,7 @@
 #import "base64/NSData+Base64.h"
 #import "TRSabrRequest.h"
 #import <sys/utsname.h>
+#include "common/preferences.h"
 
 @implementation TRSabrStream : NSObject
 
@@ -334,13 +335,13 @@
 
     NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/dev.preloading.tubereplacer.preferences.plist"];
     YoutubeClientType *clientType = [YoutubeClientType webClient];
-    if ([preferences[@"StreamType"] isEqualToString:@"mweb"]) {
+    if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"mweb"]) {
         clientType = [YoutubeClientType webMobileClient];
-    } else if ([preferences[@"StreamType"] isEqualToString:@"visionos"]) {
+    } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"visionos"]) {
         clientType = [YoutubeClientType visionOSClient];
-    } else if ([preferences[@"StreamType"] isEqualToString:@"android"]) {
+    } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"android"]) {
         clientType = [YoutubeClientType androidClient];
-    } else if ([preferences[@"StreamType"] isEqualToString:@"androidvr"]) {
+    } else if ([PreferencesGetVideoStreamPreference(preferences) isEqualToString:@"androidvr"]) {
         clientType = [YoutubeClientType androidVrClient];
     }
 

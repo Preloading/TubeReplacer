@@ -66,16 +66,6 @@ NSString *TRPackageVersion(NSString *packageID) {
     return nil;
 }
 
-bool PreferencesBoolValue(NSDictionary* preferences, NSString *key, bool defaultValue) {
-    id value = [preferences objectForKey:key]; 
-    
-    if (value == nil || value == [NSNull null]) {
-        return defaultValue;
-    }
-    
-    return [value boolValue];
-}
-
 NSString *URLDecode(NSString *string) {
     if (!string) return nil;
     
