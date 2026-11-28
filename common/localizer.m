@@ -26,7 +26,7 @@ NSString *localizedStringForKeyTR(NSString *key) {
     if (localizationData == nil) {
         loadLocalizationData();
     }
-    NSString *out = localizationData[key];
+    NSString *out = [localizationData objectForKey:key];
     if (out == nil) {
         return key;
     }
